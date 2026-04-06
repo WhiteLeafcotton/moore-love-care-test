@@ -1,72 +1,71 @@
 import { useRef, useMemo } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
-import { Environment, Float, ContactShadows, MeshDistortMaterial } from "@react-three/drei";
+import { Environment, Float, ContactShadows, MeshDistortMaterial, Sky } from "@react-three/drei";
 import { Water } from "three-stdlib";
 import * as THREE from "three";
 
 extend({ Water });
 
-// 🌅 Stable Realistic Sky Component
-function RealisticSky() {
-  const skyTex = useMemo(() => {
-    const canvas = document.createElement("canvas");
-    canvas.width = 1; canvas.height = 256;
-    const ctx = canvas.getContext("2d");
-    const grad = ctx.createLinearGradient(0, 0, 0, 256);
-    grad.addColorStop(0, "#d2b4de"); // Hazy Purple Top
-    grad.addColorStop(0.7, "#f5eae8"); // Baby Pink Horizon
-    grad.addColorStop(1, "#ebdcd8"); 
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, 1, 256);
-    const tex = new THREE.CanvasTexture(canvas);
-    return tex;
-  }, []);
-
-  return (
-    <mesh scale={1000}>
-      <sphereGeometry args={[1, 64, 64]} />
-      <meshBasicMaterial map={skyTex} side={THREE.BackSide} fog={false} />
-    </mesh>
-  );
-}
-
 export default function Scene({ currentView }) {
   const { camera } = useThree();
   const waterRef = useRef();
 
-  // 🎥 Locked Camera Paths
+  // 🎥 CAMERA COORDINATES (LOCKED)
   const views = {
     home: { pos: [18, 2, 18], look: [0, 2, 0] },
     collection: { pos: [-24, 8, 20], look: [-55, 5, -5] } 
   };
+
   const targetLook = useMemo(() => new THREE.Vector3(0, 0, 0), []);
   
-  // 🎨 Texture Loading with Error Catching
-  // Ensure your file is at: /public/textures/travertine.jpg
-  const stoneTex = useLoader(THREE.TextureLoader, "/textures/travertine.jpg");
-  if (stoneTex) {
-    stoneTex.wrapS = stoneTex.wrapT = THREE.RepeatWrapping;
-    stoneTex.repeat.set(4, 4);
-  }
+  // 🎨 PATH HANDLING (Fixes GitHub Pages 404s)
+  const baseUrl = import.meta.env.BASE_URL || "/";
+  
+  // Load Stone Texture
+  const stoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/travertine.jpg`);
+  useMemo(() => {
+    if (stoneTex) {
+      stoneTex.wrapS = stoneTex.wrapT = THREE.RepeatWrapping;
+      stoneTex.repeat.set(4, 4);
+    }
+  }, [stoneTex]);
 
+  // Load Water Normals
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
-  waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
+  useMemo(() => {
+    if (waterNormals) {
+      waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
+    }
+  }, [waterNormals]);
 
   useFrame((state, delta) => {
     const target = views[currentView];
     camera.position.lerp(new THREE.Vector3(...target.pos), 0.04); 
     targetLook.lerp(new THREE.Vector3(...target.look), 0.04);
     camera.lookAt(targetLook);
-    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.2;
+    
+    if (waterRef.current) {
+      waterRef.current.material.uniforms["time"].value += delta * 0.2;
+    }
   });
 
   return (
     <>
-      <RealisticSky />
+      {/* 🌅 REALISTIC PINK SKY */}
+      <Sky 
+        distance={450000} 
+        sunPosition={[10, 0.5, 20]} // Lower sun for pinker horizon
+        inclination={0} 
+        azimuth={0.25} 
+        mieCoefficient={0.005} 
+        mieDirectionalG={0.8} 
+        turbidity={15} 
+      />
+      
       <Environment preset="dawn" />
       <fog attach="fog" args={["#f5eae8", 10, 110]} />
       
-      <directionalLight position={[10, 15, 5]} intensity={1} color="#ffebd1" />
+      <directionalLight position={[10, 15, 5]} intensity={1.2} color="#ffebd1" castShadow />
       <ambientLight intensity={0.5} />
 
       {/* --- 🏠 STRUCTURE 1 (HOME) --- */}
@@ -94,7 +93,7 @@ export default function Scene({ currentView }) {
 
         {/* 🔮 IRIDESCENT SPHERE IN WATER */}
         <Float speed={2} floatIntensity={1} position={[-8, 1, 14]}>
-          <mesh>
+          <mesh castShadow>
             <sphereGeometry args={[3.5, 64, 64]} />
             <MeshDistortMaterial 
               color="#ffffff" speed={3} distort={0.2} transmission={1} 
@@ -107,7 +106,7 @@ export default function Scene({ currentView }) {
       {/* 🌊 FLUSHED PINK WATER */}
       <water
         ref={waterRef}
-        args={[new THREE.PlaneGeometry(2000, 2000), {
+        args={[new THREE.PlaneGeometry(3000, 3000), {
           textureWidth: 512, textureHeight: 512, waterNormals, 
           sunDirection: new THREE.Vector3(10, 1, 5), sunColor: 0xffffff, 
           waterColor: 0xa19089, distortionScale: 2, fog: true,
