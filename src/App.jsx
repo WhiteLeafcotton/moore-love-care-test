@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
 import Scene from "./components/Scene";
 import "./index.css";
@@ -7,13 +7,10 @@ export default function App() {
   const [currentView, setCurrentView] = useState("home"); 
 
   return (
-    <div style={{ width: "100vw", height: "100vh", background: "#f2e9e4" }}>
-      
-      {/* Brand UI */}
+    <div style={{ width: "100vw", height: "100vh", background: "#e8d2ca" }}>
       <div className="ui-overlay" style={{ zIndex: 10, pointerEvents: 'none' }}>
         <h1 className="brand-title">Moore Love and Care</h1>
         <p className="brand-subtitle">THE SOLARIUM SANCTUARY</p>
-        
         <button 
           className="explore-button" 
           onClick={() => setCurrentView(currentView === "home" ? "collection" : "home")}
@@ -29,12 +26,10 @@ export default function App() {
         </button>
       </div>
 
-      <Canvas 
-        shadows 
-        dpr={[1, 2]}
-        camera={{ position: [18, 2, 18], fov: 25 }}
-      >
-        <Scene currentView={currentView} />
+      <Canvas shadows dpr={[1, 2]} camera={{ position: [18, 2, 18], fov: 25 }}>
+        <Suspense fallback={null}>
+          <Scene currentView={currentView} />
+        </Suspense>
       </Canvas>
     </div>
   );
