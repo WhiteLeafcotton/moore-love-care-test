@@ -1,82 +1,51 @@
 import { useRef, useMemo } from "react";
 import { useThree, useFrame, extend } from "@react-three/fiber";
-import { Environment, Float, ContactShadows, Html } from "@react-three/drei";
+import { Environment, Float, ContactShadows } from "@react-three/drei";
 import { Water } from "three-stdlib";
 import * as THREE from "three";
 
 extend({ Water });
 
-export default function Scene({ isSubmerged, currentView }) {
+export default function Scene({ currentView }) {
   const { camera } = useThree();
   const waterRef = useRef();
-  const overlayRef = useRef();
 
-  // 🎥 COORDINATES
+  // 🎥 COORDINATES: Home (Right) -> Collection (Left)
   const views = {
-    home: { pos: [18, 2, 18], look: [0, 0, 0] },     // EXACTLY YOUR ORIGINAL VIEW
-    structure: { pos: [-18, 5, 10], look: [10, 2, -10] } // THE QUARTER-TURN POSITION
+    home: { pos: [18, 2, 18], look: [0, 0, 0] },
+    collection: { pos: [-22, 5, 15], look: [-30, 0, -10] } 
   };
 
-  // Pre-setting the vectors so we don't create new objects 60 times a second
-  const targetPos = useMemo(() => new THREE.Vector3(...views.home.pos), []);
-  const targetLook = useMemo(() => new THREE.Vector3(...views.home.look), []);
+  // State-tracking for the camera's gaze
+  const targetLook = useMemo(() => new THREE.Vector3(0, 0, 0), []);
 
   const waterNormals = useMemo(() => 
     new THREE.TextureLoader().load("https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg", (t) => {
       t.wrapS = t.wrapT = THREE.RepeatWrapping;
     }), []);
 
-  const distortionMaterial = useMemo(() => {
-    return new THREE.ShaderMaterial({
-      transparent: true,
-      uniforms: { time: { value: 0 }, strength: { value: 0 } },
-      vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
-      fragmentShader: `
-        uniform float time; uniform float strength; varying vec2 vUv;
-        void main() {
-          vec2 uv = vUv;
-          float wave = sin(uv.y * 15.0 + time * 1.5) * 0.01 * strength;
-          float ripple = cos(uv.x * 20.0 + time) * 0.01 * strength;
-          uv += vec2(wave, ripple);
-          gl_FragColor = vec4(vec3(0.05, 0.2, 0.3), 0.2 * strength);
-        }
-      `,
-    });
-  }, []);
-
   useFrame((state, delta) => {
-    // 🎥 THE SMOOTH PAN LOGIC
-    const currentTarget = views[currentView] || views.home;
+    // 🎥 THE CINEMATIC PAN (LEFT)
+    const target = views[currentView];
     
-    // Update target vectors
-    targetPos.set(...currentTarget.pos);
-    targetLook.set(...currentTarget.look);
-
-    // Glide the camera position (0.03 is slower/more premium, 0.05 is faster)
-    camera.position.lerp(targetPos, 0.04);
+    // Smoothly slide the camera position
+    camera.position.lerp(new THREE.Vector3(...target.pos), 0.03); 
     
-    // Create a smooth "lookAt" transition
-    state.camera.lookAt(targetLook);
+    // Smoothly pivot the camera gaze
+    targetLook.lerp(new THREE.Vector3(...target.look), 0.03);
+    camera.lookAt(targetLook);
 
-    // 🌊 ANIMATIONS
-    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.5;
-    if (overlayRef.current) {
-      overlayRef.current.material.uniforms.time.value += delta;
-      const targetStr = isSubmerged ? 1 : 0;
-      overlayRef.current.material.uniforms.strength.value = THREE.MathUtils.lerp(
-        overlayRef.current.material.uniforms.strength.value, targetStr, 0.05
-      );
-    }
+    // Constant water ripple speed
+    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.4;
   });
 
   return (
     <>
       <Environment preset="dawn" background blur={0.8} />
-      <fog attach="fog" args={["#dcd3d1", 10, 50]} />
-      {isSubmerged && <fog attach="fog" args={["#0b1f2a", 2, 25]} />}
-      <spotLight position={[20, 20, 10]} intensity={3} castShadow color="#fff4e0" />
+      <fog attach="fog" args={["#1a1a1a", 5, 75]} />
+      <spotLight position={[20, 20, 10]} intensity={2.5} castShadow color="#fff4e0" />
 
-      {/* --- 🏠 ORIGINAL STRUCTURE (HOME) --- */}
+      {/* --- 🏠 STRUCTURE 1 (ORIGINAL HOME VIEW) --- */}
       <group position={[0, 0, -5]} rotation={[0, -Math.PI / 4, 0]}>
         <group position={[5, 10, -5]}>
           <mesh castShadow><boxGeometry args={[15, 25, 10]} /><meshStandardMaterial color="#ede2df" /></mesh>
@@ -100,48 +69,43 @@ export default function Scene({ isSubmerged, currentView }) {
         <Float speed={1.2} floatIntensity={0.5}>
           <mesh position={[6, 11, -1]}>
             <sphereGeometry args={[3.5, 64, 64]} />
-            <meshPhysicalMaterial color="#ffffff" transmission={1} thickness={2} roughness={0.05} iridescence={1} />
+            <meshPhysicalMaterial color="#ffffff" transmission={1} thickness={2} roughness={0.05} />
           </mesh>
         </Float>
       </group>
 
-      {/* --- 🏗️ THE NEW STRUCTURE (REVEALED ON PAN) --- */}
-      <group position={[15, 0, -20]} rotation={[0, Math.PI / 4, 0]}>
-        <mesh castShadow position={[0, 7, 0]}>
-          <boxGeometry args={[2, 14, 2]} />
+      {/* --- 🏗️ STRUCTURE 2 (SECOND ARCHITECTURAL VIEW) --- */}
+      {/* Positioned far to the left (-50) to ensure a full camera travel */}
+      <group position={[-50, 0, -12]} rotation={[0, -Math.PI / 8, 0]}>
+        <mesh castShadow position={[0, 15, 0]}>
+          <boxGeometry args={[10, 30, 10]} />
           <meshStandardMaterial color="#ede2df" />
         </mesh>
-        
-        {currentView === 'structure' && (
-          <Html position={[0, 6, 6]} center transform distanceFactor={8}>
-            <div style={{ color: 'white', textAlign: 'center' }}>
-              <h2 style={{ fontFamily: 'serif', letterSpacing: '10px', marginBottom: '30px', whiteSpace: 'nowrap' }}>THE COLLECTION</h2>
-              <div style={{ display: 'flex', gap: '20px' }}>
-                {[1, 2, 3].map(i => (
-                  <div key={i} style={{ width: '130px', height: '190px', background: 'rgba(255, 255, 255, 0.05)', backdropFilter: 'blur(15px)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '2px' }} />
-                ))}
-              </div>
-            </div>
-          </Html>
-        )}
+        <mesh castShadow position={[10, 8, 0]}>
+          <boxGeometry args={[6, 16, 6]} />
+          <meshStandardMaterial color="#dcd3d1" />
+        </mesh>
+        <Float speed={2.5}>
+          <mesh position={[0, 34, 0]}>
+            <sphereGeometry args={[2.5, 32, 32]} />
+            <meshPhysicalMaterial color="#ffffff" transmission={1} thickness={1} />
+          </mesh>
+        </Float>
       </group>
 
-      {/* --- WATER & EXTRAS --- */}
+      {/* 🌊 GLOBAL WATER (ONE SURFACE FOR THE ENTIRE WORLD) */}
       <water
         ref={waterRef}
-        args={[new THREE.PlaneGeometry(500, 500), {
+        args={[new THREE.PlaneGeometry(2500, 2500), {
           textureWidth: 512, textureHeight: 512, waterNormals, 
           sunDirection: new THREE.Vector3(), sunColor: 0xffffff, 
-          waterColor: 0xa19791, distortionScale: 3.7, fog: true,
+          waterColor: 0x111111, distortionScale: 1.5, fog: true,
         }]}
         rotation={[-Math.PI / 2, 0, 0]}
         position={[0, -0.1, 0]}
       />
-      <mesh ref={overlayRef} position={[0, 5, 0]}>
-        <planeGeometry args={[200, 200]} />
-        <primitive object={distortionMaterial} attach="material" />
-      </mesh>
-      <ContactShadows opacity={0.2} scale={100} blur={2.5} far={20} />
+      
+      <ContactShadows opacity={0.4} scale={200} blur={2.5} far={30} />
     </>
   );
 }
