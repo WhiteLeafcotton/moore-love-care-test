@@ -17,7 +17,7 @@ export default function Scene({ currentView }) {
 
   const targetLook = useMemo(() => new THREE.Vector3(0, 0, 0), []);
   
-  // 🎨 Texture Loading (Safe for GitHub Pages)
+  // Bulletproof Pathing for GitHub Pages
   const baseUrl = import.meta.env.BASE_URL || "/";
   const stoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/travertine.jpg`);
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
@@ -40,25 +40,21 @@ export default function Scene({ currentView }) {
 
   return (
     <>
-      <Sky distance={450000} sunPosition={[10, 0.5, 20]} inclination={0} azimuth={0.25} turbidity={10} />
+      <Sky distance={450000} sunPosition={[10, 0.5, 20]} turbidity={10} />
       <Environment preset="dawn" />
-      <fog attach="fog" args={["#f5eae8", 10, 90]} />
+      <fog attach="fog" args={["#f5eae8", 10, 95]} />
       
       <spotLight position={[30, 20, 10]} intensity={1.5} castShadow color="#ffebd1" />
       <ambientLight intensity={0.4} />
 
-      {/* --- 🏠 STRUCTURE 1 (HOME) --- */}
+      {/* --- MAIN STRUCTURE --- */}
       <group position={[0, -2, -5]} rotation={[0, -Math.PI / 6, 0]}>
         <mesh position={[0, 10, 0]} castShadow>
           <boxGeometry args={[18, 25, 2]} />
-          {/* Apply the pink stone texture here */}
           <meshStandardMaterial map={stoneTex} color="#ede2df" roughness={0.9} />
         </mesh>
-        <mesh position={[0, 8, 1.1]} rotation={[Math.PI / 2, 0, 0]}>
-          <cylinderGeometry args={[5, 5, 2.5, 32]} />
-          <meshStandardMaterial map={stoneTex} color="#dcd3d1" />
-        </mesh>
         
+        {/* The Iridescent Orb from your Unseen Studio Ref */}
         <Float speed={1.5} floatIntensity={2}>
           <mesh position={[-6, 12, 5]}>
             <sphereGeometry args={[3.5, 64, 64]} />
@@ -70,32 +66,25 @@ export default function Scene({ currentView }) {
         </Float>
       </group>
 
-      {/* --- 🚪 STRUCTURE 2 (COLLECTION) --- */}
+      {/* --- DOORWAY (COLLECTION VIEW) --- */}
       <group position={[-55, -2, -8]} rotation={[0, Math.PI / 8, 0]}>
         <group position={[0, 12, 0]}>
           <mesh position={[-6, 0, 0]} castShadow>
             <boxGeometry args={[4, 30, 4]} />
-            <meshStandardMaterial map={stoneTex} color="#ede2df" roughness={0.8} />
+            <meshStandardMaterial map={stoneTex} color="#ede2df" />
           </mesh>
           <mesh position={[6, 0, 0]} castShadow>
             <boxGeometry args={[4, 30, 4]} />
-            <meshStandardMaterial map={stoneTex} color="#ede2df" roughness={0.8} />
+            <meshStandardMaterial map={stoneTex} color="#ede2df" />
           </mesh>
           <mesh position={[0, 13, 0]} castShadow>
             <boxGeometry args={[16, 4, 4]} />
-            <meshStandardMaterial map={stoneTex} color="#ede2df" roughness={0.8} />
+            <meshStandardMaterial map={stoneTex} color="#ede2df" />
           </mesh>
         </group>
-
-        {[0, 1, 2, 3].map((i) => (
-          <mesh key={i} position={[0, i * 1.5, 8 - i * 4]} castShadow>
-            <boxGeometry args={[8, 0.5, 6]} />
-            <meshStandardMaterial color="#ffffff" roughness={0.9} />
-          </mesh>
-        ))}
       </group>
 
-      {/* 🌊 BLUSHED PINK WATER */}
+      {/* --- WATER SURFACE --- */}
       <water
         ref={waterRef}
         args={[new THREE.PlaneGeometry(3000, 3000), {
