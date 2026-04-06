@@ -10,13 +10,11 @@ export default function Scene({ currentView }) {
   const { camera } = useThree();
   const waterRef = useRef();
 
-  // 🎥 COORDINATES: Home (Right) -> Collection (Left)
   const views = {
     home: { pos: [18, 2, 18], look: [0, 0, 0] },
-    collection: { pos: [-22, 5, 15], look: [-30, 0, -10] } 
+    collection: { pos: [-24, 6, 18], look: [-45, 2, -5] } 
   };
 
-  // State-tracking for the camera's gaze
   const targetLook = useMemo(() => new THREE.Vector3(0, 0, 0), []);
 
   const waterNormals = useMemo(() => 
@@ -25,27 +23,23 @@ export default function Scene({ currentView }) {
     }), []);
 
   useFrame((state, delta) => {
-    // 🎥 THE CINEMATIC PAN (LEFT)
+    // 🎥 LOCKED TRANSITION
     const target = views[currentView];
-    
-    // Smoothly slide the camera position
     camera.position.lerp(new THREE.Vector3(...target.pos), 0.03); 
-    
-    // Smoothly pivot the camera gaze
     targetLook.lerp(new THREE.Vector3(...target.look), 0.03);
     camera.lookAt(targetLook);
 
-    // Constant water ripple speed
+    // 🌊 LOCKED WATER
     if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.4;
   });
 
   return (
     <>
       <Environment preset="dawn" background blur={0.8} />
-      <fog attach="fog" args={["#1a1a1a", 5, 75]} />
+      <fog attach="fog" args={["#1a1a1a", 5, 80]} />
       <spotLight position={[20, 20, 10]} intensity={2.5} castShadow color="#fff4e0" />
 
-      {/* --- 🏠 STRUCTURE 1 (ORIGINAL HOME VIEW) --- */}
+      {/* --- 🏠 STRUCTURE 1 (HOME) --- */}
       <group position={[0, 0, -5]} rotation={[0, -Math.PI / 4, 0]}>
         <group position={[5, 10, -5]}>
           <mesh castShadow><boxGeometry args={[15, 25, 10]} /><meshStandardMaterial color="#ede2df" /></mesh>
@@ -74,26 +68,50 @@ export default function Scene({ currentView }) {
         </Float>
       </group>
 
-      {/* --- 🏗️ STRUCTURE 2 (SECOND ARCHITECTURAL VIEW) --- */}
-      {/* Positioned far to the left (-50) to ensure a full camera travel */}
-      <group position={[-50, 0, -12]} rotation={[0, -Math.PI / 8, 0]}>
-        <mesh castShadow position={[0, 15, 0]}>
-          <boxGeometry args={[10, 30, 10]} />
+      {/* --- 🏗️ THE NEW "DREAMSCAPES" COLLECTION (STRUCTURE 2) --- */}
+      <group position={[-50, 0, -10]} rotation={[0, -Math.PI / 10, 0]}>
+        
+        {/* Main Archway Element */}
+        <mesh position={[0, 8, 0]} castShadow>
+          <boxGeometry args={[12, 16, 2]} />
           <meshStandardMaterial color="#ede2df" />
         </mesh>
-        <mesh castShadow position={[10, 8, 0]}>
-          <boxGeometry args={[6, 16, 6]} />
-          <meshStandardMaterial color="#dcd3d1" />
+        <mesh position={[0, 7, 0.1]}>
+          <cylinderGeometry args={[4, 4, 3, 32]} rotation={[Math.PI / 2, 0, 0]} />
+          <meshStandardMaterial color="#1a1a1a" /> {/* The "Portal" cutout look */}
         </mesh>
-        <Float speed={2.5}>
-          <mesh position={[0, 34, 0]}>
-            <sphereGeometry args={[2.5, 32, 32]} />
-            <meshPhysicalMaterial color="#ffffff" transmission={1} thickness={1} />
+
+        {/* Floating Vertical Frames (from reference) */}
+        {[ -8, 8 ].map((x, i) => (
+          <Float key={i} speed={2} rotationIntensity={0.2} position={[x, 10, 5]}>
+            <mesh castShadow>
+              <boxGeometry args={[5, 8, 0.5]} />
+              <meshPhysicalMaterial 
+                color="#ffffff" 
+                transmission={0.5} 
+                thickness={1} 
+                roughness={0.1} 
+              />
+            </mesh>
+          </Float>
+        ))}
+
+        {/* Textured Architectural Block */}
+        <mesh position={[12, 4, -5]} castShadow>
+          <boxGeometry args={[8, 12, 8]} />
+          <meshStandardMaterial color="#dcd3d1" roughness={0.9} />
+        </mesh>
+
+        {/* Soft Lighting Orb */}
+        <Float speed={3} floatIntensity={1}>
+          <mesh position={[-10, 15, -2]}>
+            <sphereGeometry args={[1.5, 32, 32]} />
+            <meshStandardMaterial emissive="#fff4e0" emissiveIntensity={2} color="#ffffff" />
           </mesh>
         </Float>
       </group>
 
-      {/* 🌊 GLOBAL WATER (ONE SURFACE FOR THE ENTIRE WORLD) */}
+      {/* 🌊 GLOBAL WATER */}
       <water
         ref={waterRef}
         args={[new THREE.PlaneGeometry(2500, 2500), {
