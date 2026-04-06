@@ -5,12 +5,12 @@ import "./index.css";
 
 export default function App() {
   const [isSubmerged, setIsSubmerged] = useState(false);
-  const [currentView, setCurrentView] = useState("home"); // 'home' or 'structure'
+  const [currentView, setCurrentView] = useState("home");
 
   return (
     <div style={{ width: "100vw", height: "100vh", background: "#1a1a1a" }}>
       
-      {/* UI Overlay (Above Water) */}
+      {/* UI Overlay (Landing Page - Unchanged) */}
       <div className={`ui-overlay ${isSubmerged ? "fade-out" : ""}`}>
         <h1 className="brand-title">Moore Love and Care</h1>
         <p className="brand-subtitle">THE SOLARIUM SANCTUARY</p>
@@ -19,7 +19,7 @@ export default function App() {
         </button>
       </div>
 
-      {/* Underwater UI */}
+      {/* Underwater UI (Revealed after clicking Explore) */}
       {isSubmerged && (
         <div className="underwater-ui">
           <h1 className="brand-title">Moore Love and Care</h1>
@@ -27,7 +27,6 @@ export default function App() {
             {currentView === "home" ? "BENEATH THE SURFACE" : "THE COLLECTION"}
           </p>
           
-          {/* Button to trigger the Quarter-Circle Pan */}
           <button 
             className="pan-button" 
             onClick={() => setCurrentView(currentView === "home" ? "structure" : "home")}
@@ -42,8 +41,12 @@ export default function App() {
         </div>
       )}
 
-      <Canvas shadows dpr={[1, 2]}>
-        {/* We removed the camera prop from Canvas because Scene now controls it */}
+      {/* 3D Scene - RESTORED ORIGINAL CAMERA */}
+      <Canvas 
+        shadows 
+        dpr={[1, 2]} 
+        camera={{ position: [18, 2, 18], fov: 25 }} // This fixes your Home View
+      >
         <Scene isSubmerged={isSubmerged} currentView={currentView} />
       </Canvas>
     </div>

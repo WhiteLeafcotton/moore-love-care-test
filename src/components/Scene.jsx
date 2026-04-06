@@ -11,13 +11,12 @@ export default function Scene({ isSubmerged, currentView }) {
   const waterRef = useRef();
   const overlayRef = useRef();
 
-  // 🎥 CAMERA PRESETS
+  // 🎥 CAMERA PRESETS: Define the "End Point" of the pan
   const views = {
-    home: { pos: [18, 2, 18], look: [0, 0, 0] },     // Your original starting view
-    structure: { pos: [-15, 4, 12], look: [5, 2, -10] } // The Quarter-Circle Pan position
+    structure: { pos: [-15, 4, 12], look: [5, 2, -10] } 
   };
 
-  const targetLookAt = useMemo(() => new THREE.Vector3(), []);
+  const targetLookAt = useMemo(() => new THREE.Vector3(0, 0, 0), []);
 
   const waterNormals = useMemo(
     () =>
@@ -58,19 +57,26 @@ export default function Scene({ isSubmerged, currentView }) {
   }, []);
 
   useFrame((state, delta) => {
-    // 1. Smooth Camera Movement
-    const target = views[currentView] || views.home;
-    camera.position.lerp(new THREE.Vector3(...target.pos), 0.04);
-    targetLookAt.lerp(new THREE.Vector3(...target.look), 0.04);
-    camera.lookAt(targetLookAt);
+    // 🎥 CAMERA LOGIC: Only active when the user wants to see the new structure
+    if (currentView === "structure") {
+      const target = views.structure;
+      camera.position.lerp(new THREE.Vector3(...target.pos), 0.04);
+      targetLookAt.lerp(new THREE.Vector3(...target.look), 0.04);
+      camera.lookAt(targetLookAt);
+    }
 
-    // 2. Animate Water & Distortion
-    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.5;
+    // 🌊 ANIMATIONS (Always active)
+    if (waterRef.current) {
+      waterRef.current.material.uniforms["time"].value += delta * 0.5;
+    }
+
     if (overlayRef.current) {
       overlayRef.current.material.uniforms.time.value += delta;
       const targetStr = isSubmerged ? 1 : 0;
       overlayRef.current.material.uniforms.strength.value = THREE.MathUtils.lerp(
-        overlayRef.current.material.uniforms.strength.value, targetStr, 0.05
+        overlayRef.current.material.uniforms.strength.value,
+        targetStr,
+        0.05
       );
     }
   });
@@ -124,7 +130,8 @@ export default function Scene({ isSubmerged, currentView }) {
       </group>
 
       {/* --- 🏗️ NEW STRUCTURE & CARDS (The Reveal) --- */}
-      <group position={[15, 0, -10]} rotation={[0, Math.PI / 4, 0]}>
+      {/* Positioned far enough away that it's out of frame at Home */}
+      <group position={[25, 0, -10]} rotation={[0, Math.PI / 4, 0]}>
         <Float speed={3} floatIntensity={1}>
           <mesh castShadow>
             <boxGeometry args={[4, 12, 4]} />
@@ -155,7 +162,7 @@ export default function Scene({ isSubmerged, currentView }) {
       {/* WATER */}
       <water
         ref={waterRef}
-        args={[new THREE.PlaneGeometry(300, 300), {
+        args={[new THREE.PlaneGeometry(500, 500), {
           textureWidth: 512, textureHeight: 512,
           waterNormals, sunDirection: new THREE.Vector3(),
           sunColor: 0xffffff, waterColor: 0xa19791,
