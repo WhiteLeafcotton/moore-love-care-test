@@ -9,8 +9,7 @@ export default function App() {
   return (
     <div style={{ width: "100vw", height: "100vh", background: "#f5eae8" }}>
       <div className="ui-overlay" style={{ zIndex: 10, pointerEvents: 'none' }}>
-        <h1 className="brand-title" style={{ color: '#4a4a4a' }}>Moore Love and Care</h1>
-        <p className="brand-subtitle" style={{ color: '#4a4a4a' }}>THE SOLARIUM SANCTUARY</p>
+        <h1 className="brand-title" style={{ color: '#4a4a4a', position: 'absolute', top: '5%', left: '5%' }}>Moore Love and Care</h1>
         <button 
           className="explore-button" 
           onClick={() => setCurrentView(currentView === "home" ? "collection" : "home")}
@@ -19,7 +18,7 @@ export default function App() {
             position: 'absolute', bottom: '10%', left: '50%', transform: 'translateX(-50%)',
             padding: '12px 45px', background: 'rgba(255,255,255,0.3)', border: '1px solid rgba(255,255,255,0.5)',
             color: '#4a4a4a', cursor: 'pointer', backdropFilter: 'blur(15px)', letterSpacing: '4px',
-            textTransform: 'uppercase', fontSize: '10px', transition: 'all 0.5s ease', borderRadius: '50px'
+            textTransform: 'uppercase', fontSize: '10px', borderRadius: '50px'
           }}
         >
           {currentView === "home" ? "Explore Collection" : "Return Home"}
