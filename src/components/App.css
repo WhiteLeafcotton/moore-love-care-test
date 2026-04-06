@@ -1,0 +1,112 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,700&display=swap');
+
+/* --- Root & Reset --- */
+:root {
+  --accent-gold: #c5a059; /* Sophisticated luxury gold */
+  --deep-navy: #05101a;    /* Deep, dark water navy */
+  --soft-white: rgba(255, 255, 255, 0.85);
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevents scrolling or bouncing on mobile/trackpads */
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body, html, #root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: var(--deep-navy);
+  color: #ffffff;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* --- UI Overlay (The Solarium Sanctuary Text) --- */
+.ui-overlay {
+  position: absolute;
+  top: 50%;
+  left: 8%; /* Provides breathing room from the screen edge */
+  transform: translateY(-50%);
+  z-index: 100;
+  font-family: 'Playfair Display', serif;
+  transition: all 1.4s cubic-bezier(0.23, 1, 0.32, 1); /* Cinematic "float away" effect */
+  pointer-events: auto;
+}
+
+/* State when "Explore Care" is clicked */
+.ui-overlay.fade-out {
+  opacity: 0;
+  transform: translateY(-55%) scale(0.98);
+  pointer-events: none;
+}
+
+/* --- Typography --- */
+.brand-title {
+  font-size: clamp(3rem, 8vw, 5.5rem); /* Scales smoothly from mobile to desktop */
+  font-weight: 400;
+  line-height: 1;
+  margin: 0;
+  letter-spacing: -2px;
+  text-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); /* Subtle depth for readability */
+}
+
+.brand-subtitle {
+  font-size: 0.85rem;
+  letter-spacing: 0.6em; /* High-end magazine spacing */
+  margin-top: 1.5rem;
+  margin-bottom: 3.5rem;
+  color: var(--accent-gold);
+  text-transform: uppercase;
+  font-weight: 400;
+  opacity: 0.9;
+}
+
+/* --- The Luxury Button --- */
+.explore-button {
+  position: relative;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 20px 50px;
+  font-size: 0.7rem;
+  font-weight: 400;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+  outline: none;
+}
+
+.explore-button:hover {
+  border-color: #fff;
+  letter-spacing: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.explore-button:active {
+  transform: scale(0.95);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* --- Visual Accents --- */
+/* A vertical line to guide the eye, common in luxury architecture sites */
+.ui-overlay::before {
+  content: '';
+  position: absolute;
+  left: -30px;
+  top: 12px;
+  width: 1px;
+  height: 80px;
+  background: linear-gradient(to bottom, var(--accent-gold), transparent);
+}
+
+/* Canvas container handling */
+#root canvas {
+  touch-action: none; /* Prevents accidental zooming on mobile */
+}
