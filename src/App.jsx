@@ -7,7 +7,7 @@ export default function App() {
   const [currentView, setCurrentView] = useState("home"); 
 
   return (
-    <div style={{ width: "100vw", height: "100vh", background: "#f2e9e4" }}>
+    <div style={{ width: "100vw", height: "100vh", background: "#ede2df" }}>
       
       <div className="ui-overlay" style={{ zIndex: 10, pointerEvents: 'none' }}>
         <h1 className="brand-title">Moore Love and Care</h1>
