@@ -9,7 +9,6 @@ export default function App() {
   return (
     <div style={{ width: "100vw", height: "100vh", background: "#f2e9e4" }}>
       
-      {/* 🏙️ BRAND UI OVERLAY */}
       <div className="ui-overlay" style={{ zIndex: 10, pointerEvents: 'none' }}>
         <h1 className="brand-title">Moore Love and Care</h1>
         <p className="brand-subtitle">THE SOLARIUM SANCTUARY</p>
@@ -29,13 +28,8 @@ export default function App() {
         </button>
       </div>
 
-      {/* 🎨 3D CANVAS */}
-      <Canvas 
-        shadows 
-        dpr={[1, 2]}
-        camera={{ position: [18, 2, 18], fov: 25 }}
-      >
-        {/* Suspense must wrap the Scene to handle the stone and water texture loading */}
+      <Canvas shadows dpr={[1, 2]} camera={{ position: [18, 2, 18], fov: 25 }}>
+        {/* CRITICAL: This Suspense component prevents the "Broken" white screen */}
         <Suspense fallback={null}>
           <Scene currentView={currentView} />
         </Suspense>
