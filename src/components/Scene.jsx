@@ -1,16 +1,35 @@
 import { useRef, useMemo } from "react";
-import { useThree, useFrame, extend } from "@react-three/fiber";
+import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
 import { Environment, Float, ContactShadows, MeshDistortMaterial } from "@react-three/drei";
 import { Water } from "three-stdlib";
 import * as THREE from "three";
 
 extend({ Water });
 
+// procedural gradient sky texture (Pinkish-Purple haze)
+const generateGradientSky = () => {
+  const canvas = document.createElement("canvas");
+  canvas.width = 512;
+  canvas.height = 1024;
+  const ctx = canvas.getContext("2d");
+  const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  // Pink (Horizon) -> Light Purple (Zenith)
+  gradient.addColorStop(0, "#e8d2ca"); 
+  gradient.addColorStop(0.5, "#d2b4de");
+  gradient.addColorStop(1, "#c39bd3"); 
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  texture.mapping = THREE.EquirectangularReflectionMapping;
+  return texture;
+};
+
 export default function Scene({ currentView }) {
-  const { camera } = useThree();
+  const { camera, scene } = useThree();
   const waterRef = useRef();
-  
-  // 🎥 COORDINATES (LOCKED)
+
+  // 🎥 CAMERA COORDINATES (LOCKED)
   const views = {
     home: { pos: [18, 2, 18], look: [0, 2, 0] },
     collection: { pos: [-24, 7, 20], look: [-50, 5, -5] } 
@@ -18,150 +37,108 @@ export default function Scene({ currentView }) {
 
   const targetLook = useMemo(() => new THREE.Vector3(0, 0, 0), []);
   
-  // 📦 TEXTURE LOADING
-  const [wallTexture, waterNormals] = useMemo(() => {
-    const loader = new THREE.TextureLoader();
-    const textures = [
-      // 1. Procedural Stucco for walls
-      loader.load("https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/lava/lavatile.jpg", (t) => {
-          t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(5,5); 
-          // We will tint this lava texture to be sandy/off-white in the material
-      }),
-      // 2. Water normals
-      loader.load("https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg", (t) => {
-          t.wrapS = t.wrapT = THREE.RepeatWrapping;
-      })
-    ];
-    return textures;
-  }, []);
+  // 🎨 TEXTURE LOADERS
+  const travertineTexture = useLoader(THREE.TextureLoader, "/textures/travertine.jpg");
+  travertineTexture.wrapS = travertineTexture.wrapT = THREE.RepeatWrapping;
+  travertineTexture.repeat.set(2, 2);
+
+  const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
+  waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
+
+  // 🌅 Set Procedural Gradient Sky
+  const skyTexture = useMemo(() => generateGradientSky(), []);
+  scene.background = skyTexture;
 
   useFrame((state, delta) => {
-    // 🎥 SMOOTH PANNING
     const target = views[currentView];
     camera.position.lerp(new THREE.Vector3(...target.pos), 0.03); 
     targetLook.lerp(new THREE.Vector3(...target.look), 0.03);
     camera.lookAt(targetLook);
     
-    // 🌊 WATER ANIMATION
+    // 🌊 Water ripple speed
     if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.4;
   });
+
+  // Reusable component for that grainy, architectural texture from reference
+  const TexturedMaterial = () => (
+    <meshStandardMaterial 
+      color="#ede2df" 
+      map={travertineTexture} 
+      roughnessMap={travertineTexture}
+      roughness={1.1} // Flat, organic feel
+      metalness={0.05}
+    />
+  );
 
   return (
     <>
       <Environment preset="dawn" />
-      <fog attach="fog" args={["#f0e1df", 10, 95]} />
+      <fog attach="fog" args={["#e8d2ca", 15, 95]} /> // Fog blending with sky pink
       
-      <spotLight position={[30, 20, 10]} intensity={1.2} castShadow color="#ffebd1" />
+      <spotLight position={[30, 20, 10]} intensity={1.5} castShadow color="#ffebd1" />
       <ambientLight intensity={0.5} />
-
-      {/* --- 🌌 CUSTOM ETHEREAL SKY SPHERE --- */}
-      {/* Replaces procedural Sky with a fixed gradient matching the reference pink/purple hase */}
-      <mesh scale={5000} rotation={[0, -Math.PI / 2, 0]}>
-        <sphereGeometry args={[1, 64, 64]} />
-        <meshBasicMaterial 
-          side={THREE.BackSide} 
-          map={new THREE.TextureLoader().load("https://res.cloudinary.com/dzx6x1/image/upload/v1642131908/ethereal_gradient_x9j7vx.jpg")} 
-        />
-      </mesh>
-
-      {/* --- 🌄 DISTANT ROLLING DUNES (Pink/Purple Landscape) --- */}
-      <group position={[0, -5, -60]}>
-        {[1, 2, 3].map(i => (
-          <mesh key={i} position={[ (i - 2) * 80, 0, 0 ]} rotation={[-Math.PI / 2, 0, 0]}>
-            <planeGeometry args={[120, 120, 64, 64]} />
-            {/* Using displacement to create the dunes */}
-            <meshStandardMaterial 
-              color="#f4e1f5" // Soft pink-purple tint
-              roughness={1}
-              displacementMap={new THREE.TextureLoader().load("https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/terrain/heightmap.png")}
-              displacementScale={20}
-              displacementBias={-10}
-            />
-          </mesh>
-        ))}
-      </group>
 
       {/* --- 🏠 STRUCTURE 1 (HOME VIEW) --- */}
       <group position={[0, -2, -5]} rotation={[0, -Math.PI / 6, 0]}>
         <mesh position={[0, 10, 0]} castShadow>
           <boxGeometry args={[18, 25, 2]} />
-          {/* Sandy textured material (lava tint) */}
-          <meshStandardMaterial 
-            color="#ede2df" 
-            map={wallTexture} // Apply texture
-            roughness={0.9} 
-          />
+          <TexturedMaterial />
         </mesh>
         <mesh position={[0, 8, 1.1]} rotation={[Math.PI / 2, 0, 0]}>
           <cylinderGeometry args={[5, 5, 2.5, 32]} />
-          <meshStandardMaterial color="#dcd3d1" />
+          <TexturedMaterial />
         </mesh>
-        
-        {/* Iridescent sphere 1 (Floating at Home) */}
-        <Float speed={1.5} floatIntensity={2}>
-          <mesh position={[-6, 12, 5]}>
-            <sphereGeometry args={[3.5, 64, 64]} />
-            <MeshDistortMaterial 
-              color="#ffffff" speed={2} distort={0.2} transmission={1} 
-              thickness={2} roughness={0.02} iridescence={1}
-            />
-          </mesh>
-        </Float>
       </group>
 
-      {/* --- 🚪 STRUCTURE 2 (DOORWAY COLLECTION VIEW) --- */}
-      {/* Textures and elements updated based on Unseen Studio reference */}
+      {/* --- 🚪 STRUCTURE 2 (DOORWAY / COLLECTION VIEW) --- */}
       <group position={[-55, -2, -8]} rotation={[0, Math.PI / 8, 0]}>
         
-        {/* Floating Architectural Rock / Boulder */}
-        <Float speed={1}>
-          <mesh position={[-14, 5, 10]} castShadow>
-            <dodecahedronGeometry args={[5, 4]} />
-            <meshStandardMaterial 
-              color="#dcd3d1" 
-              map={wallTexture} // Applied sandy texture to rock
-              roughness={1} 
-            />
+        {/* Curved Archway Frame (Replacing blocky pillars) */}
+        <group position={[0, 15, 0]}>
+          {/* Main vertical wall */}
+          <mesh position={[0, 0, 0]} castShadow>
+            <boxGeometry args={[16, 30, 4]} />
+            <TexturedMaterial />
           </mesh>
-        </Float>
-
-        {/* The Doorway Frame */}
-        <group position={[0, 12, 0]}>
-          <mesh position={[-6, 0, 0]} castShadow>
-            <boxGeometry args={[4, 30, 4]} />
-            <meshStandardMaterial color="#ede2df" map={wallTexture} roughness={0.8} />
+          {/* The Actual Archway Cutout (Visual Hack) */}
+          <mesh position={[0, -5, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[6, 6, 5, 32, 1, false, 0, Math.PI]} />
+            <meshBasicMaterial color="#dcd3d1" side={THREE.BackSide} /> // Matching background
           </mesh>
-          <mesh position={[6, 0, 0]} castShadow>
-            <boxGeometry args={[4, 30, 4]} />
-            <meshStandardMaterial color="#ede2df" map={wallTexture} roughness={0.8} />
-          </mesh>
-          <mesh position={[0, 13, 0]} castShadow>
-            <boxGeometry args={[16, 4, 4]} />
-            <meshStandardMaterial color="#ede2df" map={wallTexture} roughness={0.8} />
-          </mesh>
+          {/* Tall, narrow doorway cutouts (similar to ref) */}
+           <mesh position={[-6, -6, 0.1]}>
+              <boxGeometry args={[1.5, 12, 5]} />
+              <meshBasicMaterial color="#dcd3d1" />
+           </mesh>
+           <mesh position={[6, -6, 0.1]}>
+              <boxGeometry args={[1.5, 12, 5]} />
+              <meshBasicMaterial color="#dcd3d1" />
+           </mesh>
         </group>
 
-        {/* Floating Steps */}
+        {/* Floating Steps leading THROUGH the doorway */}
         {[0, 1, 2, 3].map((i) => (
           <mesh key={i} position={[0, i * 1.5, 8 - i * 4]} castShadow>
             <boxGeometry args={[8, 0.5, 6]} />
-            <meshStandardMaterial color="#ffffff" map={wallTexture} roughness={0.9} />
+            <TexturedMaterial />
           </mesh>
         ))}
 
-        {/* Iridescent Sphere 2 (RESTING IN WATER) */}
-        <mesh position={[10, 2, -10]}>
-          <sphereGeometry args={[3.5, 64, 64]} />
-          <MeshDistortMaterial 
-              color="#ffffff" speed={1} distort={0.1} transmission={1} 
-              thickness={2} roughness={0.02} iridescence={1}
+        {/* 🔮 RESTORED IRIDESCENT SPHERE (Nestled in water) */}
+        <Float speed={1.5} floatIntensity={0.5} position={[-6, 0.5, 12]}>
+          <mesh>
+            <sphereGeometry args={[3, 64, 64]} />
+            <MeshDistortMaterial 
+              color="#ffffff" speed={2} distort={0.2} transmission={1} 
+              thickness={2} roughness={0.02} iridescence={1.5}
             />
-        </mesh>
+          </mesh>
+        </Float>
 
-        {/* Tall Needle */}
-        <mesh position={[16, 15, -15]} castShadow>
+        {/* Tall Architectural Needle */}
+        <mesh position={[14, 15, -5]} castShadow>
           <cylinderGeometry args={[0.5, 0.5, 40, 32]} />
-          <meshStandardMaterial color="#dcd3d1" />
+          <TexturedMaterial />
         </mesh>
       </group>
 
@@ -177,7 +154,7 @@ export default function Scene({ currentView }) {
         position={[0, -0.1, 0]}
       />
       
-      <ContactShadows opacity={0.25} scale={200} blur={3} far={40} />
+      <ContactShadows opacity={0.3} scale={200} blur={3} far={40} />
     </>
   );
 }
