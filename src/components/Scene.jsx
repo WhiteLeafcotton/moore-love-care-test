@@ -44,14 +44,23 @@ export default function Scene({ currentView }) {
 
   return (
     <>
-      <Sky distance={450000} sunPosition={[10, 0.5, 20]} inclination={0} azimuth={0.25} turbidity={10} />
+      {/* 🌅 ENHANCED SUNSET SKY */}
+      <Sky 
+        distance={450000} 
+        sunPosition={[10, 0.5, 20]} // Lower sun for pinker horizon
+        inclination={0} 
+        azimuth={0.25} 
+        mieCoefficient={0.005} 
+        mieDirectionalG={0.8} 
+        turbidity={10} 
+      />
       <Environment preset="dawn" />
       <fog attach="fog" args={["#f5eae8", 10, 95]} />
       
       <spotLight position={[30, 20, 10]} intensity={1.5} castShadow color="#ffebd1" />
       <ambientLight intensity={0.4} />
 
-      {/* --- 🏠 STRUCTURE 1 (HOME) --- */}
+      {/* --- 🏠 STRUCTURE 1 (HOME VIEW) --- */}
       <group position={[0, -2, -5]} rotation={[0, -Math.PI / 6, 0]}>
         <mesh position={[0, 10, 0]} castShadow>
           <boxGeometry args={[18, 25, 2]} />
@@ -97,9 +106,14 @@ export default function Scene({ currentView }) {
             <meshStandardMaterial color="#ffffff" roughness={0.9} />
           </mesh>
         ))}
+
+        <mesh position={[14, 15, -5]} castShadow>
+          <cylinderGeometry args={[0.5, 0.5, 40, 32]} />
+          <meshStandardMaterial color="#dcd3d1" />
+        </mesh>
       </group>
 
-      {/* 🌊 BLUSHED PINK WATER */}
+      {/* 🌊 BLUSHED PINK WATER SURFACE */}
       <water
         ref={waterRef}
         args={[new THREE.PlaneGeometry(3000, 3000), {
