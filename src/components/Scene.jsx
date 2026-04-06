@@ -97,7 +97,7 @@ export default function Scene({ currentView }) {
         </mesh>
       </group>
 
-      {/* 🌊 GLOBAL WATER */}
+      {/* 🌊 GLOBAL WAHTER */}
       <water
         ref={waterRef}
         args={[new THREE.PlaneGeometry(3000, 3000), {
