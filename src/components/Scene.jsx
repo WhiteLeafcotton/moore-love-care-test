@@ -1,6 +1,6 @@
 import { useRef, useMemo } from "react";
 import { useThree, useFrame, extend } from "@react-three/fiber";
-import { Environment, Float, ContactShadows, MeshDistortMaterial } from "@react-three/drei";
+import { Environment, Float, ContactShadows, MeshDistortMaterial, Sky } from "@react-three/drei";
 import { Water } from "three-stdlib";
 import * as THREE from "three";
 
@@ -12,7 +12,7 @@ export default function Scene({ currentView }) {
 
   const views = {
     home: { pos: [18, 2, 18], look: [0, 2, 0] },
-    collection: { pos: [-24, 8, 18], look: [-50, 4, -5] } 
+    collection: { pos: [-24, 7, 20], look: [-50, 5, -5] } 
   };
 
   const targetLook = useMemo(() => new THREE.Vector3(0, 0, 0), []);
@@ -31,85 +31,94 @@ export default function Scene({ currentView }) {
 
   return (
     <>
-      {/* 🌅 WARM SUNRISE LIGHTING */}
-      <Environment preset="dawn" background blur={0.8} />
-      <fog attach="fog" args={["#dcd3d1", 5, 85]} />
-      <ambientLight intensity={0.5} />
-      <spotLight position={[20, 20, 10]} intensity={2} castShadow color="#ffebd1" />
+      {/* 🌅 ENHANCED SKY: Removing purple, adding hazy sunrise */}
+      <Sky 
+        distance={450000} 
+        sunPosition={[10, 1, 20]} 
+        inclination={0} 
+        azimuth={0.25} 
+        mieCoefficient={0.005} 
+        mieDirectionalG={0.8} 
+        turbidity={10} 
+      />
+      <Environment preset="dawn" />
+      <fog attach="fog" args={["#f2e9e4", 10, 90]} />
+      
+      <spotLight position={[30, 20, 10]} intensity={1.5} castShadow color="#ffebd1" />
+      <ambientLight intensity={0.4} />
 
-      {/* --- 🏠 STRUCTURE 1 (HOME - ARCHES & STAIRS) --- */}
+      {/* --- 🏠 STRUCTURE 1 (HOME) --- */}
       <group position={[0, -2, -5]} rotation={[0, -Math.PI / 6, 0]}>
-        {/* Main Wall with Arch */}
         <mesh position={[0, 10, 0]} castShadow>
           <boxGeometry args={[18, 25, 2]} />
           <meshStandardMaterial color="#ede2df" roughness={0.9} />
         </mesh>
-        <mesh position={[0, 8, 1]} rotation={[Math.PI / 2, 0, 0]}>
-          <cylinderGeometry args={[5, 5, 3, 32]} />
-          <meshStandardMaterial color="#dcd3d1" roughness={1} />
+        <mesh position={[0, 8, 1.1]} rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[5, 5, 2.5, 32]} />
+          <meshStandardMaterial color="#dcd3d1" />
         </mesh>
-
-        {/* Floating Stairs (from reference) */}
-        {[0, 1, 2, 3, 4].map((i) => (
-          <mesh key={i} position={[2 + i, i * 0.8, 4]} castShadow>
-            <boxGeometry args={[6, 0.5, 3]} />
-            <meshStandardMaterial color="#ffffff" roughness={0.8} />
-          </mesh>
-        ))}
-
-        {/* The Iridescent Sphere */}
-        <Float speed={1.5} rotationIntensity={1} floatIntensity={2}>
+        
+        <Float speed={1.5} floatIntensity={2}>
           <mesh position={[-6, 12, 5]}>
             <sphereGeometry args={[3.5, 64, 64]} />
             <MeshDistortMaterial 
-              color="#ffffff" 
-              speed={2} 
-              distort={0.3} 
-              transmission={1} 
-              thickness={2} 
-              roughness={0.05} 
-              iridescence={1}
+              color="#ffffff" speed={2} distort={0.2} transmission={1} 
+              thickness={2} roughness={0.02} iridescence={1}
             />
           </mesh>
         </Float>
       </group>
 
-      {/* --- 🏗️ STRUCTURE 2 (COLLECTION - ORGANIC FORMS) --- */}
-      <group position={[-55, -2, -10]} rotation={[0, Math.PI / 10, 0]}>
-        {/* Large Rounded Portal */}
-        <mesh position={[0, 12, 0]} castShadow>
-          <boxGeometry args={[20, 30, 3]} />
-          <meshStandardMaterial color="#ede2df" roughness={0.9} />
-        </mesh>
+      {/* --- 🚪 STRUCTURE 2 (ENHANCED DOORWAY) --- */}
+      <group position={[-55, -2, -8]} rotation={[0, Math.PI / 8, 0]}>
         
-        {/* Floating Organic "Rock" (from reference) */}
-        <Float speed={1.2}>
-          <mesh position={[12, 2, 5]} castShadow>
-            <dodecahedronGeometry args={[5, 3]} />
-            <meshStandardMaterial color="#dcd3d1" roughness={1} />
+        {/* The Doorway Frame */}
+        <group position={[0, 12, 0]}>
+          {/* Left Pillar */}
+          <mesh position={[-6, 0, 0]} castShadow>
+            <boxGeometry args={[4, 30, 4]} />
+            <meshStandardMaterial color="#ede2df" roughness={0.8} />
           </mesh>
-        </Float>
+          {/* Right Pillar */}
+          <mesh position={[6, 0, 0]} castShadow>
+            <boxGeometry args={[4, 30, 4]} />
+            <meshStandardMaterial color="#ede2df" roughness={0.8} />
+          </mesh>
+          {/* Top Header */}
+          <mesh position={[0, 13, 0]} castShadow>
+            <boxGeometry args={[16, 4, 4]} />
+            <meshStandardMaterial color="#ede2df" roughness={0.8} />
+          </mesh>
+        </group>
 
-        {/* Tall Slim Pillar */}
-        <mesh position={[-8, 15, 6]} castShadow>
-          <cylinderGeometry args={[1.5, 1.5, 35, 32]} />
-          <meshStandardMaterial color="#ede2df" />
+        {/* Floating Steps leading THROUGH the doorway */}
+        {[0, 1, 2, 3].map((i) => (
+          <mesh key={i} position={[0, i * 1.5, 8 - i * 4]} castShadow>
+            <boxGeometry args={[8, 0.5, 6]} />
+            <meshStandardMaterial color="#ffffff" roughness={0.9} />
+          </mesh>
+        ))}
+
+        {/* Tall Architectural Needle */}
+        <mesh position={[14, 15, -5]} castShadow>
+          <cylinderGeometry args={[0.5, 0.5, 40, 32]} />
+          <meshStandardMaterial color="#dcd3d1" />
         </mesh>
       </group>
 
-      {/* 🌊 GLOBAL WAHTER */}
+      {/* 🌊 LOCKED WATER SURFACE */}
       <water
         ref={waterRef}
         args={[new THREE.PlaneGeometry(3000, 3000), {
           textureWidth: 512, textureHeight: 512, waterNormals, 
-          sunDirection: new THREE.Vector3(), sunColor: 0xffffff, 
-          waterColor: 0x9fb5bd, distortionScale: 1.8, fog: true,
+          sunDirection: new THREE.Vector3(10, 1, 20), sunColor: 0xffffff, 
+          waterColor: 0x8ea6ad, distortionScale: 1.5, fog: true,
         }]}
         rotation={[-Math.PI / 2, 0, 0]}
         position={[0, -0.1, 0]}
       />
       
-      <ContactShadows opacity={0.2} scale={200} blur={3} far={40} />
+      <ContactShadows opacity={0.25} scale={200} blur={3} far={40} />
     </>
   );
 }
