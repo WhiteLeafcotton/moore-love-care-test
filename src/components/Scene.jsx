@@ -6,14 +6,12 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* A structural Arch Cutout component */
-const ArchVoid = ({ position, colorProps, width = 3, height = 7 }) => (
+/* A structural "Void" Maker: Pillars + Arch Cap */
+const ArchOpening = ({ position, colorProps, width = 4, height = 8 }) => (
   <group position={position}>
-    {/* Side Pillars */}
     <Box args={[width, height, 2.01]} position={[0, height / 2, 0]}>
       <meshStandardMaterial {...colorProps} />
     </Box>
-    {/* The Arch Top */}
     <Cylinder args={[width / 2, width / 2, 2.01, 32]} position={[0, height, 0]} rotation={[Math.PI / 2, 0, 0]}>
       <meshStandardMaterial {...colorProps} />
     </Cylinder>
@@ -39,9 +37,8 @@ export default function Scene({ currentView }) {
   const purpleProps = { map: renderTex, color: "#d1c4e9", roughness: 0.9 };
 
   useFrame((state, delta) => {
-    // Adjusted camera for better "corner room" perspective
-    const targetPos = currentView === 'home' ? [-15, 7, 20] : [30, 5, 15];
-    const targetLook = currentView === 'home' ? [5, 0, -5] : [60, 0, 10];
+    const targetPos = currentView === 'home' ? [-15, 6, 22] : [35, 4, 12];
+    const targetLook = currentView === 'home' ? [5, 0, -5] : [70, 0, 8];
     camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
     camera.lookAt(new THREE.Vector3(...targetLook));
     if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.15;
@@ -49,36 +46,48 @@ export default function Scene({ currentView }) {
 
   return (
     <>
-      <Sky sunPosition={[-40, 0.1, 10]} />
+      <Sky sunPosition={[-35, 0.05, 10]} />
       <Environment preset="dawn" />
       
-      <group position={[0, 2, -5]} scale={0.9}>
+      <group position={[0, 2, -10]} scale={0.9}>
         
         {/* FLOOR PLATFORM */}
         <Box args={[32, 1.5, 24]} position={[2, -8.7, 5]}>
           <meshStandardMaterial {...pinkProps} />
         </Box>
 
-        {/* BACK PINK WALL: Built in segments to create TRUE cutouts */}
+        {/* PINK BACK WALL: Pillars & Arched Doors clustered left */}
         <group position={[-12, 0, 0]}>
-          {/* Main Wall Fillers around the doors */}
+          {/* Left Anchor Pillar */}
           <Box args={[4, 16, 2]} position={[-2, 0, 0]}><meshStandardMaterial {...pinkProps} /></Box>
-          <ArchVoid position={[2, -8, 0]} colorProps={pinkProps} width={3.5} height={7} />
-          <Box args={[2, 16, 2]} position={[4.75, 0, 0]}><meshStandardMaterial {...pinkProps} /></Box>
-          <ArchVoid position={[7.5, -8, 0]} colorProps={pinkProps} width={3.5} height={7} />
-          <Box args={[2, 16, 2]} position={[10.25, 0, 0]}><meshStandardMaterial {...pinkProps} /></Box>
-          <ArchVoid position={[13, -8, 0]} colorProps={pinkProps} width={3.5} height={7} />
-          {/* Long right side of pink wall to lead into corner */}
-          <Box args={[14, 16, 2]} position={[21.75, 0, 0]}><meshStandardMaterial {...pinkProps} /></Box>
+          
+          {/* Three Arched Doorways (The "Voids") */}
+          <group position={[2.5, -8, 0]}>
+            <ArchOpening position={[0, 0, 0]} colorProps={pinkProps} width={1} height={9} />
+            <ArchOpening position={[4, 0, 0]} colorProps={pinkProps} width={1} height={9} />
+            <ArchOpening position={[8, 0, 0]} colorProps={pinkProps} width={1} height={9} />
+            {/* The lintels (caps) above doors */}
+            <Box args={[12, 7, 2]} position={[4, 4.5, 0]}><meshStandardMaterial {...pinkProps} /></Box>
+          </group>
+
+          {/* Right Wall Mass leading to corner */}
+          <Box args={[14, 16, 2]} position={[21, 0, 0]}><meshStandardMaterial {...pinkProps} /></Box>
         </group>
 
-        {/* PURPLE SIDE WALL: Anchored at exact 90 degrees to pink wall's end */}
-        <group position={[15.75, 0, 1]} rotation={[0, -Math.PI / 2, 0]}>
-          {/* Wall sections for proportional windows */}
+        {/* PURPLE SIDE WALL: Locked to 90 degrees */}
+        <group position={[16, 0, 1]} rotation={[0, -Math.PI / 2, 0]}>
+          {/* Start Pillar */}
           <Box args={[6, 16, 2]} position={[3, 0, 0]}><meshStandardMaterial {...purpleProps} /></Box>
-          <ArchVoid position={[7.5, -3, 0]} colorProps={purpleProps} width={2.5} height={5} />
-          <Box args={[4, 16, 2]} position={[10.75, 0, 0]}><meshStandardMaterial {...purpleProps} /></Box>
-          <ArchVoid position={[14, -3, 0]} colorProps={purpleProps} width={2.5} height={5} />
+          
+          {/* Two Arched Windows (Elevated "Voids") */}
+          <group position={[9, -2, 0]}>
+             <ArchOpening position={[0, -4, 0]} colorProps={purpleProps} width={1} height={4} />
+             <ArchOpening position={[4, -4, 0]} colorProps={purpleProps} width={1} height={4} />
+             {/* Window surround mass */}
+             <Box args={[8, 12, 2]} position={[2, 2, 0]}><meshStandardMaterial {...purpleProps} /></Box>
+          </group>
+
+          {/* End Pillar */}
           <Box args={[8, 16, 2]} position={[20, 0, 0]}><meshStandardMaterial {...purpleProps} /></Box>
         </group>
 
