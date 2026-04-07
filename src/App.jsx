@@ -33,7 +33,13 @@ export default function App() {
         </button>
       </div>
 
-      <Canvas shadows dpr={[1, 2]} camera={{ position: [24, 2.5, 34], fov: 28 }} gl={{ antialias: true }}>
+      <Canvas 
+        shadows 
+        dpr={[1, 2]} 
+        /* Pulled back to Z:60 and raised to Y:15 for the zoom-out view */
+        camera={{ position: [40, 15, 60], fov: 35 }} 
+        gl={{ antialias: true }}
+      >
         <Suspense fallback={null}>
           <Scene currentView={currentView} />
         </Suspense>
