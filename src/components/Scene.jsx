@@ -23,9 +23,9 @@ export default function Scene({ currentView }) {
     if (pinkStoneTex) pinkStoneTex.repeat.set(1.5, 10);
   }, [pinkStoneTex, travertineTex, waterNormals]);
 
-  /* CINEMATIC VIEWS - Restored to original shots */
+  /* NEW INTERIOR VIEW: Starts INSIDE looking toward the corner */
   const views = {
-    home: { pos: [20, 3, 32], look: [-10, 4, -5] },
+    home: { pos: [-5, 6, 15], look: [-30, 5, -10] }, // Deep inside perspective
     collection: { pos: [-110, 3, 55], look: [-140, 2, -10] } 
   };
   
@@ -50,39 +50,32 @@ export default function Scene({ currentView }) {
         
         {/* --- BACK WALL (Travertine) with 1 DOOR & 2 WINDOWS --- */}
         <group position={[-35, 0, 0]}>
-            {/* Leftmost Pillar */}
             <mesh position={[-15, 0, 0]}>
                 <boxGeometry args={[10, 40, 2]} />
                 <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
             </mesh>
             
-            {/* DOOR 1 (Back Wall) - Pillar + Header */}
             <mesh position={[-5, 13, 0]}> 
                 <boxGeometry args={[10, 14, 2]} />
                 <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
             </mesh>
 
-            {/* Center Pillar */}
             <mesh position={[5, 0, 0]}>
                 <boxGeometry args={[10, 40, 2]} />
                 <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
             </mesh>
 
-            {/* WINDOW 1 - Header & Sill */}
             <mesh position={[15, 13, 0]}> <boxGeometry args={[10, 14, 2]} /> <meshStandardMaterial map={travertineTex} color="#fcd7d7" /></mesh>
             <mesh position={[15, -7, 0]}> <boxGeometry args={[10, 14, 2]} /> <meshStandardMaterial map={travertineTex} color="#fcd7d7" /></mesh>
 
-            {/* Gap-Closing Pillar */}
             <mesh position={[25, 0, 0]}>
                 <boxGeometry args={[10, 40, 2]} />
                 <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
             </mesh>
 
-            {/* WINDOW 2 - Header & Sill */}
             <mesh position={[35, 13, 0]}> <boxGeometry args={[10, 14, 2]} /> <meshStandardMaterial map={travertineTex} color="#fcd7d7" /></mesh>
             <mesh position={[35, -7, 0]}> <boxGeometry args={[10, 14, 2]} /> <meshStandardMaterial map={travertineTex} color="#fcd7d7" /></mesh>
 
-            {/* CORNER CONNECTOR - Ensures no gap */}
             <mesh position={[45, 0, 0]}>
                 <boxGeometry args={[10, 40, 2]} />
                 <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
@@ -91,13 +84,11 @@ export default function Scene({ currentView }) {
 
         {/* --- RIGHT WALL (Pink Stone) with 3 DOORS --- */}
         <group position={[10, 0, 25]} rotation={[0, Math.PI / 2, 0]}>
-          {/* Main Corner Pillar */}
           <mesh position={[-35, 0, 0]}>
             <boxGeometry args={[10, 40, 2]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
           
-          {/* DOOR 2 */}
           <mesh position={[-25, 13, 0]}> <boxGeometry args={[10, 14, 2]} /> <meshStandardMaterial map={pinkStoneTex} color="#ede2df" /></mesh>
           
           <mesh position={[-15, 0, 0]}>
@@ -105,7 +96,6 @@ export default function Scene({ currentView }) {
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
 
-          {/* DOOR 3 */}
           <mesh position={[-5, 13, 0]}> <boxGeometry args={[10, 14, 2]} /> <meshStandardMaterial map={pinkStoneTex} color="#ede2df" /></mesh>
 
           <mesh position={[5, 0, 0]}>
@@ -113,7 +103,6 @@ export default function Scene({ currentView }) {
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
 
-          {/* DOOR 4 */}
           <mesh position={[15, 13, 0]}> <boxGeometry args={[10, 14, 2]} /> <meshStandardMaterial map={pinkStoneTex} color="#ede2df" /></mesh>
 
           <mesh position={[25, 0, 0]}>
@@ -122,14 +111,13 @@ export default function Scene({ currentView }) {
           </mesh>
         </group>
 
-        {/* THE LARGE BENCH */}
-        <mesh position={[0, -13, 0]} castShadow receiveShadow>
+        {/* THE LARGE BENCH: Restored and centered */}
+        <mesh position={[0, -13, 5]} castShadow receiveShadow>
           <boxGeometry args={[65, 4, 15]} /> 
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
       </group>
 
-      {/* ORIGINAL WATER SYSTEM */}
       <water
         ref={waterRef}
         args={[new THREE.PlaneGeometry(5000, 5000), {
