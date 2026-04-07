@@ -6,18 +6,18 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* My Design Method: The "Shadow-Gap" Window */
-const ArchitecturalWindow = ({ args, position }) => (
+/* Scaled-down Embedded Slider Window */
+const SliderWindow = ({ position, wallProps }) => (
   <group position={position}>
-    <Box args={args}>
-      <meshStandardMaterial color="#a0c0c0" opacity={0.2} transparent roughness={0} metalness={1} />
+    {/* Header & Sill to "embed" the window */}
+    <Box args={[1.6, 2, 2.1]} position={[0, 4, 0]}><meshStandardMaterial {...wallProps} /></Box>
+    <Box args={[1.6, 6, 2.1]} position={[0, -5, 0]}><meshStandardMaterial {...wallProps} /></Box>
+    {/* The Frame and Glass */}
+    <Box args={[1.4, 6.2, 0.4]} position={[0, -0.1, 0]}>
+      <meshStandardMaterial color="#1a1a1a" roughness={0.1} />
     </Box>
-    {/* Minimalist Black Linear Frame */}
-    <Box args={[args[0] + 0.2, 0.1, args[2] + 0.2]} position={[0, args[1]/2, 0]}>
-      <meshStandardMaterial color="#000" />
-    </Box>
-    <Box args={[args[0] + 0.2, 0.1, args[2] + 0.2]} position={[0, -args[1]/2, 0]}>
-      <meshStandardMaterial color="#000" />
+    <Box args={[1.2, 6, 0.1]} position={[0, -0.1, 0]}>
+      <meshStandardMaterial color="#a0c0c0" opacity={0.4} transparent />
     </Box>
   </group>
 );
@@ -33,7 +33,7 @@ export default function Scene({ currentView }) {
   useMemo(() => {
     if (renderTex) {
       renderTex.wrapS = renderTex.wrapT = THREE.RepeatWrapping;
-      renderTex.repeat.set(1.5, 3);
+      renderTex.repeat.set(1, 2.5); // Scaled for smaller walls
     }
   }, [renderTex]);
 
@@ -41,62 +41,56 @@ export default function Scene({ currentView }) {
   const purpleProps = { map: renderTex, color: "#d1c4e9", roughness: 0.9 };
 
   useFrame((state, delta) => {
-    const targetPos = currentView === 'home' ? [-35, 15, 40] : [50, 10, 20];
-    const targetLook = currentView === 'home' ? [0, 0, 0] : [100, 0, 10];
+    const targetPos = currentView === 'home' ? [-20, 8, 25] : [40, 5, 15];
+    const targetLook = currentView === 'home' ? [0, 0, -5] : [80, 0, 10];
     camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
     camera.lookAt(new THREE.Vector3(...targetLook));
-    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.15;
+    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.2;
   });
 
   return (
     <>
-      <Sky sunPosition={[-50, 2, 10]} />
+      <Sky sunPosition={[-35, 0.05, 10]} />
       <Environment preset="dawn" />
       
-      <group position={[0, 0, 0]}>
+      <group position={[0, 4, -10]} scale={0.9}>
         
-        {/* STEPPED MONOLITHIC FLOOR */}
-        <Box args={[40, 3, 30]} position={[0, -14, 0]}>
+        {/* 1. FLOOR PLATFORM */}
+        <Box args={[28, 1.5, 22]} position={[2, -8.7, 4]}>
           <meshStandardMaterial {...pinkProps} />
         </Box>
 
-        {/* THE "FLOATING" WALL SYSTEM */}
-        <group position={[0, -12.2, 0]}> {/* The 0.2 Shadow Gap */}
-          
-          {/* WALL A: Back Pink Wall with Asymmetric Opening */}
-          <group position={[-18, 14, 0]}>
-            <Box args={[12, 28, 2]} position={[0, 0, 0]}><meshStandardMaterial {...pinkProps} /></Box>
-            <ArchitecturalWindow args={[8, 28, 0.5]} position={[10, 0, 0]} />
-            <Box args={[16, 28, 2]} position={[22, 0, 0]}><meshStandardMaterial {...pinkProps} /></Box>
-          </group>
-
-          {/* WALL B: Side Purple Wall with Floor-Level Panoramic */}
-          <group position={[18, 14, 14]} rotation={[0, -Math.PI / 2, 0]}>
-            <Box args={[10, 28, 2]} position={[0, 0, 0]}><meshStandardMaterial {...purpleProps} /></Box>
-            {/* Massive Panoramic Opening */}
-            <group position={[11, 0, 0]}>
-                <Box args={[12, 10, 2]} position={[0, 9, 0]}><meshStandardMaterial {...purpleProps} /></Box>
-                <ArchitecturalWindow args={[12, 18, 0.5]} position={[0, -5, 0]} />
-            </group>
-            <Box args={[6, 28, 2]} position={[20, 0, 0]}><meshStandardMaterial {...purpleProps} /></Box>
-          </group>
-
+        {/* 2. PINK WALL: 3 Doorways */}
+        <group position={[-10, 0, 0]}>
+          <Box args={[4, 16, 2]} position={[-2, 0, 0]}><meshStandardMaterial {...pinkProps} /></Box>
+          {/* Door 1 */}
+          <Box args={[4, 4, 2]} position={[2, 6, 0]}><meshStandardMaterial {...pinkProps} /></Box>
+          <Box args={[4, 16, 2]} position={[6, 0, 0]}><meshStandardMaterial {...pinkProps} /></Box>
+          {/* Door 2 */}
+          <Box args={[4, 4, 2]} position={[10, 6, 0]}><meshStandardMaterial {...pinkProps} /></Box>
+          <Box args={[4, 16, 2]} position={[14, 0, 0]}><meshStandardMaterial {...pinkProps} /></Box>
+          {/* Door 3 */}
+          <Box args={[4, 4, 2]} position={[18, 6, 0]}><meshStandardMaterial {...pinkProps} /></Box>
+          <Box args={[6, 16, 2]} position={[23, 0, 0]}><meshStandardMaterial {...pinkProps} /></Box>
         </group>
 
-        {/* MINIMALIST L-BENCH */}
-        <group position={[-12, -12.5, -4]}>
-          <Box args={[24, 1.2, 5]} position={[4, 0, 0]}><meshStandardMaterial {...purpleProps} /></Box>
-          <Box args={[5, 1.2, 20]} position={[-5.5, 0, 7.5]}><meshStandardMaterial {...purpleProps} /></Box>
+        {/* 3. PURPLE WALL: 90° Corner meeting & 2 Slider Windows */}
+        <group position={[14.1, 0, 11]} rotation={[0, -Math.PI / 2, 0]}>
+          <Box args={[8, 16, 2]} position={[-4, 0, 0]}><meshStandardMaterial {...purpleProps} /></Box>
+          <SliderWindow position={[0.8, 0, 0]} wallProps={purpleProps} />
+          <Box args={[4, 16, 2]} position={[3.6, 0, 0]}><meshStandardMaterial {...purpleProps} /></Box>
+          <SliderWindow position={[6.4, 0, 0]} wallProps={purpleProps} />
+          <Box args={[6, 16, 2]} position={[12.4, 0, 0]}><meshStandardMaterial {...purpleProps} /></Box>
         </group>
 
       </group>
 
       <water
         ref={waterRef}
-        args={[new THREE.PlaneGeometry(2000, 2000), {
+        args={[new THREE.PlaneGeometry(1000, 1000), {
           textureWidth: 512, textureHeight: 512, waterNormals, 
           sunDirection: new THREE.Vector3(10, 1, 20), sunColor: 0xffffff, 
-          waterColor: 0x777777, distortionScale: 0.3, fog: false,
+          waterColor: 0x999999, distortionScale: 0.3, fog: false,
         }]}
         rotation={[-Math.PI / 2, 0, 0]}
         position={[0, -0.1, 0]}
