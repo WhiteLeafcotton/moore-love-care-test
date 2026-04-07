@@ -1,105 +1,181 @@
 import { useRef, useMemo } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
-import { Environment, Sky, Box, Cylinder } from "@react-three/drei";
+import { Environment, Sky, ContactShadows } from "@react-three/drei";
 import { Water } from "three-stdlib";
 import * as THREE from "three";
 
 extend({ Water });
-
-/* Simplified Arch: Guaranteed to reach the floor */
-const WallWithArch = ({ position, colorProps, width = 4, height = 16, archW = 3, archH = 8, isWindow = false }) => (
-  <group position={position}>
-    {/* Left Pillar */}
-    <Box args={[(width - archW) / 2, height, 2]} position={[-(archW + (width - archW) / 2) / 2, height / 2, 0]}>
-      <meshStandardMaterial {...colorProps} />
-    </Box>
-    {/* Right Pillar */}
-    <Box args={[(width - archW) / 2, height, 2]} position={[(archW + (width - archW) / 2) / 2, height / 2, 0]}>
-      <meshStandardMaterial {...colorProps} />
-    </Box>
-    {/* Header (Top of wall) */}
-    <Box args={[archW, height - archH - (isWindow ? 4 : 0), 2]} position={[0, height - (height - archH - (isWindow ? 4 : 0)) / 2, 0]}>
-      <meshStandardMaterial {...colorProps} />
-    </Box>
-    {/* The Arch Cap */}
-    <Cylinder args={[archW / 2, archW / 2, 2, 32, 1, false, 0, Math.PI]} position={[0, archH + (isWindow ? 4 : 0), 0]} rotation={[0, 0, Math.PI]}>
-      <meshStandardMaterial {...colorProps} />
-    </Cylinder>
-    {/* Sill for windows only */}
-    {isWindow && (
-      <Box args={[archW, 4, 2]} position={[0, 2, 0]}>
-        <meshStandardMaterial {...colorProps} />
-      </Box>
-    )}
-  </group>
-);
 
 export default function Scene({ currentView }) {
   const { camera } = useThree();
   const waterRef = useRef();
   const baseUrl = import.meta.env.BASE_URL || "/";
 
-  const renderTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
+  const pinkStoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
+  const travertineTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/travertine.jpg`);
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
 
   useMemo(() => {
-    if (renderTex) {
-      renderTex.wrapS = renderTex.wrapT = THREE.RepeatWrapping;
-      renderTex.repeat.set(1, 2);
-    }
-  }, [renderTex]);
+    [pinkStoneTex, travertineTex, waterNormals].forEach(t => {
+      if (t) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 16; }
+    });
+    if (travertineTex) travertineTex.repeat.set(1.5, 10); 
+    if (pinkStoneTex) pinkStoneTex.repeat.set(1.5, 10);
+  }, [pinkStoneTex, travertineTex, waterNormals]);
 
-  const pinkProps = { map: renderTex, color: "#fcd7d7", roughness: 0.9 };
-  const purpleProps = { map: renderTex, color: "#d1c4e9", roughness: 0.9 };
+  /* REFINED CINEMATIC PATHWAY:
+     - Home: Moves forward INTO the room and turns 90 degrees RIGHT to face the inner corner.
+     - Collection: Lateral exit through the side wall remains perfect.
+  */
+  const views = {
+    home: { 
+      // Positioned inside the room, slightly to the left of center
+      pos: [-15, 4, 10],      
+      // Target is now far to the RIGHT and BACK to force that 90-degree corner view
+      look: [40, 2, -15]    
+    },
+    collection: { 
+      pos: [90, 3, 20], 
+      look: [160, 2, 20] 
+    } 
+  };
+  
+  const targetLook = useMemo(() => new THREE.Vector3(0, 0, 0), []);
 
   useFrame((state, delta) => {
-    const targetPos = currentView === 'home' ? [-18, 7, 24] : [32, 5, 18];
-    const targetLook = currentView === 'home' ? [2, 0, -5] : [65, 0, 10];
-    camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
-    camera.lookAt(new THREE.Vector3(...targetLook));
-    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.15;
+    const target = views[currentView];
+    camera.position.lerp(new THREE.Vector3(...target.pos), 0.012); 
+    targetLook.lerp(new THREE.Vector3(...target.look), 0.012);
+    camera.lookAt(targetLook);
+    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.3;
   });
 
   return (
     <>
-      <Sky sunPosition={[-40, 0.1, 10]} />
+      <Sky sunPosition={[-35, 0.08, 15]} turbidity={0.01} rayleigh={3} />
       <Environment preset="dawn" />
+      <fog attach="fog" args={["#f7ece8", 30, 200]} />
       
-      <group position={[0, 2, -5]} scale={0.9}>
-        {/* FLOOR PLATFORM */}
-        <Box args={[38, 1.5, 28]} position={[3, -8.7, 7]}>
-          <meshStandardMaterial {...pinkProps} />
-        </Box>
+      {/* CLEAN FLOATING CORNER ROOM */}
+<group position={[0, 4, -12]} scale={1}>
 
-        {/* PINK BACK WALL */}
-        <group position={[-14, -8, 0]}>
-          <Box args={[4, 16, 2]} position={[2, 8, 0]}><meshStandardMaterial {...pinkProps} /></Box>
-          <WallWithArch position={[6, 0, 0]} width={4} archW={2.5} archH={8} colorProps={pinkProps} />
-          <WallWithArch position={[10, 0, 0]} width={4} archW={2.5} archH={8} colorProps={pinkProps} />
-          <WallWithArch position={[14, 0, 0]} width={4} archW={2.5} archH={8} colorProps={pinkProps} />
-          {/* Extension to the corner */}
-          <Box args={[14, 16, 2]} position={[23, 8, 0]}><meshStandardMaterial {...pinkProps} /></Box>
-        </group>
+  {/* === FLOOR === */}
+  <mesh position={[0, -15, 0]} receiveShadow>
+    <boxGeometry args={[60, 2, 60]} />
+    <meshStandardMaterial map={travertineTex} color="#f5dcd6" />
+  </mesh>
 
-        {/* PURPLE SIDE WALL: Rotated 90° and snapped to corner */}
-        <group position={[16, -8, 1]} rotation={[0, -Math.PI / 2, 0]}>
-          <Box args={[6, 16, 2]} position={[3, 8, 0]}><meshStandardMaterial {...purpleProps} /></Box>
-          <WallWithArch position={[9, 0, 0]} width={6} archW={3} archH={5} isWindow={true} colorProps={purpleProps} />
-          <WallWithArch position={[15, 0, 0]} width={6} archW={3} archH={5} isWindow={true} colorProps={purpleProps} />
-          <Box args={[8, 16, 2]} position={[22, 8, 0]}><meshStandardMaterial {...purpleProps} /></Box>
-        </group>
-      </group>
+  {/* === LEFT WALL (ARCH DOORS) === */}
+  <group position={[-30, 5, 0]}>
+    
+    {/* Wall base */}
+    <mesh>
+      <boxGeometry args={[2, 40, 60]} />
+      <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
+    </mesh>
+
+    {/* --- DOORWAY 1 --- */}
+    <group position={[0, -5, -15]}>
+      {/* sides */}
+      <mesh position={[0, 0, -6]}>
+        <boxGeometry args={[2, 20, 8]} />
+        <meshStandardMaterial map={travertineTex} />
+      </mesh>
+
+      <mesh position={[0, 0, 6]}>
+        <boxGeometry args={[2, 20, 8]} />
+        <meshStandardMaterial map={travertineTex} />
+      </mesh>
+
+      {/* arch top */}
+      <mesh position={[0, 10, 0]}>
+        <cylinderGeometry args={[6, 6, 2, 32, 1, false, 0, Math.PI]} />
+        <meshStandardMaterial map={travertineTex} />
+        <rotation x={Math.PI / 2} />
+      </mesh>
+    </group>
+
+    {/* --- DOORWAY 2 --- */}
+    <group position={[0, -5, 15]}>
+      <mesh position={[0, 0, -6]}>
+        <boxGeometry args={[2, 20, 8]} />
+        <meshStandardMaterial map={travertineTex} />
+      </mesh>
+
+      <mesh position={[0, 0, 6]}>
+        <boxGeometry args={[2, 20, 8]} />
+        <meshStandardMaterial map={travertineTex} />
+      </mesh>
+
+      <mesh position={[0, 10, 0]}>
+        <cylinderGeometry args={[6, 6, 2, 32, 1, false, 0, Math.PI]} />
+        <meshStandardMaterial map={travertineTex} />
+        <rotation x={Math.PI / 2} />
+      </mesh>
+    </group>
+  </group>
+
+  {/* === RIGHT WALL (MODERN WINDOWS) === */}
+  <group position={[0, 5, 30]} rotation={[0, Math.PI / 2, 0]}>
+
+    {/* Wall base */}
+    <mesh>
+      <boxGeometry args={[2, 40, 60]} />
+      <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
+    </mesh>
+
+    {/* WINDOW 1 */}
+    <group position={[0, 5, -15]}>
+      {/* frame */}
+      <mesh>
+        <boxGeometry args={[2.2, 14, 14]} />
+        <meshStandardMaterial color="#d9d9d9" />
+      </mesh>
+
+      {/* glass */}
+      <mesh>
+        <boxGeometry args={[1.8, 12, 12]} />
+        <meshPhysicalMaterial
+          color="#ffffff"
+          transmission={1}
+          roughness={0}
+          thickness={0.5}
+        />
+      </mesh>
+    </group>
+
+    {/* WINDOW 2 */}
+    <group position={[0, 5, 15]}>
+      <mesh>
+        <boxGeometry args={[2.2, 14, 14]} />
+        <meshStandardMaterial color="#d9d9d9" />
+      </mesh>
+
+      <mesh>
+        <boxGeometry args={[1.8, 12, 12]} />
+        <meshPhysicalMaterial
+          color="#ffffff"
+          transmission={1}
+          roughness={0}
+          thickness={0.5}
+        />
+      </mesh>
+    </group>
+  </group>
+
+</group>
 
       <water
         ref={waterRef}
-        args={[new THREE.PlaneGeometry(1200, 1200), {
+        args={[new THREE.PlaneGeometry(5000, 5000), {
           textureWidth: 512, textureHeight: 512, waterNormals, 
           sunDirection: new THREE.Vector3(10, 1, 20), sunColor: 0xffffff, 
-          waterColor: 0x999999, distortionScale: 0.2, fog: false,
+          waterColor: 0xa19089, distortionScale: 0.8, fog: true,
         }]}
         rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, -0.1, 0]}
+        position={[0, -0.05, 0]}
       />
+      <ContactShadows opacity={0.3} scale={250} blur={3} far={50} color="#5e4d4d" />
     </>
   );
 }
