@@ -31,7 +31,7 @@ export default function Scene({ currentView }) {
   const waterRef = useRef();
   const baseUrl = import.meta.env.BASE_URL || "/";
 
-  // 1. Load Textures
+  // 1. Load Textures (Ensure stone_pillar.jpg is renamed correctly in your folder)
   const pinkStoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
   const grassTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/grass.jpg`);
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
@@ -40,15 +40,14 @@ export default function Scene({ currentView }) {
     pinkStoneTex.wrapS = pinkStoneTex.wrapT = THREE.RepeatWrapping;
     pinkStoneTex.repeat.set(2, 2);
     grassTex.wrapS = grassTex.wrapT = THREE.RepeatWrapping;
-    grassTex.repeat.set(20, 20); // Tighter repeat for visible grass blades
+    grassTex.repeat.set(20, 20); 
     waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
   }, [pinkStoneTex, grassTex, waterNormals]);
 
-  // 2. UPDATED CAMERA LOGIC (Further distance for collection)
+  // 2. CAMERA LOGIC: Dramatically further distance for Collection view
   const views = {
     home: { pos: [18, 2, 18], look: [0, 2, 0] },
-    // Moved 'pos' further back on the X and Z for a more dramatic transition
-    collection: { pos: [-45, 10, 35], look: [-80, 5, -15] } 
+    collection: { pos: [-55, 12, 45], look: [-90, 5, -20] } 
   };
   const targetLook = useMemo(() => new THREE.Vector3(0, 0, 0), []);
 
@@ -68,28 +67,35 @@ export default function Scene({ currentView }) {
       
       <PinkClouds />
 
-      {/* --- 90 DEGREE INSIDE CORNER (SCALED DOWN) --- */}
+      {/* --- REFINED 90 DEGREE INSIDE CORNER --- */}
       <group position={[0, -1.8, -5]} scale={0.6}>
-        {/* Wall 1 */}
-        <mesh position={[-10, 15, -10]} castShadow>
+        {/* Wall 1: Back Wall */}
+        <mesh position={[-10, 15, -10.1]} castShadow receiveShadow>
           <boxGeometry args={[20, 30, 1.5]} />
-          <meshStandardMaterial map={pinkStoneTex} color="#f2dcd5" />
+          <meshStandardMaterial map={pinkStoneTex} color="#f2dcd5" roughness={0.8} />
         </mesh>
-        {/* Wall 2 (The 90° turn) */}
-        <mesh position={[-20, 15, 0]} rotation={[0, Math.PI / 2, 0]} castShadow>
+
+        {/* Wall 2: Side Wall (Slightly darker color to create depth/shadow at the 90° angle) */}
+        <mesh position={[-20.1, 15, 0]} rotation={[0, Math.PI / 2, 0]} castShadow receiveShadow>
           <boxGeometry args={[20, 30, 1.5]} />
-          <meshStandardMaterial map={pinkStoneTex} color="#f2dcd5" />
+          <meshStandardMaterial map={pinkStoneTex} color="#e8cfc8" roughness={0.8} />
         </mesh>
         
-        {/* Base Platform sitting on water */}
-        <mesh position={[-10, 0.5, 0]} castShadow>
-          <boxGeometry args={[22, 1, 15]} />
+        {/* Base Platform: Sitting right on the water's surface */}
+        <mesh position={[-10, 0.5, 0]} castShadow receiveShadow>
+          <boxGeometry args={[21, 1, 20]} />
           <meshStandardMaterial map={pinkStoneTex} color="#f2dcd5" />
+        </mesh>
+
+        {/* Corner Shadow Strip: Physically defines the meeting point */}
+        <mesh position={[-20, 15, -10]} scale={[0.1, 1, 0.1]}>
+          <boxGeometry args={[1, 30, 1]} />
+          <meshStandardMaterial color="#000" transparent opacity={0.1} />
         </mesh>
       </group>
 
       {/* --- STAIRS (COLLECTION VIEW) --- */}
-      <group position={[-70, -2, -20]} scale={0.8}>
+      <group position={[-80, -2, -25]} scale={0.8}>
         {[0, 1, 2, 3, 4, 5].map((i) => (
           <mesh key={i} position={[0, i * 1, i * 2.5]} castShadow>
             <boxGeometry args={[12, 0.8, 4]} />
@@ -98,12 +104,12 @@ export default function Scene({ currentView }) {
         ))}
       </group>
 
-      {/* --- RE-FIXED GRASSY HILLS --- */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2, -60]}>
-        <planeGeometry args={[400, 200, 64, 64]} />
+      {/* --- GRASSY HILLS (Layered further back) --- */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.9, -80]} receiveShadow>
+        <planeGeometry args={[500, 250, 64, 64]} />
         <meshStandardMaterial 
           map={grassTex} 
-          color="#d4b2b2" // Keeping it pink-tinted but grassy
+          color="#d4b2b2" 
           roughness={1} 
           metalness={0}
         />
@@ -121,7 +127,7 @@ export default function Scene({ currentView }) {
         position={[0, -0.2, 0]}
       />
       
-      <ContactShadows opacity={0.25} scale={200} blur={3} far={40} />
+      <ContactShadows opacity={0.35} scale={200} blur={3.5} far={40} color="#5e4d4d" />
     </>
   );
 }
