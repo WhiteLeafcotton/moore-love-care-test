@@ -1,24 +1,22 @@
 import { useRef, useMemo } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
-import { Environment, Sky, Box } from "@react-three/drei";
+import { Environment, Sky, Box, Cylinder } from "@react-three/drei";
 import { Water } from "three-stdlib";
 import * as THREE from "three";
 
 extend({ Water });
 
-/* Scaled-down Embedded Slider Window */
-const SliderWindow = ({ position, wallProps }) => (
+/* A structural Archway component */
+const ArchwayOpening = ({ position, colorProps, width = 3, height = 6 }) => (
   <group position={position}>
-    {/* Header & Sill to "embed" the window */}
-    <Box args={[1.6, 2, 2.1]} position={[0, 4, 0]}><meshStandardMaterial {...wallProps} /></Box>
-    <Box args={[1.6, 6, 2.1]} position={[0, -5, 0]}><meshStandardMaterial {...wallProps} /></Box>
-    {/* The Frame and Glass */}
-    <Box args={[1.4, 6.2, 0.4]} position={[0, -0.1, 0]}>
-      <meshStandardMaterial color="#1a1a1a" roughness={0.1} />
+    {/* Side Pillars */}
+    <Box args={[width, height, 2.05]} position={[0, height / 2, 0]}>
+      <meshStandardMaterial {...colorProps} />
     </Box>
-    <Box args={[1.2, 6, 0.1]} position={[0, -0.1, 0]}>
-      <meshStandardMaterial color="#a0c0c0" opacity={0.4} transparent />
-    </Box>
+    {/* The Arched Top */}
+    <Cylinder args={[width / 2, width / 2, 2.05, 32]} position={[0, height, 0]} rotation={[Math.PI / 2, 0, 0]}>
+      <meshStandardMaterial {...colorProps} />
+    </Cylinder>
   </group>
 );
 
@@ -33,7 +31,7 @@ export default function Scene({ currentView }) {
   useMemo(() => {
     if (renderTex) {
       renderTex.wrapS = renderTex.wrapT = THREE.RepeatWrapping;
-      renderTex.repeat.set(1, 2.5); // Scaled for smaller walls
+      renderTex.repeat.set(1, 2);
     }
   }, [renderTex]);
 
@@ -41,11 +39,11 @@ export default function Scene({ currentView }) {
   const purpleProps = { map: renderTex, color: "#d1c4e9", roughness: 0.9 };
 
   useFrame((state, delta) => {
-    const targetPos = currentView === 'home' ? [-20, 8, 25] : [40, 5, 15];
-    const targetLook = currentView === 'home' ? [0, 0, -5] : [80, 0, 10];
+    const targetPos = currentView === 'home' ? [-18, 6, 22] : [35, 4, 12];
+    const targetLook = currentView === 'home' ? [2, 0, -5] : [70, 0, 8];
     camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
     camera.lookAt(new THREE.Vector3(...targetLook));
-    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.2;
+    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.15;
   });
 
   return (
@@ -53,44 +51,42 @@ export default function Scene({ currentView }) {
       <Sky sunPosition={[-35, 0.05, 10]} />
       <Environment preset="dawn" />
       
-      <group position={[0, 4, -10]} scale={0.9}>
+      <group position={[0, 2, -10]} scale={0.85}>
         
-        {/* 1. FLOOR PLATFORM */}
-        <Box args={[28, 1.5, 22]} position={[2, -8.7, 4]}>
+        {/* FLOOR PLATFORM */}
+        <Box args={[30, 1.2, 22]} position={[0, -6.6, 4]}>
           <meshStandardMaterial {...pinkProps} />
         </Box>
 
-        {/* 2. PINK WALL: 3 Doorways */}
-        <group position={[-10, 0, 0]}>
-          <Box args={[4, 16, 2]} position={[-2, 0, 0]}><meshStandardMaterial {...pinkProps} /></Box>
-          {/* Door 1 */}
-          <Box args={[4, 4, 2]} position={[2, 6, 0]}><meshStandardMaterial {...pinkProps} /></Box>
-          <Box args={[4, 16, 2]} position={[6, 0, 0]}><meshStandardMaterial {...pinkProps} /></Box>
-          {/* Door 2 */}
-          <Box args={[4, 4, 2]} position={[10, 6, 0]}><meshStandardMaterial {...pinkProps} /></Box>
-          <Box args={[4, 16, 2]} position={[14, 0, 0]}><meshStandardMaterial {...pinkProps} /></Box>
-          {/* Door 3 */}
-          <Box args={[4, 4, 2]} position={[18, 6, 0]}><meshStandardMaterial {...pinkProps} /></Box>
-          <Box args={[6, 16, 2]} position={[23, 0, 0]}><meshStandardMaterial {...pinkProps} /></Box>
+        {/* PINK WALL (Back): Clustered Arched Doorways on the Left */}
+        <group position={[-14, 0, 0]}>
+          {/* Main Wall Mass */}
+          <Box args={[28, 12, 2]} position={[14, 0, 0]}><meshStandardMaterial {...pinkProps} /></Box>
+          
+          {/* Arched Voids (clustered left) */}
+          <ArchwayOpening position={[4, -6, 0]} colorProps={pinkProps} width={2.5} height={5} />
+          <ArchwayOpening position={[8, -6, 0]} colorProps={pinkProps} width={2.5} height={5} />
+          <ArchwayOpening position={[12, -6, 0]} colorProps={pinkProps} width={2.5} height={5} />
         </group>
 
-        {/* 3. PURPLE WALL: 90° Corner meeting & 2 Slider Windows */}
-        <group position={[14.1, 0, 11]} rotation={[0, -Math.PI / 2, 0]}>
-          <Box args={[8, 16, 2]} position={[-4, 0, 0]}><meshStandardMaterial {...purpleProps} /></Box>
-          <SliderWindow position={[0.8, 0, 0]} wallProps={purpleProps} />
-          <Box args={[4, 16, 2]} position={[3.6, 0, 0]}><meshStandardMaterial {...purpleProps} /></Box>
-          <SliderWindow position={[6.4, 0, 0]} wallProps={purpleProps} />
-          <Box args={[6, 16, 2]} position={[12.4, 0, 0]}><meshStandardMaterial {...purpleProps} /></Box>
+        {/* PURPLE WALL (Right): Matching Arched Windows */}
+        <group position={[14, 0, 11]} rotation={[0, -Math.PI / 2, 0]}>
+          {/* Main Wall Mass */}
+          <Box args={[22, 12, 2]} position={[11, 0, 0]}><meshStandardMaterial {...purpleProps} /></Box>
+          
+          {/* Arched Windows (placed with door logic) */}
+          <ArchwayOpening position={[6, -2, 0]} colorProps={purpleProps} width={2.2} height={4} />
+          <ArchwayOpening position={[10, -2, 0]} colorProps={purpleProps} width={2.2} height={4} />
         </group>
 
       </group>
 
       <water
         ref={waterRef}
-        args={[new THREE.PlaneGeometry(1000, 1000), {
+        args={[new THREE.PlaneGeometry(1500, 1500), {
           textureWidth: 512, textureHeight: 512, waterNormals, 
           sunDirection: new THREE.Vector3(10, 1, 20), sunColor: 0xffffff, 
-          waterColor: 0x999999, distortionScale: 0.3, fog: false,
+          waterColor: 0x999999, distortionScale: 0.25, fog: false,
         }]}
         rotation={[-Math.PI / 2, 0, 0]}
         position={[0, -0.1, 0]}
