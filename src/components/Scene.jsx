@@ -24,15 +24,16 @@ export default function Scene({ currentView }) {
   }, [pinkStoneTex, travertineTex, waterNormals]);
 
   /* REFINED CINEMATIC PATHWAY:
-     - Home: Moves forward INTO the room and turns 90 degrees RIGHT to face the inner corner.
+     - Home: Starts at a distance to the right, glides through the entrance,
+       and settles back to capture the full interior corner scale.
      - Collection: Lateral exit through the side wall remains perfect.
   */
   const views = {
     home: { 
-      // Positioned inside the room, slightly to the left of center
-      pos: [-15, 4, 10],      
-      // Target is now far to the RIGHT and BACK to force that 90-degree corner view
-      look: [40, 2, -15]    
+      // START/SETTLE: Backed up to [0, 5, 25] to give the corner breathing room
+      pos: [0, 5, 25],      
+      // LOOK: Aimed deep into the corner for that dramatic intersection focus
+      look: [45, 2, -15]    
     },
     collection: { 
       pos: [90, 3, 20], 
@@ -44,9 +45,16 @@ export default function Scene({ currentView }) {
 
   useFrame((state, delta) => {
     const target = views[currentView];
+    
+    // We start the camera further away initially for the "weird start" fix
+    if (state.clock.elapsedTime < 0.1 && currentView === 'home') {
+       camera.position.set(30, 8, 60); 
+    }
+
     camera.position.lerp(new THREE.Vector3(...target.pos), 0.012); 
     targetLook.lerp(new THREE.Vector3(...target.look), 0.012);
     camera.lookAt(targetLook);
+    
     if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.3;
   });
 
