@@ -1,6 +1,6 @@
 import { useRef, useMemo } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
-import { Environment, Sky, ContactShadows } from "@react-three/drei";
+import { Environment, Sky } from "@react-three/drei";
 import { Water } from "three-stdlib";
 import * as THREE from "three";
 
@@ -21,8 +21,9 @@ export default function Scene({ currentView }) {
     });
   }, [pinkStoneTex, travertineTex, waterNormals]);
 
+  // Keeping your camera exactly where it was in the home view
   const views = {
-    home: { pos: [24, 10, 34], look: [-12, 8, -5] }, // Slightly higher look to see tops
+    home: { pos: [24, 2.5, 34], look: [-12, 3.8, -5] },
     collection: { pos: [-110, 3, 55], look: [-140, 2, -10] } 
   };
   
@@ -41,68 +42,65 @@ export default function Scene({ currentView }) {
       <Sky sunPosition={[-35, 0.08, 15]} turbidity={0.01} rayleigh={3} />
       <Environment preset="dawn" />
       
-      {/* Wall Container - Positioned so Y=0 is water level */}
-      <group position={[0, 22.5, -12]} scale={0.75}>
+      {/* Wall Container - Height capped to 40 so the top edge is visible */}
+      <group position={[0, 18, -12]} scale={0.75}>
         
         {/* --- BACK WALL (TRAVERTINE) --- */}
-        {/* We use a height of 45 for everything to keep it in frame */}
         
-        {/* Left Edge Pillar */}
+        {/* Left Pillar */}
         <mesh position={[-48, 0, 0]}>
-          <boxGeometry args={[12, 45, 0.2]} />
+          <boxGeometry args={[12, 40, 0.2]} />
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
 
-        {/* WINDOW FRAME (The Cutout) */}
-        <mesh position={[-38.5, -10, 0]}> {/* Sill */}
-          <boxGeometry args={[7, 25, 0.2]} />
+        {/* FULLY FRAMED FLOATING WINDOW */}
+        <mesh position={[-38.5, -8, 0]}> {/* Sill - Above the bench */}
+          <boxGeometry args={[7, 18, 0.2]} />
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
-        <mesh position={[-38.5, 17.5, 0]}> {/* Header */}
-          <boxGeometry args={[7, 10, 0.2]} />
+        <mesh position={[-38.5, 14, 0]}> {/* Header - Closes the top */}
+          <boxGeometry args={[7, 12, 0.2]} />
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
 
-        {/* Middle Wall Section */}
+        {/* Center Wall Section */}
         <mesh position={[-14, 0, 0]}>
-          <boxGeometry args={[36, 45, 0.2]} />
+          <boxGeometry args={[36, 40, 0.2]} />
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
 
-        {/* MAIN DOOR HEADER */}
-        <mesh position={[8, 17.5, 0]}>
-          <boxGeometry args={[8, 10, 0.2]} />
+        {/* MAIN DOORWAY TOP */}
+        <mesh position={[8, 14, 0]}>
+          <boxGeometry args={[8, 12, 0.2]} />
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
 
-        {/* Right Edge Wall */}
+        {/* Right Wall */}
         <mesh position={[28, 0, 0]}>
-          <boxGeometry args={[32, 45, 0.2]} />
+          <boxGeometry args={[32, 40, 0.2]} />
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
 
         {/* --- SIDE WALL (PINK STONE) --- */}
         <group position={[-54, 0, 32]} rotation={[0, Math.PI / 2, 0]}>
           <mesh position={[-20, 0, 0]}>
-            <boxGeometry args={[35, 45, 0.2]} />
+            <boxGeometry args={[35, 40, 0.2]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
-          
-          <mesh position={[0, 17.5, 0]}> {/* SIDE DOOR HEADER */}
-            <boxGeometry args={[5, 10, 0.2]} />
+          <mesh position={[0, 14, 0]}> {/* Side Door Top */}
+            <boxGeometry args={[5, 12, 0.2]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
-
           <mesh position={[20, 0, 0]}>
-            <boxGeometry args={[35, 45, 0.2]} />
+            <boxGeometry args={[35, 40, 0.2]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
         </group>
       </group>
 
-      {/* Floating Bench */}
-      <mesh position={[-18, 2, -15]} castShadow receiveShadow>
-        <boxGeometry args={[50, 4, 12]} /> 
+      {/* Bench (positioned slightly lower so the window is clear) */}
+      <mesh position={[-18, 1.5, -15]} castShadow receiveShadow>
+        <boxGeometry args={[50, 3, 12]} /> 
         <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
       </mesh>
 
