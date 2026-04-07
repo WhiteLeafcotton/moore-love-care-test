@@ -19,12 +19,14 @@ export default function Scene({ currentView }) {
     [pinkStoneTex, travertineTex, waterNormals].forEach(t => {
       if (t) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 16; }
     });
-    if (travertineTex) travertineTex.repeat.set(1.5, 10); 
-    if (pinkStoneTex) pinkStoneTex.repeat.set(1.5, 10);
+    // Adjusted texture scale for the closer camera
+    if (travertineTex) travertineTex.repeat.set(1.2, 8); 
+    if (pinkStoneTex) pinkStoneTex.repeat.set(1.2, 8);
   }, [pinkStoneTex, travertineTex, waterNormals]);
 
+  // IMAX PERSPECTIVE: Lowered the Y (height) and moved Z closer to create a looming effect
   const views = {
-    home: { pos: [20, 3, 32], look: [-10, 4, -5] },
+    home: { pos: [12, 1.8, 26], look: [-10, 3, -8] },
     collection: { pos: [-110, 3, 55], look: [-140, 2, -10] } 
   };
   
@@ -32,93 +34,102 @@ export default function Scene({ currentView }) {
 
   useFrame((state, delta) => {
     const target = views[currentView];
+    // Dynamic FOV adjustment for that "wide-lens" IMAX look
+    camera.fov = THREE.MathUtils.lerp(camera.fov, 45, 0.02);
+    camera.updateProjectionMatrix();
+
     camera.position.lerp(new THREE.Vector3(...target.pos), 0.02); 
     targetLook.lerp(new THREE.Vector3(...target.look), 0.02);
     camera.lookAt(targetLook);
-    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.3;
+    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.2;
   });
 
   return (
     <>
       <Sky sunPosition={[-35, 0.08, 15]} turbidity={0.01} rayleigh={3} />
       <Environment preset="dawn" />
-      <fog attach="fog" args={["#f7ece8", 30, 200]} />
+      <fog attach="fog" args={["#f7ece8", 20, 150]} />
       
-      {/* GROUNDED AT Y:4 - Structure remains submerged in the water */}
-      <group position={[0, 4, -12]} scale={0.8}>
+      {/* STRUCTURE CLUSTER */}
+      <group position={[0, 4, -12]} scale={0.85}>
         
-        {/* --- BACK WALL (Travertine) --- */}
-        <group position={[-35, 0, 0]}>
-            <mesh position={[-6, 0, 0]}>
-                <boxGeometry args={[16, 40, 0.2]} />
+        {/* --- BACK WALL (Travertine) - TIGHTER RATIO --- */}
+        <group position={[-28, 0, 0]}>
+            {/* Left Pillar */}
+            <mesh position={[-5, 0, 0]}>
+                <boxGeometry args={[14, 40, 0.2]} />
                 <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
             </mesh>
-            {/* Window Sill & Header with overlap to close gaps */}
-            <mesh position={[5.5, -7, 0]}> 
-                <boxGeometry args={[8.5, 14, 0.2]} />
+            {/* Window Frames (Now much closer to the pillar) */}
+            <mesh position={[5.1, -7, 0]}> 
+                <boxGeometry args={[7, 14, 0.2]} />
                 <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
             </mesh>
-            <mesh position={[5.5, 13, 0]}> 
-                <boxGeometry args={[8.5, 14, 0.2]} />
+            <mesh position={[5.1, 13, 0]}> 
+                <boxGeometry args={[7, 14, 0.2]} />
                 <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
             </mesh>
         </group>
 
-        <mesh position={[-11, 0, 0]}>
-          <boxGeometry args={[30, 40, 0.2]} />
+        {/* Middle Wall (Shrunk to bring the Door closer to the Window) */}
+        <mesh position={[-6, 0, 0]}>
+          <boxGeometry args={[16, 40, 0.2]} />
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
 
-        <mesh position={[8, 13, 0]}>
+        {/* Main Door Header */}
+        <mesh position={[6.5, 13, 0]}>
           <boxGeometry args={[9, 14, 0.2]} />
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
 
-        <mesh position={[29, 0, 0]}>
-          <boxGeometry args={[33, 40, 0.2]} />
+        {/* Right Pillar */}
+        <mesh position={[24, 0, 0]}>
+          <boxGeometry args={[26, 40, 0.2]} />
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
 
-        {/* --- SIDE WALL (Pink Stone) with Two Identical Doors --- */}
-        <group position={[-43, 0, 28]} rotation={[0, Math.PI / 2, 0]}>
+        {/* --- SIDE WALL (Pink Stone) - TIGHTER DOUBLE DOORS --- */}
+        <group position={[-35.5, 0, 22]} rotation={[0, Math.PI / 2, 0]}>
           {/* Left Pillar */}
-          <mesh position={[-25, 0, 0]}>
-            <boxGeometry args={[20, 40, 0.2]} />
+          <mesh position={[-18, 0, 0]}>
+            <boxGeometry args={[16, 40, 0.2]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
           
-          {/* DOOR 1 (Identical Header) */}
-          <mesh position={[-10, 13, 0]}> 
-            <boxGeometry args={[10, 14, 0.2]} />
+          {/* DOOR 1 */}
+          <mesh position={[-6, 13, 0]}> 
+            <boxGeometry args={[8, 14, 0.2]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
 
-          {/* Center Pillar */}
-          <mesh position={[5, 0, 0]}>
-            <boxGeometry args={[20, 40, 0.2]} />
+          {/* Thin Center Pillar (Brings doors closer) */}
+          <mesh position={[2.5, 0, 0]}>
+            <boxGeometry args={[9, 40, 0.2]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
 
-          {/* DOOR 2 (Added Identical Header on the right) */}
-          <mesh position={[20, 13, 0]}> 
-            <boxGeometry args={[10, 14, 0.2]} />
+          {/* DOOR 2 */}
+          <mesh position={[11, 13, 0]}> 
+            <boxGeometry args={[8, 14, 0.2]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
 
           {/* Right Pillar */}
-          <mesh position={[35, 0, 0]}>
-            <boxGeometry args={[20, 40, 0.2]} />
+          <mesh position={[22, 0, 0]}>
+            <boxGeometry args={[14, 40, 0.2]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
         </group>
 
         {/* THE BENCH */}
-        <mesh position={[-2, -13, -5]} castShadow receiveShadow>
-          <boxGeometry args={[55, 4, 12]} /> 
+        <mesh position={[2, -13, -5]} castShadow receiveShadow>
+          <boxGeometry args={[50, 4, 12]} /> 
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
       </group>
 
+      {/* ENHANCED WATER POOL */}
       <water
         ref={waterRef}
         args={[new THREE.PlaneGeometry(5000, 5000), {
