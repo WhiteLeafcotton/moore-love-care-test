@@ -116,32 +116,50 @@ export default function Scene({ currentView }) {
         </mesh>
 
         {/* PLATFORM */}
-        <mesh position={[0, 0.3, 0]} receiveShadow>
-          <boxGeometry args={[22, 0.6, 20]} />
-          <meshStandardMaterial color="#f2dcd5" />
-        </mesh>
+        <mesh position={[-10, 0.3, 0]} castShadow receiveShadow>
+  <boxGeometry args={[18, 0.6, 18]} />
+  <meshStandardMaterial
+    map={pinkStoneTex}
+    color="#f2dcd5"
+    roughness={0.85}
+  />
+</mesh>
 
-        {/* INTEGRATED STAIRS */}
-        {[0, 1, 2, 3, 4, 5].map((i) => (
-          <mesh key={i} position={[-2, i * 0.6, -4 + i * 1.2]} castShadow>
-            <boxGeometry args={[8, 0.5, 2]} />
-            <meshStandardMaterial color="#f2dcd5" />
-          </mesh>
-        ))}
-      </group>
+       {/* --- REFINED STAIRS (INTEGRATED + MINIMAL) --- */}
+<group position={[-10, -1.2, -6]}>
+  {[0, 1, 2, 3, 4, 5, 6].map((i) => (
+    <mesh
+      key={i}
+      position={[0, i * 0.45, i * 1.05]}
+      castShadow
+      receiveShadow
+    >
+      <boxGeometry args={[6.5, 0.35, 1.8]} />
+      <meshStandardMaterial
+        map={pinkStoneTex}
+        color="#f2dcd5"
+        roughness={0.9}
+      />
+    </mesh>
+  ))}
+</group>
 
-      {/* FLOATING SPHERE */}
-      <Float speed={1} rotationIntensity={0.2} floatIntensity={1}>
-        <mesh position={[6, 6, -6]}>
-          <sphereGeometry args={[2, 64, 64]} />
-          <meshPhysicalMaterial
-            color="#f6e3df"
-            roughness={0}
-            transmission={0.9}
-            thickness={1}
-          />
-        </mesh>
-      </Float>
+      {/* --- FLOATING SPHERE (FIXED COMPOSITION) --- */}
+{/* --- FLOATING SPHERE (FIXED COMPOSITION) --- */}
+<Float speed={0.6} rotationIntensity={0.15} floatIntensity={0.6}>
+  <mesh position={[-2, 5.5, -8]}>
+    <sphereGeometry args={[1.6, 64, 64]} />
+    <meshPhysicalMaterial
+      color="#f8e9e6"
+      roughness={0.05}
+      transmission={1}
+      thickness={1.2}
+      ior={1.4}
+      clearcoat={1}
+      clearcoatRoughness={0}
+    />
+  </mesh>
+</Float>
 
       {/* WATER */}
       <water
