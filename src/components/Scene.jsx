@@ -6,6 +6,28 @@ import * as THREE from "three";
 
 extend({ Water });
 
+// ☁️ Component for Moving Pink Clouds
+function MovingClouds() {
+  const cloudRef = useRef();
+  useFrame((state) => {
+    cloudRef.current.children.forEach((cloud, i) => {
+      cloud.position.x += Math.sin(state.clock.elapsedTime * 0.2 + i) * 0.005;
+      cloud.position.z += Math.cos(state.clock.elapsedTime * 0.2 + i) * 0.005;
+    });
+  });
+
+  return (
+    <group ref={cloudRef}>
+      {[...Array(12)].map((_, i) => (
+        <mesh key={i} position={[Math.random() * 150 - 75, 25 + Math.random() * 15, -60 - Math.random() * 50]}>
+          <sphereGeometry args={[12, 16, 16]} />
+          <meshStandardMaterial color="#fcd7d7" transparent opacity={0.3} fog={false} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
 export default function Scene({ currentView }) {
   const { camera } = useThree();
   const waterRef = useRef();
@@ -17,7 +39,6 @@ export default function Scene({ currentView }) {
 
   const targetLook = useMemo(() => new THREE.Vector3(0, 0, 0), []);
   
-  // Bulletproof Pathing for GitHub Pages
   const baseUrl = import.meta.env.BASE_URL || "/";
   const stoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/travertine.jpg`);
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
@@ -25,7 +46,7 @@ export default function Scene({ currentView }) {
   useMemo(() => {
     if (stoneTex) {
       stoneTex.wrapS = stoneTex.wrapT = THREE.RepeatWrapping;
-      stoneTex.repeat.set(4, 4);
+      stoneTex.repeat.set(2, 2);
     }
     waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
   }, [stoneTex, waterNormals]);
@@ -40,24 +61,48 @@ export default function Scene({ currentView }) {
 
   return (
     <>
-      <Sky distance={450000} sunPosition={[10, 0.5, 20]} turbidity={10} />
+      <Sky distance={450000} sunPosition={[10, 5, 20]} turbidity={0.1} rayleigh={2} />
       <Environment preset="dawn" />
-      <fog attach="fog" args={["#f5eae8", 10, 95]} />
+      <fog attach="fog" args={["#fcd7d7", 20, 150]} />
       
       <spotLight position={[30, 20, 10]} intensity={1.5} castShadow color="#ffebd1" />
       <ambientLight intensity={0.4} />
 
-      {/* --- MAIN STRUCTURE --- */}
+      <MovingClouds />
+
+      {/* --- GRASSY HILLS (BACKGROUND) --- */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2, -70]}>
+        <planeGeometry args={[300, 150, 32, 32]} />
+        <meshStandardMaterial color="#4d5d30" roughness={1} />
+      </mesh>
+
+      {/* --- REFINED PORTAL STRUCTURE (HOME VIEW) --- */}
       <group position={[0, -2, -5]} rotation={[0, -Math.PI / 6, 0]}>
+        {/* The Portal Wall */}
         <mesh position={[0, 10, 0]} castShadow>
-          <boxGeometry args={[18, 25, 2]} />
-          <meshStandardMaterial map={stoneTex} color="#ede2df" roughness={0.9} />
+          <ringGeometry args={[5, 18, 64]} /> 
+          <meshStandardMaterial map={stoneTex} color="#f2dcd5" side={THREE.DoubleSide} roughness={0.8} />
         </mesh>
         
-        {/* The Iridescent Orb from your Unseen Studio Ref */}
+        {/* Floating Top Beam */}
+        <Float speed={2} rotationIntensity={0.1} floatIntensity={0.5}>
+          <mesh position={[6, 18, -3]} castShadow>
+            <boxGeometry args={[18, 4, 3]} />
+            <meshStandardMaterial map={stoneTex} color="#f2dcd5" />
+          </mesh>
+        </Float>
+
+        {/* Floating Steps leading to portal */}
+        {[0, 1, 2, 3].map((i) => (
+          <mesh key={i} position={[i * 1.5 - 3, i * 1, 6]} castShadow>
+            <boxGeometry args={[5, 0.6, 2.5]} />
+            <meshStandardMaterial map={stoneTex} color="#f2dcd5" />
+          </mesh>
+        ))}
+
         <Float speed={1.5} floatIntensity={2}>
-          <mesh position={[-6, 12, 5]}>
-            <sphereGeometry args={[3.5, 64, 64]} />
+          <mesh position={[-8, 14, 4]}>
+            <sphereGeometry args={[3, 64, 64]} />
             <MeshDistortMaterial 
               color="#ffffff" speed={2} distort={0.2} transmission={1} 
               thickness={2} roughness={0.02} iridescence={1.2}
@@ -66,25 +111,25 @@ export default function Scene({ currentView }) {
         </Float>
       </group>
 
-      {/* --- DOORWAY (COLLECTION VIEW) --- */}
+      {/* --- REFINED DOORWAY (COLLECTION VIEW) --- */}
       <group position={[-55, -2, -8]} rotation={[0, Math.PI / 8, 0]}>
         <group position={[0, 12, 0]}>
-          <mesh position={[-6, 0, 0]} castShadow>
-            <boxGeometry args={[4, 30, 4]} />
-            <meshStandardMaterial map={stoneTex} color="#ede2df" />
+          <mesh position={[-7, 0, 0]} castShadow>
+            <boxGeometry args={[4, 32, 4]} />
+            <meshStandardMaterial map={stoneTex} color="#f2dcd5" />
           </mesh>
-          <mesh position={[6, 0, 0]} castShadow>
-            <boxGeometry args={[4, 30, 4]} />
-            <meshStandardMaterial map={stoneTex} color="#ede2df" />
+          <mesh position={[7, 0, 0]} castShadow>
+            <boxGeometry args={[4, 32, 4]} />
+            <meshStandardMaterial map={stoneTex} color="#f2dcd5" />
           </mesh>
-          <mesh position={[0, 13, 0]} castShadow>
-            <boxGeometry args={[16, 4, 4]} />
-            <meshStandardMaterial map={stoneTex} color="#ede2df" />
+          <mesh position={[0, 14, 0]} castShadow>
+            <boxGeometry args={[18, 4, 4]} />
+            <meshStandardMaterial map={stoneTex} color="#f2dcd5" />
           </mesh>
         </group>
       </group>
 
-      {/* --- WATER SURFACE --- */}
+      {/* --- WATER SURFACE (KEPT ORIGINAL) --- */}
       <water
         ref={waterRef}
         args={[new THREE.PlaneGeometry(3000, 3000), {
