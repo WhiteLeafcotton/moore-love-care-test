@@ -29,14 +29,13 @@ export default function Scene({ currentView }) {
     }
   }, [pinkStoneTex, travertineTex, waterNormals]);
 
-  // 🔥 REFINED CINEMATIC ANGLES
   const views = {
     home: { 
-      pos: [18, 1.8, 24],     // Lower Y for a monumental feel, pushed back for better framing
-      look: [-14, 3.5, -5]    // Targeted at the corner/bench intersection
+      pos: [18, 1.8, 24],     
+      look: [-14, 3.5, -5]    
     },
     collection: { 
-      pos: [-110, 3, 55],     // Sweeping view over the floating sanctuary
+      pos: [-110, 3, 55],     
       look: [-140, 2, -15]    
     } 
   };
@@ -45,7 +44,6 @@ export default function Scene({ currentView }) {
 
   useFrame((state, delta) => {
     const target = views[currentView];
-    // Smooth lerp for that premium motion feel
     camera.position.lerp(new THREE.Vector3(...target.pos), 0.02); 
     targetLook.lerp(new THREE.Vector3(...target.look), 0.02);
     camera.lookAt(targetLook);
@@ -64,23 +62,42 @@ export default function Scene({ currentView }) {
       {/* --- LOCATION 1: THE MONOLITH --- */}
       <group position={[0, 0, -5]} scale={0.7}>
         
-        {/* BACK WALL (Travertine) with Center Doorway */}
+        {/* BACK WALL (Travertine) - Now with a Corner Window */}
         <group position={[0, 60, -12]}> 
-          <mesh position={[-25, 0, 0]}>
-            <boxGeometry args={[40, 150, 4]} />
+          {/* Far Left Piece (forms the edge of the corner window) */}
+          <mesh position={[-42, 0, 0]}>
+            <boxGeometry args={[6, 150, 4]} />
             <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
           </mesh>
+
+          {/* THE CORNER WINDOW GAP (approx 6 units wide) */}
+
+          {/* Main Left Wall Piece */}
+          <mesh position={[-18, 0, 0]}>
+            <boxGeometry args={[34, 150, 4]} />
+            <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
+          </mesh>
+
+          {/* Right Wall Piece (forms the main door) */}
           <mesh position={[25, 0, 0]}>
             <boxGeometry args={[40, 150, 4]} />
             <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
           </mesh>
+
+          {/* Header above the Main Door */}
           <mesh position={[0, 50, 0]}> 
             <boxGeometry args={[10, 50, 4]} />
             <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
           </mesh>
+
+          {/* Header above the Corner Window */}
+          <mesh position={[-37, 50, 0]}> 
+            <boxGeometry args={[6, 50, 4]} />
+            <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
+          </mesh>
         </group>
 
-        {/* SIDE WALL (Pink Stone) WITH SLENDER DOOR CUTOUT */}
+        {/* SIDE WALL (Pink Stone) - Slender Door Cutout */}
         <group position={[-45, 60, 12]} rotation={[0, Math.PI / 2, 0]}>
           <mesh position={[-15, 0, 0]}>
             <boxGeometry args={[20, 150, 4]} />
@@ -96,7 +113,7 @@ export default function Scene({ currentView }) {
           </mesh>
         </group>
 
-        {/* LOCKED BENCH: Intersects the Pink Wall */}
+        {/* THE BUILT-IN BENCH */}
         <mesh position={[-18.5, 2, -6]} castShadow receiveShadow>
           <boxGeometry args={[46, 4, 12]} /> 
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
