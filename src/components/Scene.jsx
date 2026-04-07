@@ -44,72 +44,71 @@ export default function Scene({ currentView }) {
       <Environment preset="dawn" />
       <fog attach="fog" args={["#f7ece8", 30, 200]} />
       
-      {/* GROUNDED AT Y:4 - This keeps the bottom submerged in the water pool */}
+      {/* Grounded Y: 4 position to maintain the "sitting on water" look */}
       <group position={[0, 4, -12]} scale={0.75}>
         
         {/* --- BACK WALL (Travertine) --- */}
         
-        {/* COMPACTED LEFT SECTION: Overlapping the pillar and window to kill the gap */}
-        <group position={[-42.5, 0, 0]}>
-            {/* Main Pillar (Moved slightly right to overlap window frame) */}
+        {/* FIXED WINDOW SECTION: Substantial overlap to kill the light gap */}
+        <group position={[-42, 0, 0]}>
+            {/* Main Pillar */}
             <mesh position={[-5, 0, 0]}>
-                <boxGeometry args={[18, 40, 0.2]} />
+                <boxGeometry args={[18.5, 40, 0.2]} />
                 <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
             </mesh>
 
-            {/* Window Frame Pieces (Moved slightly left to overlap pillar) */}
-            <mesh position={[6.9, -7, 0]}> {/* Sill */}
-                <boxGeometry args={[6.1, 14, 0.2]} />
+            {/* Window Frame (Sill and Header) */}
+            <mesh position={[6, -7, 0]}> 
+                <boxGeometry args={[8, 14, 0.2]} />
                 <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
             </mesh>
-            <mesh position={[6.9, 13, 0]}> {/* Header */}
-                <boxGeometry args={[6.1, 14, 0.2]} />
+            <mesh position={[6, 13, 0]}> 
+                <boxGeometry args={[8, 14, 0.2]} />
                 <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
             </mesh>
         </group>
 
-        {/* Middle Wall */}
-        <mesh position={[-14, 0, 0]}>
-          <boxGeometry args={[36, 40, 0.2]} />
+        {/* Middle Wall - Slightly widened for overlap safety */}
+        <mesh position={[-13.5, 0, 0]}>
+          <boxGeometry args={[37, 40, 0.2]} />
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
 
         {/* Main Doorway Header */}
         <mesh position={[8, 13, 0]}>
-          <boxGeometry args={[8, 14, 0.2]} />
+          <boxGeometry args={[9, 14, 0.2]} />
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
 
         {/* Right Edge Wall */}
-        <mesh position={[28, 0, 0]}>
-          <boxGeometry args={[32, 40, 0.2]} />
+        <mesh position={[28.5, 0, 0]}>
+          <boxGeometry args={[33, 40, 0.2]} />
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
 
         {/* --- SIDE WALL (Pink Stone) --- */}
         <group position={[-54, 0, 32]} rotation={[0, Math.PI / 2, 0]}>
           <mesh position={[-20, 0, 0]}>
-            <boxGeometry args={[35, 40, 0.2]} />
+            <boxGeometry args={[35.5, 40, 0.2]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
-          <mesh position={[0, 13, 0]}> {/* Side Door Top */}
-            <boxGeometry args={[5, 14, 0.2]} />
+          <mesh position={[0, 13, 0]}> 
+            <boxGeometry args={[6, 14, 0.2]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
           <mesh position={[20, 0, 0]}>
-            <boxGeometry args={[35, 40, 0.2]} />
+            <boxGeometry args={[35.5, 40, 0.2]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
         </group>
 
-        {/* BENCH */}
+        {/* THE BENCH */}
         <mesh position={[-18, -13, -5]} castShadow receiveShadow>
           <boxGeometry args={[50, 4, 12]} /> 
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
       </group>
 
-      {/* WATER POOL */}
       <water
         ref={waterRef}
         args={[new THREE.PlaneGeometry(5000, 5000), {
