@@ -19,12 +19,13 @@ export default function Scene({ currentView }) {
     [pinkStoneTex, travertineTex, waterNormals].forEach(t => {
       if (t) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 16; }
     });
-    if (travertineTex) travertineTex.repeat.set(1.5, 15); 
-    if (pinkStoneTex) pinkStoneTex.repeat.set(1.5, 15);
+    if (travertineTex) travertineTex.repeat.set(1.5, 10); 
+    if (pinkStoneTex) pinkStoneTex.repeat.set(1.5, 10);
   }, [pinkStoneTex, travertineTex, waterNormals]);
 
+  // Adjusted camera views for a tighter, more symmetrical frame
   const views = {
-    home: { pos: [24, 2.5, 34], look: [-12, 3.8, -5] },
+    home: { pos: [18, 3, 30], look: [-8, 4, -5] },
     collection: { pos: [-110, 3, 55], look: [-140, 2, -10] } 
   };
   
@@ -44,67 +45,64 @@ export default function Scene({ currentView }) {
       <Environment preset="dawn" />
       <fog attach="fog" args={["#f7ece8", 30, 200]} />
       
-      {/* Grounded Y: 4 position to maintain the "sitting on water" look */}
-      <group position={[0, 4, -12]} scale={0.75}>
+      {/* Group centered and tightened for cinematic balance */}
+      <group position={[0, 4, -10]} scale={0.8}>
         
         {/* --- BACK WALL (Travertine) --- */}
         
-        {/* FIXED WINDOW SECTION: Substantial overlap to kill the light gap */}
-        <group position={[-42, 0, 0]}>
-            {/* Main Pillar */}
+        {/* LEFT WINDOW SECTION: Brought inward for a more compact frame */}
+        <group position={[-32, 0, 0]}>
             <mesh position={[-5, 0, 0]}>
-                <boxGeometry args={[18.5, 40, 0.2]} />
+                <boxGeometry args={[15, 40, 0.2]} />
                 <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
             </mesh>
-
-            {/* Window Frame (Sill and Header) */}
-            <mesh position={[6, -7, 0]}> 
-                <boxGeometry args={[8, 14, 0.2]} />
+            <mesh position={[5.5, -7, 0]}> 
+                <boxGeometry args={[7, 14, 0.2]} />
                 <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
             </mesh>
-            <mesh position={[6, 13, 0]}> 
-                <boxGeometry args={[8, 14, 0.2]} />
+            <mesh position={[5.5, 13, 0]}> 
+                <boxGeometry args={[7, 14, 0.2]} />
                 <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
             </mesh>
         </group>
 
-        {/* Middle Wall - Slightly widened for overlap safety */}
-        <mesh position={[-13.5, 0, 0]}>
-          <boxGeometry args={[37, 40, 0.2]} />
+        {/* MIDDLE WALL: Narrowed to pull the whole structure together */}
+        <mesh position={[-8, 0, 0]}>
+          <boxGeometry args={[25, 40, 0.2]} />
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
 
-        {/* Main Doorway Header */}
-        <mesh position={[8, 13, 0]}>
-          <boxGeometry args={[9, 14, 0.2]} />
+        {/* MAIN DOORWAY: Now tighter and more centered to the logo */}
+        <mesh position={[7.5, 13, 0]}>
+          <boxGeometry args={[8, 14, 0.2]} />
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
 
-        {/* Right Edge Wall */}
-        <mesh position={[28.5, 0, 0]}>
-          <boxGeometry args={[33, 40, 0.2]} />
+        {/* RIGHT PILLAR: Balanced with the left side */}
+        <mesh position={[25, 0, 0]}>
+          <boxGeometry args={[28, 40, 0.2]} />
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
 
         {/* --- SIDE WALL (Pink Stone) --- */}
-        <group position={[-54, 0, 32]} rotation={[0, Math.PI / 2, 0]}>
-          <mesh position={[-20, 0, 0]}>
-            <boxGeometry args={[35.5, 40, 0.2]} />
+        <group position={[-40, 0, 25]} rotation={[0, Math.PI / 2, 0]}>
+          <mesh position={[-15, 0, 0]}>
+            <boxGeometry args={[25, 40, 0.2]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
-          <mesh position={[0, 13, 0]}> 
-            <boxGeometry args={[6, 14, 0.2]} />
+          <mesh position={[2, 13, 0]}> 
+            <boxGeometry args={[9, 14, 0.2]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
-          <mesh position={[20, 0, 0]}>
-            <boxGeometry args={[35.5, 40, 0.2]} />
+          <mesh position={[18, 0, 0]}>
+            <boxGeometry args={[25, 40, 0.2]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
         </group>
 
-        {/* THE BENCH */}
-        <mesh position={[-18, -13, -5]} castShadow receiveShadow>
-          <boxGeometry args={[50, 4, 12]} /> 
+        {/* THE BENCH: Moved back slightly to frame the "floor" space */}
+        <mesh position={[-5, -13, -5]} castShadow receiveShadow>
+          <boxGeometry args={[45, 4, 10]} /> 
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
       </group>
