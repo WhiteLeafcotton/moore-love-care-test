@@ -6,11 +6,32 @@ import * as THREE from "three";
 
 extend({ Water });
 
+function PinkClouds() {
+  const cloudsRef = useRef();
+  useFrame((state) => {
+    cloudsRef.current.position.x = Math.sin(state.clock.elapsedTime * 0.08) * 2;
+  });
+
+  return (
+    <group ref={cloudsRef}>
+      <mesh position={[-25, 30, -70]}>
+        <sphereGeometry args={[22, 32, 16]} />
+        <meshStandardMaterial color="#fcd7d7" transparent opacity={0.12} fog={false} />
+      </mesh>
+      <mesh position={[35, 40, -90]}>
+        <sphereGeometry args={[28, 32, 16]} />
+        <meshStandardMaterial color="#fcd7d7" transparent opacity={0.12} fog={false} />
+      </mesh>
+    </group>
+  );
+}
+
 export default function Scene({ currentView }) {
   const { camera } = useThree();
   const waterRef = useRef();
   const baseUrl = import.meta.env.BASE_URL || "/";
 
+  // Load Textures
   const pinkStoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
   const travertineTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/travertine.jpg`);
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
@@ -19,18 +40,19 @@ export default function Scene({ currentView }) {
     [pinkStoneTex, travertineTex, waterNormals].forEach(t => {
       if (t) t.wrapS = t.wrapT = THREE.RepeatWrapping;
     });
-    if (travertineTex) travertineTex.repeat.set(2, 4); // Stretched for taller walls
+    if (travertineTex) travertineTex.repeat.set(2, 2);
     if (pinkStoneTex) pinkStoneTex.repeat.set(1, 4);
   }, [pinkStoneTex, travertineTex, waterNormals]);
 
+  // 🔥 RESTORED CAMERA PERSPECTIVE: Angled to clearly see the 90° corner and door
   const views = {
     home: { 
-      pos: [12, 1.8, 15],      // Lower, immersive water level
-      look: [-15, 4, -10]      // Angled to frame the corner and door
+      pos: [18, 4, 18],       // Back and angled (18, 18)
+      look: [-1, 3.5, -2]     // Gaze directed at the corner meeting point
     },
     collection: { 
-      pos: [-90, 3, 40],    
-      look: [-120, 2, -20]    
+      pos: [-75, 15, 60],     
+      look: [-100, 6, -15]    
     } 
   };
   
@@ -49,49 +71,57 @@ export default function Scene({ currentView }) {
 
   return (
     <>
-      <Sky sunPosition={[10, 0.2, 20]} turbidity={0.1} rayleigh={2} />
+      <Sky sunPosition={[10, 0.5, 20]} rayleigh={2} turbidity={0.1} mieCoefficient={0.005} mieDirectionalG={0.8}/>
       <Environment preset="dawn" />
-      <fog attach="fog" args={["#f7ece8", 5, 120]} />
+      <fog attach="fog" args={["#f7ece8", 20, 160]} />
+      
+      <PinkClouds />
 
-      {/* --- CINEMATIC ARCHITECTURE --- */}
-      <group position={[0, 0, -5]} scale={0.7}>
+      {/* --- THE SANCTUARY ROOM (RESTORED PERSPECTIVE) --- */}
+      <group position={[0, -0.2, -5]} scale={0.6}>
         
-        {/* BACK WALL: Tall enough to never see the top edge */}
-        <group position={[0, 25, -12]}> 
-          {/* Left Wall Segment */}
-          <mesh position={[-25, 0, 0]}>
-            <boxGeometry args={[40, 60, 4]} />
-            <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
+        {/* L-SHAPE ARCHITECTURE */}
+        {/* Wall 1: Travertine (Back Wall - contains the doorway) */}
+        <mesh position={[-10, 15, -10]} castShadow receiveShadow>
+          <boxGeometry args={[20, 30, 2]} />
+          <meshStandardMaterial map={travertineTex} color="#fcd7d7" roughness={0.8}/>
+        </mesh>
+        
+        {/* Wall 2: Pink Stone (Side Wall - defines the 90° corner turn) */}
+        <mesh position={[-21, 15, -1]} rotation={[0, Math.PI / 2, 0]} castShadow>
+          <boxGeometry args={[18, 30, 2]} />
+          <meshStandardMaterial map={pinkStoneTex} color="#ede2df" roughness={0.9} />
+        </mesh>
+
+        {/* LOCKED LUXURY DAIS (PINK STONE) */}
+        <group position={[-10, 0.3, 0]}>
+          <mesh castShadow receiveShadow>
+            <boxGeometry args={[22, 0.8, 15]} />
+            <meshStandardMaterial map={pinkStoneTex} color="#fcd7d7" />
           </mesh>
-          {/* Right Wall Segment */}
-          <mesh position={[25, 0, 0]}>
-            <boxGeometry args={[40, 60, 4]} />
-            <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
-          </mesh>
-          {/* Header - Positioned high so the door feels massive */}
-          <mesh position={[0, 15, 0]}>
-            <boxGeometry args={[10, 30, 4]} />
-            <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
+          <mesh position={[2, 0.6, 2]} castShadow>
+            <boxGeometry args={[12, 0.8, 8]} />
+            <meshStandardMaterial map={pinkStoneTex} color="#fcd7d7" />
           </mesh>
         </group>
+      </group>
 
-        {/* SIDE WALL: Extended height */}
-        <mesh position={[-45, 25, 10]} rotation={[0, Math.PI / 2, 0]}>
-          <boxGeometry args={[50, 60, 4]} />
-          <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
+      {/* --- DESCENDING WATER STAIRS (TRAVERTINE) --- */}
+      <group position={[-90, -0.2, -25]} scale={0.8}>
+        {[0, 1, 2, 3, 4, 5].map((i) => (
+          <mesh key={i} position={[0, i * 1, i * 2.5]} castShadow receiveShadow>
+            <boxGeometry args={[12, 0.8, 4]} />
+            <meshStandardMaterial map={travertineTex} color="#fcd7d7" roughness={0.7} />
+          </mesh>
+        ))}
+        {/* Landing at top */}
+        <mesh position={[0, 6, 12]} castShadow receiveShadow>
+          <boxGeometry args={[14, 1.2, 6]} />
+          <meshStandardMaterial map={pinkStoneTex} color="#fcd7d7" />
         </mesh>
       </group>
 
-      {/* --- DESCENDING STAIRS --- */}
-      <group position={[-110, 0, -5]} scale={0.8}>
-        {[0, 1, 2, 3, 4].map((i) => (
-          <mesh key={i} position={[0, (4 - i) * 1.2, i * 6]} castShadow receiveShadow>
-            <boxGeometry args={[45, 1.2, 10]} />
-            <meshStandardMaterial map={travertineTex} color="#ffffff" />
-          </mesh>
-        ))}
-      </group>
-
+      {/* --- WATER SURFACE --- */}
       <water
         ref={waterRef}
         args={[new THREE.PlaneGeometry(3000, 3000), {
@@ -100,7 +130,7 @@ export default function Scene({ currentView }) {
           waterColor: 0xa19089, distortionScale: 1.5, fog: true,
         }]}
         rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, -0.1, 0]}
+        position={[0, -0.2, 0]}
       />
       
       <ContactShadows opacity={0.4} scale={200} blur={2.5} far={40} color="#5e4d4d" />
