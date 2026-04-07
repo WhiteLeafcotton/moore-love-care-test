@@ -23,22 +23,26 @@ export default function Scene({ currentView }) {
     if (pinkStoneTex) pinkStoneTex.repeat.set(1.5, 10);
   }, [pinkStoneTex, travertineTex, waterNormals]);
 
-  /* CINEMATIC PATHWAY: 
-     1. HOME: Enter through Back Wall door -> Face Interior Corner 
-     2. COLLECTION: Exit through Right Wall door -> Open Horizon
+  /* REFINED CINEMATIC PATHWAY:
+     - Home: Starts far back, enters through the front, and locks its gaze 
+       specifically on the deep interior corner (-35, -12 coordinate area).
+     - Collection: Lateral exit through the side wall remains unchanged.
   */
   const views = {
-    // APPROACH: Starts outside the back door, moves IN to face the corner where walls meet
-    home: { pos: [-5, 4, 45], look: [-28, 2, -10] },
-    // EXIT: Moves laterally through a side door on the right wall out to sea
-    collection: { pos: [90, 3, 20], look: [160, 2, 20] } 
+    home: { 
+      pos: [0, 5, 55],       // Start centered and further back to see the entry
+      look: [-38, 3, -15]    // Lock focus deep into the back-left interior corner
+    },
+    collection: { 
+      pos: [90, 3, 20], 
+      look: [160, 2, 20] 
+    } 
   };
   
   const targetLook = useMemo(() => new THREE.Vector3(0, 0, 0), []);
 
   useFrame((state, delta) => {
     const target = views[currentView];
-    // Slightly slower lerp (0.012) for a more "expensive" editorial feel
     camera.position.lerp(new THREE.Vector3(...target.pos), 0.012); 
     targetLook.lerp(new THREE.Vector3(...target.look), 0.012);
     camera.lookAt(targetLook);
