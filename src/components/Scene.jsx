@@ -6,142 +6,137 @@ import * as THREE from "three";
 
 extend({ Water });
 
+/* STRUCTURAL COMPONENT: Arched Opening
+  Creates a real physical gap by placing a curved "cap" between two pillars.
+*/
+const ArchedOpening = ({ position, colorProps, width = 6, height = 12, isWindow = false }) => (
+  <group position={position}>
+    {/* Left Pillar */}
+    <mesh position={[-(width / 2 + 1), height / 2, 0]}>
+      <boxGeometry args={[2, height, 2]} />
+      <meshStandardMaterial {...colorProps} />
+    </mesh>
+    {/* Right Pillar */}
+    <mesh position={[width / 2 + 1, height / 2, 0]}>
+      <boxGeometry args={[2, height, 2]} />
+      <meshStandardMaterial {...colorProps} />
+    </mesh>
+    {/* Arch Header */}
+    <mesh position={[0, height, 0]} rotation={[0, 0, Math.PI / 2]}>
+      <cylinderGeometry args={[width / 2 + 1, width / 2 + 1, 2, 32, 1, false, 0, Math.PI]} />
+      <meshStandardMaterial {...colorProps} />
+    </mesh>
+    {/* Sill for windows */}
+    {isWindow && (
+      <mesh position={[0, 2, 0]}>
+        <boxGeometry args={[width, 4, 2]} />
+        <meshStandardMaterial {...colorProps} />
+      </mesh>
+    )}
+  </group>
+);
+
 export default function Scene({ currentView }) {
   const { camera } = useThree();
   const waterRef = useRef();
   const baseUrl = import.meta.env.BASE_URL || "/";
 
+  // Textures
   const pinkStoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
   const travertineTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/travertine.jpg`);
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
 
   useMemo(() => {
     [pinkStoneTex, travertineTex, waterNormals].forEach(t => {
-      if (t) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 16; }
+      if (t) {
+        t.wrapS = t.wrapT = THREE.RepeatWrapping;
+        t.repeat.set(1, 1);
+      }
     });
-    if (travertineTex) travertineTex.repeat.set(1.5, 10); 
-    if (pinkStoneTex) pinkStoneTex.repeat.set(1.5, 10);
   }, [pinkStoneTex, travertineTex, waterNormals]);
 
-  /* REFINED CINEMATIC PATHWAY:
-     - Home: Moves forward INTO the room and turns 90 degrees RIGHT to face the inner corner.
-     - Collection: Lateral exit through the side wall remains perfect.
-  */
-  const views = {
-    home: { 
-      // Positioned inside the room, slightly to the left of center
-      pos: [-15, 4, 10],      
-      // Target is now far to the RIGHT and BACK to force that 90-degree corner view
-      look: [40, 2, -15]    
-    },
-    collection: { 
-      pos: [90, 3, 20], 
-      look: [160, 2, 20] 
-    } 
-  };
-  
-  const targetLook = useMemo(() => new THREE.Vector3(0, 0, 0), []);
+  const pinkProps = { map: pinkStoneTex, color: "#fcd7d7", roughness: 0.8 };
+  const purpleProps = { map: travertineTex, color: "#d1c4e9", roughness: 0.8 };
 
   useFrame((state, delta) => {
-    const target = views[currentView];
-    camera.position.lerp(new THREE.Vector3(...target.pos), 0.012); 
-    targetLook.lerp(new THREE.Vector3(...target.look), 0.012);
-    camera.lookAt(targetLook);
-    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.3;
+    // CAMERA: Locked to a high-angle corner view to verify geometry
+    const targetPos = currentView === 'home' ? [-45, 20, 45] : [50, 15, 30];
+    const targetLook = currentView === 'home' ? [0, 5, 0] : [100, 5, 10];
+    
+    camera.position.lerp(new THREE.Vector3(...targetPos), 0.03);
+    camera.lookAt(new THREE.Vector3(...targetLook));
+    
+    if (waterRef.current) {
+      waterRef.current.material.uniforms["time"].value += delta * 0.2;
+    }
   });
 
   return (
     <>
-      <Sky sunPosition={[-35, 0.08, 15]} turbidity={0.01} rayleigh={3} />
+      <Sky sunPosition={[-35, 0.08, 15]} turbidity={0.1} />
       <Environment preset="dawn" />
-      <fog attach="fog" args={["#f7ece8", 30, 200]} />
       
-      {/* --- FLOATING CORNER ROOM (CLEAN) --- */}
-<group position={[0, 4, -12]}>
+      <group position={[0, 0, 0]}>
+        {/* MAIN FLOOR PLATFORM */}
+        <mesh receiveShadow position={[0, -0.5, 0]}>
+          <boxGeometry args={[50, 1, 50]} />
+          <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
+        </mesh>
 
-  {/* FLOOR */}
-  <mesh receiveShadow position={[0, -12, 0]}>
-    <boxGeometry args={[60, 2, 60]} />
-    <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
-  </mesh>
+        {/* BACK PINK WALL (Left Side) */}
+        <group position={[-24, 0, 0]}>
+          {/* Main Wall Fillers */}
+          <mesh position={[0, 15, -20]}>
+            <boxGeometry args={[2, 30, 10]} />
+            <meshStandardMaterial {...pinkProps} />
+          </mesh>
+          <mesh position={[0, 15, 20]}>
+            <boxGeometry args={[2, 30, 10]} />
+            <meshStandardMaterial {...pinkProps} />
+          </mesh>
+          <mesh position={[0, 15, 0]}>
+            <boxGeometry args={[2, 30, 6]} />
+            <meshStandardMaterial {...pinkProps} />
+          </mesh>
 
-  {/* LEFT WALL (ARCHED DOORS) */}
-  <group position={[-30, 8, 0]}>
-    
-    {/* wall base */}
-    <mesh>
-      <boxGeometry args={[2, 40, 60]} />
-      <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
-    </mesh>
+          {/* Arched Doorways */}
+          <ArchedOpening position={[0.1, 0, -10]} width={8} height={14} colorProps={pinkProps} />
+          <ArchedOpening position={[0.1, 0, 10]} width={8} height={14} colorProps={pinkProps} />
+        </group>
 
-    {/* DOOR 1 (arched illusion) */}
-    <group position={[1.1, -6, -12]}>
-      {/* sides */}
-      <mesh position={[0, 8, 0]}>
-        <boxGeometry args={[0.5, 16, 8]} />
-        <meshStandardMaterial map={travertineTex} />
-      </mesh>
+        {/* SIDE PURPLE WALL (Right Side - 90 Degree Turn) */}
+        <group position={[0, 0, -24]} rotation={[0, Math.PI / 2, 0]}>
+          <mesh position={[0, 15, -15]}>
+            <boxGeometry args={[2, 30, 20]} />
+            <meshStandardMaterial {...purpleProps} />
+          </mesh>
+          <mesh position={[0, 15, 15]}>
+            <boxGeometry args={[2, 30, 20]} />
+            <meshStandardMaterial {...purpleProps} />
+          </mesh>
 
-      {/* arch top */}
-      <mesh position={[0, 16, 0]}>
-        <cylinderGeometry args={[4, 4, 0.5, 32, 1, false, 0, Math.PI]} />
-        <meshStandardMaterial map={travertineTex} />
-        rotation={[0, 0, Math.PI / 2]}
-      </mesh>
-    </group>
+          {/* Arched Window */}
+          <ArchedOpening position={[0.1, 0, 0]} width={6} height={10} isWindow={true} colorProps={purpleProps} />
+        </group>
+      </group>
 
-    {/* DOOR 2 */}
-    <group position={[1.1, -6, 12]}>
-      <mesh position={[0, 8, 0]}>
-        <boxGeometry args={[0.5, 16, 8]} />
-        <meshStandardMaterial map={travertineTex} />
-      </mesh>
-
-      <mesh position={[0, 16, 0]}>
-        <cylinderGeometry args={[4, 4, 0.5, 32, 1, false, 0, Math.PI]} />
-        <meshStandardMaterial map={travertineTex} />
-        rotation={[0, 0, Math.PI / 2]}
-      </mesh>
-    </group>
-
-  </group>
-
-  {/* RIGHT WALL (WINDOWS) */}
-  <group position={[0, 8, 30]} rotation={[0, Math.PI / 2, 0]}>
-    
-    {/* wall */}
-    <mesh>
-      <boxGeometry args={[2, 40, 60]} />
-      <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
-    </mesh>
-
-    {/* WINDOW 1 */}
-    <mesh position={[1.1, 5, -12]}>
-      <boxGeometry args={[0.5, 10, 10]} />
-      <meshStandardMaterial color="#cfe8ff" transparent opacity={0.25} />
-    </mesh>
-
-    {/* WINDOW 2 */}
-    <mesh position={[1.1, 5, 12]}>
-      <boxGeometry args={[0.5, 10, 10]} />
-      <meshStandardMaterial color="#cfe8ff" transparent opacity={0.25} />
-    </mesh>
-
-  </group>
-
-</group>
-
+      {/* WATER */}
       <water
         ref={waterRef}
-        args={[new THREE.PlaneGeometry(5000, 5000), {
-          textureWidth: 512, textureHeight: 512, waterNormals, 
-          sunDirection: new THREE.Vector3(10, 1, 20), sunColor: 0xffffff, 
-          waterColor: 0xa19089, distortionScale: 0.8, fog: true,
+        args={[new THREE.PlaneGeometry(1000, 1000), {
+          textureWidth: 512,
+          textureHeight: 512,
+          waterNormals,
+          sunDirection: new THREE.Vector3(10, 1, 20),
+          sunColor: 0xffffff,
+          waterColor: 0xa19089,
+          distortionScale: 0.5,
         }]}
         rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, -0.05, 0]}
+        position={[0, -1, 0]}
       />
-      <ContactShadows opacity={0.3} scale={250} blur={3} far={50} color="#5e4d4d" />
+      
+      <ContactShadows opacity={0.4} scale={100} blur={2} far={20} color="#000000" />
     </>
   );
 }
