@@ -19,7 +19,6 @@ export default function Scene({ currentView }) {
     [pinkStoneTex, travertineTex, waterNormals].forEach(t => {
       if (t) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 16; }
     });
-    // Maintaining your preferred texture repeats
     if (travertineTex) travertineTex.repeat.set(1.5, 15); 
     if (pinkStoneTex) pinkStoneTex.repeat.set(1.5, 15);
   }, [pinkStoneTex, travertineTex, waterNormals]);
@@ -45,40 +44,43 @@ export default function Scene({ currentView }) {
       <Environment preset="dawn" />
       <fog attach="fog" args={["#f7ece8", 30, 200]} />
       
-      {/* SITTING ON THE WATER: 
-        By setting Y to 4 and keeping pillars at 40 high, 
-        the bottom of the pillars sits at -16 relative to 0. 
-        This "submerges" the base so it looks grounded like Unseen.
-      */}
+      {/* Positioned at Y: 4 to keep it firmly grounded in the water */}
       <group position={[0, 4, -12]} scale={0.75}>
         
         {/* --- BACK WALL (Travertine) --- */}
-        <mesh position={[-48, 0, 0]}>
-          <boxGeometry args={[12, 40, 0.2]} />
-          <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
-        </mesh>
+        
+        {/* WE MERGED PILLAR 1 AND WINDOW FRAME HERE TO REMOVE THE SLIT */}
+        <group position={[-43.5, 0, 0]}>
+            {/* The Main Left Pillar (Widened to bridge the gap) */}
+            <mesh position={[-4.5, 0, 0]}>
+                <boxGeometry args={[18, 40, 0.2]} />
+                <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
+            </mesh>
 
-        {/* FULLY FRAMED WINDOW - Positioned to look like a cutout */}
-        <mesh position={[-38.5, -7, 0]}> {/* Sill */}
-          <boxGeometry args={[7, 14, 0.2]} />
-          <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
-        </mesh>
-        <mesh position={[-38.5, 13, 0]}> {/* Header */}
-          <boxGeometry args={[7, 14, 0.2]} />
-          <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
-        </mesh>
+            {/* The Window Cutout (Perfectly aligned to the pillar edge) */}
+            <mesh position={[7.5, -7, 0]}> {/* Sill */}
+                <boxGeometry args={[6, 14, 0.2]} />
+                <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
+            </mesh>
+            <mesh position={[7.5, 13, 0]}> {/* Header */}
+                <boxGeometry args={[6, 14, 0.2]} />
+                <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
+            </mesh>
+        </group>
 
+        {/* Center Pillar */}
         <mesh position={[-14, 0, 0]}>
           <boxGeometry args={[36, 40, 0.2]} />
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
 
-        {/* MAIN DOOR HEADER */}
+        {/* Main Doorway Header */}
         <mesh position={[8, 13, 0]}>
           <boxGeometry args={[8, 14, 0.2]} />
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
 
+        {/* Right Pillar */}
         <mesh position={[28, 0, 0]}>
           <boxGeometry args={[32, 40, 0.2]} />
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
@@ -90,7 +92,7 @@ export default function Scene({ currentView }) {
             <boxGeometry args={[35, 40, 0.2]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
-          <mesh position={[0, 13, 0]}> {/* Side Door Top */}
+          <mesh position={[0, 13, 0]}> {/* Side Door Header */}
             <boxGeometry args={[5, 14, 0.2]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
@@ -100,7 +102,7 @@ export default function Scene({ currentView }) {
           </mesh>
         </group>
 
-        {/* THE BENCH - Anchored into the base */}
+        {/* THE BENCH */}
         <mesh position={[-18, -13, -5]} castShadow receiveShadow>
           <boxGeometry args={[50, 4, 12]} /> 
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
