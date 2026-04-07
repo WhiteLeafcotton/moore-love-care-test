@@ -1,6 +1,6 @@
 import { useRef, useMemo } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
-import { Environment, Float, Sky, ContactShadows } from "@react-three/drei";
+import { Environment, Float, Sky, ContactShadows, Text, Circle } from "@react-three/drei";
 import { Water } from "three-stdlib";
 import * as THREE from "three";
 
@@ -9,9 +9,7 @@ extend({ Water });
 function PinkClouds() {
   const cloudsRef = useRef();
   useFrame((state) => {
-    if (cloudsRef.current) {
-      cloudsRef.current.position.x = Math.sin(state.clock.elapsedTime * 0.08) * 2;
-    }
+    cloudsRef.current.position.x = Math.sin(state.clock.elapsedTime * 0.08) * 2;
   });
 
   return (
@@ -28,25 +26,65 @@ function PinkClouds() {
   );
 }
 
+// 🏛️ Component for the Arched Bays (Structure B)
+function ArchedBays({ texture }) {
+  const bayCount = 4;
+  const bayWidth = 15;
+  
+  return (
+    <group>
+      {[...Array(bayCount)].map((_, i) => (
+        <group key={i} position={[(i * bayWidth) - (bayWidth * 1.5), 0, 0]}>
+          {/* Main Arched Pole (Column) */}
+          <mesh position={[0, 15, 0]} castShadow>
+            <cylinderGeometry args={[1.5, 2, 30, 64]} />
+            <meshStandardMaterial map={texture} color="#ede2df" />
+          </mesh>
+          
+          {/* Top Arch Structure */}
+          <mesh position={[0, 30, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            <torusGeometry args={[7.5, 0.75, 16, 100]} />
+            <meshStandardMaterial map={texture} color="#ede2df" />
+          </mesh>
+          <mesh position={[0, 34, 0]}>
+            <boxGeometry args={[15, 8, 4]} />
+            <meshStandardMaterial map={texture} color="#ede2df" />
+          </mesh>
+        </group>
+      ))}
+    </group>
+  );
+}
+
 export default function Scene({ currentView }) {
   const { camera } = useThree();
   const waterRef = useRef();
   const baseUrl = import.meta.env.BASE_URL || "/";
 
-  // 1. Load Textures
+  // 1. Load All Assets (Including the two distinct textures)
   const pinkStoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
-  const grassTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/grass.jpg`);
+  const travertineTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/travertine.jpg`);
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
+  const grassTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/grass.jpg`);
 
   useMemo(() => {
-    pinkStoneTex.wrapS = pinkStoneTex.wrapT = THREE.RepeatWrapping;
-    pinkStoneTex.repeat.set(2, 2);
-    grassTex.wrapS = grassTex.wrapT = THREE.RepeatWrapping;
-    grassTex.repeat.set(20, 20);
-    waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
-  }, [pinkStoneTex, grassTex, waterNormals]);
+    if (pinkStoneTex && travertineTex && grassTex) {
+      // Repeat Pink Stone (Long columns)
+      pinkStoneTex.wrapS = pinkStoneTex.wrapT = THREE.RepeatWrapping;
+      pinkStoneTex.repeat.set(1, 4);
+      
+      // Repeat Travertine (Flat walls)
+      travertineTex.wrapS = travertineTex.wrapT = THREE.RepeatWrapping;
+      travertineTex.repeat.set(2, 2);
 
-  // 2. CAMERA LOGIC (Original glide preserved)
+      // Repeat Grass (Hills)
+      grassTex.wrapS = grassTex.wrapT = THREE.RepeatWrapping;
+      grassTex.repeat.set(20, 20);
+    }
+    waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
+  }, [pinkStoneTex, travertineTex, grassTex, waterNormals]);
+
+  // 2. Original Camera Glide (Preserved)
   const views = {
     home: { pos: [18, 2, 18], look: [0, 2, 0] },
     collection: { pos: [-55, 12, 45], look: [-90, 5, -20] } 
@@ -63,71 +101,63 @@ export default function Scene({ currentView }) {
 
   return (
     <>
-      <Sky sunPosition={[10, 0.5, 20]} turbidity={0.1} rayleigh={2} />
+      {/* Atmosphere (Sky/Dawn preset) */}
+      <Sky distance={450000} sunPosition={[10, 0.5, 20]} turbidity={0.1} rayleigh={2} mieCoefficient={0.005}mieDirectionalG={0.8} />
       <Environment preset="dawn" />
       <fog attach="fog" args={["#f7ece8", 15, 120]} />
       
+      <spotLight position={[30, 20, 10]} intensity={1.5} castShadow color="#ffebd1" />
+      <ambientLight intensity={0.4} />
+
       <PinkClouds />
 
-      {/* --- 90° CORNER STRUCTURE (NEW STRUCTURE) --- */}
+      {/* --- STRUCTURE A: THE MULTI-TEXTURE CORNER (HOME VIEW) --- */}
       <group position={[0, -1.8, -5]} scale={0.6}>
-        {/* BACK WALL */}
+        {/* L-Shape: Defines the visual inside corner */}
+        
+        {/* Wall 1: Back Wall (TRAVERTINE) */}
         <mesh position={[-10, 15, -10]} castShadow receiveShadow>
-          <boxGeometry args={[20, 30, 0.6]} />
-          <meshStandardMaterial map={pinkStoneTex} color="#f2dcd5" roughness={0.85} />
+          <boxGeometry args={[20, 30, 2]} />
+          <meshStandardMaterial map={travertineTex} color="#fcd7d7" roughness={0.8} />
+        </mesh>
+        
+        {/* Wall 2: Side Wall (PINK STONE - The 90° Turn) */}
+        {/* Moved slightly to create a true shadow gap/depth */}
+        <mesh position={[-21, 15, -1]} rotation={[0, Math.PI / 2, 0]} castShadow receiveShadow>
+          <boxGeometry args={[18, 30, 2]} />
+          <meshStandardMaterial map={pinkStoneTex} color="#ede2df" roughness={0.9} />
         </mesh>
 
-        {/* SIDE WALL */}
-        <mesh position={[-20, 15, 0]} rotation={[0, Math.PI / 2, 0]} castShadow>
-          <boxGeometry args={[20, 30, 0.6]} />
-          <meshStandardMaterial map={pinkStoneTex} color="#e8cfc8" roughness={0.9} />
-        </mesh>
-
-        {/* PLATFORM (SITTING ON WATER) */}
-        <mesh position={[-10, 0.4, 2]} castShadow receiveShadow>
-          <boxGeometry args={[18, 0.8, 12]} />
-          <meshStandardMaterial map={pinkStoneTex} color="#f2dcd5" />
-        </mesh>
-
-        {/* CORNER SHADOW LINE */}
-        <mesh position={[-20, 15, -10]}>
-          <boxGeometry args={[0.2, 30, 0.2]} />
-          <meshStandardMaterial color="#000" transparent opacity={0.08} />
-        </mesh>
-      </group>
-
-      {/* ✨ FLOATING GLASS SPHERE */}
-      <Float speed={0.5} rotationIntensity={0.1} floatIntensity={0.5}>
-        <mesh position={[-8, 6, -6]}>
-          <sphereGeometry args={[2, 64, 64]} />
-          <meshPhysicalMaterial
-            color="#f8e9e6"
-            roughness={0.05}
-            transmission={1}
-            thickness={1.5}
-            ior={1.45}
-            clearcoat={1}
-          />
-        </mesh>
-      </Float>
-
-      {/* --- STAIRS (COLLECTION VIEW) --- */}
-      <group position={[-80, -2, -25]} scale={0.8}>
-        {[0, 1, 2, 3, 4, 5].map((i) => (
-          <mesh key={i} position={[0, i * 1, i * 2.5]} castShadow>
-            <boxGeometry args={[12, 0.8, 4]} />
-            <meshStandardMaterial map={pinkStoneTex} color="#f2dcd5" />
-          </mesh>
+        {/* --- LUXURY PLATFORM DAIS (PINK STONE) --- */}
+        {/* Floating steps leading to a raised dais */}
+        {[0.5, 2.5, 4.5].map((y, i) => (
+          <Float key={i} speed={2 + i} floatIntensity={1}>
+            <mesh position={[-5, y, 6]} castShadow>
+              <boxGeometry args={[14, 1.2, 8]} />
+              <meshStandardMaterial map={pinkStoneTex} color="#fcd7d7" roughness={0.7} />
+            </mesh>
+          </Float>
         ))}
+        {/* Large Main Platform on the water */}
+        <mesh position={[-10, 0.5, 0]} castShadow receiveShadow>
+          <boxGeometry args={[22, 1, 15]} />
+          <meshStandardMaterial map={pinkStoneTex} color="#fcd7d7" />
+        </mesh>
       </group>
 
-      {/* --- GRASSY HILLS --- */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.9, -80]} receiveShadow>
-        <planeGeometry args={[500, 250, 64, 64]} />
+      {/* --- STRUCTURE B: THE ARCHED SANCTUARY (COLLECTION VIEW) --- */}
+      {/* Inspired by the reference image's arched poles */}
+      <group position={[-90, -2, -20]} scale={0.7}>
+        <ArchedBays texture={pinkStoneTex} />
+      </group>
+
+      {/* --- GRASSY HILLS (BACKGROUND LANDSCAPE) --- */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2, -70]} receiveShadow>
+        <planeGeometry args={[400, 200, 64, 64]} />
         <meshStandardMaterial map={grassTex} color="#d4b2b2" roughness={1} metalness={0} />
       </mesh>
 
-      {/* --- WATER --- */}
+      {/* --- WATER SURFACE (ORIGINAL) --- */}
       <water
         ref={waterRef}
         args={[new THREE.PlaneGeometry(3000, 3000), {
@@ -139,7 +169,7 @@ export default function Scene({ currentView }) {
         position={[0, -0.2, 0]}
       />
       
-      <ContactShadows opacity={0.35} scale={200} blur={3.5} far={40} color="#5e4d4d" />
+      <ContactShadows opacity={0.3} scale={200} blur={3} far={40} color="#5e4d4d" />
     </>
   );
 }
