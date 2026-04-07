@@ -1,86 +1,45 @@
 import { useState, Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
 import Scene from "./components/Scene";
-import "./index.css";
 
 export default function App() {
   const [currentView, setCurrentView] = useState("home");
 
   return (
-    <div style={{ width: "100vw", height: "100vh", background: "#f5eae8", position: "relative" }}>
+    <div style={{ width: "100vw", height: "100vh", background: "#f7ece8", position: "relative" }}>
       
-      {/* UI OVERLAY - Matched to the "Moore Love & Care" Editorial Style */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          zIndex: 10,
-          pointerEvents: "none",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <h1
-          style={{
-            fontSize: "clamp(2rem, 5vw, 3.5rem)",
-            letterSpacing: "0.15em",
-            color: "#3e3e3e",
-            fontWeight: 400,
-            margin: 0,
-            textTransform: "uppercase",
-            fontFamily: "'Cinzel', serif" // Essential for that premium look
-          }}
-        >
+      {/* UI OVERLAY */}
+      <div style={{
+        position: "absolute", inset: 0, zIndex: 10, pointerEvents: "none",
+        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center"
+      }}>
+        <h1 style={{
+          fontSize: "clamp(2rem, 8vw, 4rem)", letterSpacing: "0.15em",
+          color: "#3e3e3e", fontWeight: 400, margin: 0, fontFamily: "'Cinzel', serif"
+        }}>
           Moore Love & Care
         </h1>
-
-        <p
-          style={{
-            letterSpacing: "0.4em",
-            fontSize: "10px",
-            marginTop: "12px",
-            color: "rgba(62, 62, 62, 0.7)",
-            fontWeight: 700
-          }}
-        >
+        <p style={{ letterSpacing: "0.5em", fontSize: "10px", marginTop: "10px", color: "rgba(62, 62, 62, 0.6)" }}>
           THE SOLARIUM SANCTUARY
         </p>
-
         <button
-          onClick={() =>
-            setCurrentView(
-              currentView === "home" ? "collection" : "home"
-            )
-          }
+          onClick={() => setCurrentView(v => v === "home" ? "collection" : "home")}
           style={{
-            pointerEvents: "auto",
-            marginTop: "60px",
-            padding: "16px 50px",
-            borderRadius: "50px",
-            border: "1px solid rgba(0,0,0,0.05)",
-            background: "rgba(255,255,255,0.8)",
-            backdropFilter: "blur(10px)",
-            letterSpacing: "0.2em",
-            fontSize: "11px",
-            textTransform: "uppercase",
-            cursor: "pointer",
-            transition: "all 0.4s ease"
+            pointerEvents: "auto", marginTop: "5vh", padding: "15px 50px",
+            borderRadius: "50px", border: "1px solid rgba(0,0,0,0.05)",
+            background: "rgba(255,255,255,0.85)", backdropFilter: "blur(10px)",
+            letterSpacing: "0.2em", fontSize: "11px", cursor: "pointer"
           }}
         >
-          {currentView === "home"
-            ? "Explore Collection"
-            : "Return Home"}
+          {currentView === "home" ? "Explore Collection" : "Return Home"}
         </button>
       </div>
 
-      {/* 3D CANVAS - Updated Camera for the Monumental Look */}
       <Canvas 
         shadows 
-        dpr={[1, 2]}
-        camera={{ position: [20, 2.5, 26], fov: 32 }} // This matches the reference angle
-        gl={{ antialias: true, alpha: true }}
+        dpr={[1, 2]} 
+        camera={{ position: [24, 2.5, 34], fov: 28 }} // Cinematic pulled-back view
+        gl={{ antialias: true }}
       >
         <Suspense fallback={null}>
           <Scene currentView={currentView} />
