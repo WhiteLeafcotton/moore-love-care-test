@@ -11,24 +11,16 @@ export default function Scene({ currentView }) {
   const waterRef = useRef();
   const baseUrl = import.meta.env.BASE_URL || "/";
 
-  // Textures
   const pinkStoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
   const travertineTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/travertine.jpg`);
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
 
   useMemo(() => {
     [pinkStoneTex, travertineTex, waterNormals].forEach(t => {
-      if (t) { 
-        t.wrapS = t.wrapT = THREE.RepeatWrapping; 
-        t.anisotropy = 16; 
-      }
+      if (t) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 16; }
     });
-    // Adjusting scale to look like high-end slab marble
-    if (travertineTex) travertineTex.repeat.set(1, 4);
-    if (pinkStoneTex) pinkStoneTex.repeat.set(1, 4);
   }, [pinkStoneTex, travertineTex, waterNormals]);
 
-  // Camera views - FOV 28 for that editorial zoom
   const views = {
     home: { pos: [24, 2.5, 34], look: [-12, 3.8, -5] },
     collection: { pos: [-110, 3, 55], look: [-140, 2, -10] } 
@@ -49,73 +41,67 @@ export default function Scene({ currentView }) {
       <Sky sunPosition={[-35, 0.08, 15]} turbidity={0.01} rayleigh={3} />
       <Environment preset="dawn" />
       
-      {/* STRUCTURAL CONTAINER 
-          Positioned at Y: 17.5 so that 35-unit tall pillars rest exactly at Y: 0 (Water Level) 
+      {/* ANCHORING THE STRUCTURE:
+         The group is at Y: 17.5. Since the pillars are 35 units tall, 
+         their bottom edge sits exactly at Y: 0 (the water).
       */}
       <group position={[0, 17.5, -12]} scale={0.75}>
         
-        {/* --- BACK WALL (TRAVERTINE) --- */}
-        
-        {/* Far Left Pillar */}
+        {/* --- BACK WALL --- */}
         <mesh position={[-48, 0, 0]}>
           <boxGeometry args={[12, 35, 0.2]} />
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
 
-        {/* FULLY FRAMED WINDOW - Positioned to float above bench */}
-        <mesh position={[-38.5, -10, 0]}> {/* Bottom Sill */}
-          <boxGeometry args={[7, 15, 0.2]} />
+        {/* THE WINDOW: A solid frame above the bench */}
+        <mesh position={[-38.5, -9, 0]}> {/* Bottom Sill */}
+          <boxGeometry args={[7, 17, 0.2]} />
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
-        <mesh position={[-38.5, 12.5, 0]}> {/* Top Header (Lintel) */}
+        <mesh position={[-38.5, 12.5, 0]}> {/* Top Header */}
           <boxGeometry args={[7, 10, 0.2]} />
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
 
-        {/* Main Center Wall */}
         <mesh position={[-14, 0, 0]}>
           <boxGeometry args={[36, 35, 0.2]} />
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
 
-        {/* MAIN DOORWAY TOP - Creates the framed opening */}
+        {/* MAIN DOORWAY TOP */}
         <mesh position={[8, 12.5, 0]}>
           <boxGeometry args={[8, 10, 0.2]} />
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
 
-        {/* Right Wall Section */}
         <mesh position={[28, 0, 0]}>
           <boxGeometry args={[32, 35, 0.2]} />
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
 
-        {/* --- SIDE WALL (PINK STONE) --- */}
+        {/* --- SIDE WALL --- */}
         <group position={[-54, 0, 32]} rotation={[0, Math.PI / 2, 0]}>
           <mesh position={[-20, 0, 0]}>
             <boxGeometry args={[35, 35, 0.2]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
-          
-          <mesh position={[0, 12.5, 0]}> {/* Side Door Header */}
+          <mesh position={[0, 12.5, 0]}> {/* Side Door Top */}
             <boxGeometry args={[5, 10, 0.2]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
-
           <mesh position={[20, 0, 0]}>
             <boxGeometry args={[35, 35, 0.2]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
         </group>
 
-        {/* THE BENCH - Sitting on the water */}
-        <mesh position={[-18, -15.5, -5]} castShadow receiveShadow>
-          <boxGeometry args={[50, 4, 12]} /> 
+        {/* THE BENCH: Lowered to sit slightly into the water for a realistic anchor */}
+        <mesh position={[-18, -16.5, -5]} castShadow receiveShadow>
+          <boxGeometry args={[50, 3.5, 12]} /> 
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
       </group>
 
-      {/* WATER - Level at Y: 0 */}
       <water
         ref={waterRef}
         args={[new THREE.PlaneGeometry(1000, 1000), {
@@ -124,7 +110,7 @@ export default function Scene({ currentView }) {
           waterColor: 0xa19089, distortionScale: 0.4, fog: true,
         }]}
         rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, 0, 0]}
+        position={[0, 0, 0]} 
       />
 
       <ContactShadows opacity={0.4} scale={100} blur={2} far={10} color="#000000" />
