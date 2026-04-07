@@ -6,19 +6,19 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* UPDATED EMBEDDED WINDOW (Sill matches wall texture) */
+/* FULLY CONNECTED EMBEDDED WINDOW */
 const EmbeddedWindow = ({ position, wallProps }) => (
   <group position={position}>
-    {/* Top Frame (Black accent) */}
-    <Box args={[1.4, 0.2, 2.1]} position={[0, 12.4, 0]}>
+    {/* Top Frame (Intersecting the wall for a perfect seal) */}
+    <Box args={[1.5, 0.4, 2.2]} position={[0, 12.4, 0]}>
       <meshStandardMaterial color="#1a1a1a" roughness={0.1} />
     </Box>
-    {/* NEW: Bottom Sill now matches the Wall Texture */}
-    <Box args={[1.4, 12.4, 2.1]} position={[0, -6.3, 0]}>
+    {/* Bottom Sill matching wall texture, positioned to be gapless */}
+    <Box args={[1.5, 12.4, 2.1]} position={[0, -6.3, 0]}>
       <meshStandardMaterial {...wallProps} />
     </Box>
-    {/* Recessed Glass */}
-    <Box args={[1.2, 12.2, 0.1]} position={[0, 6.2, 0]}>
+    {/* Glass pane recessed with volume to prevent flickering */}
+    <Box args={[1.3, 12.2, 0.5]} position={[0, 6.2, 0]}>
       <meshStandardMaterial color="#a0c0c0" opacity={0.4} transparent />
     </Box>
   </group>
@@ -43,7 +43,7 @@ export default function Scene({ currentView }) {
   const purpleProps = { map: renderTex, color: "#d1c4e9", roughness: 0.8 };
 
   const views = {
-    home: { pos: [-28, 10, 32], look: [8, 0, -5] },      
+    home: { pos: [-32, 12, 35], look: [5, 0, -8] },      
     collection: { pos: [60, 5, 20], look: [120, 2, 15] } 
   };
   
@@ -64,49 +64,50 @@ export default function Scene({ currentView }) {
       
       <group position={[0, 4, -10]} scale={0.8}>
         
-        {/* --- BACK WALL (Pink) - Fully Integrated Window Segments --- */}
+        {/* --- BACK WALL (Pink) - Gapless Segmenting --- */}
         <group position={[-15.5, 0, 0]}>
-            {/* 1. Left Edge Segment */}
+            {/* Left anchor block */}
             <Box args={[8, 30, 2]} position={[-4, 0, 0]}> 
               <meshStandardMaterial {...pinkProps} />
             </Box>
             
-            {/* 2. Window 1 (Passing pinkProps for the sill) */}
+            {/* Embedded Window 1 (Tight overlap) */}
             <EmbeddedWindow position={[0.7, 0, 0]} wallProps={pinkProps} />
 
-            {/* 3. Middle Pier - Widened to 10 for better window spacing */}
+            {/* Middle Pier - Recalculated for closer window placement */}
             <Box args={[10, 30, 2]} position={[6.4, 0, 0]}> 
               <meshStandardMaterial {...pinkProps} />
             </Box>
 
-            {/* 4. Window 2 (Sill matches wall) */}
+            {/* Embedded Window 2 */}
             <EmbeddedWindow position={[12.1, 0, 0]} wallProps={pinkProps} />
 
-            {/* 5. Right End Segment */}
+            {/* Right anchor block */}
             <Box args={[12, 30, 2]} position={[23.1, 0, 0]}>
               <meshStandardMaterial {...pinkProps} />
             </Box>
         </group>
 
-        {/* --- RIGHT WALL (Purple) - Corner Overlap --- */}
+        {/* --- RIGHT WALL (Purple) - Forced Corner Overlap --- */}
         <group position={[10, 0, 15.5]} rotation={[0, Math.PI / 2, 0]}>
-          <Box args={[11, 30, 2]} position={[-15.5, 0, 0]}> 
+          {/* Extended corner block to ensure walls physically intersect */}
+          <Box args={[11, 30, 2.1]} position={[-15.5, 0, 0]}> 
             <meshStandardMaterial {...purpleProps} />
           </Box>
-          <Box args={[10, 10, 2]} position={[-5, 10, 0]}>
+          <Box args={[10, 10, 2.1]} position={[-5, 10, 0]}>
             <meshStandardMaterial {...purpleProps} />
           </Box>
-          <Box args={[10, 30, 2]} position={[5, 0, 0]}>
+          <Box args={[10, 30, 2.1]} position={[5, 0, 0]}>
             <meshStandardMaterial {...purpleProps} />
           </Box>
         </group>
 
-        {/* --- PLATFORM FLOOR - Horizontal 'Cube' Base --- */}
-        <Box args={[32, 1.5, 25]} position={[0.5, -14.2, 3]}>
+        {/* --- PLATFORM FLOOR - Widened to hide water gaps under walls --- */}
+        <Box args={[34, 1.5, 27]} position={[1, -14.2, 4]}>
           <meshStandardMaterial {...pinkProps} />
         </Box>
 
-        {/* L-BENCH POSITIONING */}
+        {/* RE-ALIGNED L-BENCH */}
         <group position={[-10, -12, 0]}>
           <Box args={[22, 2, 4]} position={[1, 0, -6]}>
             <meshStandardMaterial {...purpleProps} />
