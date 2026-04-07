@@ -44,31 +44,31 @@ export default function Scene({ currentView }) {
       <Environment preset="dawn" />
       <fog attach="fog" args={["#f7ece8", 30, 200]} />
       
-      {/* Positioned at Y: 4 to keep it firmly grounded in the water */}
+      {/* GROUNDED AT Y:4 - This keeps the bottom submerged in the water pool */}
       <group position={[0, 4, -12]} scale={0.75}>
         
         {/* --- BACK WALL (Travertine) --- */}
         
-        {/* WE MERGED PILLAR 1 AND WINDOW FRAME HERE TO REMOVE THE SLIT */}
-        <group position={[-43.5, 0, 0]}>
-            {/* The Main Left Pillar (Widened to bridge the gap) */}
-            <mesh position={[-4.5, 0, 0]}>
+        {/* COMPACTED LEFT SECTION: Overlapping the pillar and window to kill the gap */}
+        <group position={[-42.5, 0, 0]}>
+            {/* Main Pillar (Moved slightly right to overlap window frame) */}
+            <mesh position={[-5, 0, 0]}>
                 <boxGeometry args={[18, 40, 0.2]} />
                 <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
             </mesh>
 
-            {/* The Window Cutout (Perfectly aligned to the pillar edge) */}
-            <mesh position={[7.5, -7, 0]}> {/* Sill */}
-                <boxGeometry args={[6, 14, 0.2]} />
+            {/* Window Frame Pieces (Moved slightly left to overlap pillar) */}
+            <mesh position={[6.9, -7, 0]}> {/* Sill */}
+                <boxGeometry args={[6.1, 14, 0.2]} />
                 <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
             </mesh>
-            <mesh position={[7.5, 13, 0]}> {/* Header */}
-                <boxGeometry args={[6, 14, 0.2]} />
+            <mesh position={[6.9, 13, 0]}> {/* Header */}
+                <boxGeometry args={[6.1, 14, 0.2]} />
                 <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
             </mesh>
         </group>
 
-        {/* Center Pillar */}
+        {/* Middle Wall */}
         <mesh position={[-14, 0, 0]}>
           <boxGeometry args={[36, 40, 0.2]} />
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
@@ -80,7 +80,7 @@ export default function Scene({ currentView }) {
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
 
-        {/* Right Pillar */}
+        {/* Right Edge Wall */}
         <mesh position={[28, 0, 0]}>
           <boxGeometry args={[32, 40, 0.2]} />
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
@@ -92,7 +92,7 @@ export default function Scene({ currentView }) {
             <boxGeometry args={[35, 40, 0.2]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
-          <mesh position={[0, 13, 0]}> {/* Side Door Header */}
+          <mesh position={[0, 13, 0]}> {/* Side Door Top */}
             <boxGeometry args={[5, 14, 0.2]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
@@ -102,13 +102,14 @@ export default function Scene({ currentView }) {
           </mesh>
         </group>
 
-        {/* THE BENCH */}
+        {/* BENCH */}
         <mesh position={[-18, -13, -5]} castShadow receiveShadow>
           <boxGeometry args={[50, 4, 12]} /> 
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
       </group>
 
+      {/* WATER POOL */}
       <water
         ref={waterRef}
         args={[new THREE.PlaneGeometry(5000, 5000), {
