@@ -31,7 +31,6 @@ export default function Scene({ currentView }) {
   const waterRef = useRef();
   const baseUrl = import.meta.env.BASE_URL || "/";
 
-  // 1. Load Textures
   const pinkStoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
   const travertineTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/travertine.jpg`);
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
@@ -44,17 +43,16 @@ export default function Scene({ currentView }) {
     if (pinkStoneTex) pinkStoneTex.repeat.set(1, 4);
   }, [pinkStoneTex, travertineTex, waterNormals]);
 
-  // 2. Camera Views (Smooth Transitions)
   const views = {
-    home: { pos: [22, 6, 25], look: [0, 4, 0] },
-    collection: { pos: [-65, 15, 45], look: [-95, 8, -25] } 
+    home: { pos: [22, 8, 28], look: [0, 4, 0] },
+    collection: { pos: [-75, 12, 55], look: [-100, 5, -30] } 
   };
   const targetLook = useMemo(() => new THREE.Vector3(0, 0, 0), []);
 
   useFrame((state, delta) => {
     const target = views[currentView];
-    camera.position.lerp(new THREE.Vector3(...target.pos), 0.03); 
-    targetLook.lerp(new THREE.Vector3(...target.look), 0.03);
+    camera.position.lerp(new THREE.Vector3(...target.pos), 0.035); 
+    targetLook.lerp(new THREE.Vector3(...target.look), 0.035);
     camera.lookAt(targetLook);
     if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.4;
   });
@@ -67,9 +65,9 @@ export default function Scene({ currentView }) {
       
       <PinkClouds />
 
-      {/* --- STRUCTURE A: THE CORNER & GROUNDED PLATFORM --- */}
-      <group position={[0, -0.1, -5]} scale={0.6}>
-        {/* Travertine Wall */}
+      {/* --- HOME AREA: GROUNDED ARCHITECTURAL BLOCKS --- */}
+      <group position={[0, 0, -5]} scale={0.6}>
+        {/* Main Travertine Wall */}
         <mesh position={[-10, 15, -10]} castShadow receiveShadow>
           <boxGeometry args={[20, 30, 2]} />
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
@@ -81,34 +79,36 @@ export default function Scene({ currentView }) {
           <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
         </mesh>
 
-        {/* LOCKED LUXURY PLATFORM (NO FLOATING) */}
-        <group position={[-10, 0.3, 2]}>
-          {/* Main Base */}
-          <mesh castShadow receiveShadow>
-            <boxGeometry args={[22, 0.8, 18]} />
+        {/* STACKED PLATFORM SYSTEM */}
+        <group position={[-10, 0, 4]}>
+          {/* Base Foundation Slab */}
+          <mesh position={[0, 0.5, 0]} receiveShadow castShadow>
+            <boxGeometry args={[24, 1, 20]} />
             <meshStandardMaterial map={pinkStoneTex} color="#fcd7d7" />
           </mesh>
-          {/* Second Tier */}
-          <mesh position={[0, 0.8, -2]} castShadow>
-            <boxGeometry args={[18, 0.8, 12]} />
-            <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
+          {/* Architectural Upper Block (Real Architecture Feel) */}
+          <mesh position={[0, 1.8, -2]} castShadow receiveShadow>
+            <boxGeometry args={[18, 1.6, 12]} />
+            <meshStandardMaterial map={travertineTex} color="#ffffff" />
           </mesh>
         </group>
       </group>
 
-      {/* --- STRUCTURE B: THE GRAND ARCHITECTURAL STAIRS --- */}
-      <group position={[-85, -0.2, -15]} scale={0.8}>
-        {[0, 1, 2, 3, 4].map((i) => (
-          <mesh key={i} position={[0, i * 1.2, i * 4]} castShadow receiveShadow>
-            <boxGeometry args={[30, 1.2, 10]} />
-            <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
-          </mesh>
-        ))}
-        {/* Top Landing Platform */}
-        <mesh position={[0, 6, 24]} castShadow receiveShadow>
-          <boxGeometry args={[35, 1.2, 20]} />
+      {/* --- COLLECTION AREA: REVERSED ARCHITECTURAL STAIRS --- */}
+      <group position={[-90, 0, -10]} scale={0.8}>
+        {/* Top Landing Platform (Now in the back) */}
+        <mesh position={[0, 6, -10]} castShadow receiveShadow>
+          <boxGeometry args={[35, 1.5, 20]} />
           <meshStandardMaterial map={pinkStoneTex} color="#fcd7d7" />
         </mesh>
+
+        {/* Steps descending TOWARD the camera */}
+        {[0, 1, 2, 3, 4].map((i) => (
+          <mesh key={i} position={[0, (4 - i) * 1.2, i * 4.5]} castShadow receiveShadow>
+            <boxGeometry args={[32, 1.2, 8]} />
+            <meshStandardMaterial map={travertineTex} color="#ffffff" />
+          </mesh>
+        ))}
       </group>
 
       {/* --- WATER SURFACE --- */}
