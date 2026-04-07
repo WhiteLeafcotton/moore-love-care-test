@@ -7,7 +7,7 @@
   --soft-white: rgba(255, 255, 255, 0.85);
   margin: 0;
   padding: 0;
-  overflow: hidden; /* Prevents scrolling or bouncing on mobile/trackpads */
+  overflow: hidden; /* Prevents scrolling or bouincing on mobile/trackpads */
 }
 
 * {
