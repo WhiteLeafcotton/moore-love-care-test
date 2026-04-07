@@ -6,13 +6,19 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* A structural "Void" Maker: Pillars + Arch Cap */
-const ArchOpening = ({ position, colorProps, width = 4, height = 8 }) => (
+/* Structural Arch Header (The "Cap" between pillars) */
+const ArchHeader = ({ position, colorProps, width = 3, height = 2 }) => (
   <group position={position}>
-    <Box args={[width, height, 2.01]} position={[0, height / 2, 0]}>
+    {/* The Square Header Block */}
+    <Box args={[width, height, 2]} position={[0, height / 2, 0]}>
       <meshStandardMaterial {...colorProps} />
     </Box>
-    <Cylinder args={[width / 2, width / 2, 2.01, 32]} position={[0, height, 0]} rotation={[Math.PI / 2, 0, 0]}>
+    {/* The Rounded Under-Arch (Subtractive Logic) */}
+    <Cylinder 
+      args={[width / 2, width / 2, 2.05, 32, 1, false, 0, Math.PI]} 
+      position={[0, 0, 0]} 
+      rotation={[0, 0, Math.PI]}
+    >
       <meshStandardMaterial {...colorProps} />
     </Cylinder>
   </group>
@@ -29,7 +35,7 @@ export default function Scene({ currentView }) {
   useMemo(() => {
     if (renderTex) {
       renderTex.wrapS = renderTex.wrapT = THREE.RepeatWrapping;
-      renderTex.repeat.set(1.5, 2.5);
+      renderTex.repeat.set(1, 2);
     }
   }, [renderTex]);
 
@@ -37,8 +43,8 @@ export default function Scene({ currentView }) {
   const purpleProps = { map: renderTex, color: "#d1c4e9", roughness: 0.9 };
 
   useFrame((state, delta) => {
-    const targetPos = currentView === 'home' ? [-15, 6, 22] : [35, 4, 12];
-    const targetLook = currentView === 'home' ? [5, 0, -5] : [70, 0, 8];
+    const targetPos = currentView === 'home' ? [-15, 7, 22] : [32, 5, 15];
+    const targetLook = currentView === 'home' ? [5, 0, -5] : [65, 0, 10];
     camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
     camera.lookAt(new THREE.Vector3(...targetLook));
     if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.15;
@@ -46,56 +52,54 @@ export default function Scene({ currentView }) {
 
   return (
     <>
-      <Sky sunPosition={[-35, 0.05, 10]} />
+      <Sky sunPosition={[-40, 0.1, 10]} />
       <Environment preset="dawn" />
       
-      <group position={[0, 2, -10]} scale={0.9}>
+      <group position={[0, 2, -5]} scale={0.9}>
         
         {/* FLOOR PLATFORM */}
-        <Box args={[32, 1.5, 24]} position={[2, -8.7, 5]}>
+        <Box args={[34, 1.5, 26]} position={[2, -8.7, 6]}>
           <meshStandardMaterial {...pinkProps} />
         </Box>
 
-        {/* PINK BACK WALL: Pillars & Arched Doors clustered left */}
+        {/* PINK WALL (Back): 3 Small Doorways clustered left */}
         <group position={[-12, 0, 0]}>
-          {/* Left Anchor Pillar */}
-          <Box args={[4, 16, 2]} position={[-2, 0, 0]}><meshStandardMaterial {...pinkProps} /></Box>
+          {/* Pillars */}
+          <Box args={[3, 16, 2]} position={[-1.5, 0, 0]}><meshStandardMaterial {...pinkProps} /></Box>
+          <Box args={[1.5, 16, 2]} position={[3.25, 0, 0]}><meshStandardMaterial {...pinkProps} /></Box>
+          <Box args={[1.5, 16, 2]} position={[7.25, 0, 0]}><meshStandardMaterial {...pinkProps} /></Box>
+          <Box args={[1.5, 16, 2]} position={[11.25, 0, 0]}><meshStandardMaterial {...pinkProps} /></Box>
           
-          {/* Three Arched Doorways (The "Voids") */}
-          <group position={[2.5, -8, 0]}>
-            <ArchOpening position={[0, 0, 0]} colorProps={pinkProps} width={1} height={9} />
-            <ArchOpening position={[4, 0, 0]} colorProps={pinkProps} width={1} height={9} />
-            <ArchOpening position={[8, 0, 0]} colorProps={pinkProps} width={1} height={9} />
-            {/* The lintels (caps) above doors */}
-            <Box args={[12, 7, 2]} position={[4, 4.5, 0]}><meshStandardMaterial {...pinkProps} /></Box>
-          </group>
+          {/* Arched Caps (The Door Tops) */}
+          <ArchHeader position={[1, 1, 0]} width={2.5} height={7} colorProps={pinkProps} />
+          <ArchHeader position={[5.25, 1, 0]} width={2.5} height={7} colorProps={pinkProps} />
+          <ArchHeader position={[9.25, 1, 0]} width={2.5} height={7} colorProps={pinkProps} />
 
-          {/* Right Wall Mass leading to corner */}
-          <Box args={[14, 16, 2]} position={[21, 0, 0]}><meshStandardMaterial {...pinkProps} /></Box>
+          {/* Right Solid Section leading to corner */}
+          <Box args={[16, 16, 2]} position={[20, 0, 0]}><meshStandardMaterial {...pinkProps} /></Box>
         </group>
 
-        {/* PURPLE SIDE WALL: Locked to 90 degrees */}
+        {/* PURPLE WALL (Right): 2 Small Windows at 90 degrees */}
         <group position={[16, 0, 1]} rotation={[0, -Math.PI / 2, 0]}>
-          {/* Start Pillar */}
+          {/* Pillars */}
           <Box args={[6, 16, 2]} position={[3, 0, 0]}><meshStandardMaterial {...purpleProps} /></Box>
-          
-          {/* Two Arched Windows (Elevated "Voids") */}
-          <group position={[9, -2, 0]}>
-             <ArchOpening position={[0, -4, 0]} colorProps={purpleProps} width={1} height={4} />
-             <ArchOpening position={[4, -4, 0]} colorProps={purpleProps} width={1} height={4} />
-             {/* Window surround mass */}
-             <Box args={[8, 12, 2]} position={[2, 2, 0]}><meshStandardMaterial {...purpleProps} /></Box>
-          </group>
+          <Box args={[2, 16, 2]} position={[9, 0, 0]}><meshStandardMaterial {...purpleProps} /></Box>
+          <Box args={[8, 16, 2]} position={[18, 0, 0]}><meshStandardMaterial {...purpleProps} /></Box>
 
-          {/* End Pillar */}
-          <Box args={[8, 16, 2]} position={[20, 0, 0]}><meshStandardMaterial {...purpleProps} /></Box>
+          {/* Arched Caps (The Window Tops - Elevated) */}
+          <ArchHeader position={[7, 3, 0]} width={2} height={5} colorProps={purpleProps} />
+          <ArchHeader position={[13, 3, 0]} width={2} height={5} colorProps={purpleProps} />
+          
+          {/* Sills (Bottom of windows) */}
+          <Box args={[2, 5, 2]} position={[7, -5.5, 0]}><meshStandardMaterial {...purpleProps} /></Box>
+          <Box args={[2, 5, 2]} position={[13, -5.5, 0]}><meshStandardMaterial {...purpleProps} /></Box>
         </group>
 
       </group>
 
       <water
         ref={waterRef}
-        args={[new THREE.PlaneGeometry(1000, 1000), {
+        args={[new THREE.PlaneGeometry(1200, 1200), {
           textureWidth: 512, textureHeight: 512, waterNormals, 
           sunDirection: new THREE.Vector3(10, 1, 20), sunColor: 0xffffff, 
           waterColor: 0x999999, distortionScale: 0.2, fog: false,
