@@ -25,12 +25,12 @@ export default function Scene({ currentView }) {
 
   const views = {
     home: { 
-      pos: [16, 2.5, 20],     
-      look: [-12, 4.5, -8]    
+      pos: [15, 2.5, 20],     
+      look: [-10, 4, -8]    
     },
     collection: { 
-      pos: [-90, 4, 45],      
-      look: [-115, 2, -10]    
+      pos: [-95, 4, 50],      
+      look: [-120, 2, -10]    
     } 
   };
   
@@ -48,7 +48,7 @@ export default function Scene({ currentView }) {
     <>
       <Sky sunPosition={[10, 0.2, 20]} turbidity={0.1} rayleigh={2} />
       <Environment preset="dawn" />
-      <fog attach="fog" args={["#f7ece8", 10, 150]} />
+      <fog attach="fog" args={["#f7ece8", 10, 160]} />
 
       {/* --- LOCATION 1: THE MONOLITH --- */}
       <group position={[0, 0, -5]} scale={0.7}>
@@ -69,33 +69,42 @@ export default function Scene({ currentView }) {
           </mesh>
         </group>
 
-        {/* SIDE WALL (Pink Stone) with Slender Window */}
-        <group position={[-45, 40, 10]} rotation={[0, Math.PI / 2, 0]}>
-          {/* Bottom section of wall */}
-          <mesh position={[0, -35, 0]}>
-            <boxGeometry args={[50, 30, 4]} />
+        {/* PINK STONE WALL WITH MID-WAY WINDOWS */}
+        <group position={[-45, 40, 12]} rotation={[0, Math.PI / 2, 0]}>
+          {/* Bottom Solid Section (from water up to window sill) */}
+          <mesh position={[0, -45, 0]}>
+            <boxGeometry args={[50, 10, 4]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
-          {/* Left section of wall */}
-          <mesh position={[-20, 15, 0]}>
-            <boxGeometry args={[10, 70, 4]} />
+          
+          {/* Vertical Pillars creating the "Slits" */}
+          <mesh position={[-20, 5, 0]}> {/* Left pillar */}
+            <boxGeometry args={[10, 90, 4]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
-          {/* Right section of wall */}
-          <mesh position={[10, 15, 0]}>
-            <boxGeometry args={[30, 70, 4]} />
+          <mesh position={[-4, 5, 0]}> {/* Middle pillar */}
+            <boxGeometry args={[10, 90, 4]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
-          {/* Header above window */}
-          <mesh position={[-10, 40, 0]}>
-            <boxGeometry args={[10, 20, 4]} />
+          <mesh position={[18, 5, 0]}> {/* Right end wall */}
+            <boxGeometry args={[22, 90, 4]} />
+            <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
+          </mesh>
+
+          {/* Window Tops (Headers) - Closes the windows half way up */}
+          <mesh position={[-12, -20, 0]}> 
+            <boxGeometry args={[6, 40, 4]} /> {/* This blocks the top half of the slit */}
+            <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
+          </mesh>
+          <mesh position={[4, -20, 0]}>
+            <boxGeometry args={[6, 40, 4]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
         </group>
 
-        {/* THE HORIZONTAL PLATFORM */}
-        <mesh position={[-10, 2, -6]} castShadow receiveShadow>
-          <boxGeometry args={[32, 4, 12]} />
+        {/* BUILT-IN TRAVERTINE BENCH */}
+        <mesh position={[-18, 2, -6]} castShadow receiveShadow>
+          <boxGeometry args={[45, 4, 12]} /> 
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
 
@@ -109,9 +118,9 @@ export default function Scene({ currentView }) {
       </group>
 
       {/* --- LOCATION 2: THE FLOATING SLAB --- */}
-      <group position={[-120, 1, -10]}>
+      <group position={[-130, 1, -15]}>
         <mesh castShadow receiveShadow>
-          <boxGeometry args={[45, 1.5, 35]} />
+          <boxGeometry args={[50, 1.5, 40]} />
           <meshStandardMaterial map={pinkStoneTex} color="#fcd7d7" />
         </mesh>
       </group>
