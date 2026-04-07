@@ -57,110 +57,109 @@ export default function Scene({ currentView }) {
       <fog attach="fog" args={["#f7ece8", 30, 200]} />
       
       {/* CLEAN FLOATING CORNER ROOM */}
-<group position={[0, 4, -12]} scale={1}>
+<group position={[0, 4, -12]}>
 
-  {/* === FLOOR === */}
+  {/* FLOOR */}
   <mesh position={[0, -15, 0]} receiveShadow>
     <boxGeometry args={[60, 2, 60]} />
     <meshStandardMaterial map={travertineTex} color="#f5dcd6" />
   </mesh>
 
-  {/* === LEFT WALL (ARCH DOORS) === */}
+  {/* LEFT WALL (WITH REAL OPENINGS) */}
   <group position={[-30, 5, 0]}>
-    
-    {/* Wall base */}
-    <mesh>
-      <boxGeometry args={[2, 40, 60]} />
-      <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
+
+    {/* TOP WALL */}
+    <mesh position={[0, 15, 0]}>
+      <boxGeometry args={[2, 10, 60]} />
+      <meshStandardMaterial map={travertineTex} />
     </mesh>
 
-    {/* --- DOORWAY 1 --- */}
-    <group position={[0, -5, -15]}>
-      {/* sides */}
-      <mesh position={[0, 0, -6]}>
-        <boxGeometry args={[2, 20, 8]} />
-        <meshStandardMaterial map={travertineTex} />
-      </mesh>
+    {/* BOTTOM WALL */}
+    <mesh position={[0, -15, 0]}>
+      <boxGeometry args={[2, 10, 60]} />
+      <meshStandardMaterial map={travertineTex} />
+    </mesh>
 
-      <mesh position={[0, 0, 6]}>
-        <boxGeometry args={[2, 20, 8]} />
-        <meshStandardMaterial map={travertineTex} />
-      </mesh>
+    {/* SIDE STRIPS BETWEEN DOORS */}
+    <mesh position={[0, 0, -25]}>
+      <boxGeometry args={[2, 20, 10]} />
+      <meshStandardMaterial map={travertineTex} />
+    </mesh>
 
-      {/* arch top */}
-      <mesh position={[0, 10, 0]}>
-        <cylinderGeometry args={[6, 6, 2, 32, 1, false, 0, Math.PI]} />
-        <meshStandardMaterial map={travertineTex} />
-        <rotation x={Math.PI / 2} />
-      </mesh>
-    </group>
+    <mesh position={[0, 0, 0]}>
+      <boxGeometry args={[2, 20, 10]} />
+      <meshStandardMaterial map={travertineTex} />
+    </mesh>
 
-    {/* --- DOORWAY 2 --- */}
-    <group position={[0, -5, 15]}>
-      <mesh position={[0, 0, -6]}>
-        <boxGeometry args={[2, 20, 8]} />
-        <meshStandardMaterial map={travertineTex} />
-      </mesh>
+    <mesh position={[0, 0, 25]}>
+      <boxGeometry args={[2, 20, 10]} />
+      <meshStandardMaterial map={travertineTex} />
+    </mesh>
 
-      <mesh position={[0, 0, 6]}>
-        <boxGeometry args={[2, 20, 8]} />
-        <meshStandardMaterial map={travertineTex} />
-      </mesh>
+    {/* ARCH 1 */}
+    <mesh position={[0, 5, -12]} rotation={[Math.PI / 2, 0, 0]}>
+      <cylinderGeometry args={[6, 6, 2, 32, 1, false, 0, Math.PI]} />
+      <meshStandardMaterial map={travertineTex} />
+    </mesh>
 
-      <mesh position={[0, 10, 0]}>
-        <cylinderGeometry args={[6, 6, 2, 32, 1, false, 0, Math.PI]} />
-        <meshStandardMaterial map={travertineTex} />
-        <rotation x={Math.PI / 2} />
-      </mesh>
-    </group>
+    {/* ARCH 2 */}
+    <mesh position={[0, 5, 12]} rotation={[Math.PI / 2, 0, 0]}>
+      <cylinderGeometry args={[6, 6, 2, 32, 1, false, 0, Math.PI]} />
+      <meshStandardMaterial map={travertineTex} />
+    </mesh>
+
   </group>
 
-  {/* === RIGHT WALL (MODERN WINDOWS) === */}
+  {/* RIGHT WALL (WINDOW CUTOUT STYLE) */}
   <group position={[0, 5, 30]} rotation={[0, Math.PI / 2, 0]}>
 
-    {/* Wall base */}
-    <mesh>
-      <boxGeometry args={[2, 40, 60]} />
-      <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
+    {/* TOP */}
+    <mesh position={[0, 15, 0]}>
+      <boxGeometry args={[2, 10, 60]} />
+      <meshStandardMaterial map={pinkStoneTex} />
     </mesh>
 
-    {/* WINDOW 1 */}
-    <group position={[0, 5, -15]}>
-      {/* frame */}
-      <mesh>
-        <boxGeometry args={[2.2, 14, 14]} />
-        <meshStandardMaterial color="#d9d9d9" />
-      </mesh>
+    {/* BOTTOM */}
+    <mesh position={[0, -15, 0]}>
+      <boxGeometry args={[2, 10, 60]} />
+      <meshStandardMaterial map={pinkStoneTex} />
+    </mesh>
 
-      {/* glass */}
-      <mesh>
-        <boxGeometry args={[1.8, 12, 12]} />
-        <meshPhysicalMaterial
-          color="#ffffff"
-          transmission={1}
-          roughness={0}
-          thickness={0.5}
-        />
-      </mesh>
-    </group>
+    {/* SIDE SEGMENTS */}
+    <mesh position={[0, 0, -25]}>
+      <boxGeometry args={[2, 20, 10]} />
+      <meshStandardMaterial map={pinkStoneTex} />
+    </mesh>
 
-    {/* WINDOW 2 */}
-    <group position={[0, 5, 15]}>
-      <mesh>
-        <boxGeometry args={[2.2, 14, 14]} />
-        <meshStandardMaterial color="#d9d9d9" />
-      </mesh>
+    <mesh position={[0, 0, 25]}>
+      <boxGeometry args={[2, 20, 10]} />
+      <meshStandardMaterial map={pinkStoneTex} />
+    </mesh>
 
-      <mesh>
-        <boxGeometry args={[1.8, 12, 12]} />
-        <meshPhysicalMaterial
-          color="#ffffff"
-          transmission={1}
-          roughness={0}
-          thickness={0.5}
-        />
-      </mesh>
-    </group>
+    {/* WINDOW FRAME 1 */}
+    <mesh position={[0, 5, -12]}>
+      <boxGeometry args={[2.2, 14, 14]} />
+      <meshStandardMaterial color="#d9d9d9" />
+    </mesh>
+
+    {/* GLASS 1 */}
+    <mesh position={[0, 5, -12]}>
+      <boxGeometry args={[1.8, 12, 12]} />
+      <meshPhysicalMaterial transmission={1} roughness={0} thickness={0.5} />
+    </mesh>
+
+    {/* WINDOW FRAME 2 */}
+    <mesh position={[0, 5, 12]}>
+      <boxGeometry args={[2.2, 14, 14]} />
+      <meshStandardMaterial color="#d9d9d9" />
+    </mesh>
+
+    {/* GLASS 2 */}
+    <mesh position={[0, 5, 12]}>
+      <boxGeometry args={[1.8, 12, 12]} />
+      <meshPhysicalMaterial transmission={1} roughness={0} thickness={0.5} />
+    </mesh>
+
   </group>
 
 </group>
