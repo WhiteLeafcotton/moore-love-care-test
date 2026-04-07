@@ -23,20 +23,24 @@ export default function Scene({ currentView }) {
     if (pinkStoneTex) pinkStoneTex.repeat.set(1.5, 10);
   }, [pinkStoneTex, travertineTex, waterNormals]);
 
-  /* UPDATED CINEMATIC PATHWAY */
+  /* CINEMATIC PATHWAY: 
+     1. HOME: Enter through Back Wall door -> Face Interior Corner 
+     2. COLLECTION: Exit through Right Wall door -> Open Horizon
+  */
   const views = {
-    // APPROACH: Starts inside the room, moving toward the corner
-    home: { pos: [5, 4, 15], look: [-35, 2, -10] },
-    // EXIT: Glides through the side door out to the open water
-    collection: { pos: [80, 3, 25], look: [150, 2, 25] } 
+    // APPROACH: Starts outside the back door, moves IN to face the corner where walls meet
+    home: { pos: [-5, 4, 45], look: [-28, 2, -10] },
+    // EXIT: Moves laterally through a side door on the right wall out to sea
+    collection: { pos: [90, 3, 20], look: [160, 2, 20] } 
   };
   
   const targetLook = useMemo(() => new THREE.Vector3(0, 0, 0), []);
 
   useFrame((state, delta) => {
     const target = views[currentView];
-    camera.position.lerp(new THREE.Vector3(...target.pos), 0.015); 
-    targetLook.lerp(new THREE.Vector3(...target.look), 0.015);
+    // Slightly slower lerp (0.012) for a more "expensive" editorial feel
+    camera.position.lerp(new THREE.Vector3(...target.pos), 0.012); 
+    targetLook.lerp(new THREE.Vector3(...target.look), 0.012);
     camera.lookAt(targetLook);
     if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.3;
   });
@@ -50,7 +54,7 @@ export default function Scene({ currentView }) {
       {/* THE ISOMETRIC CORNER ROOM */}
       <group position={[0, 4, -12]} scale={0.8}>
         
-        {/* --- BACK WALL (Travertine) with 1 DOOR & 2 WINDOWS --- */}
+        {/* --- BACK WALL (Travertine) --- */}
         <group position={[-35, 0, 0]}>
             <mesh position={[-15, 0, 0]}>
                 <boxGeometry args={[10, 40, 2]} />
@@ -84,7 +88,7 @@ export default function Scene({ currentView }) {
             </mesh>
         </group>
 
-        {/* --- RIGHT WALL (Pink Stone) with 3 DOORS --- */}
+        {/* --- RIGHT WALL (Pink Stone) --- */}
         <group position={[10, 0, 25]} rotation={[0, Math.PI / 2, 0]}>
           <mesh position={[-35, 0, 0]}>
             <boxGeometry args={[10, 40, 2]} />
@@ -120,7 +124,6 @@ export default function Scene({ currentView }) {
         </mesh>
       </group>
 
-      {/* ORIGINAL WATER SYSTEM */}
       <water
         ref={waterRef}
         args={[new THREE.PlaneGeometry(5000, 5000), {
