@@ -11,7 +11,6 @@ export default function Scene({ currentView }) {
   const waterRef = useRef();
   const baseUrl = import.meta.env.BASE_URL || "/";
 
-  // Textures
   const pinkStoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
   const travertineTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/travertine.jpg`);
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
@@ -42,29 +41,32 @@ export default function Scene({ currentView }) {
       <Sky sunPosition={[-35, 0.08, 15]} turbidity={0.01} rayleigh={3} />
       <Environment preset="dawn" />
       
-      {/* The Unseen Frame:
-        Pillars are 30 units high. 
-        Positioning the group at Y: 15 puts the bottom edge exactly at Y: 0 (Water Level).
+      {/* GROUNDING THE STRUCTURE:
+        Group is at Y: 12. Pillars are 30 units tall. 
+        30 / 2 = 15. Since 15 > 12, the bottom 3 units are SUBMERGED.
+        This ensures no floating gaps even when the water ripples.
       */}
-      <group position={[0, 15, -12]} scale={0.75}>
+      <group position={[0, 12, -12]} scale={0.75}>
         
-        {/* --- BACK WALL (Travertine) --- */}
+        {/* --- BACK WALL (TRAVERTINE SLAB) --- */}
         
-        {/* Main Pillar Left */}
-        <mesh position={[-48, 0, 0]}>
-          <boxGeometry args={[12, 30, 0.2]} />
-          <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
-        </mesh>
-
-        {/* THE WINDOW FRAME (A complete rectangular cutout) */}
-        <mesh position={[-38.5, -7.5, 0]}> {/* Bottom Sill */}
-          <boxGeometry args={[7, 15, 0.2]} />
-          <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
-        </mesh>
-        <mesh position={[-38.5, 10, 0]}> {/* Top Header (Lintel) */}
-          <boxGeometry args={[7, 10, 0.2]} />
-          <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
-        </mesh>
+        {/* Left Section (Combined Pillar + Window Frame to fix the 'slit') */}
+        <group position={[-43, 0, 0]}>
+            {/* The Solid Left Side */}
+            <mesh position={[-5, 0, 0]}>
+                <boxGeometry args={[12, 30, 0.2]} />
+                <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
+            </mesh>
+            {/* The Window Cutout (Sill & Header merged to the pillar) */}
+            <mesh position={[4.5, -7.5, 0]}> 
+                <boxGeometry args={[7, 15, 0.2]} />
+                <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
+            </mesh>
+            <mesh position={[4.5, 10, 0]}> 
+                <boxGeometry args={[7, 10, 0.2]} />
+                <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
+            </mesh>
+        </group>
 
         {/* Center Pillar */}
         <mesh position={[-14, 0, 0]}>
@@ -72,20 +74,20 @@ export default function Scene({ currentView }) {
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
 
-        {/* DOORWAY HEADER (Visible Top) */}
+        {/* Doorway Header (Lintel) */}
         <mesh position={[8, 10, 0]}>
           <boxGeometry args={[8, 10, 0.2]} />
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
 
-        {/* Right Wall Pillar */}
+        {/* Right Pillar */}
         <mesh position={[28, 0, 0]}>
           <boxGeometry args={[32, 30, 0.2]} />
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
 
-        {/* --- SIDE WALL (Pink Stone) --- */}
-        <group position={[-54, 0, 32]} rotation={[0, Math.PI / 2, 0]}>
+        {/* --- SIDE WALL (PINK STONE SLAB) --- */}
+        <group position={[-55, 0, 32]} rotation={[0, Math.PI / 2, 0]}>
           <mesh position={[-20, 0, 0]}>
             <boxGeometry args={[35, 30, 0.2]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
@@ -94,15 +96,15 @@ export default function Scene({ currentView }) {
             <boxGeometry args={[5, 10, 0.2]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
-          <mesh position={[20, 0, 0]}>
+          <mesh position={20, 0, 0}>
             <boxGeometry args={[35, 30, 0.2]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
         </group>
 
-        {/* THE BENCH - Lowered to sit in the water pool */}
-        <mesh position={[-18, -13.5, -5]} castShadow receiveShadow>
-          <boxGeometry args={[50, 3, 12]} /> 
+        {/* THE BENCH - Partially Submerged for that "Unseen" heavy anchor */}
+        <mesh position={[-18, -13, -5]} castShadow receiveShadow>
+          <boxGeometry args={[50, 4, 12]} /> 
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
       </group>
@@ -113,13 +115,13 @@ export default function Scene({ currentView }) {
         args={[new THREE.PlaneGeometry(1000, 1000), {
           textureWidth: 512, textureHeight: 512, waterNormals, 
           sunDirection: new THREE.Vector3(10, 1, 20), sunColor: 0xffffff, 
-          waterColor: 0xa19089, distortionScale: 0.3, fog: true,
+          waterColor: 0xa19089, distortionScale: 0.2, fog: true,
         }]}
         rotation={[-Math.PI / 2, 0, 0]}
         position={[0, 0, 0]} 
       />
 
-      <ContactShadows opacity={0.5} scale={100} blur={2.5} far={10} color="#000000" />
+      <ContactShadows opacity={0.6} scale={100} blur={3} far={10} color="#000000" />
     </>
   );
 }
