@@ -1,27 +1,20 @@
 import { useRef, useMemo } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
-import { Environment, Sky, Box } from "@react-three/drei";
+import { Environment, Sky, ContactShadows, Box, Cone } from "@react-three/drei";
 import { Water } from "three-stdlib";
 import * as THREE from "three";
 
 extend({ Water });
 
-/* FULLY CONNECTED EMBEDDED WINDOW */
-const EmbeddedWindow = ({ position, wallProps }) => (
-  <group position={position}>
-    {/* Top Frame (Intersecting the wall for a perfect seal) */}
-    <Box args={[1.5, 0.4, 2.2]} position={[0, 12.4, 0]}>
-      <meshStandardMaterial color="#1a1a1a" roughness={0.1} />
-    </Box>
-    {/* Bottom Sill matching wall texture, positioned to be gapless */}
-    <Box args={[1.5, 12.4, 2.1]} position={[0, -6.3, 0]}>
-      <meshStandardMaterial {...wallProps} />
-    </Box>
-    {/* Glass pane recessed with volume to prevent flickering */}
-    <Box args={[1.3, 12.2, 0.5]} position={[0, 6.2, 0]}>
-      <meshStandardMaterial color="#a0c0c0" opacity={0.4} transparent />
-    </Box>
-  </group>
+/* =========================================
+   THE ARTIFACT: INVERTED OCULUS VAULT
+   ========================================= */
+const VaultMaterial = ({ color }) => (
+  <meshStandardMaterial
+    color={color}
+    roughness={0.9} // Matt texture to absorb light
+    metalness={0.05} // Very slight shimmer
+  />
 );
 
 export default function Scene({ currentView }) {
@@ -29,106 +22,97 @@ export default function Scene({ currentView }) {
   const waterRef = useRef();
   const baseUrl = import.meta.env.BASE_URL || "/";
 
+  // Reusing confirmed workable texture paths
   const renderTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
 
   useMemo(() => {
     if (renderTex) {
       renderTex.wrapS = renderTex.wrapT = THREE.RepeatWrapping;
-      renderTex.repeat.set(2, 4);
+      renderTex.repeat.set(3, 3);
     }
   }, [renderTex]);
 
-  const pinkProps = { map: renderTex, color: "#fcd7d7", roughness: 0.8 };
-  const purpleProps = { map: renderTex, color: "#d1c4e9", roughness: 0.8 };
-
+  /* NEW VIEWS: Closer, more intimate framing of the artifact */
   const views = {
-    home: { pos: [-32, 12, 35], look: [5, 0, -8] },      
-    collection: { pos: [60, 5, 20], look: [120, 2, 15] } 
+    home: { pos: [-15, 6, 25], look: [5, 0, 5] },
+    collection: { pos: [30, 12, 40], look: [100, -5, 10] }
   };
   
   const targetLook = useMemo(() => new THREE.Vector3(0, 0, 0), []);
 
   useFrame((state, delta) => {
     const target = views[currentView];
-    camera.position.lerp(new THREE.Vector3(...target.pos), 0.02); 
-    targetLook.lerp(new THREE.Vector3(...target.look), 0.02);
+    camera.position.lerp(new THREE.Vector3(...target.pos), 0.015);
+    targetLook.lerp(new THREE.Vector3(...target.look), 0.015);
     camera.lookAt(targetLook);
-    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.2;
+    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.4;
   });
 
   return (
     <>
-      <Sky sunPosition={[-35, 0.05, 10]} />
+      <Sky sunPosition={[45, 0.01, -10]} turbidity={0.1} /> {/* Dawn Light */}
       <Environment preset="dawn" />
+      <fog attach="fog" args={["#f7ece8", 10, 150]} />
       
-      <group position={[0, 4, -10]} scale={0.8}>
+      {/* THE ISOLATED ARTIFACT */}
+      <group position={[0, -2, -10]} scale={0.7} rotation={[0, -Math.PI / 4, 0]}>
         
-        {/* --- BACK WALL (Pink) - Gapless Segmenting --- */}
-        <group position={[-15.5, 0, 0]}>
-            {/* Left anchor block */}
-            <Box args={[8, 30, 2]} position={[-4, 0, 0]}> 
-              <meshStandardMaterial {...pinkProps} />
-            </Box>
+        {/* --- THE SUBMERGED PLINTH FOUNDATION --- */}
+        <mesh position={[0, -10, 0]} receiveShadow castShadow>
+          <boxGeometry args={[45, 12, 45]} />
+          <meshStandardMaterial map={renderTex} color="#d1c4e9" roughness={0.9} /> {/* Purple-tinted Plinth */}
+        </mesh>
+
+        {/* --- THE INVERTED CONICAL VAULT --- */}
+        <group position={[0, 10, 0]} rotation={[Math.PI, 0, 0]}>
+            <mesh receiveShadow castShadow>
+                <coneGeometry args={[25, 20, 4]} /> {/* 4-sided 'diamond' cone geometry */}
+                <VaultMaterial color="#1a1a1a" /> {/* Deep Obsidian Render */}
+            </mesh>
             
-            {/* Embedded Window 1 (Tight overlap) */}
-            <EmbeddedWindow position={[0.7, 0, 0]} wallProps={pinkProps} />
-
-            {/* Middle Pier - Recalculated for closer window placement */}
-            <Box args={[10, 30, 2]} position={[6.4, 0, 0]}> 
-              <meshStandardMaterial {...pinkProps} />
-            </Box>
-
-            {/* Embedded Window 2 */}
-            <EmbeddedWindow position={[12.1, 0, 0]} wallProps={pinkProps} />
-
-            {/* Right anchor block */}
-            <Box args={[12, 30, 2]} position={[23.1, 0, 0]}>
-              <meshStandardMaterial {...pinkProps} />
-            </Box>
+            {/* The Oculus: A central circular cutout/skylight */}
+            <mesh position={[0, -10, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+                <ringGeometry args={[0, 6, 32]} />
+                <meshStandardMaterial color="#fff" emissive="#ffffff" emissiveIntensity={1} transparent opacity={0.6}/>
+            </mesh>
         </group>
 
-        {/* --- RIGHT WALL (Purple) - Forced Corner Overlap --- */}
-        <group position={[10, 0, 15.5]} rotation={[0, Math.PI / 2, 0]}>
-          {/* Extended corner block to ensure walls physically intersect */}
-          <Box args={[11, 30, 2.1]} position={[-15.5, 0, 0]}> 
-            <meshStandardMaterial {...purpleProps} />
+        {/* --- THE ISOLATED INTERIOR & L-BENCH --- */}
+        <group position={[-12, -3.5, -12]} scale={0.9} rotation={[0, Math.PI / 4, 0]}>
+          
+          {/* Back Travertine Wall Segment */}
+          <Box args={[18, 12, 1.5]} position={[0, 0, 0]}>
+            <meshStandardMaterial map={renderTex} color="#fcd7d7" roughness={0.9} />
           </Box>
-          <Box args={[10, 10, 2.1]} position={[-5, 10, 0]}>
-            <meshStandardMaterial {...purpleProps} />
+          {/* Side Travertine Wall Segment */}
+          <Box args={[1.5, 12, 18]} position={[-8.25, 0, 8.25]}>
+            <meshStandardMaterial map={renderTex} color="#fcd7d7" roughness={0.9} />
           </Box>
-          <Box args={[10, 30, 2.1]} position={[5, 0, 0]}>
-            <meshStandardMaterial {...purpleProps} />
-          </Box>
-        </group>
 
-        {/* --- PLATFORM FLOOR - Widened to hide water gaps under walls --- */}
-        <Box args={[34, 1.5, 27]} position={[1, -14.2, 4]}>
-          <meshStandardMaterial {...pinkProps} />
-        </Box>
+          {/* L-BENCH (Purple Stone) */}
+          <group position={[0, -5, 0]}>
+            <Box args={[16, 1.5, 4]} position={[0, 0, -2.5]}>
+              <meshStandardMaterial color="#d1c4e9" roughness={0.6} />
+            </Box>
+            <Box args={[4, 1.5, 14]} position={[-6, 0, 2.5]}>
+              <meshStandardMaterial color="#d1c4e9" roughness={0.6} />
+            </Box>
+          </group>
 
-        {/* RE-ALIGNED L-BENCH */}
-        <group position={[-10, -12, 0]}>
-          <Box args={[22, 2, 4]} position={[1, 0, -6]}>
-            <meshStandardMaterial {...purpleProps} />
-          </Box>
-          <Box args={[4, 2, 18]} position={[-8, 0, 5]}>
-            <meshStandardMaterial {...purpleProps} />
-          </Box>
         </group>
 
       </group>
 
       <water
         ref={waterRef}
-        args={[new THREE.PlaneGeometry(1000, 1000), {
-          textureWidth: 512, textureHeight: 512, waterNormals, 
-          sunDirection: new THREE.Vector3(10, 1, 20), sunColor: 0xffffff, 
-          waterColor: 0x999999, distortionScale: 0.4, fog: false,
+        args={[new THREE.PlaneGeometry(5000, 5000), {
+          textureWidth: 512, textureHeight: 512, waterNormals,sunDirection: new THREE.Vector3(10, 1, 20), sunColor: 0xffffff, waterColor: 0x999999,distortionScale: 0.5,fog: true,
         }]}
         rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, -0.1, 0]}
+        position={[0, -0.05, 0]}
       />
+      <ContactShadows opacity={0.4} scale={200} blur={2.5} far={40} color="#5e4d4d" />
     </>
   );
 }
