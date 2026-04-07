@@ -6,24 +6,21 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* FULLY FRAMED SLIT WINDOW with that exact black stone texture material */
+/* FULLY FRAMED SLIT WINDOW */
 const SlitWindow = ({ position }) => (
   <group position={position}>
-    {/* Left Frame Vertical */}
+    {/* Frame perimeters using the textured stone style */}
     <Box args={[0.2, 25, 2.1]} position={[-0.4, 0, 0]}>
-      <meshStandardMaterial color="#2a2a2a" roughness={0.3} metalness={0} /> {/* Textured Black Stone look */}
+      <meshStandardMaterial color="#1a1a1a" roughness={0.1} />
     </Box>
-    {/* Right Frame Vertical */}
     <Box args={[0.2, 25, 2.1]} position={[0.4, 0, 0]}>
-      <meshStandardMaterial color="#2a2a2a" roughness={0.3} metalness={0} />
+      <meshStandardMaterial color="#1a1a1a" roughness={0.1} />
     </Box>
-    {/* Top Frame Horizontal */}
     <Box args={[1.0, 0.2, 2.1]} position={[0, 12.4, 0]}>
-      <meshStandardMaterial color="#2a2a2a" roughness={0.3} metalness={0} />
+      <meshStandardMaterial color="#1a1a1a" roughness={0.1} />
     </Box>
-    {/* Bottom Frame Horizontal */}
     <Box args={[1.0, 0.2, 2.1]} position={[0, -12.4, 0]}>
-      <meshStandardMaterial color="#2a2a2a" roughness={0.3} metalness={0} />
+      <meshStandardMaterial color="#1a1a1a" roughness={0.1} />
     </Box>
     {/* Glass Pane */}
     <Box args={[0.6, 24.6, 2.05]} position={[0, 0, 0]}>
@@ -37,23 +34,21 @@ export default function Scene({ currentView }) {
   const waterRef = useRef();
   const baseUrl = import.meta.env.BASE_URL || "/";
 
-  // Use only ONE main stucco/lime wash texture for the entire structure
-  const renderTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/lime_wash_texture.jpg`);
+  // Reverting to verified working texture path to avoid white-screen 404s
+  const renderTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
 
   useMemo(() => {
     if (renderTex) {
       renderTex.wrapS = renderTex.wrapT = THREE.RepeatWrapping;
-      renderTex.anisotropy = 16;
-      renderTex.repeat.set(2, 6); // Tighten tiling for intimate feel
+      renderTex.repeat.set(2, 4); // Tiling for the textured render look
     }
   }, [renderTex]);
 
-  // Define the material properties with the texture (replaces the old travertine/stone)
-  const pinkRenderProps = { map: renderTex, color: "#fcd7d7", roughness: 0.7, metalness: 0 };
-  const purpleRenderProps = { map: renderTex, color: "#d1c4e9", roughness: 0.7, metalness: 0 }; // A light purple render
+  // Master material presets for the entire structure
+  const pinkProps = { map: renderTex, color: "#fcd7d7", roughness: 0.8 };
+  const purpleProps = { map: renderTex, color: "#d1c4e9", roughness: 0.8 };
 
-  /* Optimized "Pool Room" Views (Closer for detail) */
   const views = {
     home: { pos: [-20, 5, 25], look: [15, 2, -10] },      
     collection: { pos: [60, 3, 15], look: [120, 2, 15] } 
@@ -73,63 +68,49 @@ export default function Scene({ currentView }) {
     <>
       <Sky sunPosition={[-35, 0.08, 15]} turbidity={0.01} rayleigh={3} />
       <Environment preset="dawn" />
-      <fog attach="fog" args={["#f7ece8", 20, 150]} />
       
-      {/* THE INTIMATE TEXTURED POOL SANCTUARY */}
       <group position={[0, 4, -10]} scale={0.8}>
         
-        {/* --- BACK WALL (Now Pink Textured Render) with FRAMED SLITS --- */}
-        <group position={[-15, 0, 0]}>
-            {/* Extended Solid Section to close the corner gap completely */}
-            <Box args={[12, 30, 2]} position={[-1, 0, 0]}> 
-              <meshStandardMaterial {...pinkRenderProps} />
+        {/* --- BACK WALL (Pink) - Seamless Corner Fix --- */}
+        <group position={[-15.5, 0, 0]}>
+            <Box args={[11, 30, 2]} position={[-0.5, 0, 0]}> 
+              <meshStandardMaterial {...pinkProps} />
             </Box>
-            
-            <SlitWindow position={[6.1, 0, 0]} />
-
-            <Box args={[18, 30, 2]} position={[16.1, 0, 0]}>
-              <meshStandardMaterial {...pinkRenderProps} />
+            <SlitWindow position={[5.5, 0, 0]} />
+            <Box args={[18, 30, 2]} position={[15.5, 0, 0]}>
+              <meshStandardMaterial {...pinkProps} />
             </Box>
-
-            <SlitWindow position={[26.1, 0, 0]}> <Box args={[0.2, 25, 2.1]}> <meshStandardMaterial color="#2a2a2a" roughness={0.3} metalness={0} /> </Box> </SlitWindow>
-
-            <Box args={[10, 30, 2]} position={[36.1, 0, 0]}>
-              <meshStandardMaterial {...pinkRenderProps} />
+            <SlitWindow position={[25.5, 0, 0]} />
+            <Box args={[10, 30, 2]} position={[35.5, 0, 0]}>
+              <meshStandardMaterial {...pinkProps} />
             </Box>
         </group>
 
-        {/* --- RIGHT WALL (Now Purple Textured Render) - Doors intact --- */}
-        <group position={[10, 0, 15]} rotation={[0, Math.PI / 2, 0]}>
-          <Box args={[10, 30, 2]} position={[-15, 0, 0]}>
-            <meshStandardMaterial {...purpleRenderProps} />
+        {/* --- RIGHT WALL (Purple) - Overlapping for no gaps --- */}
+        <group position={[10, 0, 15.5]} rotation={[0, Math.PI / 2, 0]}>
+          <Box args={[11, 30, 2]} position={[-15.5, 0, 0]}>
+            <meshStandardMaterial {...purpleProps} />
           </Box>
           <Box args={[10, 10, 2]} position={[-5, 10, 0]}>
-            <meshStandardMaterial {...purpleRenderProps} />
+            <meshStandardMaterial {...purpleProps} />
           </Box>
           <Box args={[10, 30, 2]} position={[5, 0, 0]}>
-            <meshStandardMaterial {...purpleRenderProps} />
+            <meshStandardMaterial {...purpleProps} />
           </Box>
         </group>
 
-        {/* --- FIXED CONNECTIONS & FOUNDATION --- */}
-        
-        {/* CORNER CONNECTOR - Ensures no gap */}
-        <Box args={[3, 30, 2]} position={[-15.5, 0, 1]} rotation={[0, Math.PI / 4, 0]}>
-          <meshStandardMaterial {...pinkRenderProps} />
+        {/* THE PLATFORM (Tucked into corner foundation) */}
+        <Box args={[25, 1.5, 20]} position={[-10, -14.2, 5]}>
+          <meshStandardMaterial {...pinkProps} />
         </Box>
 
-        {/* NEW ADDITION: CORNER PLATFORM */}
-        <Box args={[22, 1.5, 20]} position={[-10, -14.2, 5]}>
-          <meshStandardMaterial {...pinkRenderProps} />
-        </Box>
-
-        {/* L-SHAPED CORNER BENCH */}
+        {/* THE L-BENCH */}
         <group position={[-10, -12, 0]}>
           <Box args={[20, 2, 4]} position={[0, 0, -6]}>
-            <meshStandardMaterial {...purpleRenderProps} />
+            <meshStandardMaterial {...purpleProps} />
           </Box>
           <Box args={[4, 2, 16]} position={[-8, 0, 4]}>
-            <meshStandardMaterial {...purpleRenderProps} />
+            <meshStandardMaterial {...purpleProps} />
           </Box>
         </group>
 
@@ -145,7 +126,6 @@ export default function Scene({ currentView }) {
         rotation={[-Math.PI / 2, 0, 0]}
         position={[0, -0.05, 0]}
       />
-      <ContactShadows opacity={0.4} scale={150} blur={2.5} far={40} color="#5e4d4d" />
     </>
   );
 }
