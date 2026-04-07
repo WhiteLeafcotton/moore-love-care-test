@@ -19,14 +19,14 @@ export default function Scene({ currentView }) {
     [pinkStoneTex, travertineTex, waterNormals].forEach(t => {
       if (t) t.wrapS = t.wrapT = THREE.RepeatWrapping;
     });
-    if (travertineTex) travertineTex.repeat.set(2, 8); 
-    if (pinkStoneTex) pinkStoneTex.repeat.set(1, 8);
+    if (travertineTex) travertineTex.repeat.set(2, 10); 
+    if (pinkStoneTex) pinkStoneTex.repeat.set(1, 10);
   }, [pinkStoneTex, travertineTex, waterNormals]);
 
   const views = {
     home: { 
       pos: [15, 2.5, 20],     
-      look: [-10, 4, -8]    
+      look: [-12, 4, -8]    
     },
     collection: { 
       pos: [-95, 4, 50],      
@@ -53,78 +53,57 @@ export default function Scene({ currentView }) {
       {/* --- LOCATION 1: THE MONOLITH --- */}
       <group position={[0, 0, -5]} scale={0.7}>
         
-        {/* BACK WALL (Travertine) with Doorway */}
-        <group position={[0, 40, -12]}> 
+        {/* BACK WALL (Travertine) with Center Doorway */}
+        <group position={[0, 50, -12]}> 
           <mesh position={[-25, 0, 0]}>
-            <boxGeometry args={[40, 100, 4]} />
+            <boxGeometry args={[40, 120, 4]} />
             <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
           </mesh>
           <mesh position={[25, 0, 0]}>
-            <boxGeometry args={[40, 100, 4]} />
+            <boxGeometry args={[40, 120, 4]} />
             <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
           </mesh>
-          <mesh position={[0, 30, 0]}> 
-            <boxGeometry args={[10, 60, 4]} />
+          <mesh position={[0, 40, 0]}> 
+            <boxGeometry args={[10, 40, 4]} />
             <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
           </mesh>
         </group>
 
-        {/* PINK STONE WALL WITH MID-WAY WINDOWS */}
-        <group position={[-45, 40, 12]} rotation={[0, Math.PI / 2, 0]}>
-          {/* Bottom Solid Section (from water up to window sill) */}
-          <mesh position={[0, -45, 0]}>
-            <boxGeometry args={[50, 10, 4]} />
+        {/* SIDE WALL (Pink Stone) WITH ONE SLENDER DOOR CUTOUT */}
+        <group position={[-45, 50, 12]} rotation={[0, Math.PI / 2, 0]}>
+          {/* Main Wall Body (Left of door) */}
+          <mesh position={[-15, 0, 0]}>
+            <boxGeometry args={[20, 120, 4]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
-          
-          {/* Vertical Pillars creating the "Slits" */}
-          <mesh position={[-20, 5, 0]}> {/* Left pillar */}
-            <boxGeometry args={[10, 90, 4]} />
+          {/* Main Wall Body (Right of door) */}
+          <mesh position={[15, 0, 0]}>
+            <boxGeometry args={[30, 120, 4]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
-          <mesh position={[-4, 5, 0]}> {/* Middle pillar */}
-            <boxGeometry args={[10, 90, 4]} />
-            <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
-          </mesh>
-          <mesh position={[18, 5, 0]}> {/* Right end wall */}
-            <boxGeometry args={[22, 90, 4]} />
-            <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
-          </mesh>
-
-          {/* Window Tops (Headers) - Closes the windows half way up */}
-          <mesh position={[-12, -20, 0]}> 
-            <boxGeometry args={[6, 40, 4]} /> {/* This blocks the top half of the slit */}
-            <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
-          </mesh>
-          <mesh position={[4, -20, 0]}>
+          {/* Header (Top of door) */}
+          <mesh position={[-2, 40, 0]}>
             <boxGeometry args={[6, 40, 4]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
         </group>
 
-        {/* BUILT-IN TRAVERTINE BENCH */}
-        <mesh position={[-18, 2, -6]} castShadow receiveShadow>
-          <boxGeometry args={[45, 4, 12]} /> 
+        {/* THE LOCKED BENCH: Intersects the Pink Wall */}
+        <mesh position={[-18.5, 2, -6]} castShadow receiveShadow>
+          <boxGeometry args={[46, 4, 12]} /> 
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
-
-        {/* STEPS */}
-        {[0, 1, 2].map((i) => (
-          <mesh key={i} position={[8, 0.5 - (i * 0.4), 2 + (i * 1.5)]}>
-            <boxGeometry args={[8, 0.4, 2]} />
-            <meshStandardMaterial map={travertineTex} color="#ffffff" />
-          </mesh>
-        ))}
       </group>
 
       {/* --- LOCATION 2: THE FLOATING SLAB --- */}
       <group position={[-130, 1, -15]}>
         <mesh castShadow receiveShadow>
-          <boxGeometry args={[50, 1.5, 40]} />
+          <boxGeometry args={[55, 1.5, 45]} />
           <meshStandardMaterial map={pinkStoneTex} color="#fcd7d7" />
         </mesh>
       </group>
 
+      {/* --- WATER --- */}
       <water
         ref={waterRef}
         args={[new THREE.PlaneGeometry(3000, 3000), {
