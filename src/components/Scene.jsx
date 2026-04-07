@@ -23,16 +23,16 @@ export default function Scene({ currentView }) {
     if (pinkStoneTex) pinkStoneTex.repeat.set(1.5, 10);
   }, [pinkStoneTex, travertineTex, waterNormals]);
 
-  /* REFINED CINEMATIC PATHWAY:
-     - Home: Pulls back and to the left to reveal 80% of the structure.
+ /* REFINED CINEMATIC PATHWAY:
+     - Home: Moves further left to center the interior corner in the frame.
      - Collection: Lateral exit remains the same.
   */
   const views = {
     home: { 
-      // BACKED UP & MOVED LEFT: Positioned at [-25, 6, 45] to capture the scale
-      pos: [-25, 6, 45],      
-      // LOOK: Still focused on the corner [45, 2, -15] to maintain the depth
-      look: [45, 2, -15]    
+      // MOVED FURTHER LEFT: Positioned at [-45, 6, 50] to center the corner
+      pos: [-45, 6, 50],      
+      // LOOK: Adjusted to [35, 2, -15] to frame the corner intersection beautifully
+      look: [35, 2, -15]    
     },
     collection: { 
       pos: [90, 3, 20], 
@@ -45,9 +45,9 @@ export default function Scene({ currentView }) {
   useFrame((state, delta) => {
     const target = views[currentView];
     
-    // START POINT: Starting high and further right to create a sweeping entrance
+    // SWEEPING ENTRANCE: Keeps the high-right start for a dramatic fly-in
     if (state.clock.elapsedTime < 0.1 && currentView === 'home') {
-       camera.position.set(40, 10, 70); 
+       camera.position.set(40, 12, 80); 
     }
 
     camera.position.lerp(new THREE.Vector3(...target.pos), 0.012); 
