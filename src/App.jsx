@@ -7,14 +7,13 @@ export default function App() {
   const [currentView, setCurrentView] = useState("home");
 
   return (
-    <div style={{ width: "100vw", height: "100vh", background: "#f5eae8" }}>
+    <div style={{ width: "100vw", height: "100vh", background: "#f5eae8", position: "relative" }}>
       
-      {/* UI OVERLAY */}
+      {/* UI OVERLAY - Matched to the "Moore Love & Care" Editorial Style */}
       <div
         style={{
           position: "absolute",
-          width: "100%",
-          height: "100%",
+          inset: 0,
           zIndex: 10,
           pointerEvents: "none",
           display: "flex",
@@ -25,10 +24,13 @@ export default function App() {
       >
         <h1
           style={{
-            fontSize: "48px",
-            letterSpacing: "6px",
-            color: "#4a4a4a",
-            fontWeight: 300,
+            fontSize: "clamp(2rem, 5vw, 3.5rem)",
+            letterSpacing: "0.15em",
+            color: "#3e3e3e",
+            fontWeight: 400,
+            margin: 0,
+            textTransform: "uppercase",
+            fontFamily: "'Cinzel', serif" // Essential for that premium look
           }}
         >
           Moore Love & Care
@@ -36,10 +38,11 @@ export default function App() {
 
         <p
           style={{
-            letterSpacing: "4px",
-            fontSize: "12px",
-            marginTop: "10px",
-            color: "#7a7a7a",
+            letterSpacing: "0.4em",
+            fontSize: "10px",
+            marginTop: "12px",
+            color: "rgba(62, 62, 62, 0.7)",
+            fontWeight: 700
           }}
         >
           THE SOLARIUM SANCTUARY
@@ -53,15 +56,17 @@ export default function App() {
           }
           style={{
             pointerEvents: "auto",
-            marginTop: "40px",
-            padding: "12px 40px",
+            marginTop: "60px",
+            padding: "16px 50px",
             borderRadius: "50px",
-            border: "1px solid rgba(255,255,255,0.6)",
-            background: "rgba(255,255,255,0.25)",
-            backdropFilter: "blur(12px)",
-            letterSpacing: "3px",
+            border: "1px solid rgba(0,0,0,0.05)",
+            background: "rgba(255,255,255,0.8)",
+            backdropFilter: "blur(10px)",
+            letterSpacing: "0.2em",
             fontSize: "11px",
+            textTransform: "uppercase",
             cursor: "pointer",
+            transition: "all 0.4s ease"
           }}
         >
           {currentView === "home"
@@ -70,8 +75,13 @@ export default function App() {
         </button>
       </div>
 
-      {/* 3D CANVAS */}
-      <Canvas shadows camera={{ position: [12, 6, 18], fov: 28 }}>
+      {/* 3D CANVAS - Updated Camera for the Monumental Look */}
+      <Canvas 
+        shadows 
+        dpr={[1, 2]}
+        camera={{ position: [20, 2.5, 26], fov: 32 }} // This matches the reference angle
+        gl={{ antialias: true, alpha: true }}
+      >
         <Suspense fallback={null}>
           <Scene currentView={currentView} />
         </Suspense>
