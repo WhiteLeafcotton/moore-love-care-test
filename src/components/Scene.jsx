@@ -43,10 +43,18 @@ export default function Scene({ currentView }) {
     if (pinkStoneTex) pinkStoneTex.repeat.set(1, 4);
   }, [pinkStoneTex, travertineTex, waterNormals]);
 
+  // 🔥 CINEMATIC CAMERA VIEWS: Lowered Y and brought Z closer
   const views = {
-    home: { pos: [22, 8, 28], look: [0, 4, 0] },
-    collection: { pos: [-75, 12, 55], look: [-100, 5, -30] } 
+    home: { 
+      pos: [14, 3, 14],      // Lower (3) and closer (14)
+      look: [-2, 4, -2]      // Looking slightly up at the corner
+    },
+    collection: { 
+      pos: [-55, 5, 35],     // Lower (5) and closer (35)
+      look: [-85, 6, -15]    // Angled to see the steps descending toward water
+    } 
   };
+  
   const targetLook = useMemo(() => new THREE.Vector3(0, 0, 0), []);
 
   useFrame((state, delta) => {
@@ -54,39 +62,38 @@ export default function Scene({ currentView }) {
     camera.position.lerp(new THREE.Vector3(...target.pos), 0.035); 
     targetLook.lerp(new THREE.Vector3(...target.look), 0.035);
     camera.lookAt(targetLook);
-    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.4;
+    
+    if (waterRef.current) {
+      waterRef.current.material.uniforms["time"].value += delta * 0.4;
+    }
   });
 
   return (
     <>
       <Sky sunPosition={[10, 0.5, 20]} turbidity={0.1} rayleigh={2} />
       <Environment preset="dawn" />
-      <fog attach="fog" args={["#f7ece8", 20, 150]} />
+      <fog attach="fog" args={["#f7ece8", 10, 100]} />
       
       <PinkClouds />
 
-      {/* --- HOME AREA: GROUNDED ARCHITECTURAL BLOCKS --- */}
+      {/* --- HOME AREA --- */}
       <group position={[0, 0, -5]} scale={0.6}>
-        {/* Main Travertine Wall */}
         <mesh position={[-10, 15, -10]} castShadow receiveShadow>
           <boxGeometry args={[20, 30, 2]} />
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
         
-        {/* Pink Stone Side Wall */}
         <mesh position={[-21, 15, -1]} rotation={[0, Math.PI / 2, 0]} castShadow>
           <boxGeometry args={[18, 30, 2]} />
           <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
         </mesh>
 
-        {/* STACKED PLATFORM SYSTEM */}
+        {/* STACKED ARCHITECTURAL BLOCKS */}
         <group position={[-10, 0, 4]}>
-          {/* Base Foundation Slab */}
           <mesh position={[0, 0.5, 0]} receiveShadow castShadow>
             <boxGeometry args={[24, 1, 20]} />
             <meshStandardMaterial map={pinkStoneTex} color="#fcd7d7" />
           </mesh>
-          {/* Architectural Upper Block (Real Architecture Feel) */}
           <mesh position={[0, 1.8, -2]} castShadow receiveShadow>
             <boxGeometry args={[18, 1.6, 12]} />
             <meshStandardMaterial map={travertineTex} color="#ffffff" />
@@ -94,15 +101,13 @@ export default function Scene({ currentView }) {
         </group>
       </group>
 
-      {/* --- COLLECTION AREA: REVERSED ARCHITECTURAL STAIRS --- */}
+      {/* --- COLLECTION AREA: REVERSED STAIRS --- */}
       <group position={[-90, 0, -10]} scale={0.8}>
-        {/* Top Landing Platform (Now in the back) */}
         <mesh position={[0, 6, -10]} castShadow receiveShadow>
           <boxGeometry args={[35, 1.5, 20]} />
           <meshStandardMaterial map={pinkStoneTex} color="#fcd7d7" />
         </mesh>
 
-        {/* Steps descending TOWARD the camera */}
         {[0, 1, 2, 3, 4].map((i) => (
           <mesh key={i} position={[0, (4 - i) * 1.2, i * 4.5]} castShadow receiveShadow>
             <boxGeometry args={[32, 1.2, 8]} />
