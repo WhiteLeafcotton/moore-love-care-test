@@ -6,26 +6,6 @@ import * as THREE from "three";
 
 extend({ Water });
 
-function PinkClouds() {
-  const cloudsRef = useRef();
-  useFrame((state) => {
-    cloudsRef.current.position.x = Math.sin(state.clock.elapsedTime * 0.08) * 2;
-  });
-
-  return (
-    <group ref={cloudsRef}>
-      <mesh position={[-25, 30, -70]}>
-        <sphereGeometry args={[22, 32, 16]} />
-        <meshStandardMaterial color="#fcd7d7" transparent opacity={0.12} fog={false} />
-      </mesh>
-      <mesh position={[35, 40, -90]}>
-        <sphereGeometry args={[28, 32, 16]} />
-        <meshStandardMaterial color="#fcd7d7" transparent opacity={0.12} fog={false} />
-      </mesh>
-    </group>
-  );
-}
-
 export default function Scene({ currentView }) {
   const { camera } = useThree();
   const waterRef = useRef();
@@ -39,18 +19,18 @@ export default function Scene({ currentView }) {
     [pinkStoneTex, travertineTex, waterNormals].forEach(t => {
       if (t) t.wrapS = t.wrapT = THREE.RepeatWrapping;
     });
-    if (travertineTex) travertineTex.repeat.set(2, 2);
+    if (travertineTex) travertineTex.repeat.set(2, 4); // Stretched for taller walls
     if (pinkStoneTex) pinkStoneTex.repeat.set(1, 4);
   }, [pinkStoneTex, travertineTex, waterNormals]);
 
   const views = {
     home: { 
-      pos: [10, 2.5, 18],     // Slightly back to frame the arch
-      look: [-8, 6, -12]      // Looking slightly UP to catch the top of the door
+      pos: [12, 1.8, 15],      // Lower, immersive water level
+      look: [-15, 4, -10]      // Angled to frame the corner and door
     },
     collection: { 
-      pos: [-85, 3.5, 45],    
-      look: [-115, 3, -15]    
+      pos: [-90, 3, 40],    
+      look: [-120, 2, -20]    
     } 
   };
   
@@ -69,57 +49,49 @@ export default function Scene({ currentView }) {
 
   return (
     <>
-      <Sky sunPosition={[10, 0.5, 20]} turbidity={0.1} rayleigh={2} />
+      <Sky sunPosition={[10, 0.2, 20]} turbidity={0.1} rayleigh={2} />
       <Environment preset="dawn" />
-      <fog attach="fog" args={["#f7ece8", 10, 135]} />
-      
-      <PinkClouds />
+      <fog attach="fog" args={["#f7ece8", 5, 120]} />
 
-      {/* --- THE MONOLITHIC ROOM WITH LOWER ARCH --- */}
-      <group position={[0, 0, -5]} scale={0.6}>
+      {/* --- CINEMATIC ARCHITECTURE --- */}
+      <group position={[0, 0, -5]} scale={0.7}>
         
-        {/* BACK WALL WITH ACCESSIBLE DOORWAY */}
-        <group position={[0, 10, -12]}> {/* Lowered entire wall group from 15 to 10 */}
-          {/* Left Side */}
-          <mesh position={[-18, 0, 0]}>
-            <boxGeometry args={[26, 20, 4]} />
+        {/* BACK WALL: Tall enough to never see the top edge */}
+        <group position={[0, 25, -12]}> 
+          {/* Left Wall Segment */}
+          <mesh position={[-25, 0, 0]}>
+            <boxGeometry args={[40, 60, 4]} />
             <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
           </mesh>
-          {/* Right Side */}
-          <mesh position={[18, 0, 0]}>
-            <boxGeometry args={[26, 20, 4]} />
+          {/* Right Wall Segment */}
+          <mesh position={[25, 0, 0]}>
+            <boxGeometry args={[40, 60, 4]} />
             <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
           </mesh>
-          {/* Header - The "Arch" piece brought into view */}
-          <mesh position={[0, 7, 0]}>
-            <boxGeometry args={[10, 6, 4]} />
+          {/* Header - Positioned high so the door feels massive */}
+          <mesh position={[0, 15, 0]}>
+            <boxGeometry args={[10, 30, 4]} />
             <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
           </mesh>
         </group>
 
-        {/* SIDE WALL */}
-        <mesh position={[-35, 10, 0]} rotation={[0, Math.PI / 2, 0]}>
-          <boxGeometry args={[30, 20, 4]} />
+        {/* SIDE WALL: Extended height */}
+        <mesh position={[-45, 25, 10]} rotation={[0, Math.PI / 2, 0]}>
+          <boxGeometry args={[50, 60, 4]} />
           <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
         </mesh>
       </group>
 
-      {/* --- GRAND STAIRS DESCENDING --- */}
+      {/* --- DESCENDING STAIRS --- */}
       <group position={[-110, 0, -5]} scale={0.8}>
-        <mesh position={[0, 6, -10]} castShadow receiveShadow>
-          <boxGeometry args={[45, 1.5, 22]} />
-          <meshStandardMaterial map={pinkStoneTex} color="#fcd7d7" />
-        </mesh>
-
         {[0, 1, 2, 3, 4].map((i) => (
-          <mesh key={i} position={[0, (4 - i) * 1.2, i * 5.5]} castShadow receiveShadow>
-            <boxGeometry args={[40, 1.2, 10]} />
+          <mesh key={i} position={[0, (4 - i) * 1.2, i * 6]} castShadow receiveShadow>
+            <boxGeometry args={[45, 1.2, 10]} />
             <meshStandardMaterial map={travertineTex} color="#ffffff" />
           </mesh>
         ))}
       </group>
 
-      {/* --- WATER SURFACE --- */}
       <water
         ref={waterRef}
         args={[new THREE.PlaneGeometry(3000, 3000), {
