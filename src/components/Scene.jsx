@@ -39,19 +39,19 @@ export default function Scene({ currentView }) {
     [pinkStoneTex, travertineTex, waterNormals].forEach(t => {
       if (t) t.wrapS = t.wrapT = THREE.RepeatWrapping;
     });
-    if (travertineTex) travertineTex.repeat.set(2, 2);
+    if (travertineTex) travertineTex.repeat.set(4, 2);
     if (pinkStoneTex) pinkStoneTex.repeat.set(1, 4);
   }, [pinkStoneTex, travertineTex, waterNormals]);
 
-  // 🔥 CINEMATIC CAMERA VIEWS: Lowered Y and brought Z closer
+  // 🔥 WATER-LEVEL CAMERA: Very low Y (2.0) to feel "submerged" in the scene
   const views = {
     home: { 
-      pos: [14, 3, 14],      // Lower (3) and closer (14)
-      look: [-2, 4, -2]      // Looking slightly up at the corner
+      pos: [10, 2, 15],       // Right on the water
+      look: [-8, 4, -10]      // Looking through the U-shape toward the horizon
     },
     collection: { 
-      pos: [-55, 5, 35],     // Lower (5) and closer (35)
-      look: [-85, 6, -15]    // Angled to see the steps descending toward water
+      pos: [-70, 4, 45],      // Low-angle glide over the water
+      look: [-110, 3, -15]    // Looking up at the descending stairs
     } 
   };
   
@@ -59,8 +59,8 @@ export default function Scene({ currentView }) {
 
   useFrame((state, delta) => {
     const target = views[currentView];
-    camera.position.lerp(new THREE.Vector3(...target.pos), 0.035); 
-    targetLook.lerp(new THREE.Vector3(...target.look), 0.035);
+    camera.position.lerp(new THREE.Vector3(...target.pos), 0.025); 
+    targetLook.lerp(new THREE.Vector3(...target.look), 0.025);
     camera.lookAt(targetLook);
     
     if (waterRef.current) {
@@ -72,45 +72,53 @@ export default function Scene({ currentView }) {
     <>
       <Sky sunPosition={[10, 0.5, 20]} turbidity={0.1} rayleigh={2} />
       <Environment preset="dawn" />
-      <fog attach="fog" args={["#f7ece8", 10, 100]} />
+      <fog attach="fog" args={["#f7ece8", 10, 130]} />
       
       <PinkClouds />
 
-      {/* --- HOME AREA --- */}
+      {/* --- THE U-SHAPED COURTYARD (OPEN BUT ENCLOSED) --- */}
       <group position={[0, 0, -5]} scale={0.6}>
-        <mesh position={[-10, 15, -10]} castShadow receiveShadow>
-          <boxGeometry args={[20, 30, 2]} />
+        {/* 1. Extended Back Wall (Travertine) */}
+        <mesh position={[5, 15, -15]} castShadow receiveShadow>
+          <boxGeometry args={[60, 30, 2]} /> 
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
         
-        <mesh position={[-21, 15, -1]} rotation={[0, Math.PI / 2, 0]} castShadow>
-          <boxGeometry args={[18, 30, 2]} />
+        {/* 2. Left Wing Wall (Pink Stone) */}
+        <mesh position={[-25, 15, 0]} rotation={[0, Math.PI / 2, 0]} castShadow>
+          <boxGeometry args={[30, 30, 2]} />
           <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
         </mesh>
 
-        {/* STACKED ARCHITECTURAL BLOCKS */}
-        <group position={[-10, 0, 4]}>
+        {/* 3. Right Wing Wall (Travertine) - Completes the "Room" feel */}
+        <mesh position={[35, 15, 0]} rotation={[0, Math.PI / 2, 0]} castShadow>
+          <boxGeometry args={[30, 30, 2]} />
+          <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
+        </mesh>
+
+        {/* GROUNDED ARCHITECTURAL PEDESTAL */}
+        <group position={[-10, 0, 6]}>
           <mesh position={[0, 0.5, 0]} receiveShadow castShadow>
-            <boxGeometry args={[24, 1, 20]} />
+            <boxGeometry args={[28, 1, 20]} />
             <meshStandardMaterial map={pinkStoneTex} color="#fcd7d7" />
           </mesh>
           <mesh position={[0, 1.8, -2]} castShadow receiveShadow>
-            <boxGeometry args={[18, 1.6, 12]} />
+            <boxGeometry args={[20, 1.6, 12]} />
             <meshStandardMaterial map={travertineTex} color="#ffffff" />
           </mesh>
         </group>
       </group>
 
-      {/* --- COLLECTION AREA: REVERSED STAIRS --- */}
-      <group position={[-90, 0, -10]} scale={0.8}>
+      {/* --- COLLECTION AREA: GRAND STAIRS DESCENDING TO WATER --- */}
+      <group position={[-115, 0, -5]} scale={0.8}>
         <mesh position={[0, 6, -10]} castShadow receiveShadow>
-          <boxGeometry args={[35, 1.5, 20]} />
+          <boxGeometry args={[45, 1.5, 22]} />
           <meshStandardMaterial map={pinkStoneTex} color="#fcd7d7" />
         </mesh>
 
         {[0, 1, 2, 3, 4].map((i) => (
-          <mesh key={i} position={[0, (4 - i) * 1.2, i * 4.5]} castShadow receiveShadow>
-            <boxGeometry args={[32, 1.2, 8]} />
+          <mesh key={i} position={[0, (4 - i) * 1.2, i * 5.5]} castShadow receiveShadow>
+            <boxGeometry args={[40, 1.2, 10]} />
             <meshStandardMaterial map={travertineTex} color="#ffffff" />
           </mesh>
         ))}
