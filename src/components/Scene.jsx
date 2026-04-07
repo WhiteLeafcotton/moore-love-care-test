@@ -16,25 +16,25 @@ export default function Scene({ currentView }) {
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
 
   useMemo(() => {
-    if (pinkStoneTex) {
-      pinkStoneTex.wrapS = pinkStoneTex.wrapT = THREE.RepeatWrapping;
-      pinkStoneTex.repeat.set(1, 15);
-    }
-    if (travertineTex) {
-      travertineTex.wrapS = travertineTex.wrapT = THREE.RepeatWrapping;
-      travertineTex.repeat.set(2, 15);
-    }
-    if (waterNormals) waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
+    [pinkStoneTex, travertineTex, waterNormals].forEach(t => {
+      if (t) {
+        t.wrapS = t.wrapT = THREE.RepeatWrapping;
+        // High-end subtle gloss
+        t.anisotropy = 16;
+      }
+    });
+    if (travertineTex) travertineTex.repeat.set(1.5, 12); 
+    if (pinkStoneTex) pinkStoneTex.repeat.set(1.5, 12);
   }, [pinkStoneTex, travertineTex, waterNormals]);
 
   const views = {
     home: { 
-      pos: [18, 2.2, 26],     
-      look: [-16, 4, -5]    
+      pos: [22, 2.8, 28],     // Pushed back slightly for that wider editorial crop
+      look: [-18, 4.5, -5]    
     },
     collection: { 
-      pos: [-110, 3, 55],     
-      look: [-140, 2, -15]    
+      pos: [-110, 3, 55],      
+      look: [-140, 2, -10]    
     } 
   };
   
@@ -42,76 +42,87 @@ export default function Scene({ currentView }) {
 
   useFrame((state, delta) => {
     const target = views[currentView];
-    camera.position.lerp(new THREE.Vector3(...target.pos), 0.02); 
-    targetLook.lerp(new THREE.Vector3(...target.look), 0.02);
+    camera.position.lerp(new THREE.Vector3(...target.pos), 0.025); 
+    targetLook.lerp(new THREE.Vector3(...target.look), 0.025);
     camera.lookAt(targetLook);
-    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.35;
+    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.3;
   });
 
   return (
     <>
-      <Sky sunPosition={[10, 0.05, -20]} turbidity={0.01} rayleigh={3} />
+      {/* LIGHTING SETUP: 
+        Low sun position to create the warm, horizontal light rays 
+        seen in your reference image.
+      */}
+      <Sky sunPosition={[-30, 0.08, 15]} turbidity={0.02} rayleigh={4} mieCoefficient={0.005} />
       <Environment preset="dawn" />
-      <fog attach="fog" args={["#f7ece8", 20, 200]} />
+      <fog attach="fog" args={["#f7ece8", 30, 220]} />
+      
+      <directionalLight 
+        position={[-50, 5, 20]} 
+        intensity={1.8} 
+        color="#fff4f0" 
+        castShadow 
+      />
 
-      {/* --- LOCATION 1: THE MONOLITH --- */}
-      <group position={[0, 0, -5]} scale={0.7}>
+      {/* --- THE PRIMARY MONOLITH --- */}
+      <group position={[0, 0, -5]} scale={0.75}>
         
-        {/* BACK WALL (Travertine) with Offset Window */}
-        <group position={[0, 75, -12]}> 
-          {/* 1. Corner Pillar (Now wider to push the window away from the corner) */}
-          <mesh position={[-45, 0, 0]}>
-            <boxGeometry args={[10, 180, 4]} />
-            <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
+        {/* BACK WALL (Travertine) with True Air Gaps */}
+        <group position={[0, 80, -12]}> 
+          {/* Left Anchor */}
+          <mesh position={[-48, 0, 0]} castShadow receiveShadow>
+            <boxGeometry args={[12, 180, 4]} />
+            <meshStandardMaterial map={travertineTex} color="#fcd7d7" roughness={0.6} />
           </mesh>
 
-          {/* WINDOW GAP: Empty space between -40 and -32 */}
+          {/* WINDOW GAP: Near the corner, not in it */}
 
-          {/* 2. Main Wall Slab */}
-          <mesh position={[-16, 0, 0]}>
+          {/* Main Display Wall (Centers the UI text) */}
+          <mesh position={[-14, 0, 0]} castShadow receiveShadow>
+            <boxGeometry args={[36, 180, 4]} />
+            <meshStandardMaterial map={travertineTex} color="#fcd7d7" roughness={0.6} />
+          </mesh>
+
+          {/* MAIN DOORWAY GAP */}
+
+          {/* Right Wall Slab */}
+          <mesh position={[28, 0, 0]} castShadow receiveShadow>
             <boxGeometry args={[32, 180, 4]} />
-            <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
+            <meshStandardMaterial map={travertineTex} color="#fcd7d7" roughness={0.6} />
           </mesh>
 
-          {/* DOORWAY GAP: Empty space between -3 and 3 */}
-
-          {/* 3. Right Wall Slab */}
-          <mesh position={[24, 0, 0]}>
-            <boxGeometry args={[42, 180, 4]} />
+          {/* High Headers to lock in the doorway shapes */}
+          <mesh position={[-38, 75, 0]}>
+            <boxGeometry args={[8, 30, 4.1]} />
             <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
           </mesh>
-
-          {/* Headers */}
-          <mesh position={[-36, 70, 0]}> {/* Above Offset Window */}
-            <boxGeometry args={[8, 40, 4.1]} />
-            <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
-          </mesh>
-          <mesh position={[3, 70, 0]}> {/* Above Main Door */}
-            <boxGeometry args={[12, 40, 4.1]} />
+          <mesh position={[8, 75, 0]}>
+            <boxGeometry args={[8, 30, 4.1]} />
             <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
           </mesh>
         </group>
 
-        {/* SIDE WALL (Pink Stone) - Slender Door Cutout */}
-        <group position={[-50, 75, 15]} rotation={[0, Math.PI / 2, 0]}>
-          <mesh position={[-20, 0, 0]}>
-            <boxGeometry args={[30, 180, 4]} />
-            <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
+        {/* SIDE WALL (Pink Stone) - Massive and Continuous */}
+        <group position={[-54, 80, 15]} rotation={[0, Math.PI / 2, 0]}>
+          <mesh position={[-20, 0, 0]} castShadow>
+            <boxGeometry args={[35, 180, 4]} />
+            <meshStandardMaterial map={pinkStoneTex} color="#ede2df" roughness={0.8} />
           </mesh>
-          <mesh position={[20, 0, 0]}>
-            <boxGeometry args={[40, 180, 4]} />
-            <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
+          <mesh position={[25, 0, 0]} castShadow>
+            <boxGeometry args={[35, 180, 4]} />
+            <meshStandardMaterial map={pinkStoneTex} color="#ede2df" roughness={0.8} />
           </mesh>
-          <mesh position={[0, 70, 0]}>
-            <boxGeometry args={[10, 40, 4]} />
+          <mesh position={[2.5, 75, 0]}>
+            <boxGeometry args={[10, 30, 4.1]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
         </group>
 
-        {/* THE BUILT-IN BENCH (Locked to Pink Stone Wall) */}
-        <mesh position={[-24, 2, -6]} castShadow receiveShadow>
-          <boxGeometry args={[58, 4, 12]} /> 
-          <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
+        {/* THE BUILT-IN BENCH: Extended to anchor the scene */}
+        <mesh position={[-22, 2.5, -6]} castShadow receiveShadow>
+          <boxGeometry args={[65, 5, 15]} /> 
+          <meshStandardMaterial map={travertineTex} color="#fcd7d7" roughness={0.7} />
         </mesh>
       </group>
 
@@ -120,7 +131,7 @@ export default function Scene({ currentView }) {
         args={[new THREE.PlaneGeometry(5000, 5000), {
           textureWidth: 512, textureHeight: 512, waterNormals, 
           sunDirection: new THREE.Vector3(10, 1, 20), sunColor: 0xffffff, 
-          waterColor: 0xa19089, distortionScale: 1.2, fog: true,
+          waterColor: 0xa19089, distortionScale: 0.8, fog: true,
         }]}
         rotation={[-Math.PI / 2, 0, 0]}
         position={[0, -0.05, 0]}
