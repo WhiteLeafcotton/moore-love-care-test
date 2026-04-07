@@ -46,53 +46,53 @@ export default function Scene({ currentView }) {
       
       <group position={[0, 0, -5]} scale={0.75}>
         
-        {/* BACK WALL (Travertine) - Precise Cutouts */}
+        {/* --- BACK WALL (TRAVERTINE) --- */}
         <group position={[0, 85, -12]}> 
-          {/* Pillar 1 (Left Edge) */}
+          {/* Far Left Pillar */}
           <mesh position={[-48, 0, 0]}>
             <boxGeometry args={[12, 180, 0.2]} />
             <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
           </mesh>
 
-          {/* WINDOW FRAME (Enclosing the left cutout) */}
-          <mesh position={[-38.5, -35, 0]}> {/* Sill */}
-            <boxGeometry args={[7, 110, 0.2]} />
+          {/* WINDOW ENCLOSURE: Header and Sill to frame the window */}
+          <mesh position={[-38.5, -30, 0]}> 
+            <boxGeometry args={[7, 100, 0.2]} />
             <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
           </mesh>
-          <mesh position={[-38.5, 55, 0]}> {/* Header brought DOWN */}
-            <boxGeometry args={[7, 70, 0.2]} />
+          <mesh position={[-38.5, 45, 0]}> {/* WINDOW TOP */}
+            <boxGeometry args={[7, 50, 0.2]} />
             <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
           </mesh>
 
-          {/* Pillar 2 (Middle Wall) */}
+          {/* Center Wall Section */}
           <mesh position={[-14, 0, 0]}>
             <boxGeometry args={[36, 180, 0.2]} />
             <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
           </mesh>
 
-          {/* MAIN DOOR HEADER (Brought DOWN to create a top) */}
-          <mesh position={[8, 55, 0]}>
-            <boxGeometry args={[8, 70, 0.2]} />
+          {/* MAIN DOORWAY HEADER: Lowered to be visible in camera */}
+          <mesh position={[8, 45, 0]}> 
+            <boxGeometry args={[8, 50, 0.2]} />
             <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
           </mesh>
 
-          {/* Pillar 3 (Right Edge) */}
+          {/* Far Right Wall */}
           <mesh position={[28, 0, 0]}>
             <boxGeometry args={[32, 180, 0.2]} />
             <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
           </mesh>
         </group>
 
-        {/* SIDE WALL (Pink Stone) */}
+        {/* --- SIDE WALL (PINK STONE) --- */}
         <group position={[-54, 85, 20]} rotation={[0, Math.PI / 2, 0]}>
           <mesh position={[-20, 0, 0]}>
             <boxGeometry args={[35, 180, 0.2]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
           
-          {/* SIDE DOOR HEADER (Brought DOWN) */}
-          <mesh position={[0, 55, 0]}>
-            <boxGeometry args={[5, 70, 0.2]} />
+          {/* SIDE DOOR HEADER: Lowered to frame the doorway top */}
+          <mesh position={[0, 45, 0]}>
+            <boxGeometry args={[5, 50, 0.2]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
 
@@ -102,7 +102,7 @@ export default function Scene({ currentView }) {
           </mesh>
         </group>
 
-        {/* BENCH */}
+        {/* ANCHOR BENCH */}
         <mesh position={[-25, 2.5, -6]} castShadow receiveShadow>
           <boxGeometry args={[65, 5, 15]} /> 
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
