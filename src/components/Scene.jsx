@@ -6,24 +6,18 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* A truly "Embedded" Window Component */
-const WallWindow = ({ position, wallProps }) => (
+/* My Design Method: The "Shadow-Gap" Window */
+const ArchitecturalWindow = ({ args, position }) => (
   <group position={position}>
-    {/* The Sill: Built into the wall */}
-    <Box args={[1.6, 12, 2.1]} position={[0, -6.5, 0]}>
-      <meshStandardMaterial {...wallProps} />
+    <Box args={args}>
+      <meshStandardMaterial color="#a0c0c0" opacity={0.2} transparent roughness={0} metalness={1} />
     </Box>
-    {/* The Header: Solid stone above the window */}
-    <Box args={[1.6, 5, 2.1]} position={[0, 12.5, 0]}>
-      <meshStandardMaterial {...wallProps} />
+    {/* Minimalist Black Linear Frame */}
+    <Box args={[args[0] + 0.2, 0.1, args[2] + 0.2]} position={[0, args[1]/2, 0]}>
+      <meshStandardMaterial color="#000" />
     </Box>
-    {/* The Frame: Recessed slightly */}
-    <Box args={[1.4, 13.2, 0.4]} position={[0, 6.1, 0]}>
-      <meshStandardMaterial color="#1a1a1a" roughness={0.2} />
-    </Box>
-    {/* The Glass */}
-    <Box args={[1.2, 13, 0.1]} position={[0, 6.1, 0]}>
-      <meshStandardMaterial color="#a0c0c0" opacity={0.3} transparent />
+    <Box args={[args[0] + 0.2, 0.1, args[2] + 0.2]} position={[0, -args[1]/2, 0]}>
+      <meshStandardMaterial color="#000" />
     </Box>
   </group>
 );
@@ -39,64 +33,70 @@ export default function Scene({ currentView }) {
   useMemo(() => {
     if (renderTex) {
       renderTex.wrapS = renderTex.wrapT = THREE.RepeatWrapping;
-      renderTex.repeat.set(2, 4);
+      renderTex.repeat.set(1.5, 3);
     }
   }, [renderTex]);
 
-  const pinkProps = { map: renderTex, color: "#fcd7d7", roughness: 0.8 };
-  const purpleProps = { map: renderTex, color: "#d1c4e9", roughness: 0.8 };
+  const pinkProps = { map: renderTex, color: "#fcd7d7", roughness: 0.9 };
+  const purpleProps = { map: renderTex, color: "#d1c4e9", roughness: 0.9 };
 
   useFrame((state, delta) => {
-    // Smoother, high-end camera interpolation
-    const targetPos = currentView === 'home' ? [-30, 12, 35] : [60, 5, 20];
-    const targetLook = currentView === 'home' ? [5, 0, -5] : [120, 2, 15];
+    const targetPos = currentView === 'home' ? [-35, 15, 40] : [50, 10, 20];
+    const targetLook = currentView === 'home' ? [0, 0, 0] : [100, 0, 10];
     camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
     camera.lookAt(new THREE.Vector3(...targetLook));
-    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.2;
+    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.15;
   });
 
   return (
     <>
-      <Sky sunPosition={[-35, 0.05, 10]} />
+      <Sky sunPosition={[-50, 2, 10]} />
       <Environment preset="dawn" />
       
-      <group position={[0, 4, -10]} scale={0.8}>
+      <group position={[0, 0, 0]}>
         
-        {/* FLOOR PLATFORM: The foundation */}
-        <Box args={[35, 2, 25]} position={[2, -14, 2.5]}>
+        {/* STEPPED MONOLITHIC FLOOR */}
+        <Box args={[40, 3, 30]} position={[0, -14, 0]}>
           <meshStandardMaterial {...pinkProps} />
         </Box>
 
-        {/* BACK WALL: Multi-part construction for perfect window embedding */}
-        <group position={[-15, 0, 0]}>
-          <Box args={[8, 30, 2]} position={[-4, 0, 0]}><meshStandardMaterial {...pinkProps} /></Box>
-          <WallWindow position={[0.8, 0, 0]} wallProps={pinkProps} />
-          <Box args={[6, 30, 2]} position={[4.6, 0, 0]}><meshStandardMaterial {...pinkProps} /></Box>
-          <WallWindow position={[8.4, 0, 0]} wallProps={pinkProps} />
-          <Box args={[14, 30, 2]} position={[18.4, 0, 0]}><meshStandardMaterial {...pinkProps} /></Box>
+        {/* THE "FLOATING" WALL SYSTEM */}
+        <group position={[0, -12.2, 0]}> {/* The 0.2 Shadow Gap */}
+          
+          {/* WALL A: Back Pink Wall with Asymmetric Opening */}
+          <group position={[-18, 14, 0]}>
+            <Box args={[12, 28, 2]} position={[0, 0, 0]}><meshStandardMaterial {...pinkProps} /></Box>
+            <ArchitecturalWindow args={[8, 28, 0.5]} position={[10, 0, 0]} />
+            <Box args={[16, 28, 2]} position={[22, 0, 0]}><meshStandardMaterial {...pinkProps} /></Box>
+          </group>
+
+          {/* WALL B: Side Purple Wall with Floor-Level Panoramic */}
+          <group position={[18, 14, 14]} rotation={[0, -Math.PI / 2, 0]}>
+            <Box args={[10, 28, 2]} position={[0, 0, 0]}><meshStandardMaterial {...purpleProps} /></Box>
+            {/* Massive Panoramic Opening */}
+            <group position={[11, 0, 0]}>
+                <Box args={[12, 10, 2]} position={[0, 9, 0]}><meshStandardMaterial {...purpleProps} /></Box>
+                <ArchitecturalWindow args={[12, 18, 0.5]} position={[0, -5, 0]} />
+            </group>
+            <Box args={[6, 28, 2]} position={[20, 0, 0]}><meshStandardMaterial {...purpleProps} /></Box>
+          </group>
+
         </group>
 
-        {/* RIGHT WALL: Overlaps the back wall by 0.1 to hide the corner seam */}
-        <group position={[10, 0, 15.1]} rotation={[0, Math.PI / 2, 0]}>
-          <Box args={[12, 30, 2]} position={[-15, 0, 0]}><meshStandardMaterial {...purpleProps} /></Box>
-          <Box args={[8, 12, 2]} position={[-5, 9, 0]}><meshStandardMaterial {...purpleProps} /></Box>
-          <Box args={[12, 30, 2]} position={[5, 0, 0]}><meshStandardMaterial {...purpleProps} /></Box>
-        </group>
-
-        {/* L-BENCH: Aligned to the floor slab */}
-        <group position={[-10, -11.5, -2]}>
-          <Box args={[22, 1.5, 4]} position={[2, 0, 0]}><meshStandardMaterial {...purpleProps} /></Box>
-          <Box args={[4, 1.5, 18]} position={[-7, 0, 9]}><meshStandardMaterial {...purpleProps} /></Box>
+        {/* MINIMALIST L-BENCH */}
+        <group position={[-12, -12.5, -4]}>
+          <Box args={[24, 1.2, 5]} position={[4, 0, 0]}><meshStandardMaterial {...purpleProps} /></Box>
+          <Box args={[5, 1.2, 20]} position={[-5.5, 0, 7.5]}><meshStandardMaterial {...purpleProps} /></Box>
         </group>
 
       </group>
 
       <water
         ref={waterRef}
-        args={[new THREE.PlaneGeometry(1000, 1000), {
+        args={[new THREE.PlaneGeometry(2000, 2000), {
           textureWidth: 512, textureHeight: 512, waterNormals, 
           sunDirection: new THREE.Vector3(10, 1, 20), sunColor: 0xffffff, 
-          waterColor: 0x999999, distortionScale: 0.4, fog: false,
+          waterColor: 0x777777, distortionScale: 0.3, fog: false,
         }]}
         rotation={[-Math.PI / 2, 0, 0]}
         position={[0, -0.1, 0]}
