@@ -45,12 +45,12 @@ export default function Scene({ currentView }) {
 
   const views = {
     home: { 
-      pos: [8, 1.5, 18],      // Even lower, looking through the portals
-      look: [-12, 3, -15]     
+      pos: [10, 2, 16],       // Low water-level start
+      look: [-10, 4, -12]     // Looking through the single door
     },
     collection: { 
-      pos: [-75, 3, 50],      
-      look: [-110, 2, -10]    
+      pos: [-85, 3.5, 45],    // Gliding out and across
+      look: [-115, 3, -15]    
     } 
   };
   
@@ -61,48 +61,59 @@ export default function Scene({ currentView }) {
     camera.position.lerp(new THREE.Vector3(...target.pos), 0.025); 
     targetLook.lerp(new THREE.Vector3(...target.look), 0.025);
     camera.lookAt(targetLook);
-    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.4;
+    
+    if (waterRef.current) {
+      waterRef.current.material.uniforms["time"].value += delta * 0.4;
+    }
   });
 
   return (
     <>
       <Sky sunPosition={[10, 0.5, 20]} turbidity={0.1} rayleigh={2} />
       <Environment preset="dawn" />
-      <fog attach="fog" args={["#f7ece8", 15, 140]} />
+      <fog attach="fog" args={["#f7ece8", 10, 135]} />
       
       <PinkClouds />
 
-      {/* --- ARCHITECTURAL PORTALS (The "Open Cave" feel) --- */}
+      {/* --- THE MONOLITHIC ROOM WITH ONE DOOR --- */}
       <group position={[0, 0, -5]} scale={0.6}>
         
-        {/* Main Portal Wall with Arched Windows */}
-        <group position={[0, 15, -10]}>
-          {/* Top Beam */}
-          <mesh position={[0, 12, 0]}>
-            <boxGeometry args={[60, 6, 4]} />
+        {/* BACK WALL PIECES (Constructing the Doorway) */}
+        <group position={[0, 15, -12]}>
+          {/* Left Side of Wall */}
+          <mesh position={[-20, 0, 0]}>
+            <boxGeometry args={[30, 30, 4]} />
             <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
           </mesh>
-          {/* Side Pillars creating "Doorways" */}
-          {[-25, -10, 5, 20].map((x, i) => (
-            <mesh key={i} position={[x, -2, 0]}>
-              <boxGeometry args={[4, 22, 4]} />
-              <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
-            </mesh>
-          ))}
+          {/* Right Side of Wall */}
+          <mesh position={[20, 0, 0]}>
+            <boxGeometry args={[30, 30, 4]} />
+            <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
+          </mesh>
+          {/* Header (Top of Door) */}
+          <mesh position={[0, 11, 0]}>
+            <boxGeometry args={[10, 8, 4]} />
+            <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
+          </mesh>
         </group>
 
-        {/* Left Side "Window" Wall */}
-        <mesh position={[-28, 15, 5]} rotation={[0, Math.PI / 2, 0]}>
-          <boxGeometry args={[2, 30, 25]} /> {/* Thin wall with scale logic */}
-          <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
+        {/* SIDE WALL (Keeps it feeling "Enclosed") */}
+        <mesh position={[-35, 15, 0]} rotation={[0, Math.PI / 2, 0]}>
+          <boxGeometry args={[30, 30, 4]} />
+          <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
         </mesh>
       </group>
 
-      {/* --- REVERSED STAIRS (Descending to water) --- */}
-      <group position={[-110, 0, 0]} scale={0.8}>
-        {[0, 1, 2, 3, 4, 5].map((i) => (
-          <mesh key={i} position={[0, (5 - i) * 1.2, i * 4.5]} castShadow receiveShadow>
-            <boxGeometry args={[45, 1.2, 8]} />
+      {/* --- GRAND STAIRS DESCENDING --- */}
+      <group position={[-110, 0, -5]} scale={0.8}>
+        <mesh position={[0, 6, -10]} castShadow receiveShadow>
+          <boxGeometry args={[45, 1.5, 22]} />
+          <meshStandardMaterial map={pinkStoneTex} color="#fcd7d7" />
+        </mesh>
+
+        {[0, 1, 2, 3, 4].map((i) => (
+          <mesh key={i} position={[0, (4 - i) * 1.2, i * 5.5]} castShadow receiveShadow>
+            <boxGeometry args={[40, 1.2, 10]} />
             <meshStandardMaterial map={travertineTex} color="#ffffff" />
           </mesh>
         ))}
