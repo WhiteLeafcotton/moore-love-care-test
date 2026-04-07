@@ -44,52 +44,67 @@ export default function Scene({ currentView }) {
       <Environment preset="dawn" />
       <fog attach="fog" args={["#f7ece8", 30, 200]} />
       
-      {/* MONOLITHIC STRUCTURE */}
       <group position={[0, 0, -5]} scale={0.75}>
         
-        {/* BACK WALL (Travertine) with Offset Window Slit */}
+        {/* BACK WALL (Travertine) */}
         <group position={[0, 85, -12]}> 
+          {/* Left Corner Pillar */}
           <mesh position={[-48, 0, 0]} castShadow receiveShadow>
-            <boxGeometry args={[12, 180, 4]} />
+            <boxGeometry args={[12, 180, 0.2]} />
             <meshStandardMaterial map={travertineTex} color="#fcd7d7" roughness={0.6} />
           </mesh>
 
-          {/* WINDOW VOID AT -38 */}
-
-          <mesh position={[-14, 0, 0]} castShadow receiveShadow>
-            <boxGeometry args={[36, 180, 4]} />
-            <meshStandardMaterial map={travertineTex} color="#fcd7d7" roughness={0.6} />
-          </mesh>
-
-          <mesh position={[28, 0, 0]} castShadow receiveShadow>
-            <boxGeometry args={[32, 180, 4]} />
-            <meshStandardMaterial map={travertineTex} color="#fcd7d7" roughness={0.6} />
-          </mesh>
-
-          {/* Header over window gap */}
-          <mesh position={[-38, 75, 0]}>
-            <boxGeometry args={[8, 30, 4.1]} />
+          {/* WINDOW ENCLOSURE (The Rectangular Cutout) */}
+          {/* Window Sill (Bottom) */}
+          <mesh position={[-38.5, -60, 0]} castShadow>
+            <boxGeometry args={[7, 40, 0.2]} />
             <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
           </mesh>
+          {/* Window Header (Top) */}
+          <mesh position={[-38.5, 50, 0]} castShadow>
+            <boxGeometry args={[7, 80, 0.2]} />
+            <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
+          </mesh>
+
+          {/* Main Display Wall */}
+          <mesh position={[-14, 0, 0]} castShadow receiveShadow>
+            <boxGeometry args={[36, 180, 0.2]} />
+            <meshStandardMaterial map={travertineTex} color="#fcd7d7" roughness={0.6} />
+          </mesh>
+
+          {/* MAIN DOORWAY HEADER */}
+          <mesh position={[8, 50, 0]} castShadow>
+            <boxGeometry args={[8, 80, 0.2]} />
+            <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
+          </mesh>
+
+          {/* Right Wall Slab */}
+          <mesh position={[28, 0, 0]} castShadow receiveShadow>
+            <boxGeometry args={[32, 180, 0.2]} />
+            <meshStandardMaterial map={travertineTex} color="#fcd7d7" roughness={0.6} />
+          </mesh>
         </group>
 
-        {/* SIDE WALL (Pink Stone) - Pushed back to Z:18 to clear the window void */}
-        <group position={[-54, 85, 18]} rotation={[0, Math.PI / 2, 0]}>
+        {/* SIDE WALL (Pink Stone) */}
+        <group position={[-54, 85, 20]} rotation={[0, Math.PI / 2, 0]}>
           <mesh position={[-20, 0, 0]} castShadow>
-            <boxGeometry args={[35, 180, 4]} />
+            <boxGeometry args={[35, 180, 0.2]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" roughness={0.8} />
           </mesh>
-          <mesh position={[25, 0, 0]} castShadow>
-            <boxGeometry args={[35, 180, 4]} />
-            <meshStandardMaterial map={pinkStoneTex} color="#ede2df" roughness={0.8} />
-          </mesh>
-          <mesh position={[2.5, 75, 0]}>
-            <boxGeometry args={[10, 30, 4.1]} />
+          
+          {/* SIDE DOOR HEADER */}
+          <mesh position={[0, 50, 0]} castShadow>
+            <boxGeometry args={[5, 80, 0.2]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
+
+          <mesh position={[20, 0, 0]} castShadow>
+            <boxGeometry args={[35, 180, 0.2]} />
+            <meshStandardMaterial map={pinkStoneTex} color="#ede2df" roughness={0.8} />
+          </mesh>
         </group>
 
-        {/* ANCHOR BENCH */}
+        {/* BENCH */}
         <mesh position={[-25, 2.5, -6]} castShadow receiveShadow>
           <boxGeometry args={[65, 5, 15]} /> 
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" roughness={0.7} />

@@ -7,8 +7,6 @@ export default function App() {
 
   return (
     <div style={{ width: "100vw", height: "100vh", background: "#f7ece8", position: "relative" }}>
-      
-      {/* UI OVERLAY */}
       <div style={{
         position: "absolute", inset: 0, zIndex: 10, pointerEvents: "none",
         display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center"
@@ -28,19 +26,14 @@ export default function App() {
             pointerEvents: "auto", marginTop: "5vh", padding: "15px 50px",
             borderRadius: "50px", border: "1px solid rgba(0,0,0,0.05)",
             background: "rgba(255,255,255,0.85)", backdropFilter: "blur(10px)",
-            letterSpacing: "0.2em", fontSize: "11px", cursor: "pointer"
+            letterSpacing: "0.2em", fontSize: "11px", cursor: "pointer", textTransform: "uppercase"
           }}
         >
           {currentView === "home" ? "Explore Collection" : "Return Home"}
         </button>
       </div>
 
-      <Canvas 
-        shadows 
-        dpr={[1, 2]} 
-        camera={{ position: [24, 2.5, 34], fov: 28 }} // Cinematic pulled-back view
-        gl={{ antialias: true }}
-      >
+      <Canvas shadows dpr={[1, 2]} camera={{ position: [24, 2.5, 34], fov: 28 }} gl={{ antialias: true }}>
         <Suspense fallback={null}>
           <Scene currentView={currentView} />
         </Suspense>
