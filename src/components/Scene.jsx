@@ -1,20 +1,31 @@
 import { useRef, useMemo } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
-import { Environment, Sky, ContactShadows, Box, Cone } from "@react-three/drei";
+import { Environment, Sky, Box } from "@react-three/drei";
 import { Water } from "three-stdlib";
 import * as THREE from "three";
 
 extend({ Water });
 
-/* =========================================
-   THE ARTIFACT: INVERTED OCULUS VAULT
-   ========================================= */
-const VaultMaterial = ({ color }) => (
-  <meshStandardMaterial
-    color={color}
-    roughness={0.9} // Matt texture to absorb light
-    metalness={0.05} // Very slight shimmer
-  />
+/* A truly "Embedded" Window Component */
+const WallWindow = ({ position, wallProps }) => (
+  <group position={position}>
+    {/* The Sill: Built into the wall */}
+    <Box args={[1.6, 12, 2.1]} position={[0, -6.5, 0]}>
+      <meshStandardMaterial {...wallProps} />
+    </Box>
+    {/* The Header: Solid stone above the window */}
+    <Box args={[1.6, 5, 2.1]} position={[0, 12.5, 0]}>
+      <meshStandardMaterial {...wallProps} />
+    </Box>
+    {/* The Frame: Recessed slightly */}
+    <Box args={[1.4, 13.2, 0.4]} position={[0, 6.1, 0]}>
+      <meshStandardMaterial color="#1a1a1a" roughness={0.2} />
+    </Box>
+    {/* The Glass */}
+    <Box args={[1.2, 13, 0.1]} position={[0, 6.1, 0]}>
+      <meshStandardMaterial color="#a0c0c0" opacity={0.3} transparent />
+    </Box>
+  </group>
 );
 
 export default function Scene({ currentView }) {
@@ -22,97 +33,74 @@ export default function Scene({ currentView }) {
   const waterRef = useRef();
   const baseUrl = import.meta.env.BASE_URL || "/";
 
-  // Reusing confirmed workable texture paths
   const renderTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
 
   useMemo(() => {
     if (renderTex) {
       renderTex.wrapS = renderTex.wrapT = THREE.RepeatWrapping;
-      renderTex.repeat.set(3, 3);
+      renderTex.repeat.set(2, 4);
     }
   }, [renderTex]);
 
-  /* NEW VIEWS: Closer, more intimate framing of the artifact */
-  const views = {
-    home: { pos: [-15, 6, 25], look: [5, 0, 5] },
-    collection: { pos: [30, 12, 40], look: [100, -5, 10] }
-  };
-  
-  const targetLook = useMemo(() => new THREE.Vector3(0, 0, 0), []);
+  const pinkProps = { map: renderTex, color: "#fcd7d7", roughness: 0.8 };
+  const purpleProps = { map: renderTex, color: "#d1c4e9", roughness: 0.8 };
 
   useFrame((state, delta) => {
-    const target = views[currentView];
-    camera.position.lerp(new THREE.Vector3(...target.pos), 0.015);
-    targetLook.lerp(new THREE.Vector3(...target.look), 0.015);
-    camera.lookAt(targetLook);
-    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.4;
+    // Smoother, high-end camera interpolation
+    const targetPos = currentView === 'home' ? [-30, 12, 35] : [60, 5, 20];
+    const targetLook = currentView === 'home' ? [5, 0, -5] : [120, 2, 15];
+    camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
+    camera.lookAt(new THREE.Vector3(...targetLook));
+    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.2;
   });
 
   return (
     <>
-      <Sky sunPosition={[45, 0.01, -10]} turbidity={0.1} /> {/* Dawn Light */}
+      <Sky sunPosition={[-35, 0.05, 10]} />
       <Environment preset="dawn" />
-      <fog attach="fog" args={["#f7ece8", 10, 150]} />
       
-      {/* THE ISOLATED ARTIFACT */}
-      <group position={[0, -2, -10]} scale={0.7} rotation={[0, -Math.PI / 4, 0]}>
+      <group position={[0, 4, -10]} scale={0.8}>
         
-        {/* --- THE SUBMERGED PLINTH FOUNDATION --- */}
-        <mesh position={[0, -10, 0]} receiveShadow castShadow>
-          <boxGeometry args={[45, 12, 45]} />
-          <meshStandardMaterial map={renderTex} color="#d1c4e9" roughness={0.9} /> {/* Purple-tinted Plinth */}
-        </mesh>
+        {/* FLOOR PLATFORM: The foundation */}
+        <Box args={[35, 2, 25]} position={[2, -14, 2.5]}>
+          <meshStandardMaterial {...pinkProps} />
+        </Box>
 
-        {/* --- THE INVERTED CONICAL VAULT --- */}
-        <group position={[0, 10, 0]} rotation={[Math.PI, 0, 0]}>
-            <mesh receiveShadow castShadow>
-                <coneGeometry args={[25, 20, 4]} /> {/* 4-sided 'diamond' cone geometry */}
-                <VaultMaterial color="#1a1a1a" /> {/* Deep Obsidian Render */}
-            </mesh>
-            
-            {/* The Oculus: A central circular cutout/skylight */}
-            <mesh position={[0, -10, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-                <ringGeometry args={[0, 6, 32]} />
-                <meshStandardMaterial color="#fff" emissive="#ffffff" emissiveIntensity={1} transparent opacity={0.6}/>
-            </mesh>
+        {/* BACK WALL: Multi-part construction for perfect window embedding */}
+        <group position={[-15, 0, 0]}>
+          <Box args={[8, 30, 2]} position={[-4, 0, 0]}><meshStandardMaterial {...pinkProps} /></Box>
+          <WallWindow position={[0.8, 0, 0]} wallProps={pinkProps} />
+          <Box args={[6, 30, 2]} position={[4.6, 0, 0]}><meshStandardMaterial {...pinkProps} /></Box>
+          <WallWindow position={[8.4, 0, 0]} wallProps={pinkProps} />
+          <Box args={[14, 30, 2]} position={[18.4, 0, 0]}><meshStandardMaterial {...pinkProps} /></Box>
         </group>
 
-        {/* --- THE ISOLATED INTERIOR & L-BENCH --- */}
-        <group position={[-12, -3.5, -12]} scale={0.9} rotation={[0, Math.PI / 4, 0]}>
-          
-          {/* Back Travertine Wall Segment */}
-          <Box args={[18, 12, 1.5]} position={[0, 0, 0]}>
-            <meshStandardMaterial map={renderTex} color="#fcd7d7" roughness={0.9} />
-          </Box>
-          {/* Side Travertine Wall Segment */}
-          <Box args={[1.5, 12, 18]} position={[-8.25, 0, 8.25]}>
-            <meshStandardMaterial map={renderTex} color="#fcd7d7" roughness={0.9} />
-          </Box>
+        {/* RIGHT WALL: Overlaps the back wall by 0.1 to hide the corner seam */}
+        <group position={[10, 0, 15.1]} rotation={[0, Math.PI / 2, 0]}>
+          <Box args={[12, 30, 2]} position={[-15, 0, 0]}><meshStandardMaterial {...purpleProps} /></Box>
+          <Box args={[8, 12, 2]} position={[-5, 9, 0]}><meshStandardMaterial {...purpleProps} /></Box>
+          <Box args={[12, 30, 2]} position={[5, 0, 0]}><meshStandardMaterial {...purpleProps} /></Box>
+        </group>
 
-          {/* L-BENCH (Purple Stone) */}
-          <group position={[0, -5, 0]}>
-            <Box args={[16, 1.5, 4]} position={[0, 0, -2.5]}>
-              <meshStandardMaterial color="#d1c4e9" roughness={0.6} />
-            </Box>
-            <Box args={[4, 1.5, 14]} position={[-6, 0, 2.5]}>
-              <meshStandardMaterial color="#d1c4e9" roughness={0.6} />
-            </Box>
-          </group>
-
+        {/* L-BENCH: Aligned to the floor slab */}
+        <group position={[-10, -11.5, -2]}>
+          <Box args={[22, 1.5, 4]} position={[2, 0, 0]}><meshStandardMaterial {...purpleProps} /></Box>
+          <Box args={[4, 1.5, 18]} position={[-7, 0, 9]}><meshStandardMaterial {...purpleProps} /></Box>
         </group>
 
       </group>
 
       <water
         ref={waterRef}
-        args={[new THREE.PlaneGeometry(5000, 5000), {
-          textureWidth: 512, textureHeight: 512, waterNormals,sunDirection: new THREE.Vector3(10, 1, 20), sunColor: 0xffffff, waterColor: 0x999999,distortionScale: 0.5,fog: true,
+        args={[new THREE.PlaneGeometry(1000, 1000), {
+          textureWidth: 512, textureHeight: 512, waterNormals, 
+          sunDirection: new THREE.Vector3(10, 1, 20), sunColor: 0xffffff, 
+          waterColor: 0x999999, distortionScale: 0.4, fog: false,
         }]}
         rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, -0.05, 0]}
+        position={[0, -0.1, 0]}
       />
-      <ContactShadows opacity={0.4} scale={200} blur={2.5} far={40} color="#5e4d4d" />
     </>
   );
 }
