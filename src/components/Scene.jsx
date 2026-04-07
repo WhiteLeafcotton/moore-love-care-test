@@ -19,24 +19,19 @@ export default function Scene({ currentView }) {
     [pinkStoneTex, travertineTex, waterNormals].forEach(t => {
       if (t) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 16; }
     });
-    if (travertineTex) travertineTex.repeat.set(1.5, 10); 
-    if (pinkStoneTex) pinkStoneTex.repeat.set(1.5, 10);
+    // Adjusted scale for more intimate pool room textures
+    if (travertineTex) travertineTex.repeat.set(1, 4); 
+    if (pinkStoneTex) pinkStoneTex.repeat.set(1, 4);
   }, [pinkStoneTex, travertineTex, waterNormals]);
 
- /* REFINED CINEMATIC PATHWAY:
-     - Home: Moves further left to center the interior corner in the frame.
-     - Collection: Lateral exit remains the same.
-  */
   const views = {
     home: { 
-      // MOVED FURTHER LEFT: Positioned at [-45, 6, 50] to center the corner
-      pos: [-45, 6, 50],      
-      // LOOK: Adjusted to [35, 2, -15] to frame the corner intersection beautifully
-      look: [35, 2, -15]    
+      pos: [-30, 5, 35],      
+      look: [15, 2, -10]    
     },
     collection: { 
-      pos: [90, 3, 20], 
-      look: [160, 2, 20] 
+      pos: [60, 3, 15], 
+      look: [120, 2, 15] 
     } 
   };
   
@@ -45,9 +40,8 @@ export default function Scene({ currentView }) {
   useFrame((state, delta) => {
     const target = views[currentView];
     
-    // SWEEPING ENTRANCE: Keeps the high-right start for a dramatic fly-in
     if (state.clock.elapsedTime < 0.1 && currentView === 'home') {
-       camera.position.set(40, 12, 80); 
+       camera.position.set(30, 10, 60); 
     }
 
     camera.position.lerp(new THREE.Vector3(...target.pos), 0.012); 
@@ -61,78 +55,82 @@ export default function Scene({ currentView }) {
     <>
       <Sky sunPosition={[-35, 0.08, 15]} turbidity={0.01} rayleigh={3} />
       <Environment preset="dawn" />
-      <fog attach="fog" args={["#f7ece8", 30, 200]} />
+      <fog attach="fog" args={["#f7ece8", 20, 150]} />
       
-      {/* THE ISOMETRIC CORNER ROOM */}
-      <group position={[0, 4, -12]} scale={0.8}>
+      <group position={[0, 4, -10]} scale={0.8}>
         
-        {/* --- BACK WALL (Travertine) --- */}
-        <group position={[-35, 0, 0]}>
-            <mesh position={[-15, 0, 0]}>
-                <boxGeometry args={[10, 40, 2]} />
+        {/* --- COMPACT BACK WALL (Travertine) --- */}
+        {/* Total width reduced from 70 to 40 for intimacy */}
+        <group position={[-20, 0, 0]}>
+            <mesh position={[-5, 0, 0]}>
+                <boxGeometry args={[10, 30, 2]} />
                 <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
             </mesh>
             
-            <mesh position={[-5, 13, 0]}> 
-                <boxGeometry args={[10, 14, 2]} />
+            {/* Aesthetic Window Cutout */}
+            <mesh position={[5, 10, 0]}> 
+                <boxGeometry args={[10, 10, 2]} />
+                <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
+            </mesh>
+            <mesh position={[5, -10, 0]}> 
+                <boxGeometry args={[10, 10, 2]} />
                 <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
             </mesh>
 
-            <mesh position={[5, 0, 0]}>
-                <boxGeometry args={[10, 40, 2]} />
+            <mesh position={[15, 0, 0]}>
+                <boxGeometry args={[10, 30, 2]} />
                 <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
             </mesh>
 
-            <mesh position={[15, 13, 0]}> <boxGeometry args={[10, 14, 2]} /> <meshStandardMaterial map={travertineTex} color="#fcd7d7" /></mesh>
-            <mesh position={[15, -7, 0]}> <boxGeometry args={[10, 14, 2]} /> <meshStandardMaterial map={travertineTex} color="#fcd7d7" /></mesh>
-
-            <mesh position={[25, 0, 0]}>
-                <boxGeometry args={[10, 40, 2]} />
+            {/* Aesthetic High Window */}
+            <mesh position={[25, 10, 0]}> 
+                <boxGeometry args={[10, 10, 2]} />
                 <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
             </mesh>
-
-            <mesh position={[35, 13, 0]}> <boxGeometry args={[10, 14, 2]} /> <meshStandardMaterial map={travertineTex} color="#fcd7d7" /></mesh>
-            <mesh position={[35, -7, 0]}> <boxGeometry args={[10, 14, 2]} /> <meshStandardMaterial map={travertineTex} color="#fcd7d7" /></mesh>
-
-            <mesh position={[45, 0, 0]}>
-                <boxGeometry args={[10, 40, 2]} />
+            <mesh position={[25, -5, 0]}> 
+                <boxGeometry args={[10, 20, 2]} />
                 <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
             </mesh>
         </group>
 
-        {/* --- RIGHT WALL (Pink Stone) --- */}
-        <group position={[10, 0, 25]} rotation={[0, Math.PI / 2, 0]}>
-          <mesh position={[-35, 0, 0]}>
-            <boxGeometry args={[10, 40, 2]} />
-            <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
-          </mesh>
-          
-          <mesh position={[-25, 13, 0]}> <boxGeometry args={[10, 14, 2]} /> <meshStandardMaterial map={pinkStoneTex} color="#ede2df" /></mesh>
-          
+        {/* --- COMPACT RIGHT WALL (Pink Stone) --- */}
+        <group position={[5, 0, 15]} rotation={[0, Math.PI / 2, 0]}>
           <mesh position={[-15, 0, 0]}>
-            <boxGeometry args={[10, 40, 2]} />
+            <boxGeometry args={[10, 30, 2]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
-
-          <mesh position={[-5, 13, 0]}> <boxGeometry args={[10, 14, 2]} /> <meshStandardMaterial map={pinkStoneTex} color="#ede2df" /></mesh>
-
+          
+          {/* Aesthetic Doorway Framing */}
+          <mesh position={[-5, 10, 0]}> 
+            <boxGeometry args={[10, 10, 2]} />
+            <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
+          </mesh>
+          
           <mesh position={[5, 0, 0]}>
-            <boxGeometry args={[10, 40, 2]} />
+            <boxGeometry args={[10, 30, 2]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
 
-          <mesh position={[15, 13, 0]}> <boxGeometry args={[10, 14, 2]} /> <meshStandardMaterial map={pinkStoneTex} color="#ede2df" /></mesh>
-
-          <mesh position={[25, 0, 0]}>
-            <boxGeometry args={[10, 40, 2]} />
+          <mesh position={[15, 10, 0]}> 
+            <boxGeometry args={[10, 10, 2]} /> 
+            <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
+          </mesh>
+          <mesh position={[15, -10, 0]}> 
+            <boxGeometry args={[10, 10, 2]} /> 
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
         </group>
 
-        {/* THE LARGE BENCH */}
-        <mesh position={[0, -13, 0]} castShadow receiveShadow>
-          <boxGeometry args={[65, 4, 15]} /> 
+        {/* CORNER PLATFORM - A raised step inside the corner */}
+        <mesh position={[-5, -12, 5]} castShadow receiveShadow>
+          <boxGeometry args={[25, 2, 25]} />
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
+        </mesh>
+
+        {/* LINING BENCH - Positioned along the back wall */}
+        <mesh position={[0, -11, -2]} castShadow receiveShadow>
+          <boxGeometry args={[35, 1.5, 6]} /> 
+          <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
         </mesh>
       </group>
 
@@ -141,12 +139,12 @@ export default function Scene({ currentView }) {
         args={[new THREE.PlaneGeometry(5000, 5000), {
           textureWidth: 512, textureHeight: 512, waterNormals, 
           sunDirection: new THREE.Vector3(10, 1, 20), sunColor: 0xffffff, 
-          waterColor: 0xa19089, distortionScale: 0.8, fog: true,
+          waterColor: 0xa19089, distortionScale: 0.4, fog: true,
         }]}
         rotation={[-Math.PI / 2, 0, 0]}
         position={[0, -0.05, 0]}
       />
-      <ContactShadows opacity={0.3} scale={250} blur={3} far={50} color="#5e4d4d" />
+      <ContactShadows opacity={0.4} scale={150} blur={2.5} far={40} color="#5e4d4d" />
     </>
   );
 }
