@@ -23,18 +23,20 @@ export default function Scene({ currentView }) {
     if (pinkStoneTex) pinkStoneTex.repeat.set(1.5, 10);
   }, [pinkStoneTex, travertineTex, waterNormals]);
 
-  /* NEW INTERIOR VIEW: Starts INSIDE looking toward the corner */
+  /* UPDATED CINEMATIC PATHWAY */
   const views = {
-    home: { pos: [-5, 6, 15], look: [-30, 5, -10] }, // Deep inside perspective
-    collection: { pos: [-110, 3, 55], look: [-140, 2, -10] } 
+    // APPROACH: Starts inside the room, moving toward the corner
+    home: { pos: [5, 4, 15], look: [-35, 2, -10] },
+    // EXIT: Glides through the side door out to the open water
+    collection: { pos: [80, 3, 25], look: [150, 2, 25] } 
   };
   
   const targetLook = useMemo(() => new THREE.Vector3(0, 0, 0), []);
 
   useFrame((state, delta) => {
     const target = views[currentView];
-    camera.position.lerp(new THREE.Vector3(...target.pos), 0.02); 
-    targetLook.lerp(new THREE.Vector3(...target.look), 0.02);
+    camera.position.lerp(new THREE.Vector3(...target.pos), 0.015); 
+    targetLook.lerp(new THREE.Vector3(...target.look), 0.015);
     camera.lookAt(targetLook);
     if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.3;
   });
@@ -111,13 +113,14 @@ export default function Scene({ currentView }) {
           </mesh>
         </group>
 
-        {/* THE LARGE BENCH: Restored and centered */}
-        <mesh position={[0, -13, 5]} castShadow receiveShadow>
+        {/* THE LARGE BENCH */}
+        <mesh position={[0, -13, 0]} castShadow receiveShadow>
           <boxGeometry args={[65, 4, 15]} /> 
           <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
         </mesh>
       </group>
 
+      {/* ORIGINAL WATER SYSTEM */}
       <water
         ref={waterRef}
         args={[new THREE.PlaneGeometry(5000, 5000), {
