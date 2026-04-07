@@ -1,30 +1,24 @@
 import { useRef, useMemo } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
-import { Environment, Sky, ContactShadows, Box } from "@react-three/drei";
+import { Environment, Sky, Box } from "@react-three/drei";
 import { Water } from "three-stdlib";
 import * as THREE from "three";
 
 extend({ Water });
 
-/* UPDATED SLIT WINDOW COMPONENT (No longer to the floor, proportionate) */
-const SlitWindow = ({ position }) => (
+/* EMBEDDED WINDOW UNIT */
+const EmbeddedWindow = ({ position }) => (
   <group position={position}>
-    {/* Black Frame perimeter using textured style */}
-    <Box args={[0.2, 25, 2.1]} position={[-0.4, 0, 0]}>
+    {/* Frame recessed into the wall */}
+    <Box args={[1.4, 0.2, 2.1]} position={[0, 12.4, 0]}>
       <meshStandardMaterial color="#1a1a1a" roughness={0.1} />
     </Box>
-    <Box args={[0.2, 25, 2.1]} position={[0.4, 0, 0]}>
+    <Box args={[1.4, 12.4, 2.1]} position={[0, -6.3, 0]}>
       <meshStandardMaterial color="#1a1a1a" roughness={0.1} />
     </Box>
-    <Box args={[1.0, 0.2, 2.1]} position={[0, 12.4, 0]}> {/* Full perimeter top */}
-      <meshStandardMaterial color="#1a1a1a" roughness={0.1} />
-    </Box>
-    <Box args={[1.0, 12.4, 2.1]} position={[0, -6.3, 0]}> {/* NEW: Solid sill (Bottom lifted 12.4 units off floor) */}
-      <meshStandardMaterial color="#1a1a1a" roughness={0.1} />
-    </Box>
-    {/* Glass Pane */}
-    <Box args={[0.6, 12.2, 2.05]} position={[0, 6.2, 0]}> {/* Glass only in top half */}
-      <meshStandardMaterial color="#a0c0c0" opacity={0.3} transparent />
+    {/* Glass pane embedded within the frame */}
+    <Box args={[1.2, 12.2, 0.1]} position={[0, 6.2, 0]}>
+      <meshStandardMaterial color="#a0c0c0" opacity={0.4} transparent />
     </Box>
   </group>
 );
@@ -34,14 +28,13 @@ export default function Scene({ currentView }) {
   const waterRef = useRef();
   const baseUrl = import.meta.env.BASE_URL || "/";
 
-  // Using the confirmed 'moore-love-care-test' texture paths to avoid 404 errors
   const renderTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
 
   useMemo(() => {
     if (renderTex) {
       renderTex.wrapS = renderTex.wrapT = THREE.RepeatWrapping;
-      renderTex.repeat.set(2, 4); // Tighten tiling for intimate feel
+      renderTex.repeat.set(2, 4);
     }
   }, [renderTex]);
 
@@ -49,53 +42,52 @@ export default function Scene({ currentView }) {
   const purpleProps = { map: renderTex, color: "#d1c4e9", roughness: 0.8 };
 
   const views = {
-    home: { pos: [-20, 5, 25], look: [15, 2, -10] },      
-    collection: { pos: [60, 3, 15], look: [120, 2, 15] } 
+    home: { pos: [-25, 8, 30], look: [10, 0, -5] },      
+    collection: { pos: [60, 5, 20], look: [120, 2, 15] } 
   };
   
   const targetLook = useMemo(() => new THREE.Vector3(0, 0, 0), []);
 
   useFrame((state, delta) => {
     const target = views[currentView];
-    camera.position.lerp(new THREE.Vector3(...target.pos), 0.015); 
-    targetLook.lerp(new THREE.Vector3(...target.look), 0.015);
+    camera.position.lerp(new THREE.Vector3(...target.pos), 0.02); 
+    targetLook.lerp(new THREE.Vector3(...target.look), 0.02);
     camera.lookAt(targetLook);
-    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.3;
+    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.2;
   });
 
   return (
     <>
-      <Sky sunPosition={[-35, 0.08, 15]} turbidity={0.01} rayleigh={3} />
+      <Sky sunPosition={[-35, 0.05, 10]} />
       <Environment preset="dawn" />
-      <fog attach="fog" args={["#f7ece8", 20, 150]} />
       
-      {/* THE INTIMATE TEXTURED SANCTUARY */}
       <group position={[0, 4, -10]} scale={0.8}>
         
-        {/* --- BACK WALL (Pink) - Seamless Corner Fix --- */}
-        {/* Base position shifted to ensure overlap */}
+        {/* --- BACK WALL (Pink) - Multi-Segment for Embedded Look --- */}
         <group position={[-15.5, 0, 0]}>
-            <Box args={[11, 30, 2]} position={[-0.5, 0, 0]}> 
+            {/* Solid Start */}
+            <Box args={[6, 30, 2]} position={[-3, 0, 0]}> 
               <meshStandardMaterial {...pinkProps} />
             </Box>
             
-            <SlitWindow position={[5.5, 0, 0]} />
+            <EmbeddedWindow position={[0.7, 0, 0]} />
 
-            {/* Pier between windows narrowed from 18 to 15 (They are closer now) */}
-            <Box args={[15, 30, 2]} position={[14, 0, 0]}> 
+            {/* Middle Pier (Narrowed) */}
+            <Box args={[8, 30, 2]} position={[5.4, 0, 0]}> 
               <meshStandardMaterial {...pinkProps} />
             </Box>
 
-            <SlitWindow position={[22.5, 0, 0]} />
+            <EmbeddedWindow position={[10.1, 0, 0]} />
 
-            <Box args={[10, 30, 2]} position={[32.5, 0, 0]}>
+            {/* Solid End */}
+            <Box args={[15, 30, 2]} position={[21.6, 0, 0]}>
               <meshStandardMaterial {...pinkProps} />
             </Box>
         </group>
 
-        {/* --- RIGHT WALL (Purple) - Doors intact but integrated to meet corner --- */}
+        {/* --- RIGHT WALL (Purple) - Overlapping for Seamless Corner --- */}
         <group position={[10, 0, 15.5]} rotation={[0, Math.PI / 2, 0]}>
-          <Box args={[11, 30, 2]} position={[-15.5, 0, 0]}> {/* Extended width for overlap */}
+          <Box args={[11, 30, 2]} position={[-15.5, 0, 0]}> 
             <meshStandardMaterial {...purpleProps} />
           </Box>
           <Box args={[10, 10, 2]} position={[-5, 10, 0]}>
@@ -106,17 +98,17 @@ export default function Scene({ currentView }) {
           </Box>
         </group>
 
-        {/* THE PLATFORM (Tucked into corner foundation) */}
-        <Box args={[25, 1.5, 20]} position={[-10, -14.2, 5]}>
+        {/* --- PLATFORM FLOOR - The bottom of the 'cube' --- */}
+        <Box args={[32, 1.5, 25]} position={[0.5, -14.2, 3]}>
           <meshStandardMaterial {...pinkProps} />
         </Box>
 
-        {/* L-SHAPED CORNER BENCH */}
+        {/* THE L-BENCH */}
         <group position={[-10, -12, 0]}>
-          <Box args={[20, 2, 4]} position={[0, 0, -6]}>
+          <Box args={[22, 2, 4]} position={[1, 0, -6]}>
             <meshStandardMaterial {...purpleProps} />
           </Box>
-          <Box args={[4, 2, 16]} position={[-8, 0, 4]}>
+          <Box args={[4, 2, 18]} position={[-8, 0, 5]}>
             <meshStandardMaterial {...purpleProps} />
           </Box>
         </group>
@@ -125,15 +117,14 @@ export default function Scene({ currentView }) {
 
       <water
         ref={waterRef}
-        args={[new THREE.PlaneGeometry(5000, 5000), {
+        args={[new THREE.PlaneGeometry(1000, 1000), {
           textureWidth: 512, textureHeight: 512, waterNormals, 
           sunDirection: new THREE.Vector3(10, 1, 20), sunColor: 0xffffff, 
-          waterColor: 0xa19089, distortionScale: 0.5, fog: true,
+          waterColor: 0x999999, distortionScale: 0.4, fog: false,
         }]}
         rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, -0.05, 0]}
+        position={[0, -0.1, 0]}
       />
-      <ContactShadows opacity={0.4} scale={150} blur={2.5} far={40} color="#5e4d4d" />
     </>
   );
 }
