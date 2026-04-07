@@ -15,9 +15,14 @@ export default function Scene({ currentView }) {
   const travertineTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/travertine.jpg`);
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
 
+  useMemo(() => {
+    [pinkStoneTex, travertineTex, waterNormals].forEach(t => {
+      if (t) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 16; }
+    });
+  }, [pinkStoneTex, travertineTex, waterNormals]);
+
   const views = {
-    // Adjusted 'look' to ensure the headers are the focal point
-    home: { pos: [40, 15, 60], look: [-10, 5, 0] },
+    home: { pos: [24, 10, 34], look: [-12, 8, -5] }, // Slightly higher look to see tops
     collection: { pos: [-110, 3, 55], look: [-140, 2, -10] } 
   };
   
@@ -36,50 +41,70 @@ export default function Scene({ currentView }) {
       <Sky sunPosition={[-35, 0.08, 15]} turbidity={0.01} rayleigh={3} />
       <Environment preset="dawn" />
       
-      <group position={[0, 0, -5]} scale={0.75}>
+      {/* Wall Container - Positioned so Y=0 is water level */}
+      <group position={[0, 22.5, -12]} scale={0.75}>
         
-        {/* BACK WALL (TRAVERTINE) */}
-        <group position={[0, 85, -12]}> 
-          {/* Main Pillars */}
-          <mesh position={[-48, 0, 0]}><boxGeometry args={[12, 180, 0.2]} /><meshStandardMaterial map={travertineTex} color="#fcd7d7" /></mesh>
-          <mesh position={[-14, 0, 0]}><boxGeometry args={[36, 180, 0.2]} /><meshStandardMaterial map={travertineTex} color="#fcd7d7" /></mesh>
-          <mesh position={[28, 0, 0]}><boxGeometry args={[32, 180, 0.2]} /><meshStandardMaterial map={travertineTex} color="#fcd7d7" /></mesh>
+        {/* --- BACK WALL (TRAVERTINE) --- */}
+        {/* We use a height of 45 for everything to keep it in frame */}
+        
+        {/* Left Edge Pillar */}
+        <mesh position={[-48, 0, 0]}>
+          <boxGeometry args={[12, 45, 0.2]} />
+          <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
+        </mesh>
 
-          {/* WINDOW CUTOUT (Top and Bottom) */}
-          <mesh position={[-38.5, -10, 0]}> {/* Sill: Raised above bench */}
-            <boxGeometry args={[7, 15, 0.2]} />
-            <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
-          </mesh>
-          <mesh position={[-38.5, 20, 0]}> {/* Header: Visible Top */}
-            <boxGeometry args={[7, 15, 0.2]} />
-            <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
-          </mesh>
+        {/* WINDOW FRAME (The Cutout) */}
+        <mesh position={[-38.5, -10, 0]}> {/* Sill */}
+          <boxGeometry args={[7, 25, 0.2]} />
+          <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
+        </mesh>
+        <mesh position={[-38.5, 17.5, 0]}> {/* Header */}
+          <boxGeometry args={[7, 10, 0.2]} />
+          <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
+        </mesh>
 
-          {/* MAIN DOORWAY TOP */}
-          <mesh position={[8, 20, 0]}> 
-            <boxGeometry args={[8, 15, 0.2]} />
-            <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
-          </mesh>
-        </group>
+        {/* Middle Wall Section */}
+        <mesh position={[-14, 0, 0]}>
+          <boxGeometry args={[36, 45, 0.2]} />
+          <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
+        </mesh>
 
-        {/* SIDE WALL (PINK STONE) */}
-        <group position={[-54, 85, 20]} rotation={[0, Math.PI / 2, 0]}>
-          <mesh position={[-20, 0, 0]}><boxGeometry args={[35, 180, 0.2]} /><meshStandardMaterial map={pinkStoneTex} color="#ede2df" /></mesh>
-          <mesh position={[20, 0, 0]}><boxGeometry args={[35, 180, 0.2]} /><meshStandardMaterial map={pinkStoneTex} color="#ede2df" /></mesh>
+        {/* MAIN DOOR HEADER */}
+        <mesh position={[8, 17.5, 0]}>
+          <boxGeometry args={[8, 10, 0.2]} />
+          <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
+        </mesh>
+
+        {/* Right Edge Wall */}
+        <mesh position={[28, 0, 0]}>
+          <boxGeometry args={[32, 45, 0.2]} />
+          <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
+        </mesh>
+
+        {/* --- SIDE WALL (PINK STONE) --- */}
+        <group position={[-54, 0, 32]} rotation={[0, Math.PI / 2, 0]}>
+          <mesh position={[-20, 0, 0]}>
+            <boxGeometry args={[35, 45, 0.2]} />
+            <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
+          </mesh>
           
-          {/* SIDE DOORWAY TOP */}
-          <mesh position={[0, 20, 0]}>
-            <boxGeometry args={[5, 15, 0.2]} />
+          <mesh position={[0, 17.5, 0]}> {/* SIDE DOOR HEADER */}
+            <boxGeometry args={[5, 10, 0.2]} />
+            <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
+          </mesh>
+
+          <mesh position={[20, 0, 0]}>
+            <boxGeometry args={[35, 45, 0.2]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
         </group>
-
-        {/* BENCH (Window floats above this) */}
-        <mesh position={[-25, 2.5, -6]} castShadow receiveShadow>
-          <boxGeometry args={[65, 5, 15]} /> 
-          <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
-        </mesh>
       </group>
+
+      {/* Floating Bench */}
+      <mesh position={[-18, 2, -15]} castShadow receiveShadow>
+        <boxGeometry args={[50, 4, 12]} /> 
+        <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
+      </mesh>
 
       <water
         ref={waterRef}
