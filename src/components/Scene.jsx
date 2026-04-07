@@ -24,14 +24,15 @@ export default function Scene({ currentView }) {
   }, [pinkStoneTex, travertineTex, waterNormals]);
 
   /* REFINED CINEMATIC PATHWAY:
-     - Home: Starts far back, enters through the front, and locks its gaze 
-       specifically on the deep interior corner (-35, -12 coordinate area).
-     - Collection: Lateral exit through the side wall remains unchanged.
+     - Home: Moves forward INTO the room and turns 90 degrees RIGHT to face the inner corner.
+     - Collection: Lateral exit through the side wall remains perfect.
   */
   const views = {
     home: { 
-      pos: [0, 5, 55],       // Start centered and further back to see the entry
-      look: [-38, 3, -15]    // Lock focus deep into the back-left interior corner
+      // Positioned inside the room, slightly to the left of center
+      pos: [-15, 4, 10],      
+      // Target is now far to the RIGHT and BACK to force that 90-degree corner view
+      look: [40, 2, -15]    
     },
     collection: { 
       pos: [90, 3, 20], 
