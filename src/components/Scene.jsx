@@ -6,17 +6,18 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* EMBEDDED WINDOW UNIT */
-const EmbeddedWindow = ({ position }) => (
+/* UPDATED EMBEDDED WINDOW (Sill matches wall texture) */
+const EmbeddedWindow = ({ position, wallProps }) => (
   <group position={position}>
-    {/* Frame recessed into the wall */}
+    {/* Top Frame (Black accent) */}
     <Box args={[1.4, 0.2, 2.1]} position={[0, 12.4, 0]}>
       <meshStandardMaterial color="#1a1a1a" roughness={0.1} />
     </Box>
+    {/* NEW: Bottom Sill now matches the Wall Texture */}
     <Box args={[1.4, 12.4, 2.1]} position={[0, -6.3, 0]}>
-      <meshStandardMaterial color="#1a1a1a" roughness={0.1} />
+      <meshStandardMaterial {...wallProps} />
     </Box>
-    {/* Glass pane embedded within the frame */}
+    {/* Recessed Glass */}
     <Box args={[1.2, 12.2, 0.1]} position={[0, 6.2, 0]}>
       <meshStandardMaterial color="#a0c0c0" opacity={0.4} transparent />
     </Box>
@@ -42,7 +43,7 @@ export default function Scene({ currentView }) {
   const purpleProps = { map: renderTex, color: "#d1c4e9", roughness: 0.8 };
 
   const views = {
-    home: { pos: [-25, 8, 30], look: [10, 0, -5] },      
+    home: { pos: [-28, 10, 32], look: [8, 0, -5] },      
     collection: { pos: [60, 5, 20], look: [120, 2, 15] } 
   };
   
@@ -63,29 +64,31 @@ export default function Scene({ currentView }) {
       
       <group position={[0, 4, -10]} scale={0.8}>
         
-        {/* --- BACK WALL (Pink) - Multi-Segment for Embedded Look --- */}
+        {/* --- BACK WALL (Pink) - Fully Integrated Window Segments --- */}
         <group position={[-15.5, 0, 0]}>
-            {/* Solid Start */}
-            <Box args={[6, 30, 2]} position={[-3, 0, 0]}> 
+            {/* 1. Left Edge Segment */}
+            <Box args={[8, 30, 2]} position={[-4, 0, 0]}> 
               <meshStandardMaterial {...pinkProps} />
             </Box>
             
-            <EmbeddedWindow position={[0.7, 0, 0]} />
+            {/* 2. Window 1 (Passing pinkProps for the sill) */}
+            <EmbeddedWindow position={[0.7, 0, 0]} wallProps={pinkProps} />
 
-            {/* Middle Pier (Narrowed) */}
-            <Box args={[8, 30, 2]} position={[5.4, 0, 0]}> 
+            {/* 3. Middle Pier - Widened to 10 for better window spacing */}
+            <Box args={[10, 30, 2]} position={[6.4, 0, 0]}> 
               <meshStandardMaterial {...pinkProps} />
             </Box>
 
-            <EmbeddedWindow position={[10.1, 0, 0]} />
+            {/* 4. Window 2 (Sill matches wall) */}
+            <EmbeddedWindow position={[12.1, 0, 0]} wallProps={pinkProps} />
 
-            {/* Solid End */}
-            <Box args={[15, 30, 2]} position={[21.6, 0, 0]}>
+            {/* 5. Right End Segment */}
+            <Box args={[12, 30, 2]} position={[23.1, 0, 0]}>
               <meshStandardMaterial {...pinkProps} />
             </Box>
         </group>
 
-        {/* --- RIGHT WALL (Purple) - Overlapping for Seamless Corner --- */}
+        {/* --- RIGHT WALL (Purple) - Corner Overlap --- */}
         <group position={[10, 0, 15.5]} rotation={[0, Math.PI / 2, 0]}>
           <Box args={[11, 30, 2]} position={[-15.5, 0, 0]}> 
             <meshStandardMaterial {...purpleProps} />
@@ -98,12 +101,12 @@ export default function Scene({ currentView }) {
           </Box>
         </group>
 
-        {/* --- PLATFORM FLOOR - The bottom of the 'cube' --- */}
+        {/* --- PLATFORM FLOOR - Horizontal 'Cube' Base --- */}
         <Box args={[32, 1.5, 25]} position={[0.5, -14.2, 3]}>
           <meshStandardMaterial {...pinkProps} />
         </Box>
 
-        {/* THE L-BENCH */}
+        {/* L-BENCH POSITIONING */}
         <group position={[-10, -12, 0]}>
           <Box args={[22, 2, 4]} position={[1, 0, -6]}>
             <meshStandardMaterial {...purpleProps} />
