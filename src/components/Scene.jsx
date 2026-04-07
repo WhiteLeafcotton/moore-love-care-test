@@ -12,19 +12,29 @@ function PinkClouds() {
   useFrame((state) => {
     if (cloudsRef.current) {
       cloudsRef.current.position.x =
-        Math.sin(state.clock.elapsedTime * 0.05) * 3;
+        Math.sin(state.clock.elapsedTime * 0.08) * 2;
     }
   });
 
   return (
     <group ref={cloudsRef}>
-      <mesh position={[-40, 35, -80]}>
-        <sphereGeometry args={[25, 32, 16]} />
-        <meshStandardMaterial color="#fcd7d7" transparent opacity={0.1} />
+      <mesh position={[-25, 30, -70]}>
+        <sphereGeometry args={[22, 32, 16]} />
+        <meshStandardMaterial
+          color="#fcd7d7"
+          transparent
+          opacity={0.12}
+          fog={false}
+        />
       </mesh>
-      <mesh position={[40, 45, -100]}>
-        <sphereGeometry args={[30, 32, 16]} />
-        <meshStandardMaterial color="#fcd7d7" transparent opacity={0.1} />
+      <mesh position={[35, 40, -90]}>
+        <sphereGeometry args={[28, 32, 16]} />
+        <meshStandardMaterial
+          color="#fcd7d7"
+          transparent
+          opacity={0.12}
+          fog={false}
+        />
       </mesh>
     </group>
   );
@@ -47,21 +57,21 @@ export default function Scene({ currentView }) {
 
   useMemo(() => {
     pinkStoneTex.wrapS = pinkStoneTex.wrapT = THREE.RepeatWrapping;
-    pinkStoneTex.repeat.set(1.5, 1.5);
-
+    pinkStoneTex.repeat.set(2, 2);
     waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
   }, [pinkStoneTex, waterNormals]);
 
-  // CAMERA (UNCHANGED)
+  // 🔥 CAMERA (ZOOMED OUT BUT SAME FEEL)
   const views = {
-    home: { pos: [12, 6, 18], look: [0, 6, 0] },
-    collection: { pos: [-18, 10, 25], look: [-5, 6, -5] },
+    home: { pos: [28, 6, 28], look: [-10, 4, -5] }, // pulled back
+    collection: { pos: [-70, 18, 60], look: [-20, 6, -10] }, // your glide preserved but wider
   };
 
   const targetLook = useMemo(() => new THREE.Vector3(), []);
 
   useFrame((state, delta) => {
     const target = views[currentView];
+
     camera.position.lerp(new THREE.Vector3(...target.pos), 0.03);
     targetLook.lerp(new THREE.Vector3(...target.look), 0.03);
     camera.lookAt(targetLook);
@@ -73,29 +83,24 @@ export default function Scene({ currentView }) {
 
   return (
     <>
-      {/* LIGHTING (UPGRADED FOR DEPTH) */}
-      <Sky sunPosition={[8, 6, 5]} turbidity={2} rayleigh={1.2} />
-      <Environment preset="sunset" />
-      <fog attach="fog" args={["#f7ece8", 8, 120]} />
+      {/* LIGHTING */}
+      <Sky sunPosition={[10, 1, 20]} turbidity={0.3} rayleigh={1.8} />
+      <Environment preset="dawn" />
+      <fog attach="fog" args={["#f7ece8", 20, 200]} />
 
       <directionalLight
-        position={[8, 12, 6]}
-        intensity={1.8}
+        position={[10, 15, 10]}
+        intensity={1.4}
         castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
       />
-
-      {/* SOFT FILL LIGHT (KEY ADDITION) */}
-      <directionalLight position={[-5, 6, -5]} intensity={0.4} />
 
       <PinkClouds />
 
-      {/* ARCHITECTURE */}
-      <group position={[0, 0, -5]}>
+      {/* 🔥 CLEAN 90° CORNER (NO BACK EXTENSION) */}
+      <group position={[0, -1.8, -5]} scale={0.6}>
         {/* BACK WALL */}
-        <mesh position={[0, 12, -10]} castShadow receiveShadow>
-          <boxGeometry args={[20, 24, 0.5]} />
+        <mesh position={[-10, 15, -10]} castShadow receiveShadow>
+          <boxGeometry args={[20, 30, 0.6]} />
           <meshStandardMaterial
             map={pinkStoneTex}
             color="#f2dcd5"
@@ -105,73 +110,45 @@ export default function Scene({ currentView }) {
 
         {/* SIDE WALL */}
         <mesh
-          position={[-10, 12, 0]}
+          position={[-20, 15, 0]}
           rotation={[0, Math.PI / 2, 0]}
           castShadow
         >
-          <boxGeometry args={[20, 24, 0.5]} />
-          <meshStandardMaterial color="#e8cfc8" roughness={0.9} />
+          <boxGeometry args={[20, 30, 0.6]} />
+          <meshStandardMaterial
+            map={pinkStoneTex}
+            color="#e8cfc8"
+            roughness={0.9}
+          />
         </mesh>
 
-        {/* DEPTH SHADOW EDGE */}
-        <mesh position={[-10, 12, -10]}>
-          <boxGeometry args={[0.2, 24, 0.2]} />
+        {/* PLATFORM (ONLY FRONT — NO EXTENSION BACK) */}
+        <mesh position={[-10, 0.4, 2]} castShadow receiveShadow>
+          <boxGeometry args={[18, 0.8, 12]} />
+          <meshStandardMaterial
+            map={pinkStoneTex}
+            color="#f2dcd5"
+          />
+        </mesh>
+
+        {/* CORNER SHADOW LINE */}
+        <mesh position={[-20, 15, -10]}>
+          <boxGeometry args={[0.2, 30, 0.2]} />
           <meshStandardMaterial
             color="#000"
             transparent
             opacity={0.08}
           />
         </mesh>
-
-        {/* ARCH CUTOUT */}
-        <mesh position={[-5, 8, -9.6]}>
-          <cylinderGeometry args={[4, 4, 0.8, 32, 1, false, 0, Math.PI]} />
-          <meshStandardMaterial color="#f7ece8" />
-        </mesh>
-
-        {/* WINDOW */}
-        <mesh position={[5, 14, -9.6]}>
-          <boxGeometry args={[3, 10, 0.8]} />
-          <meshStandardMaterial color="#f7ece8" />
-        </mesh>
-
-        {/* PLATFORM (REFINED HEIGHT) */}
-        <mesh position={[-10, 0.2, 0]} castShadow receiveShadow>
-          <boxGeometry args={[18, 0.4, 18]} />
-          <meshStandardMaterial
-            map={pinkStoneTex}
-            color="#f2dcd5"
-            roughness={0.9}
-          />
-        </mesh>
-
-        {/* ✨ UPGRADED STAIRS */}
-        <group position={[-10, -1.1, -6]}>
-          {[0, 1, 2, 3, 4, 5, 6].map((i) => (
-            <mesh
-              key={i}
-              position={[0, i * 0.35, i * 0.9]}
-              castShadow
-              receiveShadow
-            >
-              <boxGeometry args={[5.5, 0.25, 1.6]} />
-              <meshStandardMaterial
-                map={pinkStoneTex}
-                color="#f2dcd5"
-                roughness={0.9}
-              />
-            </mesh>
-          ))}
-        </group>
       </group>
 
-      {/* ✨ FIXED FLOATING SPHERE */}
+      {/* ✨ SINGLE FLOATING GLASS SPHERE */}
       <Float speed={0.5} rotationIntensity={0.1} floatIntensity={0.5}>
-        <mesh position={[-3, 5, -7]}>
-          <sphereGeometry args={[1.5, 64, 64]} />
+        <mesh position={[-8, 6, -6]}>
+          <sphereGeometry args={[2, 64, 64]} />
           <meshPhysicalMaterial
             color="#f8e9e6"
-            roughness={0.03}
+            roughness={0.05}
             transmission={1}
             thickness={1.5}
             ior={1.45}
@@ -189,22 +166,22 @@ export default function Scene({ currentView }) {
             textureWidth: 512,
             textureHeight: 512,
             waterNormals,
-            sunDirection: new THREE.Vector3(10, 10, 10),
+            sunDirection: new THREE.Vector3(10, 1, 20),
             sunColor: 0xffffff,
             waterColor: 0xa19089,
-            distortionScale: 1.2,
+            distortionScale: 1.5,
             fog: true,
           },
         ]}
         rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, 0, 0]}
+        position={[0, -0.2, 0]}
       />
 
       <ContactShadows
-        opacity={0.35}
-        scale={120}
-        blur={2.2}
-        far={25}
+        opacity={0.3}
+        scale={200}
+        blur={3}
+        far={40}
         color="#5e4d4d"
       />
     </>
