@@ -24,15 +24,14 @@ export default function Scene({ currentView }) {
   }, [pinkStoneTex, travertineTex, waterNormals]);
 
   /* REFINED CINEMATIC PATHWAY:
-     - Home: Starts at a distance to the right, glides through the entrance,
-       and settles back to capture the full interior corner scale.
-     - Collection: Lateral exit through the side wall remains perfect.
+     - Home: Pulls back and to the left to reveal 80% of the structure.
+     - Collection: Lateral exit remains the same.
   */
   const views = {
     home: { 
-      // START/SETTLE: Backed up to [0, 5, 25] to give the corner breathing room
-      pos: [0, 5, 25],      
-      // LOOK: Aimed deep into the corner for that dramatic intersection focus
+      // BACKED UP & MOVED LEFT: Positioned at [-25, 6, 45] to capture the scale
+      pos: [-25, 6, 45],      
+      // LOOK: Still focused on the corner [45, 2, -15] to maintain the depth
       look: [45, 2, -15]    
     },
     collection: { 
@@ -46,9 +45,9 @@ export default function Scene({ currentView }) {
   useFrame((state, delta) => {
     const target = views[currentView];
     
-    // We start the camera further away initially for the "weird start" fix
+    // START POINT: Starting high and further right to create a sweeping entrance
     if (state.clock.elapsedTime < 0.1 && currentView === 'home') {
-       camera.position.set(30, 8, 60); 
+       camera.position.set(40, 10, 70); 
     }
 
     camera.position.lerp(new THREE.Vector3(...target.pos), 0.012); 
