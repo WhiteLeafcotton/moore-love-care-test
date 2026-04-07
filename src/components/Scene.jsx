@@ -54,13 +54,13 @@ export default function Scene({ currentView }) {
             <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
           </mesh>
 
-          {/* WINDOW ENCLOSURE: Header and Sill to frame the window */}
-          <mesh position={[-38.5, -30, 0]}> 
-            <boxGeometry args={[7, 100, 0.2]} />
+          {/* WINDOW ENCLOSURE: Header and Sill moved to create a floating frame */}
+          <mesh position={[-38.5, -15, 0]}> {/* WINDOW SILL - Raised to NOT touch bench */}
+            <boxGeometry args={[7, 40, 0.2]} />
             <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
           </mesh>
-          <mesh position={[-38.5, 45, 0]}> {/* WINDOW TOP */}
-            <boxGeometry args={[7, 50, 0.2]} />
+          <mesh position={[-38.5, 15, 0]}> {/* WINDOW TOP - Lowered to be visible */}
+            <boxGeometry args={[7, 40, 0.2]} />
             <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
           </mesh>
 
@@ -70,9 +70,9 @@ export default function Scene({ currentView }) {
             <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
           </mesh>
 
-          {/* MAIN DOORWAY HEADER: Lowered to be visible in camera */}
-          <mesh position={[8, 45, 0]}> 
-            <boxGeometry args={[8, 50, 0.2]} />
+          {/* MAIN DOORWAY HEADER: Dropped significantly into the camera frame */}
+          <mesh position={[8, 15, 0]}> 
+            <boxGeometry args={[8, 40, 0.2]} />
             <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
           </mesh>
 
@@ -90,9 +90,9 @@ export default function Scene({ currentView }) {
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
           
-          {/* SIDE DOOR HEADER: Lowered to frame the doorway top */}
-          <mesh position={[0, 45, 0]}>
-            <boxGeometry args={[5, 50, 0.2]} />
+          {/* SIDE DOOR HEADER: Dropped to match the other doorways */}
+          <mesh position={[0, 15, 0]}>
+            <boxGeometry args={[5, 40, 0.2]} />
             <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
           </mesh>
 
