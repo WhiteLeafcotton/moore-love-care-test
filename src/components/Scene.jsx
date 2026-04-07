@@ -45,11 +45,11 @@ export default function Scene({ currentView }) {
 
   const views = {
     home: { 
-      pos: [10, 2, 16],       // Low water-level start
-      look: [-10, 4, -12]     // Looking through the single door
+      pos: [10, 2.5, 18],     // Slightly back to frame the arch
+      look: [-8, 6, -12]      // Looking slightly UP to catch the top of the door
     },
     collection: { 
-      pos: [-85, 3.5, 45],    // Gliding out and across
+      pos: [-85, 3.5, 45],    
       look: [-115, 3, -15]    
     } 
   };
@@ -75,31 +75,31 @@ export default function Scene({ currentView }) {
       
       <PinkClouds />
 
-      {/* --- THE MONOLITHIC ROOM WITH ONE DOOR --- */}
+      {/* --- THE MONOLITHIC ROOM WITH LOWER ARCH --- */}
       <group position={[0, 0, -5]} scale={0.6}>
         
-        {/* BACK WALL PIECES (Constructing the Doorway) */}
-        <group position={[0, 15, -12]}>
-          {/* Left Side of Wall */}
-          <mesh position={[-20, 0, 0]}>
-            <boxGeometry args={[30, 30, 4]} />
+        {/* BACK WALL WITH ACCESSIBLE DOORWAY */}
+        <group position={[0, 10, -12]}> {/* Lowered entire wall group from 15 to 10 */}
+          {/* Left Side */}
+          <mesh position={[-18, 0, 0]}>
+            <boxGeometry args={[26, 20, 4]} />
             <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
           </mesh>
-          {/* Right Side of Wall */}
-          <mesh position={[20, 0, 0]}>
-            <boxGeometry args={[30, 30, 4]} />
+          {/* Right Side */}
+          <mesh position={[18, 0, 0]}>
+            <boxGeometry args={[26, 20, 4]} />
             <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
           </mesh>
-          {/* Header (Top of Door) */}
-          <mesh position={[0, 11, 0]}>
-            <boxGeometry args={[10, 8, 4]} />
+          {/* Header - The "Arch" piece brought into view */}
+          <mesh position={[0, 7, 0]}>
+            <boxGeometry args={[10, 6, 4]} />
             <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
           </mesh>
         </group>
 
-        {/* SIDE WALL (Keeps it feeling "Enclosed") */}
-        <mesh position={[-35, 15, 0]} rotation={[0, Math.PI / 2, 0]}>
-          <boxGeometry args={[30, 30, 4]} />
+        {/* SIDE WALL */}
+        <mesh position={[-35, 10, 0]} rotation={[0, Math.PI / 2, 0]}>
+          <boxGeometry args={[30, 20, 4]} />
           <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
         </mesh>
       </group>
