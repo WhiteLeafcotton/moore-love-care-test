@@ -56,108 +56,75 @@ export default function Scene({ currentView }) {
       <Environment preset="dawn" />
       <fog attach="fog" args={["#f7ece8", 30, 200]} />
       
-      {/* CLEAN FLOATING CORNER ROOM */}
+      {/* --- FLOATING CORNER ROOM (CLEAN) --- */}
 <group position={[0, 4, -12]}>
 
   {/* FLOOR */}
-  <mesh position={[0, -15, 0]} receiveShadow>
+  <mesh receiveShadow position={[0, -12, 0]}>
     <boxGeometry args={[60, 2, 60]} />
-    <meshStandardMaterial map={travertineTex} color="#f5dcd6" />
+    <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
   </mesh>
 
-  {/* LEFT WALL (WITH REAL OPENINGS) */}
-  <group position={[-30, 5, 0]}>
-
-    {/* TOP WALL */}
-    <mesh position={[0, 15, 0]}>
-      <boxGeometry args={[2, 10, 60]} />
-      <meshStandardMaterial map={travertineTex} />
+  {/* LEFT WALL (ARCHED DOORS) */}
+  <group position={[-30, 8, 0]}>
+    
+    {/* wall base */}
+    <mesh>
+      <boxGeometry args={[2, 40, 60]} />
+      <meshStandardMaterial map={travertineTex} color="#fcd7d7" />
     </mesh>
 
-    {/* BOTTOM WALL */}
-    <mesh position={[0, -15, 0]}>
-      <boxGeometry args={[2, 10, 60]} />
-      <meshStandardMaterial map={travertineTex} />
-    </mesh>
+    {/* DOOR 1 (arched illusion) */}
+    <group position={[1.1, -6, -12]}>
+      {/* sides */}
+      <mesh position={[0, 8, 0]}>
+        <boxGeometry args={[0.5, 16, 8]} />
+        <meshStandardMaterial map={travertineTex} />
+      </mesh>
 
-    {/* SIDE STRIPS BETWEEN DOORS */}
-    <mesh position={[0, 0, -25]}>
-      <boxGeometry args={[2, 20, 10]} />
-      <meshStandardMaterial map={travertineTex} />
-    </mesh>
+      {/* arch top */}
+      <mesh position={[0, 16, 0]}>
+        <cylinderGeometry args={[4, 4, 0.5, 32, 1, false, 0, Math.PI]} />
+        <meshStandardMaterial map={travertineTex} />
+        rotation={[0, 0, Math.PI / 2]}
+      </mesh>
+    </group>
 
-    <mesh position={[0, 0, 0]}>
-      <boxGeometry args={[2, 20, 10]} />
-      <meshStandardMaterial map={travertineTex} />
-    </mesh>
+    {/* DOOR 2 */}
+    <group position={[1.1, -6, 12]}>
+      <mesh position={[0, 8, 0]}>
+        <boxGeometry args={[0.5, 16, 8]} />
+        <meshStandardMaterial map={travertineTex} />
+      </mesh>
 
-    <mesh position={[0, 0, 25]}>
-      <boxGeometry args={[2, 20, 10]} />
-      <meshStandardMaterial map={travertineTex} />
-    </mesh>
-
-    {/* ARCH 1 */}
-    <mesh position={[0, 5, -12]} rotation={[Math.PI / 2, 0, 0]}>
-      <cylinderGeometry args={[6, 6, 2, 32, 1, false, 0, Math.PI]} />
-      <meshStandardMaterial map={travertineTex} />
-    </mesh>
-
-    {/* ARCH 2 */}
-    <mesh position={[0, 5, 12]} rotation={[Math.PI / 2, 0, 0]}>
-      <cylinderGeometry args={[6, 6, 2, 32, 1, false, 0, Math.PI]} />
-      <meshStandardMaterial map={travertineTex} />
-    </mesh>
+      <mesh position={[0, 16, 0]}>
+        <cylinderGeometry args={[4, 4, 0.5, 32, 1, false, 0, Math.PI]} />
+        <meshStandardMaterial map={travertineTex} />
+        rotation={[0, 0, Math.PI / 2]}
+      </mesh>
+    </group>
 
   </group>
 
-  {/* RIGHT WALL (WINDOW CUTOUT STYLE) */}
-  <group position={[0, 5, 30]} rotation={[0, Math.PI / 2, 0]}>
-
-    {/* TOP */}
-    <mesh position={[0, 15, 0]}>
-      <boxGeometry args={[2, 10, 60]} />
-      <meshStandardMaterial map={pinkStoneTex} />
+  {/* RIGHT WALL (WINDOWS) */}
+  <group position={[0, 8, 30]} rotation={[0, Math.PI / 2, 0]}>
+    
+    {/* wall */}
+    <mesh>
+      <boxGeometry args={[2, 40, 60]} />
+      <meshStandardMaterial map={pinkStoneTex} color="#ede2df" />
     </mesh>
 
-    {/* BOTTOM */}
-    <mesh position={[0, -15, 0]}>
-      <boxGeometry args={[2, 10, 60]} />
-      <meshStandardMaterial map={pinkStoneTex} />
+    {/* WINDOW 1 */}
+    <mesh position={[1.1, 5, -12]}>
+      <boxGeometry args={[0.5, 10, 10]} />
+      <meshStandardMaterial color="#cfe8ff" transparent opacity={0.25} />
     </mesh>
 
-    {/* SIDE SEGMENTS */}
-    <mesh position={[0, 0, -25]}>
-      <boxGeometry args={[2, 20, 10]} />
-      <meshStandardMaterial map={pinkStoneTex} />
-    </mesh>
-
-    <mesh position={[0, 0, 25]}>
-      <boxGeometry args={[2, 20, 10]} />
-      <meshStandardMaterial map={pinkStoneTex} />
-    </mesh>
-
-    {/* WINDOW FRAME 1 */}
-    <mesh position={[0, 5, -12]}>
-      <boxGeometry args={[2.2, 14, 14]} />
-      <meshStandardMaterial color="#d9d9d9" />
-    </mesh>
-
-    {/* GLASS 1 */}
-    <mesh position={[0, 5, -12]}>
-      <boxGeometry args={[1.8, 12, 12]} />
-      <meshPhysicalMaterial transmission={1} roughness={0} thickness={0.5} />
-    </mesh>
-
-    {/* WINDOW FRAME 2 */}
-    <mesh position={[0, 5, 12]}>
-      <boxGeometry args={[2.2, 14, 14]} />
-      <meshStandardMaterial color="#d9d9d9" />
-    </mesh>
-
-    {/* GLASS 2 */}
-    <mesh position={[0, 5, 12]}>
-      <boxGeometry args={[1.8, 12, 12]} />
-      <meshPhysicalMaterial transmission={1} roughness={0} thickness={0.5} />
+    {/* WINDOW 2 */}
+    <mesh position={[1.1, 5, 12]}>
+      <boxGeometry args={[0.5, 10, 10]} />
+      <meshStandardMaterial color="#cfe8ff" transparent opacity={0.25} />
     </mesh>
 
   </group>
