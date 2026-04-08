@@ -6,7 +6,7 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* Monolithic Staircase leading OUT into the water */
+/* Monolithic Staircase leading FORWARD from the platform face */
 const Staircase = ({ position, width, texture, rotation }) => {
   const stepHeight = 0.5;
   const stepDepth = 0.8;
@@ -15,13 +15,11 @@ const Staircase = ({ position, width, texture, rotation }) => {
   return (
     <group position={position} rotation={rotation}>
       {Array.from({ length: numSteps }).map((_, i) => (
-        // The i * stepDepth moves each step further forward as they go down
         <group key={i} position={[0, -i * stepHeight, i * stepDepth]}>
           <mesh>
             <boxGeometry args={[width, stepHeight, stepDepth]} />
             <meshStandardMaterial map={texture} color="#f1dfd8" roughness={0.6} />
           </mesh>
-          {/* Foundation blocks for each step to prevent gaps */}
           <mesh position={[0, -2.5, 0]}>
             <boxGeometry args={[width, 5, stepDepth]} />
             <meshStandardMaterial map={texture} color="#f1dfd8" roughness={0.6} />
@@ -75,8 +73,8 @@ export default function Scene({ currentView }) {
   const purpleProps = { map: travertineTex, color: "#d1c4e9", roughness: 0.8 };
 
   useFrame((state, delta) => {
-    // CAMERA: Positioned to capture the stairs leading out from the pink wall corner
-    const targetPos = currentView === 'home' ? [-22, 4, 52] : [35, 6, 10];
+    // CAMERA: Pulled back to Z=60 to frame the forward-leading stairs
+    const targetPos = currentView === 'home' ? [-10, 5, 60] : [35, 6, 10];
     const targetLook = currentView === 'home' ? [12, 1, 0] : [70, 0, 5];
     
     camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
@@ -91,21 +89,21 @@ export default function Scene({ currentView }) {
       <Environment preset="dawn" />
       
       <group position={[0, 0, 0]}>
-        {/* PLATFORM */}
+        {/* PLATFORM: Centered at X=12, Face ends at Z=29 */}
         <mesh receiveShadow position={[12, -2.0, 15]}>
           <boxGeometry args={[14, 8.0, 28]} />
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* STAIRS: Flush with Pink Wall (X=7) and Platform Face (Z=29.1) */}
+        {/* STAIRS: Now centered in FRONT of the platform */}
         <Staircase 
-          position={[7.0, 1.5, 29.1]} 
+          position={[12.0, 1.5, 29.0]} 
           rotation={[0, -Math.PI / 2, 0]} 
           width={14} 
           texture={travertineTex} 
         />
 
-        {/* PINK WALL SIDE */}
+        {/* WALLS */}
         <group position={[-16, -1, 0]}>
           <mesh position={[1, 8.5, 0]}>
             <boxGeometry args={[4, 17, 2]} />
@@ -119,7 +117,6 @@ export default function Scene({ currentView }) {
           </mesh>
         </group>
 
-        {/* PURPLE WALL SIDE */}
         <group position={[17, -1, 1]} rotation={[0, -Math.PI / 2, 0]}>
           <mesh position={[4, 8.5, 0]}>
             <boxGeometry args={[8, 17, 2]} />
