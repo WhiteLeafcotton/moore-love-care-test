@@ -10,8 +10,7 @@ extend({ Water });
 const Staircase = ({ position, width, texture, rotation }) => {
   const stepHeight = 0.5;
   const stepDepth = 0.8;
-  // UPDATED: Increased to 16 steps to match the 8.0 platform height
-  const numSteps = 16; 
+  const numSteps = 16; // Matches 8.0 platform height
 
   return (
     <group position={position} rotation={rotation}>
@@ -21,7 +20,6 @@ const Staircase = ({ position, width, texture, rotation }) => {
             <boxGeometry args={[width, stepHeight, stepDepth]} />
             <meshStandardMaterial map={texture} color="#f1dfd8" roughness={0.6} />
           </mesh>
-          {/* Base support to ensure no gaps under stairs */}
           <mesh position={[0, -2.5, 0]}>
             <boxGeometry args={[width, 5, stepDepth]} />
             <meshStandardMaterial map={texture} color="#f1dfd8" roughness={0.6} />
@@ -75,7 +73,8 @@ export default function Scene({ currentView }) {
   const purpleProps = { map: travertineTex, color: "#d1c4e9", roughness: 0.8 };
 
   useFrame((state, delta) => {
-    const targetPos = currentView === 'home' ? [-20, 1.5, 30] : [35, 6, 10];
+    // UPDATED: Camera at Z=45 to frame the stairs now that they are pushed forward
+    const targetPos = currentView === 'home' ? [-15, 1.5, 45] : [35, 6, 10];
     const targetLook = currentView === 'home' ? [16, 1.5, 0] : [70, 0, 5];
     
     camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
@@ -90,15 +89,15 @@ export default function Scene({ currentView }) {
       <Environment preset="dawn" />
       
       <group position={[0, 0, 0]}>
-        {/* PLATFORM: Height is 8.0 */}
+        {/* PLATFORM: Width 14, Height 8.0 */}
         <mesh receiveShadow position={[12, -2.0, 15]}>
           <boxGeometry args={[14, 8.0, 28]} />
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* STAIRS: Now 16 steps high to reach the 8.0 platform height exactly */}
+        {/* FIXED: Z=24.0 ensures stairs are completely in front of the platform base */}
         <Staircase 
-          position={[7.5, 1.5, 1.1]} 
+          position={[7.5, 1.5, 24.0]} 
           rotation={[0, -Math.PI / 2, 0]} 
           width={13.5} 
           texture={travertineTex} 
