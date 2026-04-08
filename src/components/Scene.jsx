@@ -80,18 +80,25 @@ export default function Scene({ currentView }) {
   };
 
   useFrame((state, delta) => {
-    // Height raised slightly to 1.5.
-    // Transition for the second view now "flies through" the window area (around x:17).
-    const targetPos = currentView === "home" 
-      ? [-15, 1.5, 30] 
-      : [60, 1.5, 1]; // Moved further out and "through" the window plane
+    // CAMERA HEIGHT: 1.5 as requested
+    // HOME VIEW: Starting position
+    // SECOND VIEW: Aligned to X: 17 to pass perfectly through the window opening
     
-    const targetLook = currentView === "home" 
+    const isHome = currentView === "home";
+    
+    const targetPos = isHome 
+      ? [-15, 1.5, 30] 
+      : [17, 1.5, -20]; // X: 17 aligns with the window center, Z: -20 pulls it through to the other side
+    
+    const targetLook = isHome 
       ? [12, 1.5, 0] 
-      : [100, 1.5, 1];
+      : [17, 1.5, -100]; // Looking straight ahead through the window
 
     camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
-    camera.lookAt(new THREE.Vector3(...targetLook));
+    
+    // Smoothly look at the target
+    const lookVec = new THREE.Vector3(...targetLook);
+    camera.lookAt(lookVec);
 
     if (waterRef.current) {
       waterRef.current.material.uniforms["time"].value += delta * 0.25;
