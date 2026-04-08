@@ -6,10 +6,10 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* Monolithic Staircase - Trimmed to fit pink wall boundary */
+/* Monolithic Staircase - Extended Horizontally via stepDepth */
 const Staircase = ({ position, width, texture, rotation }) => {
   const stepHeight = 0.5;
-  const stepDepth = 0.8;
+  const stepDepth = 1.6; // Doubled to extend the stairs further along the platform
   const numSteps = 16; 
 
   return (
@@ -72,9 +72,9 @@ export default function Scene({ currentView }) {
   const purpleProps = { map: travertineTex, color: "#d1c4e9", roughness: 0.8 };
 
   useFrame((state, delta) => {
-    // CAMERA: Lowered Y to 1.2 for a cinematic water-level view
-    const targetPos = currentView === 'home' ? [-18, 1.2, 38] : [35, 6, 10]; 
-    const targetLook = currentView === 'home' ? [12.0, 1.5, 0] : [70, 0, 5];
+    // CAMERA: Low-angle cinematic water view
+    const targetPos = currentView === 'home' ? [-15, 1.0, 45] : [35, 6, 10]; 
+    const targetLook = currentView === 'home' ? [12, 1.5, 0] : [70, 0, 5];
     
     camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
     camera.lookAt(new THREE.Vector3(...targetLook));
@@ -94,11 +94,11 @@ export default function Scene({ currentView }) {
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* STAIRS: Width increased for a broader look, X adjusted to keep right edge flush with wall */}
+        {/* STAIRS: Position locked, depth extended to 1.6 to stretch them horizontally */}
         <Staircase 
-          position={[7.25, 1.5, 1.0]} 
+          position={[5.0, 1.5, 1.0]} 
           rotation={[0, -Math.PI / 2, 0]} 
-          width={18} 
+          width={13.5} 
           texture={travertineTex} 
         />
 
