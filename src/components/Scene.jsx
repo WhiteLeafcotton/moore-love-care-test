@@ -83,7 +83,8 @@ export default function Scene({ currentView }) {
 
   // INITIAL LOAD SETUP (Window Entrance)
   useMemo(() => {
-    camera.position.set(32, 5.0, 12); 
+    // Backed up to X:45 to see the full window frame on load
+    camera.position.set(45, 5.0, 12); 
     lookAtTarget.current.set(0, 5.0, 12);
     camera.lookAt(lookAtTarget.current);
   }, [camera]);
@@ -91,21 +92,18 @@ export default function Scene({ currentView }) {
   useFrame((state, delta) => {
     const isHome = currentView === "home";
     
-    // DEFINITIONS
     const sweetSpotPos = new THREE.Vector3(-15, 1.5, 30);
     const sweetSpotLook = new THREE.Vector3(12, 1.5, 0);
 
-    // EXIT LOGIC
-    // We target a point way out beyond the door (-80) 
-    // and slightly further left (-12) to ensure the camera arcs AWAY from the door frame
-    const exitFinalPos = new THREE.Vector3(-10, 1.5, -80);
-    const exitLook = new THREE.Vector3(-10, 1.5, -150);
+    // EXIT LOGIC - Corrected to the door closest to the stairs
+    const exitFinalPos = new THREE.Vector3(-4, 1.5, -80);
+    const exitLook = new THREE.Vector3(-4, 1.5, -150);
 
     // 1. INTRO SEQUENCE (Window Fly-in)
     if (!introFinished && isHome) {
-        if (camera.position.x > 6) {
-            camera.position.lerp(new THREE.Vector3(0, 5.0, 12), 0.01);
-            lookAtTarget.current.lerp(new THREE.Vector3(-20, 5.0, 12), 0.01);
+        if (camera.position.x > 8) {
+            camera.position.lerp(new THREE.Vector3(0, 5.0, 12), 0.008);
+            lookAtTarget.current.lerp(new THREE.Vector3(-20, 5.0, 12), 0.008);
         } else {
             setIntroFinished(true);
         }
@@ -117,9 +115,8 @@ export default function Scene({ currentView }) {
     } 
     // 3. SEAMLESS EXIT (Button Pressed)
     else {
-        // Higher lerp (0.025) for a smooth, continuous travel out the door
-        camera.position.lerp(exitFinalPos, 0.025);
-        lookAtTarget.current.lerp(exitLook, 0.025);
+        camera.position.lerp(exitFinalPos, 0.02);
+        lookAtTarget.current.lerp(exitLook, 0.02);
     }
 
     camera.lookAt(lookAtTarget.current);
@@ -142,13 +139,14 @@ export default function Scene({ currentView }) {
           <boxGeometry args={[14, 8.0, 28]} />
           <meshStandardMaterial {...pinkProps} />
         </mesh>
+        
+        {/* The Stairs */}
         <Staircase position={[5.0, 1.5, 1.0]} rotation={[0, -Math.PI / 2, 0]} width={20} texture={pinkStoneTex} />
         
-        {/* DOORWAY WALL (LEFT) */}
+        {/* DOORWAY WALL (LEFT) - Aligning exit to WallOpening at position 6 */}
         <group position={[-16, -1, 0]}>
           <mesh castShadow receiveShadow position={[1, 8.5, 0]}><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
-          <WallOpening position={[6, 0, 0]} colorProps={pinkProps} />
-          {/* This is the doorway the camera glides through */}
+          <WallOpening position={[6, 0, 0]} colorProps={pinkProps} /> {/* EXIT DOORWAY */}
           <WallOpening position={[12, 0, 0]} colorProps={pinkProps} /> 
           <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
         </group>
