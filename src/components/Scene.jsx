@@ -6,7 +6,7 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* Monolithic Staircase: Updated to be 2x Wider */
+/* Monolithic Staircase: 2x Wide and Locked */
 const Staircase = ({ position, width, texture, rotation }) => {
   const stepHeight = 0.5;
   const stepDepth = 0.8;
@@ -16,12 +16,10 @@ const Staircase = ({ position, width, texture, rotation }) => {
     <group position={position} rotation={rotation}>
       {Array.from({ length: numSteps }).map((_, i) => (
         <group key={i} position={[0, -i * stepHeight, i * stepDepth]}>
-          {/* STEP SURFACE */}
           <mesh>
             <boxGeometry args={[width, stepHeight, stepDepth]} />
             <meshStandardMaterial map={texture} color="#f1dfd8" roughness={0.6} />
           </mesh>
-          {/* SOLID ARCHITECTURAL BASE: Fills space to water */}
           <mesh position={[0, -2.5, 0]}>
             <boxGeometry args={[width, 5, stepDepth]} />
             <meshStandardMaterial map={texture} color="#f1dfd8" roughness={0.6} />
@@ -32,7 +30,7 @@ const Staircase = ({ position, width, texture, rotation }) => {
   );
 };
 
-/* Modular Wall Segment: Creates a clean rectangular opening */
+/* Modular Wall Segment */
 const WallOpening = ({ position, colorProps, width = 6, openingW = 3.5, height = 17, openingH = 9, isWindow = false }) => (
   <group position={position}>
     <mesh position={[-(openingW + (width - openingW) / 2) / 2, height / 2, 0]}>
@@ -75,10 +73,13 @@ export default function Scene({ currentView }) {
   const purpleProps = { map: travertineTex, color: "#d1c4e9", roughness: 0.8 };
 
   useFrame((state, delta) => {
-    const targetPos = currentView === 'home' ? [-25, 6, 35] : [35, 5, 20];
-    const targetLook = currentView === 'home' ? [5, 0, -5] : [70, 0, 5];
-    camera.position.lerp(new THREE.Vector3(...targetPos), 0.025);
+    // UPDATED: Cinematic camera coordinates centered on the wall corner
+    const targetPos = currentView === 'home' ? [-30, 5, 40] : [40, 6, 25];
+    const targetLook = currentView === 'home' ? [16, 6, 0] : [70, 0, 5];
+    
+    camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
     camera.lookAt(new THREE.Vector3(...targetLook));
+    
     if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.2;
   });
 
@@ -88,13 +89,13 @@ export default function Scene({ currentView }) {
       <Environment preset="dawn" />
       
       <group position={[0, 0, 0]}>
-        {/* PLATFORM LOCKED */}
+        {/* PLATFORM */}
         <mesh receiveShadow position={[12, -2.0, 15]}>
           <boxGeometry args={[9, 8.0, 28]} />
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* STAIRCASE LOCKED (Width doubled to 13.5) */}
+        {/* STAIRCASE */}
         <Staircase 
           position={[7.5, 1.5, 1.1]} 
           rotation={[0, -Math.PI / 2, 0]} 
@@ -102,7 +103,7 @@ export default function Scene({ currentView }) {
           texture={travertineTex} 
         />
 
-        {/* FRONT PINK WALL LOCKED */}
+        {/* FRONT PINK WALL */}
         <group position={[-16, -1, 0]}>
           <mesh position={[1, 8.5, 0]}>
             <boxGeometry args={[4, 17, 2]} />
@@ -116,7 +117,7 @@ export default function Scene({ currentView }) {
           </mesh>
         </group>
 
-        {/* PURPLE WALL LOCKED */}
+        {/* PURPLE WALL */}
         <group position={[17, -1, 1]} rotation={[0, -Math.PI / 2, 0]}>
           <mesh position={[4, 8.5, 0]}>
             <boxGeometry args={[8, 17, 2]} />
