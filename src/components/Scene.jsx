@@ -7,7 +7,7 @@ import * as THREE from "three";
 extend({ Water });
 
 /* Modular Wall Segment: Creates a clean rectangular opening */
-const WallOpening = ({ position, colorProps, width = 6, openingW = 3.5, height = 15, openingH = 9, isWindow = false }) => (
+const WallOpening = ({ position, colorProps, width = 6, openingW = 3.5, height = 17, openingH = 9, isWindow = false }) => (
   <group position={position}>
     <mesh position={[-(openingW + (width - openingW) / 2) / 2, height / 2, 0]}>
       <boxGeometry args={[(width - openingW) / 2, height, 2]} />
@@ -62,36 +62,36 @@ export default function Scene({ currentView }) {
       <Environment preset="dawn" />
       
       <group position={[0, 0, 0]}>
-        {/* PLATFORM: Height increased to 5.0 and Y offset adjusted to -1.5 */}
-        <mesh receiveShadow position={[12, -1.5, 15]}>
-          <boxGeometry args={[9, 5.0, 28]} />
+        {/* PLATFORM: Height increased to 8.0 and repositioned */}
+        <mesh receiveShadow position={[12, -2.0, 15]}>
+          <boxGeometry args={[9, 8.0, 28]} />
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* FRONT PINK WALL - POSITION LOCKED */}
-        <group position={[-16, 0, 0]}>
-          <mesh position={[1, 7.5, 0]}>
-            <boxGeometry args={[4, 15, 2]} />
+        {/* FRONT PINK WALL: Extended height and lowered to touch water */}
+        <group position={[-16, -1, 0]}>
+          <mesh position={[1, 8.5, 0]}>
+            <boxGeometry args={[4, 17, 2]} />
             <meshStandardMaterial {...pinkProps} />
           </mesh>
-          <WallOpening position={[6, 0, 0]} width={6} openingW={3.5} openingH={9} colorProps={pinkProps} />
-          <WallOpening position={[12, 0, 0]} width={6} openingW={3.5} openingH={9} colorProps={pinkProps} />
-          <mesh position={[24, 7.5, 0]}>
-            <boxGeometry args={[18, 15, 2]} />
+          <WallOpening position={[6, 0, 0]} width={6} height={17} openingW={3.5} openingH={9} colorProps={pinkProps} />
+          <WallOpening position={[12, 0, 0]} width={6} height={17} openingW={3.5} openingH={9} colorProps={pinkProps} />
+          <mesh position={[24, 8.5, 0]}>
+            <boxGeometry args={[18, 17, 2]} />
             <meshStandardMaterial {...pinkProps} />
           </mesh>
         </group>
 
         {/* SIDE PURPLE WALL - POSITION LOCKED */}
-        <group position={[17, 0, 1]} rotation={[0, -Math.PI / 2, 0]}>
-          <mesh position={[4, 7.5, 0]}>
-            <boxGeometry args={[8, 15, 2]} />
+        <group position={[17, -1, 1]} rotation={[0, -Math.PI / 2, 0]}>
+          <mesh position={[4, 8.5, 0]}>
+            <boxGeometry args={[8, 17, 2]} />
             <meshStandardMaterial {...purpleProps} />
           </mesh>
-          <WallOpening position={[11, 0, 0]} width={6} openingW={4} openingH={6} isWindow={true} colorProps={purpleProps} />
-          <WallOpening position={[17, 0, 0]} width={6} openingW={4} openingH={6} isWindow={true} colorProps={purpleProps} />
-          <mesh position={[24, 7.5, 0]}>
-            <boxGeometry args={[8, 15, 2]} />
+          <WallOpening position={[11, 0, 0]} width={6} height={17} openingW={4} openingH={6} isWindow={true} colorProps={purpleProps} />
+          <WallOpening position={[17, 0, 0]} width={6} height={17} openingW={4} openingH={6} isWindow={true} colorProps={purpleProps} />
+          <mesh position={[24, 8.5, 0]}>
+            <boxGeometry args={[8, 17, 2]} />
             <meshStandardMaterial {...purpleProps} />
           </mesh>
         </group>
