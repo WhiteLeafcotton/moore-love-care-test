@@ -2,7 +2,7 @@ import { useRef, useMemo, useEffect, useState } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
 import { Environment, Sky, ContactShadows } from "@react-three/drei";
 import { Water } from "three-stdlib";
-import * as THREE from "three";
+import * as THREE from "this";
 
 extend({ Water });
 
@@ -83,41 +83,38 @@ export default function Scene({ currentView }) {
 
   // INITIAL LOAD SETUP
   useMemo(() => {
-    // Start way out to the right, aligned with the window opening center
-    camera.position.set(50, 6, 12); 
-    lookAtTarget.current.set(0, 6, 12);
+    // Start way out right, and slightly higher (Y: 2.5) to clear the window sill comfortably
+    camera.position.set(60, 2.5, 14); 
+    lookAtTarget.current.set(0, 2.5, 14);
     camera.lookAt(lookAtTarget.current);
   }, []);
 
   useFrame((state, delta) => {
     const isHome = currentView === "home";
     
-    // THE SWEET SPOT (Home View)
     const sweetSpotPos = new THREE.Vector3(-15, 1.5, 30);
     const sweetSpotLook = new THREE.Vector3(12, 1.5, 0);
 
-    // THE EXIT (Through the door)
-    const exitPos = new THREE.Vector3(-10, 1.5, -40);
+    const exitPos = new THREE.Vector3(-10, 1.5, -50);
     const exitLook = new THREE.Vector3(-10, 1.5, -100);
 
-    // INTRO LOGIC: We use a midpoint to "turn the corner" after passing through the window
-    // Window is at X:17. Once camera.x < 10, we know we've cleared the wall.
+    // INTRO FLOW
     if (!introFinished && isHome) {
-        if (camera.position.x > 5) {
-            // Stage 1: Move through the window at a safe height
-            camera.position.lerp(new THREE.Vector3(0, 1.5, 12), 0.008);
-            lookAtTarget.current.lerp(new THREE.Vector3(-20, 1.5, 12), 0.008);
+        if (camera.position.x > 8) {
+            // Stage 1: Comfortable clearance height (2.5) while passing through the window frame
+            camera.position.lerp(new THREE.Vector3(0, 2.5, 14), 0.007);
+            lookAtTarget.current.lerp(new THREE.Vector3(-20, 2.5, 14), 0.007);
         } else {
-            // Stage 2: We've cleared the wall, now drift to the Sweet Spot
+            // Stage 2: Wall is cleared, now settle into the cinematic low "Sweet Spot"
             setIntroFinished(true);
         }
     } else {
-        // STANDARD TRANSITIONS
+        // BUTTON TRANSITIONS
         const targetPos = isHome ? sweetSpotPos : exitPos;
         const targetLookAt = isHome ? sweetSpotLook : exitLook;
 
-        camera.position.lerp(targetPos, 0.012);
-        lookAtTarget.current.lerp(targetLookAt, 0.012);
+        camera.position.lerp(targetPos, 0.01);
+        lookAtTarget.current.lerp(targetLookAt, 0.01);
     }
 
     camera.lookAt(lookAtTarget.current);
@@ -142,7 +139,6 @@ export default function Scene({ currentView }) {
         </mesh>
         <Staircase position={[5.0, 1.5, 1.0]} rotation={[0, -Math.PI / 2, 0]} width={20} texture={pinkStoneTex} />
         
-        {/* LEFT WALL */}
         <group position={[-16, -1, 0]}>
           <mesh castShadow receiveShadow position={[1, 8.5, 0]}><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
           <WallOpening position={[6, 0, 0]} colorProps={pinkProps} />
@@ -150,7 +146,6 @@ export default function Scene({ currentView }) {
           <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
         </group>
 
-        {/* RIGHT WALL (WINDOW) */}
         <group position={[17, -1, 1]} rotation={[0, -Math.PI / 2, 0]}>
           <mesh castShadow receiveShadow position={[4, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
           <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={pinkProps} />
