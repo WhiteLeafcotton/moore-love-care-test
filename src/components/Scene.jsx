@@ -83,43 +83,48 @@ export default function Scene({ currentView }) {
 
   // INITIAL LOAD SETUP
   useMemo(() => {
-    // Height 8.5 puts the camera at the center of the windows (Eye level)
-    // X: 55 frames both windows perfectly
-    camera.position.set(55, 8.5, 14); 
-    lookAtTarget.current.set(0, 8.5, 14);
+    // Eye-level (8.5), Backed up for framing (65), Aligned with window (12)
+    camera.position.set(65, 8.5, 12); 
+    lookAtTarget.current.set(0, 8.5, 12);
     camera.lookAt(lookAtTarget.current);
   }, [camera]);
 
   useFrame((state, delta) => {
     const isHome = currentView === "home";
-    
-    // THE SWEET SPOT
+    const LERP_SPEED = 0.008; // Slow, luxurious glide for everything
+
+    // 1. INTRO WAYPOINTS
+    const introCenterPoint = new THREE.Vector3(5, 8.5, 12); // Directly inside window
     const sweetSpotPos = new THREE.Vector3(-15, 1.5, 30);
     const sweetSpotLook = new THREE.Vector3(12, 1.5, 0);
 
-    // THE EXIT DOOR (Closest to stairs)
-    // Targeting X: -10 ensures we clear the door frame at position 6 on the left wall
-    const exitFinalPos = new THREE.Vector3(-10, 1.5, -80);
-    const exitLook = new THREE.Vector3(-10, 1.5, -150);
+    // 2. EXIT WAYPOINTS (Door closest to stairs is at Z: -10 relative to group)
+    // Absolute position for that door is roughly Z: 10
+    const doorClearancePos = new THREE.Vector3(-8, 1.5, 10); // Center of doorway
+    const exitFinalPos = new THREE.Vector3(-8, 1.5, -80);
+    const exitLook = new THREE.Vector3(-8, 1.5, -150);
 
-    // 1. INTRO (Fast & Punchy)
     if (!introFinished && isHome) {
-        if (camera.position.x > 10) {
-            camera.position.lerp(new THREE.Vector3(5, 8.5, 14), 0.04);
-            lookAtTarget.current.lerp(new THREE.Vector3(-20, 8.5, 14), 0.04);
+        // Move straight through the window center first
+        if (camera.position.x > 8) {
+            camera.position.lerp(introCenterPoint, LERP_SPEED);
+            lookAtTarget.current.lerp(new THREE.Vector3(-20, 8.5, 12), LERP_SPEED);
         } else {
             setIntroFinished(true);
         }
-    } 
-    // 2. HOME (Settling into Sweet Spot)
-    else if (isHome) {
-        camera.position.lerp(sweetSpotPos, 0.015);
-        lookAtTarget.current.lerp(sweetSpotLook, 0.015);
-    } 
-    // 3. EXIT (Slow & Luxurious Glide)
-    else {
-        camera.position.lerp(exitFinalPos, 0.007);
-        lookAtTarget.current.lerp(exitLook, 0.007);
+    } else if (isHome) {
+        // Settle into Sweet Spot
+        camera.position.lerp(sweetSpotPos, LERP_SPEED);
+        lookAtTarget.current.lerp(sweetSpotLook, LERP_SPEED);
+    } else {
+        // EXIT: Go to the doorway center first, then glide out
+        if (camera.position.z > 12) {
+             camera.position.lerp(doorClearancePos, LERP_SPEED);
+             lookAtTarget.current.lerp(exitLook, LERP_SPEED);
+        } else {
+             camera.position.lerp(exitFinalPos, LERP_SPEED);
+             lookAtTarget.current.lerp(exitLook, LERP_SPEED);
+        }
     }
 
     camera.lookAt(lookAtTarget.current);
@@ -145,15 +150,15 @@ export default function Scene({ currentView }) {
         
         <Staircase position={[5.0, 1.5, 1.0]} rotation={[0, -Math.PI / 2, 0]} width={20} texture={pinkStoneTex} />
         
-        {/* LEFT WALL (EXIT) */}
+        {/* LEFT WALL */}
         <group position={[-16, -1, 0]}>
           <mesh castShadow receiveShadow position={[1, 8.5, 0]}><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
-          <WallOpening position={[6, 0, 0]} colorProps={pinkProps} /> {/* This is the door we clear now */}
+          <WallOpening position={[6, 0, 0]} colorProps={pinkProps} /> {/* EXIT DOORWAY */}
           <WallOpening position={[12, 0, 0]} colorProps={pinkProps} /> 
           <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
         </group>
 
-        {/* RIGHT WALL (ENTRY) */}
+        {/* RIGHT WALL */}
         <group position={[17, -1, 1]} rotation={[0, -Math.PI / 2, 0]}>
           <mesh castShadow receiveShadow position={[4, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
           <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={pinkProps} />
