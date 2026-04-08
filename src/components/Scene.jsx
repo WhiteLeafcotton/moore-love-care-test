@@ -81,10 +81,8 @@ export default function Scene({ currentView }) {
     metalness: 0.05,
   };
 
-  // INITIAL LOAD SETUP
+  // INITIAL LOAD SETUP (Window Entrance)
   useMemo(() => {
-    // Start X:32 - Window frame is fully visible, but outer structure is hidden.
-    // Height remains at 5.0 for a lofty clearance.
     camera.position.set(32, 5.0, 12); 
     lookAtTarget.current.set(0, 5.0, 12);
     camera.lookAt(lookAtTarget.current);
@@ -93,29 +91,41 @@ export default function Scene({ currentView }) {
   useFrame((state, delta) => {
     const isHome = currentView === "home";
     
+    // DEFINITIONS
     const sweetSpotPos = new THREE.Vector3(-15, 1.5, 30);
     const sweetSpotLook = new THREE.Vector3(12, 1.5, 0);
 
-    const exitPos = new THREE.Vector3(-10, 1.5, -50);
+    // EXIT DOORWAY LOGIC (The "Seamless Glide" out)
+    // Midpoint: X: -10 (Centered with door), Z: 10 (In front of wall)
+    const exitMidpoint = new THREE.Vector3(-10, 1.5, 10); 
+    const exitFinalPos = new THREE.Vector3(-10, 1.5, -50);
     const exitLook = new THREE.Vector3(-10, 1.5, -100);
 
-    // INTRO FLOW: Cinematic entry through the full window frame
+    // 1. INTRO SEQUENCE (LOCK IN)
     if (!introFinished && isHome) {
         if (camera.position.x > 6) {
-            // Stage 1: Move from X:32 toward the interior
             camera.position.lerp(new THREE.Vector3(0, 5.0, 12), 0.01);
             lookAtTarget.current.lerp(new THREE.Vector3(-20, 5.0, 12), 0.01);
         } else {
-            // Stage 2: Wall cleared, descend to the low Sweet Spot
             setIntroFinished(true);
         }
-    } else {
-        // TRANSITIONS (Button Triggered)
-        const targetPos = isHome ? sweetSpotPos : exitPos;
-        const targetLookAt = isHome ? sweetSpotLook : exitLook;
-
-        camera.position.lerp(targetPos, 0.012);
-        lookAtTarget.current.lerp(targetLookAt, 0.012);
+    } 
+    // 2. HOME VIEW (SWEET SPOT)
+    else if (isHome) {
+        camera.position.lerp(sweetSpotPos, 0.012);
+        lookAtTarget.current.lerp(sweetSpotLook, 0.012);
+    } 
+    // 3. EXIT SEQUENCE (BUTTON PRESSED)
+    else {
+        // If we aren't centered with the door yet (Z > 5), go to midpoint first
+        if (camera.position.z > 5) {
+            camera.position.lerp(exitMidpoint, 0.015);
+            lookAtTarget.current.lerp(exitLook, 0.015);
+        } else {
+            // Once we've cleared the "corner," glide straight out
+            camera.position.lerp(exitFinalPos, 0.02);
+            lookAtTarget.current.lerp(exitLook, 0.02);
+        }
     }
 
     camera.lookAt(lookAtTarget.current);
@@ -140,6 +150,7 @@ export default function Scene({ currentView }) {
         </mesh>
         <Staircase position={[5.0, 1.5, 1.0]} rotation={[0, -Math.PI / 2, 0]} width={20} texture={pinkStoneTex} />
         
+        {/* LEFT WALL (The Exit Doorway) */}
         <group position={[-16, -1, 0]}>
           <mesh castShadow receiveShadow position={[1, 8.5, 0]}><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
           <WallOpening position={[6, 0, 0]} colorProps={pinkProps} />
@@ -147,6 +158,7 @@ export default function Scene({ currentView }) {
           <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
         </group>
 
+        {/* RIGHT WALL (The Entry Window) */}
         <group position={[17, -1, 1]} rotation={[0, -Math.PI / 2, 0]}>
           <mesh castShadow receiveShadow position={[4, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
           <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={pinkProps} />
