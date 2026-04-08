@@ -72,7 +72,6 @@ export default function Scene({ currentView }) {
     }
   }, [pinkStoneTex]);
 
-  // ✨ upgraded material
   const pinkProps = {
     map: pinkStoneTex,
     color: "#fcd7d7",
@@ -81,8 +80,10 @@ export default function Scene({ currentView }) {
   };
 
   useFrame((state, delta) => {
-    const targetPos = currentView === "home" ? [-25, 6, 45] : [35, 6, 10];
-    const targetLook = currentView === "home" ? [12, 1, 0] : [70, 0, 5];
+    // UPDATED: Lowered y-height for 'water level' feel. 
+    // targetLook y matches targetPos y to keep the shot perfectly level.
+    const targetPos = currentView === "home" ? [-25, 0.5, 45] : [35, 0.5, 10];
+    const targetLook = currentView === "home" ? [12, 0.5, 0] : [70, 0.5, 5];
 
     camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
     camera.lookAt(new THREE.Vector3(...targetLook));
@@ -94,11 +95,9 @@ export default function Scene({ currentView }) {
 
   return (
     <>
-      {/* SKY + ENV */}
       <Sky sunPosition={[-35, 5, 15]} />
       <Environment preset="sunset" />
 
-      {/* ☀️ MAIN LIGHT (SHADOWS) */}
       <directionalLight
         position={[-20, 25, 15]}
         intensity={1.3}
@@ -107,18 +106,15 @@ export default function Scene({ currentView }) {
         shadow-mapSize-height={2048}
       />
 
-      {/* 🌸 SOFT PINK GLOW */}
       <pointLight position={[10, 5, 10]} intensity={1.2} color="#ffd6e7" />
       <pointLight position={[0, 3, 0]} intensity={0.6} color="#ffc0cb" />
 
       <group position={[0, 0, 0]}>
-        {/* PLATFORM */}
         <mesh castShadow receiveShadow position={[12, -2.0, 15]}>
           <boxGeometry args={[14, 8.0, 28]} />
           <meshStandardMaterial {...pinkProps} />
         </mesh>
 
-        {/* STAIRS */}
         <Staircase
           position={[5.0, 1.5, 1.0]}
           rotation={[0, -Math.PI / 2, 0]}
@@ -126,7 +122,6 @@ export default function Scene({ currentView }) {
           texture={pinkStoneTex}
         />
 
-        {/* PINK WALL SIDE */}
         <group position={[-16, -1, 0]}>
           <mesh castShadow receiveShadow position={[1, 8.5, 0]}>
             <boxGeometry args={[4, 17, 2]} />
@@ -142,7 +137,6 @@ export default function Scene({ currentView }) {
           </mesh>
         </group>
 
-        {/* SECOND WALL (NOW SAME MATERIAL FOR UNITY) */}
         <group position={[17, -1, 1]} rotation={[0, -Math.PI / 2, 0]}>
           <mesh castShadow receiveShadow position={[4, 8.5, 0]}>
             <boxGeometry args={[8, 17, 2]} />
@@ -159,7 +153,6 @@ export default function Scene({ currentView }) {
         </group>
       </group>
 
-      {/* 🌑 CONTACT SHADOWS */}
       <ContactShadows
         position={[12, -1.9, 15]}
         opacity={0.45}
@@ -168,7 +161,6 @@ export default function Scene({ currentView }) {
         far={12}
       />
 
-      {/* 🌊 WATER (REFLECTION BOOSTED) */}
       <water
         ref={waterRef}
         args={[
