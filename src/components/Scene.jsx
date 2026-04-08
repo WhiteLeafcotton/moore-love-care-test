@@ -6,7 +6,7 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* Monolithic Staircase leading FORWARD from the platform face */
+/* Monolithic Staircase */
 const Staircase = ({ position, width, texture, rotation }) => {
   const stepHeight = 0.5;
   const stepDepth = 0.8;
@@ -15,7 +15,7 @@ const Staircase = ({ position, width, texture, rotation }) => {
   return (
     <group position={position} rotation={rotation}>
       {Array.from({ length: numSteps }).map((_, i) => (
-        <group key={i} position={[0, -i * stepHeight, i * stepDepth]}>
+        <group key={i} position={[0, -i * stepHeight, -i * stepDepth]}>
           <mesh>
             <boxGeometry args={[width, stepHeight, stepDepth]} />
             <meshStandardMaterial map={texture} color="#f1dfd8" roughness={0.6} />
@@ -64,18 +64,16 @@ export default function Scene({ currentView }) {
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
 
   useMemo(() => {
-    [pinkStoneTex, travertineTex, waterNormals].forEach(t => {
-      if (t) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(1, 1); }
-    });
-  }, [pinkStoneTex, travertineTex, waterNormals]);
+    if (pinkStoneTex) { pinkStoneTex.wrapS = pinkStoneTex.wrapT = THREE.RepeatWrapping; pinkStoneTex.repeat.set(1, 1); }
+    if (travertineTex) { travertineTex.wrapS = travertineTex.wrapT = THREE.RepeatWrapping; travertineTex.repeat.set(1, 1); }
+  }, [pinkStoneTex, travertineTex]);
 
   const pinkProps = { map: pinkStoneTex, color: "#fcd7d7", roughness: 0.8 };
   const purpleProps = { map: travertineTex, color: "#d1c4e9", roughness: 0.8 };
 
   useFrame((state, delta) => {
-    // CAMERA: Pulled back to Z=60 to frame the forward-leading stairs
-    const targetPos = currentView === 'home' ? [-10, 5, 60] : [35, 6, 10];
-    const targetLook = currentView === 'home' ? [12, 1, 0] : [70, 0, 5];
+    const targetPos = currentView === 'home' ? [-20, 3, 40] : [35, 6, 10];
+    const targetLook = currentView === 'home' ? [5, 1.5, 0] : [70, 0, 5];
     
     camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
     camera.lookAt(new THREE.Vector3(...targetLook));
@@ -89,21 +87,21 @@ export default function Scene({ currentView }) {
       <Environment preset="dawn" />
       
       <group position={[0, 0, 0]}>
-        {/* PLATFORM: Centered at X=12, Face ends at Z=29 */}
+        {/* PLATFORM */}
         <mesh receiveShadow position={[12, -2.0, 15]}>
           <boxGeometry args={[14, 8.0, 28]} />
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* STAIRS: Now centered in FRONT of the platform */}
+        {/* STAIRS: Now flush with the PINK WALL at X = -5.0 */}
         <Staircase 
-          position={[12.0, 1.5, 29.0]} 
-          rotation={[0, -Math.PI / 2, 0]} 
-          width={14} 
+          position={[-5.0, 1.5, 15]} 
+          rotation={[0, 0, 0]} 
+          width={10} 
           texture={travertineTex} 
         />
 
-        {/* WALLS */}
+        {/* PINK WALL SIDE */}
         <group position={[-16, -1, 0]}>
           <mesh position={[1, 8.5, 0]}>
             <boxGeometry args={[4, 17, 2]} />
@@ -117,6 +115,7 @@ export default function Scene({ currentView }) {
           </mesh>
         </group>
 
+        {/* PURPLE WALL SIDE */}
         <group position={[17, -1, 1]} rotation={[0, -Math.PI / 2, 0]}>
           <mesh position={[4, 8.5, 0]}>
             <boxGeometry args={[8, 17, 2]} />
