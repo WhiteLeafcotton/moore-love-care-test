@@ -6,7 +6,7 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* Monolithic Staircase - Flipped for Outward Descent */
+/* Monolithic Staircase - Locked & Widened */
 const Staircase = ({ position, width, texture, rotation }) => {
   const stepHeight = 0.5;
   const stepDepth = 0.8;
@@ -20,7 +20,6 @@ const Staircase = ({ position, width, texture, rotation }) => {
             <boxGeometry args={[width, stepHeight, stepDepth]} />
             <meshStandardMaterial map={texture} color="#f1dfd8" roughness={0.6} />
           </mesh>
-          {/* Solid base for the steps */}
           <mesh position={[0, -2.5, 0]}>
             <boxGeometry args={[width, 5, stepDepth]} />
             <meshStandardMaterial map={texture} color="#f1dfd8" roughness={0.6} />
@@ -73,7 +72,8 @@ export default function Scene({ currentView }) {
   const purpleProps = { map: travertineTex, color: "#d1c4e9", roughness: 0.8 };
 
   useFrame((state, delta) => {
-    const targetPos = currentView === 'home' ? [-18, 6, 45] : [35, 6, 10];
+    // CAMERA: Pulled slightly more to the left (X=-25) to center the new wider stairs
+    const targetPos = currentView === 'home' ? [-25, 6, 45] : [35, 6, 10];
     const targetLook = currentView === 'home' ? [12, 1, 0] : [70, 0, 5];
     
     camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
@@ -94,11 +94,11 @@ export default function Scene({ currentView }) {
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* STAIRS: Leading outward to water, nested in the corner */}
+        {/* STAIRS: Position locked at [5, 1.5, 1] and width increased to 20 */}
         <Staircase 
           position={[5.0, 1.5, 1.0]} 
           rotation={[0, -Math.PI / 2, 0]} 
-          width={12} 
+          width={20} 
           texture={travertineTex} 
         />
 
