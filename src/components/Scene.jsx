@@ -9,22 +9,18 @@ extend({ Water });
 /* Modular Wall Segment: Creates a clean rectangular opening */
 const WallOpening = ({ position, colorProps, width = 6, openingW = 3.5, height = 15, openingH = 9, isWindow = false }) => (
   <group position={position}>
-    {/* Left Pillar */}
     <mesh position={[-(openingW + (width - openingW) / 2) / 2, height / 2, 0]}>
       <boxGeometry args={[(width - openingW) / 2, height, 2]} />
       <meshStandardMaterial {...colorProps} />
     </mesh>
-    {/* Right Pillar */}
     <mesh position={[(openingW + (width - openingW) / 2) / 2, height / 2, 0]}>
       <boxGeometry args={[(width - openingW) / 2, height, 2]} />
       <meshStandardMaterial {...colorProps} />
     </mesh>
-    {/* Header (Top) */}
     <mesh position={[0, height - (height - openingH - (isWindow ? 4 : 0)) / 2, 0]}>
       <boxGeometry args={[openingW, height - openingH - (isWindow ? 4 : 0), 2]} />
       <meshStandardMaterial {...colorProps} />
     </mesh>
-    {/* Sill for windows only */}
     {isWindow && (
       <mesh position={[0, 2, 0]}>
         <boxGeometry args={[openingW, 4, 2]} />
@@ -55,10 +51,8 @@ export default function Scene({ currentView }) {
   useFrame((state, delta) => {
     const targetPos = currentView === 'home' ? [-25, 6, 35] : [35, 5, 20];
     const targetLook = currentView === 'home' ? [5, 0, -5] : [70, 0, 5];
-    
     camera.position.lerp(new THREE.Vector3(...targetPos), 0.025);
     camera.lookAt(new THREE.Vector3(...targetLook));
-    
     if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.2;
   });
 
@@ -68,13 +62,13 @@ export default function Scene({ currentView }) {
       <Environment preset="dawn" />
       
       <group position={[0, 0, 0]}>
-        {/* REFINED PLATFORM: Shrunk to sit INSIDE the walls */}
-        <mesh receiveShadow position={[3.5, -0.5, 12]}>
-          <boxGeometry args={[31, 1, 14]} />
+        {/* PLATFORM ADJUSTED: Wider to touch Pink Wall, Shorter to clear Purple Pillars */}
+        <mesh receiveShadow position={[1, -0.5, 9]}>
+          <boxGeometry args={[34, 1, 11]} />
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* FRONT PINK WALL (Left Side) - POSITION LOCKED */}
+        {/* FRONT PINK WALL (Left Side) - LOCKED */}
         <group position={[-16, 0, 0]}>
           <mesh position={[1, 7.5, 0]}>
             <boxGeometry args={[4, 15, 2]} />
@@ -88,7 +82,7 @@ export default function Scene({ currentView }) {
           </mesh>
         </group>
 
-        {/* SIDE PURPLE WALL (Right Side) - POSITION LOCKED */}
+        {/* SIDE PURPLE WALL (Right Side) - LOCKED */}
         <group position={[17, 0, 1]} rotation={[0, -Math.PI / 2, 0]}>
           <mesh position={[4, 7.5, 0]}>
             <boxGeometry args={[8, 15, 2]} />
