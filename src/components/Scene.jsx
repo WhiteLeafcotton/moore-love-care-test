@@ -6,7 +6,7 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* Monolithic Staircase */
+/* Monolithic Staircase: Massive 13.5 unit width */
 const Staircase = ({ position, width, texture, rotation }) => {
   const stepHeight = 0.5;
   const stepDepth = 0.8;
@@ -73,8 +73,8 @@ export default function Scene({ currentView }) {
   const purpleProps = { map: travertineTex, color: "#d1c4e9", roughness: 0.8 };
 
   useFrame((state, delta) => {
-    // UPDATED: Camera at Purple Wall (X=35), back at Z=28, target at corner (X=16)
-    const targetPos = currentView === 'home' ? [35, 1.5, 28] : [35, 6, 10];
+    // UPDATED: Closer (Z=16) and shifted right (X=-5)
+    const targetPos = currentView === 'home' ? [-5, 1.5, 16] : [35, 6, 10];
     const targetLook = currentView === 'home' ? [16, 1.5, 0] : [70, 0, 5];
     
     camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
@@ -89,13 +89,15 @@ export default function Scene({ currentView }) {
       <Environment preset="dawn" />
       
       <group position={[0, 0, 0]}>
+        {/* WIDER PLATFORM */}
         <mesh receiveShadow position={[12, -2.0, 15]}>
-          <boxGeometry args={[9, 8.0, 28]} />
+          <boxGeometry args={[14, 8.0, 28]} />
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
+        {/* STEPS MOVED UP/FORWARD (Z=5.0) */}
         <Staircase 
-          position={[7.5, 1.5, 1.1]} 
+          position={[7.5, 1.5, 5.0]} 
           rotation={[0, -Math.PI / 2, 0]} 
           width={13.5} 
           texture={travertineTex} 
