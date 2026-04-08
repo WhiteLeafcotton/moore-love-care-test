@@ -6,7 +6,12 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* Monolithic Staircase - Locked & Widened */
+/* * Structure: Locked and Anchored
+ * Wide platform centered at [12, -2.0, 15] with dimensions [14, 8.0, 28].
+ * Grand Staircase locked in nested corner
+ */
+
+/* Monolithic Staircase - Flipped for Outward Descent */
 const Staircase = ({ position, width, texture, rotation }) => {
   const stepHeight = 0.5;
   const stepDepth = 0.8;
@@ -72,13 +77,21 @@ export default function Scene({ currentView }) {
   const purpleProps = { map: travertineTex, color: "#d1c4e9", roughness: 0.8 };
 
   useFrame((state, delta) => {
-    // CAMERA: Pulled slightly more to the left (X=-25) to center the new wider stairs
-    const targetPos = currentView === 'home' ? [-25, 6, 45] : [35, 6, 10];
-    const targetLook = currentView === 'home' ? [12, 1, 0] : [70, 0, 5];
+    // 
+    // UPDATED: Low, Wide, and Corner-Centered Cinematic View
+    //
+
+    // targetPos: Lower height (Y=1.0) and closer (Z=15) for monumental scale
+    const targetPos = currentView === 'home' ? [-10, 1.0, 15] : [35, 6, 10]; 
+
+    // targetLook: Pinpoints the corner where the pink and purple walls meet (X=17)
+    const targetLook = currentView === 'home' ? [17.0, 1.5, 0.5] : [70, 0, 5];
     
+    // Smooth transition
     camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
     camera.lookAt(new THREE.Vector3(...targetLook));
     
+    // Time-based water animation
     if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.2;
   });
 
@@ -88,17 +101,17 @@ export default function Scene({ currentView }) {
       <Environment preset="dawn" />
       
       <group position={[0, 0, 0]}>
-        {/* PLATFORM */}
+        {/* PLATFORM: Grand scale */}
         <mesh receiveShadow position={[12, -2.0, 15]}>
           <boxGeometry args={[14, 8.0, 28]} />
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* STAIRS: Position locked at [5, 1.5, 1] and width increased to 20 */}
+        {/* STAIRS: Position LOCKED and nested in corner */}
         <Staircase 
           position={[5.0, 1.5, 1.0]} 
           rotation={[0, -Math.PI / 2, 0]} 
-          width={20} 
+          width={12} 
           texture={travertineTex} 
         />
 
@@ -116,7 +129,7 @@ export default function Scene({ currentView }) {
           </mesh>
         </group>
 
-        {/* PURPLE WALL SIDE */}
+        {/* PURPLE WALL SIDE: The primary massive block (centered in view) */}
         <group position={[17, -1, 1]} rotation={[0, -Math.PI / 2, 0]}>
           <mesh position={[4, 8.5, 0]}>
             <boxGeometry args={[8, 17, 2]} />
