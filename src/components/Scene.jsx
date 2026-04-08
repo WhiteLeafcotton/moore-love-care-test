@@ -1,28 +1,28 @@
 import { useRef, useMemo } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
-import { Environment, Sky } from "@react-three/drei";
+import { Environment, Sky, ContactShadows } from "@react-three/drei";
 import { Water } from "three-stdlib";
 import * as THREE from "three";
 
 extend({ Water });
 
-/* Monolithic Staircase - Locked & Widened */
+/* Monolithic Staircase */
 const Staircase = ({ position, width, texture, rotation }) => {
   const stepHeight = 0.5;
   const stepDepth = 0.8;
-  const numSteps = 16; 
+  const numSteps = 16;
 
   return (
     <group position={position} rotation={rotation}>
       {Array.from({ length: numSteps }).map((_, i) => (
         <group key={i} position={[0, -i * stepHeight, i * stepDepth]}>
-          <mesh>
+          <mesh castShadow receiveShadow>
             <boxGeometry args={[width, stepHeight, stepDepth]} />
-            <meshStandardMaterial map={texture} color="#f1dfd8" roughness={0.6} />
+            <meshStandardMaterial map={texture} color="#fcd7d7" roughness={0.55} metalness={0.05} />
           </mesh>
-          <mesh position={[0, -2.5, 0]}>
+          <mesh position={[0, -2.5, 0]} castShadow receiveShadow>
             <boxGeometry args={[width, 5, stepDepth]} />
-            <meshStandardMaterial map={texture} color="#f1dfd8" roughness={0.6} />
+            <meshStandardMaterial map={texture} color="#fcd7d7" roughness={0.55} metalness={0.05} />
           </mesh>
         </group>
       ))}
@@ -30,23 +30,23 @@ const Staircase = ({ position, width, texture, rotation }) => {
   );
 };
 
-/* Modular Wall Segment */
+/* Wall Segment */
 const WallOpening = ({ position, colorProps, width = 6, openingW = 3.5, height = 17, openingH = 9, isWindow = false }) => (
   <group position={position}>
-    <mesh position={[-(openingW + (width - openingW) / 2) / 2, height / 2, 0]}>
+    <mesh castShadow receiveShadow position={[-(openingW + (width - openingW) / 2) / 2, height / 2, 0]}>
       <boxGeometry args={[(width - openingW) / 2, height, 2]} />
       <meshStandardMaterial {...colorProps} />
     </mesh>
-    <mesh position={[(openingW + (width - openingW) / 2) / 2, height / 2, 0]}>
+    <mesh castShadow receiveShadow position={[(openingW + (width - openingW) / 2) / 2, height / 2, 0]}>
       <boxGeometry args={[(width - openingW) / 2, height, 2]} />
       <meshStandardMaterial {...colorProps} />
     </mesh>
-    <mesh position={[0, height - (height - openingH - (isWindow ? 4 : 0)) / 2, 0]}>
+    <mesh castShadow receiveShadow position={[0, height - (height - openingH - (isWindow ? 4 : 0)) / 2, 0]}>
       <boxGeometry args={[openingW, height - openingH - (isWindow ? 4 : 0), 2]} />
       <meshStandardMaterial {...colorProps} />
     </mesh>
     {isWindow && (
-      <mesh position={[0, 2, 0]}>
+      <mesh castShadow receiveShadow position={[0, 2, 0]}>
         <boxGeometry args={[openingW, 4, 2]} />
         <meshStandardMaterial {...colorProps} />
       </mesh>
@@ -60,84 +60,129 @@ export default function Scene({ currentView }) {
   const baseUrl = import.meta.env.BASE_URL || "/";
 
   const pinkStoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
-  const travertineTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/travertine.jpg`);
-  const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
+  const waterNormals = useLoader(
+    THREE.TextureLoader,
+    "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg"
+  );
 
   useMemo(() => {
-    if (pinkStoneTex) { pinkStoneTex.wrapS = pinkStoneTex.wrapT = THREE.RepeatWrapping; }
-    if (travertineTex) { travertineTex.wrapS = travertineTex.wrapT = THREE.RepeatWrapping; }
-  }, [pinkStoneTex, travertineTex]);
+    if (pinkStoneTex) {
+      pinkStoneTex.wrapS = pinkStoneTex.wrapT = THREE.RepeatWrapping;
+      pinkStoneTex.repeat.set(2, 2);
+    }
+  }, [pinkStoneTex]);
 
-  const pinkProps = { map: pinkStoneTex, color: "#fcd7d7", roughness: 0.8 };
-  const purpleProps = { map: travertineTex, color: "#d1c4e9", roughness: 0.8 };
+  // ✨ upgraded material
+  const pinkProps = {
+    map: pinkStoneTex,
+    color: "#fcd7d7",
+    roughness: 0.65,
+    metalness: 0.05,
+  };
 
   useFrame((state, delta) => {
-    // CAMERA: Pulled slightly more to the left (X=-25) to center the new wider stairs
-    const targetPos = currentView === 'home' ? [-25, 6, 45] : [35, 6, 10];
-    const targetLook = currentView === 'home' ? [12, 1, 0] : [70, 0, 5];
-    
+    const targetPos = currentView === "home" ? [-25, 6, 45] : [35, 6, 10];
+    const targetLook = currentView === "home" ? [12, 1, 0] : [70, 0, 5];
+
     camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
     camera.lookAt(new THREE.Vector3(...targetLook));
-    
-    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.2;
+
+    if (waterRef.current) {
+      waterRef.current.material.uniforms["time"].value += delta * 0.25;
+    }
   });
 
   return (
     <>
-      <Sky sunPosition={[-35, 0.08, 15]} />
-      <Environment preset="dawn" />
-      
+      {/* SKY + ENV */}
+      <Sky sunPosition={[-35, 5, 15]} />
+      <Environment preset="sunset" />
+
+      {/* ☀️ MAIN LIGHT (SHADOWS) */}
+      <directionalLight
+        position={[-20, 25, 15]}
+        intensity={1.3}
+        castShadow
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+      />
+
+      {/* 🌸 SOFT PINK GLOW */}
+      <pointLight position={[10, 5, 10]} intensity={1.2} color="#ffd6e7" />
+      <pointLight position={[0, 3, 0]} intensity={0.6} color="#ffc0cb" />
+
       <group position={[0, 0, 0]}>
         {/* PLATFORM */}
-        <mesh receiveShadow position={[12, -2.0, 15]}>
+        <mesh castShadow receiveShadow position={[12, -2.0, 15]}>
           <boxGeometry args={[14, 8.0, 28]} />
-          <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
+          <meshStandardMaterial {...pinkProps} />
         </mesh>
 
-        {/* STAIRS: Position locked at [5, 1.5, 1] and width increased to 20 */}
-        <Staircase 
-          position={[5.0, 1.5, 1.0]} 
-          rotation={[0, -Math.PI / 2, 0]} 
-          width={20} 
-          texture={travertineTex} 
+        {/* STAIRS */}
+        <Staircase
+          position={[5.0, 1.5, 1.0]}
+          rotation={[0, -Math.PI / 2, 0]}
+          width={20}
+          texture={pinkStoneTex}
         />
 
         {/* PINK WALL SIDE */}
         <group position={[-16, -1, 0]}>
-          <mesh position={[1, 8.5, 0]}>
+          <mesh castShadow receiveShadow position={[1, 8.5, 0]}>
             <boxGeometry args={[4, 17, 2]} />
             <meshStandardMaterial {...pinkProps} />
           </mesh>
-          <WallOpening position={[6, 0, 0]} width={6} height={17} openingW={3.5} openingH={9} colorProps={pinkProps} />
-          <WallOpening position={[12, 0, 0]} width={6} height={17} openingW={3.5} openingH={9} colorProps={pinkProps} />
-          <mesh position={[24, 8.5, 0]}>
+
+          <WallOpening position={[6, 0, 0]} colorProps={pinkProps} />
+          <WallOpening position={[12, 0, 0]} colorProps={pinkProps} />
+
+          <mesh castShadow receiveShadow position={[24, 8.5, 0]}>
             <boxGeometry args={[18, 17, 2]} />
             <meshStandardMaterial {...pinkProps} />
           </mesh>
         </group>
 
-        {/* PURPLE WALL SIDE */}
+        {/* SECOND WALL (NOW SAME MATERIAL FOR UNITY) */}
         <group position={[17, -1, 1]} rotation={[0, -Math.PI / 2, 0]}>
-          <mesh position={[4, 8.5, 0]}>
+          <mesh castShadow receiveShadow position={[4, 8.5, 0]}>
             <boxGeometry args={[8, 17, 2]} />
-            <meshStandardMaterial {...purpleProps} />
+            <meshStandardMaterial {...pinkProps} />
           </mesh>
-          <WallOpening position={[11, 0, 0]} width={6} height={17} openingW={4} openingH={6} isWindow={true} colorProps={purpleProps} />
-          <WallOpening position={[17, 0, 0]} width={6} height={17} openingW={4} openingH={6} isWindow={true} colorProps={purpleProps} />
-          <mesh position={[24, 8.5, 0]}>
+
+          <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={pinkProps} />
+          <WallOpening position={[17, 0, 0]} isWindow={true} colorProps={pinkProps} />
+
+          <mesh castShadow receiveShadow position={[24, 8.5, 0]}>
             <boxGeometry args={[8, 17, 2]} />
-            <meshStandardMaterial {...purpleProps} />
+            <meshStandardMaterial {...pinkProps} />
           </mesh>
         </group>
       </group>
 
+      {/* 🌑 CONTACT SHADOWS */}
+      <ContactShadows
+        position={[12, -1.9, 15]}
+        opacity={0.45}
+        scale={50}
+        blur={2.5}
+        far={12}
+      />
+
+      {/* 🌊 WATER (REFLECTION BOOSTED) */}
       <water
         ref={waterRef}
-        args={[new THREE.PlaneGeometry(2000, 2000), {
-          textureWidth: 512, textureHeight: 512, waterNormals, 
-          sunDirection: new THREE.Vector3(10, 1, 20), sunColor: 0xffffff, 
-          waterColor: 0xa19089, distortionScale: 0.4,
-        }]}
+        args={[
+          new THREE.PlaneGeometry(2000, 2000),
+          {
+            textureWidth: 512,
+            textureHeight: 512,
+            waterNormals,
+            sunDirection: new THREE.Vector3(-20, 25, 15),
+            sunColor: 0xffffff,
+            waterColor: 0xbfa6a0,
+            distortionScale: 0.6,
+          },
+        ]}
         rotation={[-Math.PI / 2, 0, 0]}
         position={[0, -1, 0]}
       />
