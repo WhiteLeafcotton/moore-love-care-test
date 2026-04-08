@@ -62,9 +62,9 @@ export default function Scene({ currentView }) {
       <Environment preset="dawn" />
       
       <group position={[0, 0, 0]}>
-        {/* PLATFORM: Height increased to 3.5 */}
-        <mesh receiveShadow position={[12, -1.0, 15]}>
-          <boxGeometry args={[9, 4.0, 28]} />
+        {/* PLATFORM: Height increased to 5.0 and Y offset adjusted to -1.5 */}
+        <mesh receiveShadow position={[12, -1.5, 15]}>
+          <boxGeometry args={[9, 5.0, 28]} />
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
