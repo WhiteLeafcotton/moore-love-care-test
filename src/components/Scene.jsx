@@ -73,8 +73,8 @@ export default function Scene({ currentView }) {
   const purpleProps = { map: travertineTex, color: "#d1c4e9", roughness: 0.8 };
 
   useFrame((state, delta) => {
-    // UPDATED: Backed away (Z=28), moved left (X=-20), and leveled height (Y=1.5)
-    const targetPos = currentView === 'home' ? [-20, 1.5, 28] : [35, 6, 10];
+    // UPDATED: Shifted left (X=-25), got closer (Z=24), kept level (Y=1.5)
+    const targetPos = currentView === 'home' ? [-25, 1.5, 24] : [35, 6, 10];
     const targetLook = currentView === 'home' ? [16, 1.5, 0] : [70, 0, 5];
     
     camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
