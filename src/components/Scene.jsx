@@ -72,9 +72,9 @@ export default function Scene({ currentView }) {
   const purpleProps = { map: travertineTex, color: "#d1c4e9", roughness: 0.8 };
 
   useFrame((state, delta) => {
-    // CAMERA: Pulled back to Z=35 for a wider, more balanced view
-    const targetPos = currentView === 'home' ? [-15, 4.0, 35] : [35, 6, 10]; 
-    const targetLook = currentView === 'home' ? [15.0, 2.0, 0] : [70, 0, 5];
+    // CAMERA: Lowered Y to 1.2 for a cinematic water-level view
+    const targetPos = currentView === 'home' ? [-18, 1.2, 38] : [35, 6, 10]; 
+    const targetLook = currentView === 'home' ? [12.0, 1.5, 0] : [70, 0, 5];
     
     camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
     camera.lookAt(new THREE.Vector3(...targetLook));
@@ -94,11 +94,11 @@ export default function Scene({ currentView }) {
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* STAIRS: Width set to 13.5 to stay inside the pink wall boundary */}
+        {/* STAIRS: Width increased for a broader look, X adjusted to keep right edge flush with wall */}
         <Staircase 
-          position={[5.0, 1.5, 1.0]} 
+          position={[7.25, 1.5, 1.0]} 
           rotation={[0, -Math.PI / 2, 0]} 
-          width={13.5} 
+          width={18} 
           texture={travertineTex} 
         />
 
