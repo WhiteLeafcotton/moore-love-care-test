@@ -10,7 +10,7 @@ extend({ Water });
 const Staircase = ({ position, width, texture, rotation }) => {
   const stepHeight = 0.5;
   const stepDepth = 0.8;
-  const numSteps = 16; // Matches 8.0 platform height
+  const numSteps = 16; 
 
   return (
     <group position={position} rotation={rotation}>
@@ -73,8 +73,8 @@ export default function Scene({ currentView }) {
   const purpleProps = { map: travertineTex, color: "#d1c4e9", roughness: 0.8 };
 
   useFrame((state, delta) => {
-    // UPDATED: Camera at Z=45 to frame the stairs now that they are pushed forward
-    const targetPos = currentView === 'home' ? [-15, 1.5, 45] : [35, 6, 10];
+    // CAMERA: Moved further left and back to Z=48 to see the stairs in the water
+    const targetPos = currentView === 'home' ? [-25, 1.5, 48] : [35, 6, 10];
     const targetLook = currentView === 'home' ? [16, 1.5, 0] : [70, 0, 5];
     
     camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
@@ -89,15 +89,15 @@ export default function Scene({ currentView }) {
       <Environment preset="dawn" />
       
       <group position={[0, 0, 0]}>
-        {/* PLATFORM: Width 14, Height 8.0 */}
+        {/* PLATFORM: Width 14, Height 8.0, Front face is at Z=29 */}
         <mesh receiveShadow position={[12, -2.0, 15]}>
           <boxGeometry args={[14, 8.0, 28]} />
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* FIXED: Z=24.0 ensures stairs are completely in front of the platform base */}
+        {/* STAIRS: Z=29.1 pushes them entirely FORWARD of the platform face */}
         <Staircase 
-          position={[7.5, 1.5, 24.0]} 
+          position={[7.5, 1.5, 29.1]} 
           rotation={[0, -Math.PI / 2, 0]} 
           width={13.5} 
           texture={travertineTex} 
