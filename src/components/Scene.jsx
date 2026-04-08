@@ -81,22 +81,23 @@ export default function Scene({ currentView }) {
 
   // ... (rest of the code remains exactly the same)
 
+  // ... (rest of the code remains exactly the same)
+
   useFrame((state, delta) => {
-    // CAMERA HEIGHT: 1.5 (Level shot)
+    // CAMERA HEIGHT: 1.5 (Level shot, just above water)
     const isHome = currentView === "home";
     
-    // THE "THROUGH THE DOOR" LOGIC:
-    // The left wall is at X: -16. 
-    // The first door opening is at local X: 6 within that group.
-    // -16 + 6 = -10. So we aim for X: -10 to pass through the door.
+    // CONSISTENT TRAVEL LOGIC:
+    // We aim for X: -10 because the wall is at -16 and the door opening is +6 from there.
+    // This provides a perfectly straight line through the door in view.
     
     const targetPos = isHome 
-      ? [-15, 1.5, 30] 
-      : [-10, 1.5, -20]; // X: -10 lines up with the center of the left-most doorway
+      ? [-10, 1.5, 40]   // Start further back but already lined up with the door
+      : [-10, 1.5, -20];  // Move straight through the door to the second location
     
     const targetLook = isHome 
-      ? [12, 1.5, 0] 
-      : [-10, 1.5, -100]; // Looking straight through the doorway into the distance
+      ? [-10, 1.5, 0]    // Look straight through the doorway center
+      : [-10, 1.5, -100]; // Keep looking straight ahead as you pass through
 
     camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
     camera.lookAt(new THREE.Vector3(...targetLook));
@@ -105,6 +106,8 @@ export default function Scene({ currentView }) {
       waterRef.current.material.uniforms["time"].value += delta * 0.25;
     }
   });
+
+// ... (rest of the code remains exactly the same)
 
 // ... (rest of the code remains exactly the same)
 
