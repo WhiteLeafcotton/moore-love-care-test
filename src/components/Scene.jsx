@@ -6,7 +6,7 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* Monolithic Staircase: 3x Wider and Flush Height */
+/* Monolithic Staircase: Updated to be 2x Wider */
 const Staircase = ({ position, width, texture, rotation }) => {
   const stepHeight = 0.5;
   const stepDepth = 0.8;
@@ -21,7 +21,7 @@ const Staircase = ({ position, width, texture, rotation }) => {
             <boxGeometry args={[width, stepHeight, stepDepth]} />
             <meshStandardMaterial map={texture} color="#f1dfd8" roughness={0.6} />
           </mesh>
-          {/* SOLID ARCHITECTURAL BASE */}
+          {/* SOLID ARCHITECTURAL BASE: Fills space to water */}
           <mesh position={[0, -2.5, 0]}>
             <boxGeometry args={[width, 5, stepDepth]} />
             <meshStandardMaterial map={texture} color="#f1dfd8" roughness={0.6} />
@@ -32,7 +32,7 @@ const Staircase = ({ position, width, texture, rotation }) => {
   );
 };
 
-/* Modular Wall Segment */
+/* Modular Wall Segment: Creates a clean rectangular opening */
 const WallOpening = ({ position, colorProps, width = 6, openingW = 3.5, height = 17, openingH = 9, isWindow = false }) => (
   <group position={position}>
     <mesh position={[-(openingW + (width - openingW) / 2) / 2, height / 2, 0]}>
@@ -88,13 +88,13 @@ export default function Scene({ currentView }) {
       <Environment preset="dawn" />
       
       <group position={[0, 0, 0]}>
-        {/* PLATFORM */}
+        {/* PLATFORM LOCKED */}
         <mesh receiveShadow position={[12, -2.0, 15]}>
           <boxGeometry args={[9, 8.0, 28]} />
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* STAIRCASE: Width=13.5 (3x wider), Flush with Pink Wall and Platform */}
+        {/* STAIRCASE LOCKED (Width doubled to 13.5) */}
         <Staircase 
           position={[7.5, 1.5, 1.1]} 
           rotation={[0, -Math.PI / 2, 0]} 
@@ -102,7 +102,7 @@ export default function Scene({ currentView }) {
           texture={travertineTex} 
         />
 
-        {/* FRONT PINK WALL */}
+        {/* FRONT PINK WALL LOCKED */}
         <group position={[-16, -1, 0]}>
           <mesh position={[1, 8.5, 0]}>
             <boxGeometry args={[4, 17, 2]} />
@@ -116,7 +116,7 @@ export default function Scene({ currentView }) {
           </mesh>
         </group>
 
-        {/* PURPLE WALL */}
+        {/* PURPLE WALL LOCKED */}
         <group position={[17, -1, 1]} rotation={[0, -Math.PI / 2, 0]}>
           <mesh position={[4, 8.5, 0]}>
             <boxGeometry args={[8, 17, 2]} />
