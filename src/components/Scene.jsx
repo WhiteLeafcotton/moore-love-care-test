@@ -57,7 +57,7 @@ const WallOpening = ({ position, colorProps, width = 6, openingW = 3.5, height =
 export default function Scene({ currentView }) {
   const { camera } = useThree();
   const waterRef = useRef();
-  const lookAtTarget = useRef(new THREE.Vector3(0, 8.5, 14));
+  const lookAtTarget = useRef(new THREE.Vector3(12, 1.5, 0));
   const [introFinished, setIntroFinished] = useState(false);
   const baseUrl = import.meta.env.BASE_URL || "/";
 
@@ -74,42 +74,57 @@ export default function Scene({ currentView }) {
     }
   }, [pinkStoneTex]);
 
-  const pinkProps = { map: pinkStoneTex, color: "#fcd7d7", roughness: 0.65, metalness: 0.05 };
+  const pinkProps = {
+    map: pinkStoneTex,
+    color: "#fcd7d7",
+    roughness: 0.65,
+    metalness: 0.05,
+  };
 
   // INITIAL LOAD SETUP
   useMemo(() => {
-    // X:85 keeps the building edges out of view. Z:14 centers the window frame.
-    camera.position.set(85, 8.5, 14); 
-    lookAtTarget.current.set(0, 8.5, 14);
+    // Eye-level (8.5), Backed up for framing (65), Aligned with window (12)
+    camera.position.set(65, 8.5, 12); 
+    lookAtTarget.current.set(0, 8.5, 12);
     camera.lookAt(lookAtTarget.current);
   }, [camera]);
 
   useFrame((state, delta) => {
     const isHome = currentView === "home";
-    const LERP_SPEED = 0.005; 
+    const LERP_SPEED = 0.008; // Slow, luxurious glide for everything
 
-    // Target positions
+    // 1. INTRO WAYPOINTS
+    const introCenterPoint = new THREE.Vector3(5, 8.5, 12); // Directly inside window
     const sweetSpotPos = new THREE.Vector3(-15, 1.5, 30);
     const sweetSpotLook = new THREE.Vector3(12, 1.5, 0);
 
-    // EXIT PATH: This aligns exactly with the WallOpening at position 6 on the left wall
-    // Since the wall is at X:-16, the opening is around Z:6 relative to the scene.
-    const exitFinalPos = new THREE.Vector3(-60, 1.5, 6); 
-    const exitLook = new THREE.Vector3(-150, 1.5, 6);
+    // 2. EXIT WAYPOINTS (Door closest to stairs is at Z: -10 relative to group)
+    // Absolute position for that door is roughly Z: 10
+    const doorClearancePos = new THREE.Vector3(-8, 1.5, 10); // Center of doorway
+    const exitFinalPos = new THREE.Vector3(-8, 1.5, -80);
+    const exitLook = new THREE.Vector3(-8, 1.5, -150);
 
     if (!introFinished && isHome) {
-        // Glide straight through the window center (X:17 is the wall, so X:10 is safely inside)
-        camera.position.lerp(new THREE.Vector3(10, 8.5, 14), LERP_SPEED);
-        lookAtTarget.current.lerp(new THREE.Vector3(-50, 8.5, 14), LERP_SPEED);
-        
-        if (camera.position.x < 15) setIntroFinished(true);
+        // Move straight through the window center first
+        if (camera.position.x > 8) {
+            camera.position.lerp(introCenterPoint, LERP_SPEED);
+            lookAtTarget.current.lerp(new THREE.Vector3(-20, 8.5, 12), LERP_SPEED);
+        } else {
+            setIntroFinished(true);
+        }
     } else if (isHome) {
+        // Settle into Sweet Spot
         camera.position.lerp(sweetSpotPos, LERP_SPEED);
         lookAtTarget.current.lerp(sweetSpotLook, LERP_SPEED);
     } else {
-        // One smooth line through the door opening
-        camera.position.lerp(exitFinalPos, LERP_SPEED);
-        lookAtTarget.current.lerp(exitLook, LERP_SPEED);
+        // EXIT: Go to the doorway center first, then glide out
+        if (camera.position.z > 12) {
+             camera.position.lerp(doorClearancePos, LERP_SPEED);
+             lookAtTarget.current.lerp(exitLook, LERP_SPEED);
+        } else {
+             camera.position.lerp(exitFinalPos, LERP_SPEED);
+             lookAtTarget.current.lerp(exitLook, LERP_SPEED);
+        }
     }
 
     camera.lookAt(lookAtTarget.current);
@@ -123,11 +138,11 @@ export default function Scene({ currentView }) {
     <>
       <Sky sunPosition={[-35, 5, 15]} />
       <Environment preset="sunset" />
-      <directionalLight position={[-20, 25, 15]} intensity={1.3} castShadow />
+      <directionalLight position={[-20, 25, 15]} intensity={1.3} castShadow shadow-mapSize={[2048, 2048]} />
       <pointLight position={[10, 5, 10]} intensity={1.2} color="#ffd6e7" />
+      <pointLight position={[0, 3, 0]} intensity={0.6} color="#ffc0cb" />
 
       <group position={[0, 0, 0]}>
-        {/* Floor Base */}
         <mesh castShadow receiveShadow position={[12, -2.0, 15]}>
           <boxGeometry args={[14, 8.0, 28]} />
           <meshStandardMaterial {...pinkProps} />
@@ -135,15 +150,15 @@ export default function Scene({ currentView }) {
         
         <Staircase position={[5.0, 1.5, 1.0]} rotation={[0, -Math.PI / 2, 0]} width={20} texture={pinkStoneTex} />
         
-        {/* LEFT WALL (EXIT SIDE) */}
+        {/* LEFT WALL */}
         <group position={[-16, -1, 0]}>
           <mesh castShadow receiveShadow position={[1, 8.5, 0]}><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
-          <WallOpening position={[6, 0, 0]} colorProps={pinkProps} /> {/* THE EXIT DOOR */}
+          <WallOpening position={[6, 0, 0]} colorProps={pinkProps} /> {/* EXIT DOORWAY */}
           <WallOpening position={[12, 0, 0]} colorProps={pinkProps} /> 
           <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
         </group>
 
-        {/* RIGHT WALL (ENTRY SIDE) */}
+        {/* RIGHT WALL */}
         <group position={[17, -1, 1]} rotation={[0, -Math.PI / 2, 0]}>
           <mesh castShadow receiveShadow position={[4, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
           <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={pinkProps} />
