@@ -82,35 +82,34 @@ export default function Scene({ currentView }) {
     metalness: 0.05,
   };
 
-  // INITIAL LOAD: Fly-through intro via the window at X:17
-  useEffect(() => {
-    // Start camera behind the window
-    camera.position.set(17, 1.5, -40);
-  }, [camera]);
+  // INITIAL LOAD: Force camera to start behind the window at X:17
+  useMemo(() => {
+    camera.position.set(17, 1.5, -60);
+    lookAtTarget.current.set(17, 1.5, 30);
+    camera.lookAt(lookAtTarget.current);
+  }, []);
 
   useFrame((state, delta) => {
-    // CAMERA HEIGHT: 1.5 (Level shot cinematic)
     const isHome = currentView === "home";
     
     // COORDINATES
     // Sweet Spot: Original wide view
-    // Travel Destination: Straight through the door at X: -10
+    // Travel Destination: Center of doorway at X: -10
     const targetPos = isHome 
       ? new THREE.Vector3(-15, 1.5, 30)   // THE SWEET SPOT
-      : new THREE.Vector3(-10, 1.5, -30);  // THROUGH THE DOOR
+      : new THREE.Vector3(-10, 1.5, -40);  // THROUGH THE DOORWAY
     
     const targetLookAt = isHome 
       ? new THREE.Vector3(12, 1.5, 0)     // Sweet Spot Focus
       : new THREE.Vector3(-10, 1.5, -100); // Door Focus
 
-    // 1. Smoothly transition Position
-    camera.position.lerp(targetPos, 0.025);
+    // 1. Position Lerp - Slower speed (0.01) for cinematic feel
+    camera.position.lerp(targetPos, 0.01);
     
-    // 2. Smoothly transition Gaze (Prevents the glitchy direct path snap)
-    lookAtTarget.current.lerp(targetLookAt, 0.025);
+    // 2. Gaze Lerp - Smoothly follows the position
+    lookAtTarget.current.lerp(targetLookAt, 0.01);
     camera.lookAt(lookAtTarget.current);
 
-    // Water animation
     if (waterRef.current) {
       waterRef.current.material.uniforms["time"].value += delta * 0.25;
     }
@@ -133,7 +132,6 @@ export default function Scene({ currentView }) {
       <pointLight position={[0, 3, 0]} intensity={0.6} color="#ffc0cb" />
 
       <group position={[0, 0, 0]}>
-        {/* PLATFORM */}
         <mesh castShadow receiveShadow position={[12, -2.0, 15]}>
           <boxGeometry args={[14, 8.0, 28]} />
           <meshStandardMaterial {...pinkProps} />
@@ -175,13 +173,7 @@ export default function Scene({ currentView }) {
         </group>
       </group>
 
-      <ContactShadows
-        position={[12, -1.9, 15]}
-        opacity={0.45}
-        scale={50}
-        blur={2.5}
-        far={12}
-      />
+      <ContactShadows position={[12, -1.9, 15]} opacity={0.45} scale={50} blur={2.5} far={12} />
 
       <water
         ref={waterRef}
