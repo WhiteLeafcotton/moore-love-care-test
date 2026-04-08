@@ -80,10 +80,10 @@ export default function Scene({ currentView }) {
   };
 
   useFrame((state, delta) => {
-    // UPDATED: Lowered y-height for 'water level' feel. 
-    // targetLook y matches targetPos y to keep the shot perfectly level.
-    const targetPos = currentView === "home" ? [-25, 0.5, 45] : [35, 0.5, 10];
-    const targetLook = currentView === "home" ? [12, 0.5, 0] : [70, 0.5, 5];
+    // UPDATED: Pushed camera closer (Z decreased) and kept Y at 0.5 for level view.
+    // Shot is tight enough to crop the top of the 17-unit walls.
+    const targetPos = currentView === "home" ? [-15, 0.5, 30] : [25, 0.5, 8];
+    const targetLook = currentView === "home" ? [12, 0.5, 0] : [60, 0.5, 5];
 
     camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
     camera.lookAt(new THREE.Vector3(...targetLook));
