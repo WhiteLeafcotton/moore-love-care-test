@@ -53,7 +53,6 @@ export default function Scene({ currentView }) {
   const purpleProps = { map: travertineTex, color: "#d1c4e9", roughness: 0.8 };
 
   useFrame((state, delta) => {
-    // CAMERA FIX: Front-facing perspective looking INTO the room
     const targetPos = currentView === 'home' ? [-25, 6, 35] : [35, 5, 20];
     const targetLook = currentView === 'home' ? [5, 0, -5] : [70, 0, 5];
     
@@ -69,13 +68,13 @@ export default function Scene({ currentView }) {
       <Environment preset="dawn" />
       
       <group position={[0, 0, 0]}>
-        {/* LOCKED PLATFORM */}
-        <mesh receiveShadow position={[2, -0.5, 4]}>
-          <boxGeometry args={[40, 1, 30]} />
+        {/* REFINED PLATFORM: Shrunk to sit INSIDE the walls */}
+        <mesh receiveShadow position={[3.5, -0.5, 12]}>
+          <boxGeometry args={[31, 1, 14]} />
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* FRONT PINK WALL (Left Side) */}
+        {/* FRONT PINK WALL (Left Side) - POSITION LOCKED */}
         <group position={[-16, 0, 0]}>
           <mesh position={[1, 7.5, 0]}>
             <boxGeometry args={[4, 15, 2]} />
@@ -89,7 +88,7 @@ export default function Scene({ currentView }) {
           </mesh>
         </group>
 
-        {/* SIDE PURPLE WALL (Right Side - 90 Degree Corner) */}
+        {/* SIDE PURPLE WALL (Right Side) - POSITION LOCKED */}
         <group position={[17, 0, 1]} rotation={[0, -Math.PI / 2, 0]}>
           <mesh position={[4, 7.5, 0]}>
             <boxGeometry args={[8, 15, 2]} />
