@@ -63,8 +63,8 @@ export default function Scene({ currentView }) {
       
       <group position={[0, 0, 0]}>
         {/* PLATFORM: Height increased to 3.5 */}
-        <mesh receiveShadow position={[12, -0.75, 15]}>
-          <boxGeometry args={[9, 3.5, 28]} />
+        <mesh receiveShadow position={[12, -1.0, 15]}>
+          <boxGeometry args={[9, 4.0, 28]} />
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
