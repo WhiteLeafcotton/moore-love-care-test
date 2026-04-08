@@ -6,6 +6,24 @@ import * as THREE from "three";
 
 extend({ Water });
 
+/* Modular Staircase: Generates steps based on platform height */
+const Staircase = ({ position, width, totalHeight, texture }) => {
+  const stepHeight = 0.5;
+  const stepDepth = 0.8;
+  const numSteps = 8; // Extends steps down into the water
+
+  return (
+    <group position={position}>
+      {Array.from({ length: numSteps }).map((_, i) => (
+        <mesh key={i} position={[0, -i * stepHeight, i * stepDepth]}>
+          <boxGeometry args={[width, stepHeight, stepDepth]} />
+          <meshStandardMaterial map={texture} color="#f1dfd8" />
+        </mesh>
+      ))}
+    </group>
+  );
+};
+
 /* Modular Wall Segment: Creates a clean rectangular opening */
 const WallOpening = ({ position, colorProps, width = 6, openingW = 3.5, height = 17, openingH = 9, isWindow = false }) => (
   <group position={position}>
@@ -62,13 +80,21 @@ export default function Scene({ currentView }) {
       <Environment preset="dawn" />
       
       <group position={[0, 0, 0]}>
-        {/* PLATFORM: Height increased to 8.0 and repositioned */}
+        {/* PLATFORM LOCKED */}
         <mesh receiveShadow position={[12, -2.0, 15]}>
           <boxGeometry args={[9, 8.0, 28]} />
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* FRONT PINK WALL: Extended height and lowered to touch water */}
+        {/* STAIRCASE: Half-width (4.5), flush to Pink Wall, ends at doorway */}
+        <Staircase 
+          position={[9.75, 1.75, 1]} 
+          width={4.5} 
+          totalHeight={8} 
+          texture={travertineTex} 
+        />
+
+        {/* FRONT PINK WALL LOCKED */}
         <group position={[-16, -1, 0]}>
           <mesh position={[1, 8.5, 0]}>
             <boxGeometry args={[4, 17, 2]} />
@@ -82,7 +108,7 @@ export default function Scene({ currentView }) {
           </mesh>
         </group>
 
-        {/* SIDE PURPLE WALL - POSITION LOCKED */}
+        {/* PURPLE WALL LOCKED */}
         <group position={[17, -1, 1]} rotation={[0, -Math.PI / 2, 0]}>
           <mesh position={[4, 8.5, 0]}>
             <boxGeometry args={[8, 17, 2]} />
