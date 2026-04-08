@@ -74,45 +74,40 @@ export default function Scene({ currentView }) {
     }
   }, [pinkStoneTex]);
 
-  const pinkProps = {
-    map: pinkStoneTex,
-    color: "#fcd7d7",
-    roughness: 0.65,
-    metalness: 0.05,
-  };
+  const pinkProps = { map: pinkStoneTex, color: "#fcd7d7", roughness: 0.65, metalness: 0.05 };
 
   // INITIAL LOAD SETUP
   useMemo(() => {
-    // Perfectly framed: X:75 allows full view of windows, Y:8.5 is eye level
-    camera.position.set(75, 8.5, 14.5); 
-    lookAtTarget.current.set(0, 8.5, 14.5);
+    // X:85 keeps the building edges out of view. Z:14 centers the window frame.
+    camera.position.set(85, 8.5, 14); 
+    lookAtTarget.current.set(0, 8.5, 14);
     camera.lookAt(lookAtTarget.current);
   }, [camera]);
 
   useFrame((state, delta) => {
     const isHome = currentView === "home";
-    const LERP_SPEED = 0.005; // Universal slow, consistent glide
+    const LERP_SPEED = 0.005; 
 
-    // COORDINATE DATABASE
+    // Target positions
     const sweetSpotPos = new THREE.Vector3(-15, 1.5, 30);
     const sweetSpotLook = new THREE.Vector3(12, 1.5, 0);
 
-    // This target is perfectly aligned with the door closest to the stairs (X:-10, Z:-100)
-    const exitFinalPos = new THREE.Vector3(-10, 1.5, -100);
-    const exitLook = new THREE.Vector3(-10, 1.5, -200);
+    // EXIT PATH: This aligns exactly with the WallOpening at position 6 on the left wall
+    // Since the wall is at X:-16, the opening is around Z:6 relative to the scene.
+    const exitFinalPos = new THREE.Vector3(-60, 1.5, 6); 
+    const exitLook = new THREE.Vector3(-150, 1.5, 6);
 
     if (!introFinished && isHome) {
-        // Glide from far out, straight through the window frame
-        camera.position.lerp(new THREE.Vector3(5, 8.5, 14.5), LERP_SPEED);
-        lookAtTarget.current.lerp(new THREE.Vector3(-30, 8.5, 14.5), LERP_SPEED);
+        // Glide straight through the window center (X:17 is the wall, so X:10 is safely inside)
+        camera.position.lerp(new THREE.Vector3(10, 8.5, 14), LERP_SPEED);
+        lookAtTarget.current.lerp(new THREE.Vector3(-50, 8.5, 14), LERP_SPEED);
         
-        if (camera.position.x < 10) setIntroFinished(true);
+        if (camera.position.x < 15) setIntroFinished(true);
     } else if (isHome) {
-        // Home view
         camera.position.lerp(sweetSpotPos, LERP_SPEED);
         lookAtTarget.current.lerp(sweetSpotLook, LERP_SPEED);
     } else {
-        // Exit Glide: One single target far away to keep speed constant
+        // One smooth line through the door opening
         camera.position.lerp(exitFinalPos, LERP_SPEED);
         lookAtTarget.current.lerp(exitLook, LERP_SPEED);
     }
@@ -128,11 +123,11 @@ export default function Scene({ currentView }) {
     <>
       <Sky sunPosition={[-35, 5, 15]} />
       <Environment preset="sunset" />
-      <directionalLight position={[-20, 25, 15]} intensity={1.3} castShadow shadow-mapSize={[2048, 2048]} />
+      <directionalLight position={[-20, 25, 15]} intensity={1.3} castShadow />
       <pointLight position={[10, 5, 10]} intensity={1.2} color="#ffd6e7" />
-      <pointLight position={[0, 3, 0]} intensity={0.6} color="#ffc0cb" />
 
       <group position={[0, 0, 0]}>
+        {/* Floor Base */}
         <mesh castShadow receiveShadow position={[12, -2.0, 15]}>
           <boxGeometry args={[14, 8.0, 28]} />
           <meshStandardMaterial {...pinkProps} />
@@ -140,15 +135,15 @@ export default function Scene({ currentView }) {
         
         <Staircase position={[5.0, 1.5, 1.0]} rotation={[0, -Math.PI / 2, 0]} width={20} texture={pinkStoneTex} />
         
-        {/* LEFT WALL (EXIT) */}
+        {/* LEFT WALL (EXIT SIDE) */}
         <group position={[-16, -1, 0]}>
           <mesh castShadow receiveShadow position={[1, 8.5, 0]}><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
-          <WallOpening position={[6, 0, 0]} colorProps={pinkProps} /> {/* THE DOORWAY */}
+          <WallOpening position={[6, 0, 0]} colorProps={pinkProps} /> {/* THE EXIT DOOR */}
           <WallOpening position={[12, 0, 0]} colorProps={pinkProps} /> 
           <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
         </group>
 
-        {/* RIGHT WALL (ENTRY) */}
+        {/* RIGHT WALL (ENTRY SIDE) */}
         <group position={[17, -1, 1]} rotation={[0, -Math.PI / 2, 0]}>
           <mesh castShadow receiveShadow position={[4, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
           <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={pinkProps} />
