@@ -16,12 +16,10 @@ const Staircase = ({ position, width, texture, rotation }) => {
     <group position={position} rotation={rotation}>
       {Array.from({ length: numSteps }).map((_, i) => (
         <group key={i} position={[0, -i * stepHeight, i * stepDepth]}>
-          {/* STEP SURFACE */}
           <mesh>
             <boxGeometry args={[width, stepHeight, stepDepth]} />
             <meshStandardMaterial map={texture} color="#f1dfd8" roughness={0.6} />
           </mesh>
-          {/* SOLID ARCHITECTURAL BASE */ }
           <mesh position={[0, -2.5, 0]}>
             <boxGeometry args={[width, 5, stepDepth]} />
             <meshStandardMaterial map={texture} color="#f1dfd8" roughness={0.6} />
@@ -75,18 +73,13 @@ export default function Scene({ currentView }) {
   const purpleProps = { map: travertineTex, color: "#d1c4e9", roughness: 0.8 };
 
   useFrame((state, delta) => {
-    // UPDATED: Depth Lock (Z=12), Height Lock (Y=1.1)
-    const targetPos = currentView === 'home' ? [-22, 1.1, 12] : [35, 6, 10];
+    // FIXED: Shifted X to -12 to move right toward purple wall without spinning
+    const targetPos = currentView === 'home' ? [-12, 1.2, 12] : [35, 6, 10];
     const targetLook = currentView === 'home' ? [16, 7, 0] : [70, 0, 5];
     
-    // Smooth transition logic
+    // Smooth lerping to fixed coordinates
     camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
     camera.lookAt(new THREE.Vector3(...targetLook));
-    
-    // Apply local panning toward the purple wall (rightward shift along local X)
-    if (currentView === 'home') {
-        camera.translateX(-8); // Slides right toward the purple wall
-    }
     
     if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.2;
   });
@@ -97,13 +90,13 @@ export default function Scene({ currentView }) {
       <Environment preset="dawn" />
       
       <group position={[0, 0, 0]}>
-        {/* PLATFORM LOCKED */}
+        {/* PLATFORM */}
         <mesh receiveShadow position={[12, -2.0, 15]}>
           <boxGeometry args={[9, 8.0, 28]} />
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* STAIRCASE LOCKED */}
+        {/* STAIRCASE */}
         <Staircase 
           position={[7.5, 1.5, 1.1]} 
           rotation={[0, -Math.PI / 2, 0]} 
@@ -111,7 +104,7 @@ export default function Scene({ currentView }) {
           texture={travertineTex} 
         />
 
-        {/* FRONT PINK WALL LOCKED */}
+        {/* FRONT PINK WALL */}
         <group position={[-16, -1, 0]}>
           <mesh position={[1, 8.5, 0]}>
             <boxGeometry args={[4, 17, 2]} />
@@ -125,7 +118,7 @@ export default function Scene({ currentView }) {
           </mesh>
         </group>
 
-        {/* PURPLE WALL LOCKED */}
+        {/* PURPLE WALL */}
         <group position={[17, -1, 1]} rotation={[0, -Math.PI / 2, 0]}>
           <mesh position={[4, 8.5, 0]}>
             <boxGeometry args={[8, 17, 2]} />
