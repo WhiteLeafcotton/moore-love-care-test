@@ -73,8 +73,8 @@ export default function Scene({ currentView }) {
   const purpleProps = { map: travertineTex, color: "#d1c4e9", roughness: 0.8 };
 
   useFrame((state, delta) => {
-    // UPDATED: Shifted left (X=-25), got closer (Z=24), kept level (Y=1.5)
-    const targetPos = currentView === 'home' ? [-25, 1.5, 24] : [35, 6, 10];
+    // UPDATED: Closer (Z=18), Moved Right (X=-10), and level (Y=1.5)
+    const targetPos = currentView === 'home' ? [-10, 1.5, 18] : [35, 6, 10];
     const targetLook = currentView === 'home' ? [16, 1.5, 0] : [70, 0, 5];
     
     camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
@@ -89,13 +89,15 @@ export default function Scene({ currentView }) {
       <Environment preset="dawn" />
       
       <group position={[0, 0, 0]}>
-        <mesh receiveShadow position={[12, -2.0, 15]}>
-          <boxGeometry args={[9, 8.0, 28]} />
+        {/* WIDER PLATFORM */}
+        <mesh receiveShadow position={[12, -2.0, 18]}>
+          <boxGeometry args={[9, 8.0, 34]} />
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
+        {/* STAIRS MOVED FORWARD (Z=10) */}
         <Staircase 
-          position={[7.5, 1.5, 1.1]} 
+          position={[7.5, 1.5, 10]} 
           rotation={[0, -Math.PI / 2, 0]} 
           width={13.5} 
           texture={travertineTex} 
