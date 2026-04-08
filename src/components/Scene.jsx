@@ -73,8 +73,8 @@ export default function Scene({ currentView }) {
   const purpleProps = { map: travertineTex, color: "#d1c4e9", roughness: 0.8 };
 
   useFrame((state, delta) => {
-    // UPDATED: Camera backed up significantly (Z=35)
-    const targetPos = currentView === 'home' ? [-12, 1.5, 35] : [35, 6, 10];
+    // UPDATED: Backed up to Z=45 to frame the new stair position
+    const targetPos = currentView === 'home' ? [-12, 1.5, 45] : [35, 6, 10];
     const targetLook = currentView === 'home' ? [16, 1.5, 0] : [70, 0, 5];
     
     camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
@@ -95,9 +95,9 @@ export default function Scene({ currentView }) {
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* UPDATED: Stairs pushed significantly forward/up (Z=18) */}
+        {/* FIXED: Shifted X to 9.25 (flush with pink wall) and Z to 24.0 (foreground clearance) */}
         <Staircase 
-          position={[7.5, 1.5, 18.0]} 
+          position={[9.25, 1.5, 24.0]} 
           rotation={[0, -Math.PI / 2, 0]} 
           width={13.5} 
           texture={travertineTex} 
