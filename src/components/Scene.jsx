@@ -82,10 +82,11 @@ export default function Scene({ currentView }) {
     metalness: 0.05,
   };
 
-  // INITIAL LOAD: Force camera to start behind the window at X:17
+  // INITIAL LOAD: Approach through the WINDOW on the right wall
+  // Window center is at roughly X:17, Z:15
   useMemo(() => {
-    camera.position.set(17, 1.5, -60);
-    lookAtTarget.current.set(17, 1.5, 30);
+    camera.position.set(40, 1.5, 15); // Start far to the right, outside the window
+    lookAtTarget.current.set(-15, 1.5, 30); // Looking towards the Sweet Spot
     camera.lookAt(lookAtTarget.current);
   }, []);
 
@@ -94,19 +95,19 @@ export default function Scene({ currentView }) {
     
     // COORDINATES
     // Sweet Spot: Original wide view
-    // Travel Destination: Center of doorway at X: -10
+    // Travel Destination: Center of doorway on the LEFT wall (X: -10)
     const targetPos = isHome 
       ? new THREE.Vector3(-15, 1.5, 30)   // THE SWEET SPOT
-      : new THREE.Vector3(-10, 1.5, -40);  // THROUGH THE DOORWAY
+      : new THREE.Vector3(-10, 1.5, -40);  // OUT THE DOORWAY
     
     const targetLookAt = isHome 
       ? new THREE.Vector3(12, 1.5, 0)     // Sweet Spot Focus
-      : new THREE.Vector3(-10, 1.5, -100); // Door Focus
+      : new THREE.Vector3(-10, 1.5, -100); // Look straight through the door
 
-    // 1. Position Lerp - Slower speed (0.01) for cinematic feel
+    // Slower lerp (0.01) for that premium cinematic feel
     camera.position.lerp(targetPos, 0.01);
     
-    // 2. Gaze Lerp - Smoothly follows the position
+    // Smoothly transition the gaze
     lookAtTarget.current.lerp(targetLookAt, 0.01);
     camera.lookAt(lookAtTarget.current);
 
@@ -132,6 +133,7 @@ export default function Scene({ currentView }) {
       <pointLight position={[0, 3, 0]} intensity={0.6} color="#ffc0cb" />
 
       <group position={[0, 0, 0]}>
+        {/* PLATFORM */}
         <mesh castShadow receiveShadow position={[12, -2.0, 15]}>
           <boxGeometry args={[14, 8.0, 28]} />
           <meshStandardMaterial {...pinkProps} />
@@ -144,7 +146,7 @@ export default function Scene({ currentView }) {
           texture={pinkStoneTex}
         />
 
-        {/* LEFT WALL (WITH DOORWAY) */}
+        {/* LEFT WALL (WITH DOORWAY) - Camera exits here */}
         <group position={[-16, -1, 0]}>
           <mesh castShadow receiveShadow position={[1, 8.5, 0]}>
             <boxGeometry args={[4, 17, 2]} />
@@ -158,7 +160,7 @@ export default function Scene({ currentView }) {
           </mesh>
         </group>
 
-        {/* RIGHT WALL (WITH WINDOW) */}
+        {/* RIGHT WALL (WITH WINDOW) - Camera enters here on load */}
         <group position={[17, -1, 1]} rotation={[0, -Math.PI / 2, 0]}>
           <mesh castShadow receiveShadow position={[4, 8.5, 0]}>
             <boxGeometry args={[8, 17, 2]} />
