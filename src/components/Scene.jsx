@@ -24,7 +24,7 @@ const Staircase = ({ position, width, totalHeight, texture }) => {
   );
 };
 
-/* Modular Wall Segment: Creates a clean rectangular opening */
+/* Modular Waljl Segment: Creates a clean rectangular opening */
 const WallOpening = ({ position, colorProps, width = 6, openingW = 3.5, height = 17, openingH = 9, isWindow = false }) => (
   <group position={position}>
     <mesh position={[-(openingW + (width - openingW) / 2) / 2, height / 2, 0]}>
