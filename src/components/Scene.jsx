@@ -6,10 +6,10 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* Modular Staircase: Oversized and locked into the Camera Viewport */
+/* Modular Staircase: Final precision alignment for the inner corner */
 const Staircase = ({ position, width, texture }) => {
   const stepHeight = 0.5;
-  const stepDepth = 1.2; 
+  const stepDepth = 0.8;
   const numSteps = 12; 
 
   return (
@@ -17,11 +17,7 @@ const Staircase = ({ position, width, texture }) => {
       {Array.from({ length: numSteps }).map((_, i) => (
         <mesh key={i} position={[0, -i * stepHeight, i * stepDepth]}>
           <boxGeometry args={[width, stepHeight, stepDepth]} />
-          <meshStandardMaterial 
-            map={texture} 
-            color="#f1dfd8" 
-            roughness={0.6}
-          />
+          <meshStandardMaterial map={texture} color="#f1dfd8" roughness={0.6} />
         </mesh>
       ))}
     </group>
@@ -71,7 +67,6 @@ export default function Scene({ currentView }) {
   const purpleProps = { map: travertineTex, color: "#d1c4e9", roughness: 0.8 };
 
   useFrame((state, delta) => {
-    // HOME VIEW: Camera sits at [-25, 6, 35] looking at [5, 0, -5]
     const targetPos = currentView === 'home' ? [-25, 6, 35] : [35, 5, 20];
     const targetLook = currentView === 'home' ? [5, 0, -5] : [70, 0, 5];
     camera.position.lerp(new THREE.Vector3(...targetPos), 0.025);
@@ -91,10 +86,10 @@ export default function Scene({ currentView }) {
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* STAIRCASE: Moved to X=5, Z=20 to be DIRECTLY in front of the camera */}
+        {/* STAIRCASE: Precise inner-corner placement */}
         <Staircase 
-          position={[5, 1.5, 20]} 
-          width={8} 
+          position={[7.5, 1.5, 1.05]} 
+          width={4.5} 
           texture={travertineTex} 
         />
 
