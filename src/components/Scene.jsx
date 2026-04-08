@@ -6,10 +6,10 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* Monolithic Staircase - Extended Horizontally via stepDepth */
+/* Monolithic Staircase - Long horizontal steps */
 const Staircase = ({ position, width, texture, rotation }) => {
   const stepHeight = 0.5;
-  const stepDepth = 1.6; // Doubled to extend the stairs further along the platform
+  const stepDepth = 1.6; // Maintains the long, architectural depth
   const numSteps = 16; 
 
   return (
@@ -72,7 +72,7 @@ export default function Scene({ currentView }) {
   const purpleProps = { map: travertineTex, color: "#d1c4e9", roughness: 0.8 };
 
   useFrame((state, delta) => {
-    // CAMERA: Low-angle cinematic water view
+    // CAMERA: Water-level cinematic height
     const targetPos = currentView === 'home' ? [-15, 1.0, 45] : [35, 6, 10]; 
     const targetLook = currentView === 'home' ? [12, 1.5, 0] : [70, 0, 5];
     
@@ -88,15 +88,15 @@ export default function Scene({ currentView }) {
       <Environment preset="dawn" />
       
       <group position={[0, 0, 0]}>
-        {/* PLATFORM */}
+        {/* PLATFORM: 28 units deep */}
         <mesh receiveShadow position={[12, -2.0, 15]}>
           <boxGeometry args={[14, 8.0, 28]} />
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* STAIRS: Position locked, depth extended to 1.6 to stretch them horizontally */}
+        {/* STAIRS: Z shifted to -14.0 to extend along the face without clipping */}
         <Staircase 
-          position={[5.0, 1.5, 1.0]} 
+          position={[5.0, 1.5, -14.0]} 
           rotation={[0, -Math.PI / 2, 0]} 
           width={13.5} 
           texture={travertineTex} 
