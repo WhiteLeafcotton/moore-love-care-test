@@ -62,13 +62,13 @@ export default function Scene({ currentView }) {
       <Environment preset="dawn" />
       
       <group position={[0, 0, 0]}>
-        {/* PLATFORM ADJUSTED: Wider to touch Pink Wall, Shorter to clear Purple Pillars */}
-        <mesh receiveShadow position={[1, -0.5, 9]}>
-          <boxGeometry args={[34, 1, 11]} />
+        {/* SQUARE PLATFORM: Tucked into the corner, not under pillars */}
+        <mesh receiveShadow position={[2, -0.5, 8]}>
+          <boxGeometry args={[14, 1, 14]} />
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* FRONT PINK WALL (Left Side) - LOCKED */}
+        {/* FRONT PINK WALL - POSITION LOCKED */}
         <group position={[-16, 0, 0]}>
           <mesh position={[1, 7.5, 0]}>
             <boxGeometry args={[4, 15, 2]} />
@@ -82,7 +82,7 @@ export default function Scene({ currentView }) {
           </mesh>
         </group>
 
-        {/* SIDE PURPLE WALL (Right Side) - LOCKED */}
+        {/* SIDE PURPLE WALL - POSITION LOCKED */}
         <group position={[17, 0, 1]} rotation={[0, -Math.PI / 2, 0]}>
           <mesh position={[4, 7.5, 0]}>
             <boxGeometry args={[8, 15, 2]} />
