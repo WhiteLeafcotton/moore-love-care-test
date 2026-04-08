@@ -6,7 +6,7 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* Monolithic Staircase: Rotated 90 degrees to be flush against the pink wall side */
+/* Monolithic Staircase: 3x Wider and Flush Height */
 const Staircase = ({ position, width, texture, rotation }) => {
   const stepHeight = 0.5;
   const stepDepth = 0.8;
@@ -88,17 +88,17 @@ export default function Scene({ currentView }) {
       <Environment preset="dawn" />
       
       <group position={[0, 0, 0]}>
-        {/* PLATFORM: Locked at X=12 */}
+        {/* PLATFORM */}
         <mesh receiveShadow position={[12, -2.0, 15]}>
           <boxGeometry args={[9, 8.0, 28]} />
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* STAIRCASE: Rotated 90 deg right, flush against pink wall side */}
+        {/* STAIRCASE: Width=13.5 (3x wider), Flush with Pink Wall and Platform */}
         <Staircase 
           position={[7.5, 1.5, 1.1]} 
           rotation={[0, -Math.PI / 2, 0]} 
-          width={4.5} 
+          width={13.5} 
           texture={travertineTex} 
         />
 
