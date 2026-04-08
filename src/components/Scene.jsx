@@ -1,4 +1,4 @@
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useEffect } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
 import { Environment, Sky, ContactShadows } from "@react-three/drei";
 import { Water } from "three-stdlib";
@@ -57,6 +57,9 @@ const WallOpening = ({ position, colorProps, width = 6, openingW = 3.5, height =
 export default function Scene({ currentView }) {
   const { camera } = useThree();
   const waterRef = useRef();
+  
+  // Track current focal point to prevent rotation "glitching"
+  const lookAtTarget = useRef(new THREE.Vector3(12, 1.5, 0));
   const baseUrl = import.meta.env.BASE_URL || "/";
 
   const pinkStoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
@@ -79,53 +82,39 @@ export default function Scene({ currentView }) {
     metalness: 0.05,
   };
 
-  // ... (rest of the code remains exactly the same)
-
-  // ... (rest of the code remains exactly the same)
-
-  // ... (rest of the code remains exactly the same)
+  // INITIAL LOAD: Fly-through intro via the window at X:17
+  useEffect(() => {
+    // Start camera behind the window
+    camera.position.set(17, 1.5, -40);
+  }, [camera]);
 
   useFrame((state, delta) => {
-    // CAMERA HEIGHT: 1.5 (Level shot)
+    // CAMERA HEIGHT: 1.5 (Level shot cinematic)
     const isHome = currentView === "home";
     
-    // HOME VIEW: Restored to your original wide cinematic angle [-15, 1.5, 30]
-    // SECOND VIEW: Targets the door center [-10, 1.5, -20]
-    
+    // COORDINATES
+    // Sweet Spot: Original wide view
+    // Travel Destination: Straight through the door at X: -10
     const targetPos = isHome 
-      ? [-15, 1.5, 30]   // Original settled view - UNCHANGED
-      : [-10, 1.5, -20];  // Path through the door
+      ? new THREE.Vector3(-15, 1.5, 30)   // THE SWEET SPOT
+      : new THREE.Vector3(-10, 1.5, -30);  // THROUGH THE DOOR
     
-    const targetLook = isHome 
-      ? [12, 1.5, 0]     // Original settled look - UNCHANGED
-      : [-10, 1.5, -100]; // Look through the door during travel
+    const targetLookAt = isHome 
+      ? new THREE.Vector3(12, 1.5, 0)     // Sweet Spot Focus
+      : new THREE.Vector3(-10, 1.5, -100); // Door Focus
 
-    // LERP provides the smooth transition from the side angle into the door path
-    camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
+    // 1. Smoothly transition Position
+    camera.position.lerp(targetPos, 0.025);
     
-    // We create a temporary vector to lerp the lookAt point for a smoother head-turn
-    const currentLook = new THREE.Vector3();
-    camera.getWorldDirection(currentLook);
-    
-    // Smoothly transition the focal point
-    camera.lookAt(
-      new THREE.Vector3().lerpVectors(
-        new THREE.Vector3(12, 1.5, 0), 
-        new THREE.Vector3(-10, 1.5, -100), 
-        isHome ? 0 : 1 // This ensures it only switches focus when the state changes
-      )
-    );
+    // 2. Smoothly transition Gaze (Prevents the glitchy direct path snap)
+    lookAtTarget.current.lerp(targetLookAt, 0.025);
+    camera.lookAt(lookAtTarget.current);
 
+    // Water animation
     if (waterRef.current) {
       waterRef.current.material.uniforms["time"].value += delta * 0.25;
     }
   });
-
-// ... (rest of the code remains exactly the same)
-
-// ... (rest of the code remains exactly the same)
-
-// ... (rest of the code remains exactly the same)
 
   return (
     <>
@@ -144,6 +133,7 @@ export default function Scene({ currentView }) {
       <pointLight position={[0, 3, 0]} intensity={0.6} color="#ffc0cb" />
 
       <group position={[0, 0, 0]}>
+        {/* PLATFORM */}
         <mesh castShadow receiveShadow position={[12, -2.0, 15]}>
           <boxGeometry args={[14, 8.0, 28]} />
           <meshStandardMaterial {...pinkProps} />
@@ -156,6 +146,7 @@ export default function Scene({ currentView }) {
           texture={pinkStoneTex}
         />
 
+        {/* LEFT WALL (WITH DOORWAY) */}
         <group position={[-16, -1, 0]}>
           <mesh castShadow receiveShadow position={[1, 8.5, 0]}>
             <boxGeometry args={[4, 17, 2]} />
@@ -169,6 +160,7 @@ export default function Scene({ currentView }) {
           </mesh>
         </group>
 
+        {/* RIGHT WALL (WITH WINDOW) */}
         <group position={[17, -1, 1]} rotation={[0, -Math.PI / 2, 0]}>
           <mesh castShadow receiveShadow position={[4, 8.5, 0]}>
             <boxGeometry args={[8, 17, 2]} />
