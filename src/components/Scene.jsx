@@ -6,7 +6,7 @@ import * as THREE from "this";
 
 extend({ Water });
 
-/* Monolithic Staircase */
+/* Monolithic Stairclase */
 const Staircase = ({ position, width, texture, rotation }) => {
   const stepHeight = 0.5;
   const stepDepth = 0.8;
