@@ -15,7 +15,7 @@ const Staircase = ({ position, width, texture, rotation }) => {
   return (
     <group position={position} rotation={rotation}>
       {Array.from({ length: numSteps }).map((_, i) => (
-        <group key={i} position={[0, -i * stepHeight, i * stepDepth]}>
+        <group key={i} position={[0, -i * stepHeight, -i * stepDepth]}>
           <mesh>
             <boxGeometry args={[width, stepHeight, stepDepth]} />
             <meshStandardMaterial map={texture} color="#f1dfd8" roughness={0.6} />
@@ -73,9 +73,9 @@ export default function Scene({ currentView }) {
   const purpleProps = { map: travertineTex, color: "#d1c4e9", roughness: 0.8 };
 
   useFrame((state, delta) => {
-    // CAMERA: Moved further left and back to Z=48 to see the stairs in the water
-    const targetPos = currentView === 'home' ? [-25, 1.5, 48] : [35, 6, 10];
-    const targetLook = currentView === 'home' ? [16, 1.5, 0] : [70, 0, 5];
+    // CAMERA: Focused on the new inner corner alignment
+    const targetPos = currentView === 'home' ? [-20, 3, 40] : [35, 6, 10];
+    const targetLook = currentView === 'home' ? [10, 1.5, 0] : [70, 0, 5];
     
     camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
     camera.lookAt(new THREE.Vector3(...targetLook));
@@ -89,17 +89,17 @@ export default function Scene({ currentView }) {
       <Environment preset="dawn" />
       
       <group position={[0, 0, 0]}>
-        {/* PLATFORM: Width 14, Height 8.0, Front face is at Z=29 */}
+        {/* PLATFORM: Width 14, Height 8.0 */}
         <mesh receiveShadow position={[12, -2.0, 15]}>
           <boxGeometry args={[14, 8.0, 28]} />
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* STAIRS: Z=29.1 pushes them entirely FORWARD of the platform face */}
+        {/* STAIRS: Now parallel to pink wall at X=5.0 and centered at Z=15 */}
         <Staircase 
-          position={[7.5, 1.5, 29.1]} 
-          rotation={[0, -Math.PI / 2, 0]} 
-          width={13.5} 
+          position={[5.0, 1.5, 15]} 
+          rotation={[0, 0, 0]} 
+          width={10} 
           texture={travertineTex} 
         />
 
