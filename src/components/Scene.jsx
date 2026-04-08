@@ -83,9 +83,9 @@ export default function Scene({ currentView }) {
 
   // INITIAL LOAD SETUP
   useMemo(() => {
-    // Start X:22 (Just outside the glass) and Y:5.0 (High clearance)
-    // Z:12 is the center of that specific window
-    camera.position.set(22, 5.0, 12); 
+    // Start X:32 - Window frame is fully visible, but outer structure is hidden.
+    // Height remains at 5.0 for a lofty clearance.
+    camera.position.set(32, 5.0, 12); 
     lookAtTarget.current.set(0, 5.0, 12);
     camera.lookAt(lookAtTarget.current);
   }, [camera]);
@@ -99,17 +99,18 @@ export default function Scene({ currentView }) {
     const exitPos = new THREE.Vector3(-10, 1.5, -50);
     const exitLook = new THREE.Vector3(-10, 1.5, -100);
 
-    // INTRO FLOW: Immediate entry
+    // INTRO FLOW: Cinematic entry through the full window frame
     if (!introFinished && isHome) {
-        // Since we start at X:22, we move past the wall (X:17) quickly
-        if (camera.position.x > 5) {
-            camera.position.lerp(new THREE.Vector3(0, 5.0, 12), 0.015);
-            lookAtTarget.current.lerp(new THREE.Vector3(-20, 5.0, 12), 0.015);
+        if (camera.position.x > 6) {
+            // Stage 1: Move from X:32 toward the interior
+            camera.position.lerp(new THREE.Vector3(0, 5.0, 12), 0.01);
+            lookAtTarget.current.lerp(new THREE.Vector3(-20, 5.0, 12), 0.01);
         } else {
-            // Settle into Sweet Spot once clear of the wall
+            // Stage 2: Wall cleared, descend to the low Sweet Spot
             setIntroFinished(true);
         }
     } else {
+        // TRANSITIONS (Button Triggered)
         const targetPos = isHome ? sweetSpotPos : exitPos;
         const targetLookAt = isHome ? sweetSpotLook : exitLook;
 
