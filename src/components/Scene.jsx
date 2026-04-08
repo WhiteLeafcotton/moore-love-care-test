@@ -6,7 +6,7 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* Monolithic Staircase - Updated for Nested Corner */
+/* Monolithic Staircase - Flipped for Outward Descent */
 const Staircase = ({ position, width, texture, rotation }) => {
   const stepHeight = 0.5;
   const stepDepth = 0.8;
@@ -73,9 +73,8 @@ export default function Scene({ currentView }) {
   const purpleProps = { map: travertineTex, color: "#d1c4e9", roughness: 0.8 };
 
   useFrame((state, delta) => {
-    // CAMERA: Adjusted to view the nested corner
     const targetPos = currentView === 'home' ? [-18, 6, 45] : [35, 6, 10];
-    const targetLook = currentView === 'home' ? [8, 1, 0] : [70, 0, 5];
+    const targetLook = currentView === 'home' ? [12, 1, 0] : [70, 0, 5];
     
     camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
     camera.lookAt(new THREE.Vector3(...targetLook));
@@ -95,10 +94,10 @@ export default function Scene({ currentView }) {
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* STAIRS: Nested in the inner corner between platform and pink wall */}
+        {/* STAIRS: Leading outward to water, nested in the corner */}
         <Staircase 
           position={[5.0, 1.5, 1.0]} 
-          rotation={[0, Math.PI / 2, 0]} 
+          rotation={[0, -Math.PI / 2, 0]} 
           width={12} 
           texture={travertineTex} 
         />
