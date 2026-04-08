@@ -62,8 +62,8 @@ export default function Scene({ currentView }) {
       <Environment preset="dawn" />
       
       <group position={[0, 0, 0]}>
-        {/* SQUARE PLATFORM: Tucked into the corner, not under pillars */}
-        <mesh receiveShadow position={[2, -0.5, 8]}>
+        {/* PLATFORM: Shifted to perfectly touch both pink and purple wall bases */}
+        <mesh receiveShadow position={[9.5, -0.5, 8]}>
           <boxGeometry args={[14, 1, 14]} />
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
