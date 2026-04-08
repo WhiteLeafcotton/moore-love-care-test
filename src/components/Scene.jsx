@@ -73,8 +73,8 @@ export default function Scene({ currentView }) {
   const purpleProps = { map: travertineTex, color: "#d1c4e9", roughness: 0.8 };
 
   useFrame((state, delta) => {
-    // UPDATED: Lowered Y (2) and pushed Z forward (25) for editorial crop
-    const targetPos = currentView === 'home' ? [-30, 2, 25] : [35, 6, 20];
+    // UPDATED: Closer (Z=20), shifted right (X=-22), and ultra-low (Y=1.5)
+    const targetPos = currentView === 'home' ? [-22, 1.5, 20] : [35, 6, 15];
     const targetLook = currentView === 'home' ? [16, 6, 0] : [70, 0, 5];
     
     camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
@@ -95,7 +95,7 @@ export default function Scene({ currentView }) {
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* STAIRCASE: Monumental Width Locked */}
+        {/* STAIRCASE */}
         <Staircase 
           position={[7.5, 1.5, 1.1]} 
           rotation={[0, -Math.PI / 2, 0]} 
