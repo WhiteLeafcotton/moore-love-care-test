@@ -6,11 +6,11 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* Modular Staircase: Positioned with a Z-offset to ensure visibility */
+/* Modular Staircase: Redesigned with Front-Facing Offset for high visibility */
 const Staircase = ({ position, width, texture }) => {
   const stepHeight = 0.5;
   const stepDepth = 0.8;
-  const numSteps = 10; 
+  const numSteps = 15; // Extended for deeper water immersion
 
   return (
     <group position={position}>
@@ -86,9 +86,9 @@ export default function Scene({ currentView }) {
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* STAIRCASE: Shifted to Z=1.05 to be visible in front of wall */}
+        {/* STAIRCASE: High Visibility Offset at Z=2.5 */}
         <Staircase 
-          position={[14.25, 1.5, 1.05]} 
+          position={[14.25, 1.5, 2.5]} 
           width={4.5} 
           texture={travertineTex} 
         />
