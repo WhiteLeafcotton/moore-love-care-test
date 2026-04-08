@@ -6,14 +6,14 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* Monolithic Staircase: Half-platform width and tucked into the inner corner */
-const Staircase = ({ position, width, texture, rotation }) => {
+/* Monolithic Staircase: Aligned for a walkable path from platform to water */
+const Staircase = ({ position, width, texture }) => {
   const stepHeight = 0.5;
   const stepDepth = 0.8;
   const numSteps = 12;
 
   return (
-    <group position={position} rotation={rotation}>
+    <group position={position}>
       {Array.from({ length: numSteps }).map((_, i) => (
         <group key={i} position={[0, -i * stepHeight, i * stepDepth]}>
           {/* STEP SURFACE */}
@@ -88,15 +88,15 @@ export default function Scene({ currentView }) {
       <Environment preset="dawn" />
       
       <group position={[0, 0, 0]}>
-        {/* PLATFORM: Positioned at 12, Width 9 */}
+        {/* PLATFORM: Locked at X=12 */}
         <mesh receiveShadow position={[12, -2.0, 15]}>
           <boxGeometry args={[9, 8.0, 28]} />
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* STAIRCASE: Half-width (4.5) tucked into inner corner (X=7.5) */}
+        {/* STAIRCASE: Tucked into inner corner (X=7.5) and flush against platform */}
         <Staircase 
-          position={[7.5, 1.5, 1.05]} 
+          position={[7.5, 1.5, 1.1]} 
           width={4.5} 
           texture={travertineTex} 
         />
