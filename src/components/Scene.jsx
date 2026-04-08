@@ -6,11 +6,11 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* Modular Staircase: Positioned to be visible and flush against the pink wall */
+/* Modular Staircase: Positioned with a Z-offset to ensure visibility */
 const Staircase = ({ position, width, texture }) => {
   const stepHeight = 0.5;
   const stepDepth = 0.8;
-  const numSteps = 12;
+  const numSteps = 10; 
 
   return (
     <group position={position}>
@@ -86,9 +86,9 @@ export default function Scene({ currentView }) {
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* STAIRCASE: Positioned flush against Pink Wall at doorway threshold */}
+        {/* STAIRCASE: Shifted to Z=1.05 to be visible in front of wall */}
         <Staircase 
-          position={[14.25, 1.75, 1]} 
+          position={[14.25, 1.5, 1.05]} 
           width={4.5} 
           texture={travertineTex} 
         />
