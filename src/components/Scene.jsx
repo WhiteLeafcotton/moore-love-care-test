@@ -1,4 +1,4 @@
-import { useRef, useMemo, useEffect } from "react";
+import { useRef, useMemo, useEffect, useState } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
 import { Environment, Sky, ContactShadows } from "@react-three/drei";
 import { Water } from "three-stdlib";
@@ -57,9 +57,8 @@ const WallOpening = ({ position, colorProps, width = 6, openingW = 3.5, height =
 export default function Scene({ currentView }) {
   const { camera } = useThree();
   const waterRef = useRef();
-  
-  // Track current focal point to prevent rotation "glitching"
   const lookAtTarget = useRef(new THREE.Vector3(12, 1.5, 0));
+  const [introFinished, setIntroFinished] = useState(false);
   const baseUrl = import.meta.env.BASE_URL || "/";
 
   const pinkStoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
@@ -82,33 +81,45 @@ export default function Scene({ currentView }) {
     metalness: 0.05,
   };
 
-  // INITIAL LOAD: Approach through the WINDOW on the right wall
-  // Window center is at roughly X:17, Z:15
+  // INITIAL LOAD SETUP
   useMemo(() => {
-    camera.position.set(40, 1.5, 15); // Start far to the right, outside the window
-    lookAtTarget.current.set(-15, 1.5, 30); // Looking towards the Sweet Spot
+    // Start way out to the right, aligned with the window opening center
+    camera.position.set(50, 6, 12); 
+    lookAtTarget.current.set(0, 6, 12);
     camera.lookAt(lookAtTarget.current);
   }, []);
 
   useFrame((state, delta) => {
     const isHome = currentView === "home";
     
-    // COORDINATES
-    // Sweet Spot: Original wide view
-    // Travel Destination: Center of doorway on the LEFT wall (X: -10)
-    const targetPos = isHome 
-      ? new THREE.Vector3(-15, 1.5, 30)   // THE SWEET SPOT
-      : new THREE.Vector3(-10, 1.5, -40);  // OUT THE DOORWAY
-    
-    const targetLookAt = isHome 
-      ? new THREE.Vector3(12, 1.5, 0)     // Sweet Spot Focus
-      : new THREE.Vector3(-10, 1.5, -100); // Look straight through the door
+    // THE SWEET SPOT (Home View)
+    const sweetSpotPos = new THREE.Vector3(-15, 1.5, 30);
+    const sweetSpotLook = new THREE.Vector3(12, 1.5, 0);
 
-    // Slower lerp (0.01) for that premium cinematic feel
-    camera.position.lerp(targetPos, 0.01);
-    
-    // Smoothly transition the gaze
-    lookAtTarget.current.lerp(targetLookAt, 0.01);
+    // THE EXIT (Through the door)
+    const exitPos = new THREE.Vector3(-10, 1.5, -40);
+    const exitLook = new THREE.Vector3(-10, 1.5, -100);
+
+    // INTRO LOGIC: We use a midpoint to "turn the corner" after passing through the window
+    // Window is at X:17. Once camera.x < 10, we know we've cleared the wall.
+    if (!introFinished && isHome) {
+        if (camera.position.x > 5) {
+            // Stage 1: Move through the window at a safe height
+            camera.position.lerp(new THREE.Vector3(0, 1.5, 12), 0.008);
+            lookAtTarget.current.lerp(new THREE.Vector3(-20, 1.5, 12), 0.008);
+        } else {
+            // Stage 2: We've cleared the wall, now drift to the Sweet Spot
+            setIntroFinished(true);
+        }
+    } else {
+        // STANDARD TRANSITIONS
+        const targetPos = isHome ? sweetSpotPos : exitPos;
+        const targetLookAt = isHome ? sweetSpotLook : exitLook;
+
+        camera.position.lerp(targetPos, 0.012);
+        lookAtTarget.current.lerp(targetLookAt, 0.012);
+    }
+
     camera.lookAt(lookAtTarget.current);
 
     if (waterRef.current) {
@@ -120,58 +131,31 @@ export default function Scene({ currentView }) {
     <>
       <Sky sunPosition={[-35, 5, 15]} />
       <Environment preset="sunset" />
-
-      <directionalLight
-        position={[-20, 25, 15]}
-        intensity={1.3}
-        castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
-      />
-
+      <directionalLight position={[-20, 25, 15]} intensity={1.3} castShadow shadow-mapSize={[2048, 2048]} />
       <pointLight position={[10, 5, 10]} intensity={1.2} color="#ffd6e7" />
       <pointLight position={[0, 3, 0]} intensity={0.6} color="#ffc0cb" />
 
       <group position={[0, 0, 0]}>
-        {/* PLATFORM */}
         <mesh castShadow receiveShadow position={[12, -2.0, 15]}>
           <boxGeometry args={[14, 8.0, 28]} />
           <meshStandardMaterial {...pinkProps} />
         </mesh>
-
-        <Staircase
-          position={[5.0, 1.5, 1.0]}
-          rotation={[0, -Math.PI / 2, 0]}
-          width={20}
-          texture={pinkStoneTex}
-        />
-
-        {/* LEFT WALL (WITH DOORWAY) - Camera exits here */}
+        <Staircase position={[5.0, 1.5, 1.0]} rotation={[0, -Math.PI / 2, 0]} width={20} texture={pinkStoneTex} />
+        
+        {/* LEFT WALL */}
         <group position={[-16, -1, 0]}>
-          <mesh castShadow receiveShadow position={[1, 8.5, 0]}>
-            <boxGeometry args={[4, 17, 2]} />
-            <meshStandardMaterial {...pinkProps} />
-          </mesh>
+          <mesh castShadow receiveShadow position={[1, 8.5, 0]}><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
           <WallOpening position={[6, 0, 0]} colorProps={pinkProps} />
           <WallOpening position={[12, 0, 0]} colorProps={pinkProps} />
-          <mesh castShadow receiveShadow position={[24, 8.5, 0]}>
-            <boxGeometry args={[18, 17, 2]} />
-            <meshStandardMaterial {...pinkProps} />
-          </mesh>
+          <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
         </group>
 
-        {/* RIGHT WALL (WITH WINDOW) - Camera enters here on load */}
+        {/* RIGHT WALL (WINDOW) */}
         <group position={[17, -1, 1]} rotation={[0, -Math.PI / 2, 0]}>
-          <mesh castShadow receiveShadow position={[4, 8.5, 0]}>
-            <boxGeometry args={[8, 17, 2]} />
-            <meshStandardMaterial {...pinkProps} />
-          </mesh>
+          <mesh castShadow receiveShadow position={[4, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
           <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={pinkProps} />
           <WallOpening position={[17, 0, 0]} isWindow={true} colorProps={pinkProps} />
-          <mesh castShadow receiveShadow position={[24, 8.5, 0]}>
-            <boxGeometry args={[8, 17, 2]} />
-            <meshStandardMaterial {...pinkProps} />
-          </mesh>
+          <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
         </group>
       </group>
 
