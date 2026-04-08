@@ -80,10 +80,15 @@ export default function Scene({ currentView }) {
   };
 
   useFrame((state, delta) => {
-    // UPDATED: Pushed camera closer (Z decreased) and kept Y at 0.5 for level view.
-    // Shot is tight enough to crop the top of the 17-unit walls.
-    const targetPos = currentView === "home" ? [-15, 0.5, 30] : [25, 0.5, 8];
-    const targetLook = currentView === "home" ? [12, 0.5, 0] : [60, 0.5, 5];
+    // Height raised slightly to 1.5.
+    // Transition for the second view now "flies through" the window area (around x:17).
+    const targetPos = currentView === "home" 
+      ? [-15, 1.5, 30] 
+      : [60, 1.5, 1]; // Moved further out and "through" the window plane
+    
+    const targetLook = currentView === "home" 
+      ? [12, 1.5, 0] 
+      : [100, 1.5, 1];
 
     camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
     camera.lookAt(new THREE.Vector3(...targetLook));
@@ -127,10 +132,8 @@ export default function Scene({ currentView }) {
             <boxGeometry args={[4, 17, 2]} />
             <meshStandardMaterial {...pinkProps} />
           </mesh>
-
           <WallOpening position={[6, 0, 0]} colorProps={pinkProps} />
           <WallOpening position={[12, 0, 0]} colorProps={pinkProps} />
-
           <mesh castShadow receiveShadow position={[24, 8.5, 0]}>
             <boxGeometry args={[18, 17, 2]} />
             <meshStandardMaterial {...pinkProps} />
@@ -142,10 +145,8 @@ export default function Scene({ currentView }) {
             <boxGeometry args={[8, 17, 2]} />
             <meshStandardMaterial {...pinkProps} />
           </mesh>
-
           <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={pinkProps} />
           <WallOpening position={[17, 0, 0]} isWindow={true} colorProps={pinkProps} />
-
           <mesh castShadow receiveShadow position={[24, 8.5, 0]}>
             <boxGeometry args={[8, 17, 2]} />
             <meshStandardMaterial {...pinkProps} />
