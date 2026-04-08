@@ -10,7 +10,8 @@ extend({ Water });
 const Staircase = ({ position, width, texture, rotation }) => {
   const stepHeight = 0.5;
   const stepDepth = 0.8;
-  const numSteps = 12;
+  // UPDATED: Increased to 16 steps to match the 8.0 platform height
+  const numSteps = 16; 
 
   return (
     <group position={position} rotation={rotation}>
@@ -20,6 +21,7 @@ const Staircase = ({ position, width, texture, rotation }) => {
             <boxGeometry args={[width, stepHeight, stepDepth]} />
             <meshStandardMaterial map={texture} color="#f1dfd8" roughness={0.6} />
           </mesh>
+          {/* Base support to ensure no gaps under stairs */}
           <mesh position={[0, -2.5, 0]}>
             <boxGeometry args={[width, 5, stepDepth]} />
             <meshStandardMaterial map={texture} color="#f1dfd8" roughness={0.6} />
@@ -73,7 +75,6 @@ export default function Scene({ currentView }) {
   const purpleProps = { map: travertineTex, color: "#d1c4e9", roughness: 0.8 };
 
   useFrame((state, delta) => {
-    // CAMERA: Backed up to Z=30 to fit the wider platform and stairs
     const targetPos = currentView === 'home' ? [-20, 1.5, 30] : [35, 6, 10];
     const targetLook = currentView === 'home' ? [16, 1.5, 0] : [70, 0, 5];
     
@@ -89,13 +90,13 @@ export default function Scene({ currentView }) {
       <Environment preset="dawn" />
       
       <group position={[0, 0, 0]}>
-        {/* PLATFORM: Restored to wide version (width=14) */}
+        {/* PLATFORM: Height is 8.0 */}
         <mesh receiveShadow position={[12, -2.0, 15]}>
           <boxGeometry args={[14, 8.0, 28]} />
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* STAIRS: Restored to flush-left position (X=7.5, Z=1.1) */}
+        {/* STAIRS: Now 16 steps high to reach the 8.0 platform height exactly */}
         <Staircase 
           position={[7.5, 1.5, 1.1]} 
           rotation={[0, -Math.PI / 2, 0]} 
