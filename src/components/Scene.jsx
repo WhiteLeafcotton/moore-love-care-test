@@ -6,25 +6,31 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* Modular Staircase: Redesigned with Front-Facing Offset for high visibility */
+/* Modular Staircase: Oversized and pushed forward for visibility */
 const Staircase = ({ position, width, texture }) => {
   const stepHeight = 0.5;
-  const stepDepth = 0.8;
-  const numSteps = 15; // Extended for deeper water immersion
+  const stepDepth = 1.0; // Deeper steps
+  const numSteps = 15; 
 
   return (
     <group position={position}>
       {Array.from({ length: numSteps }).map((_, i) => (
         <mesh key={i} position={[0, -i * stepHeight, i * stepDepth]}>
           <boxGeometry args={[width, stepHeight, stepDepth]} />
-          <meshStandardMaterial map={texture} color="#f1dfd8" />
+          {/* Added emissive to help them "pop" against the pink wall */}
+          <meshStandardMaterial 
+            map={texture} 
+            color="#f1dfd8" 
+            emissive="#ffffff" 
+            emissiveIntensity={0.1} 
+          />
         </mesh>
       ))}
     </group>
   );
 };
 
-/* Modular Wall Segment: Creates a clean rectangular opening */
+/* Modular Wall Segment */
 const WallOpening = ({ position, colorProps, width = 6, openingW = 3.5, height = 17, openingH = 9, isWindow = false }) => (
   <group position={position}>
     <mesh position={[-(openingW + (width - openingW) / 2) / 2, height / 2, 0]}>
@@ -86,10 +92,10 @@ export default function Scene({ currentView }) {
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* STAIRCASE: High Visibility Offset at Z=2.5 */}
+        {/* STAIRCASE: Massive shift forward (Z=12) and widened to 6 units */}
         <Staircase 
-          position={[14.25, 1.5, 2.5]} 
-          width={4.5} 
+          position={[14.25, 1.5, 12]} 
+          width={6} 
           texture={travertineTex} 
         />
 
