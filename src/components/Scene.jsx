@@ -6,7 +6,7 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* Monolithic Staircase: 2x Wide and Locked */
+/* Monolithic Staircase: Massive 13.5 unit width */
 const Staircase = ({ position, width, texture, rotation }) => {
   const stepHeight = 0.5;
   const stepDepth = 0.8;
@@ -73,8 +73,8 @@ export default function Scene({ currentView }) {
   const purpleProps = { map: travertineTex, color: "#d1c4e9", roughness: 0.8 };
 
   useFrame((state, delta) => {
-    // UPDATED: Pushed camera forward (Z=30) to crop the top of the architecture
-    const targetPos = currentView === 'home' ? [-30, 5, 30] : [35, 6, 20];
+    // UPDATED: Lowered Y (2) and pushed Z forward (25) for editorial crop
+    const targetPos = currentView === 'home' ? [-30, 2, 25] : [35, 6, 20];
     const targetLook = currentView === 'home' ? [16, 6, 0] : [70, 0, 5];
     
     camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
@@ -95,7 +95,7 @@ export default function Scene({ currentView }) {
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* STAIRCASE */}
+        {/* STAIRCASE: Monumental Width Locked */}
         <Staircase 
           position={[7.5, 1.5, 1.1]} 
           rotation={[0, -Math.PI / 2, 0]} 
