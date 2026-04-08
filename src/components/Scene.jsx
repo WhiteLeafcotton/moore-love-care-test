@@ -6,14 +6,14 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* Monolithic Staircase: Aligned for a walkable path from platform to water */
-const Staircase = ({ position, width, texture }) => {
+/* Monolithic Staircase: Rotated 90 degrees to be flush against the pink wall side */
+const Staircase = ({ position, width, texture, rotation }) => {
   const stepHeight = 0.5;
   const stepDepth = 0.8;
   const numSteps = 12;
 
   return (
-    <group position={position}>
+    <group position={position} rotation={rotation}>
       {Array.from({ length: numSteps }).map((_, i) => (
         <group key={i} position={[0, -i * stepHeight, i * stepDepth]}>
           {/* STEP SURFACE */}
@@ -94,9 +94,10 @@ export default function Scene({ currentView }) {
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* STAIRCASE: Tucked into inner corner (X=7.5) and flush against platform */}
+        {/* STAIRCASE: Rotated 90 deg right, flush against pink wall side */}
         <Staircase 
           position={[7.5, 1.5, 1.1]} 
+          rotation={[0, -Math.PI / 2, 0]} 
           width={4.5} 
           texture={travertineTex} 
         />
