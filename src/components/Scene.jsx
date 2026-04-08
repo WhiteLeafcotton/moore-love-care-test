@@ -6,7 +6,7 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* Monolithic Staircase: Angled and flush against the inner corner */
+/* Monolithic Staircase: Half-platform width and tucked into the inner corner */
 const Staircase = ({ position, width, texture, rotation }) => {
   const stepHeight = 0.5;
   const stepDepth = 0.8;
@@ -88,21 +88,20 @@ export default function Scene({ currentView }) {
       <Environment preset="dawn" />
       
       <group position={[0, 0, 0]}>
-        {/* PLATFORM LOCKED */}
+        {/* PLATFORM: Positioned at 12, Width 9 */}
         <mesh receiveShadow position={[12, -2.0, 15]}>
           <boxGeometry args={[9, 8.0, 28]} />
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* STAIRCASE: Precise placement at X=7.5, Z=1.1 */}
+        {/* STAIRCASE: Half-width (4.5) tucked into inner corner (X=7.5) */}
         <Staircase 
-          position={[7.5, 1.5, 1.1]} 
-          rotation={[0, Math.PI / 4, 0]} 
+          position={[7.5, 1.5, 1.05]} 
           width={4.5} 
           texture={travertineTex} 
         />
 
-        {/* FRONT PINK WALL LOCKED */}
+        {/* FRONT PINK WALL */}
         <group position={[-16, -1, 0]}>
           <mesh position={[1, 8.5, 0]}>
             <boxGeometry args={[4, 17, 2]} />
@@ -116,7 +115,7 @@ export default function Scene({ currentView }) {
           </mesh>
         </group>
 
-        {/* PURPLE WALL LOCKED */}
+        {/* PURPLE WALL */}
         <group position={[17, -1, 1]} rotation={[0, -Math.PI / 2, 0]}>
           <mesh position={[4, 8.5, 0]}>
             <boxGeometry args={[8, 17, 2]} />
