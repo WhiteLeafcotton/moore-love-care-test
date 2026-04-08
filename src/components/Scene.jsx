@@ -6,19 +6,27 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* Modular Staircase: Rotated 45-degrees to point outward into the water */
+/* Monolithic Staircase: Angled and flush against the inner corner */
 const Staircase = ({ position, width, texture, rotation }) => {
   const stepHeight = 0.5;
   const stepDepth = 0.8;
-  const numSteps = 12; 
+  const numSteps = 12;
 
   return (
     <group position={position} rotation={rotation}>
       {Array.from({ length: numSteps }).map((_, i) => (
-        <mesh key={i} position={[0, -i * stepHeight, i * stepDepth]}>
-          <boxGeometry args={[width, stepHeight, stepDepth]} />
-          <meshStandardMaterial map={texture} color="#f1dfd8" roughness={0.6} />
-        </mesh>
+        <group key={i} position={[0, -i * stepHeight, i * stepDepth]}>
+          {/* STEP SURFACE */}
+          <mesh>
+            <boxGeometry args={[width, stepHeight, stepDepth]} />
+            <meshStandardMaterial map={texture} color="#f1dfd8" roughness={0.6} />
+          </mesh>
+          {/* SOLID ARCHITECTURAL BASE */}
+          <mesh position={[0, -2.5, 0]}>
+            <boxGeometry args={[width, 5, stepDepth]} />
+            <meshStandardMaterial map={texture} color="#f1dfd8" roughness={0.6} />
+          </mesh>
+        </group>
       ))}
     </group>
   );
@@ -86,9 +94,9 @@ export default function Scene({ currentView }) {
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* STAIRCASE: Rotated 45 degrees outward from corner */}
+        {/* STAIRCASE: Precise placement at X=7.5, Z=1.1 */}
         <Staircase 
-          position={[7.5, 1.5, 1.05]} 
+          position={[7.5, 1.5, 1.1]} 
           rotation={[0, Math.PI / 4, 0]} 
           width={4.5} 
           texture={travertineTex} 
