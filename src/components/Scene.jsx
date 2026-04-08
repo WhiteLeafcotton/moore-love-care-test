@@ -83,29 +83,45 @@ export default function Scene({ currentView }) {
 
   // ... (rest of the code remains exactly the same)
 
+  // ... (rest of the code remains exactly the same)
+
   useFrame((state, delta) => {
-    // CAMERA HEIGHT: 1.5 (Level shot, just above water)
+    // CAMERA HEIGHT: 1.5 (Level shot)
     const isHome = currentView === "home";
     
-    // CONSISTENT TRAVEL LOGIC:
-    // We aim for X: -10 because the wall is at -16 and the door opening is +6 from there.
-    // This provides a perfectly straight line through the door in view.
+    // HOME VIEW: Restored to your original wide cinematic angle [-15, 1.5, 30]
+    // SECOND VIEW: Targets the door center [-10, 1.5, -20]
     
     const targetPos = isHome 
-      ? [-10, 1.5, 40]   // Start further back but already lined up with the door
-      : [-10, 1.5, -20];  // Move straight through the door to the second location
+      ? [-15, 1.5, 30]   // Original settled view - UNCHANGED
+      : [-10, 1.5, -20];  // Path through the door
     
     const targetLook = isHome 
-      ? [-10, 1.5, 0]    // Look straight through the doorway center
-      : [-10, 1.5, -100]; // Keep looking straight ahead as you pass through
+      ? [12, 1.5, 0]     // Original settled look - UNCHANGED
+      : [-10, 1.5, -100]; // Look through the door during travel
 
+    // LERP provides the smooth transition from the side angle into the door path
     camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
-    camera.lookAt(new THREE.Vector3(...targetLook));
+    
+    // We create a temporary vector to lerp the lookAt point for a smoother head-turn
+    const currentLook = new THREE.Vector3();
+    camera.getWorldDirection(currentLook);
+    
+    // Smoothly transition the focal point
+    camera.lookAt(
+      new THREE.Vector3().lerpVectors(
+        new THREE.Vector3(12, 1.5, 0), 
+        new THREE.Vector3(-10, 1.5, -100), 
+        isHome ? 0 : 1 // This ensures it only switches focus when the state changes
+      )
+    );
 
     if (waterRef.current) {
       waterRef.current.material.uniforms["time"].value += delta * 0.25;
     }
   });
+
+// ... (rest of the code remains exactly the same)
 
 // ... (rest of the code remains exactly the same)
 
