@@ -6,11 +6,11 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* Modular Staircase: Generates steps based on platform height */
-const Staircase = ({ position, width, totalHeight, texture }) => {
+/* Modular Staircase: Positioned to be visible and flush against the pink wall */
+const Staircase = ({ position, width, texture }) => {
   const stepHeight = 0.5;
   const stepDepth = 0.8;
-  const numSteps = 8; // Extends steps down into the water
+  const numSteps = 12;
 
   return (
     <group position={position}>
@@ -24,7 +24,7 @@ const Staircase = ({ position, width, totalHeight, texture }) => {
   );
 };
 
-/* Modular Waljl Segment: Creates a clean rectangular opening */
+/* Modular Wall Segment: Creates a clean rectangular opening */
 const WallOpening = ({ position, colorProps, width = 6, openingW = 3.5, height = 17, openingH = 9, isWindow = false }) => (
   <group position={position}>
     <mesh position={[-(openingW + (width - openingW) / 2) / 2, height / 2, 0]}>
@@ -86,11 +86,10 @@ export default function Scene({ currentView }) {
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* STAIRCASE: Half-width (4.5), flush to Pink Wall, ends at doorway */}
+        {/* STAIRCASE: Positioned flush against Pink Wall at doorway threshold */}
         <Staircase 
-          position={[9.75, 1.75, 1]} 
+          position={[14.25, 1.75, 1]} 
           width={4.5} 
-          totalHeight={8} 
           texture={travertineTex} 
         />
 
