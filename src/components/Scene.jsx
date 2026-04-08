@@ -6,7 +6,7 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* Monolithic Staircase */
+/* Monolithic Staircase - Updated for Nested Corner */
 const Staircase = ({ position, width, texture, rotation }) => {
   const stepHeight = 0.5;
   const stepDepth = 0.8;
@@ -15,11 +15,12 @@ const Staircase = ({ position, width, texture, rotation }) => {
   return (
     <group position={position} rotation={rotation}>
       {Array.from({ length: numSteps }).map((_, i) => (
-        <group key={i} position={[0, -i * stepHeight, -i * stepDepth]}>
+        <group key={i} position={[0, -i * stepHeight, i * stepDepth]}>
           <mesh>
             <boxGeometry args={[width, stepHeight, stepDepth]} />
             <meshStandardMaterial map={texture} color="#f1dfd8" roughness={0.6} />
           </mesh>
+          {/* Solid base for the steps */}
           <mesh position={[0, -2.5, 0]}>
             <boxGeometry args={[width, 5, stepDepth]} />
             <meshStandardMaterial map={texture} color="#f1dfd8" roughness={0.6} />
@@ -64,16 +65,17 @@ export default function Scene({ currentView }) {
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
 
   useMemo(() => {
-    if (pinkStoneTex) { pinkStoneTex.wrapS = pinkStoneTex.wrapT = THREE.RepeatWrapping; pinkStoneTex.repeat.set(1, 1); }
-    if (travertineTex) { travertineTex.wrapS = travertineTex.wrapT = THREE.RepeatWrapping; travertineTex.repeat.set(1, 1); }
+    if (pinkStoneTex) { pinkStoneTex.wrapS = pinkStoneTex.wrapT = THREE.RepeatWrapping; }
+    if (travertineTex) { travertineTex.wrapS = travertineTex.wrapT = THREE.RepeatWrapping; }
   }, [pinkStoneTex, travertineTex]);
 
   const pinkProps = { map: pinkStoneTex, color: "#fcd7d7", roughness: 0.8 };
   const purpleProps = { map: travertineTex, color: "#d1c4e9", roughness: 0.8 };
 
   useFrame((state, delta) => {
-    const targetPos = currentView === 'home' ? [-20, 3, 40] : [35, 6, 10];
-    const targetLook = currentView === 'home' ? [5, 1.5, 0] : [70, 0, 5];
+    // CAMERA: Adjusted to view the nested corner
+    const targetPos = currentView === 'home' ? [-18, 6, 45] : [35, 6, 10];
+    const targetLook = currentView === 'home' ? [8, 1, 0] : [70, 0, 5];
     
     camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
     camera.lookAt(new THREE.Vector3(...targetLook));
@@ -93,11 +95,11 @@ export default function Scene({ currentView }) {
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* STAIRS: Now flush with the PINK WALL at X = -5.0 */}
+        {/* STAIRS: Nested in the inner corner between platform and pink wall */}
         <Staircase 
-          position={[-5.0, 1.5, 15]} 
-          rotation={[0, 0, 0]} 
-          width={10} 
+          position={[5.0, 1.5, 1.0]} 
+          rotation={[0, Math.PI / 2, 0]} 
+          width={12} 
           texture={travertineTex} 
         />
 
