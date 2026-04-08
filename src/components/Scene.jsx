@@ -1,12 +1,12 @@
-import { useRef, useMemo, useEffect, useState } from "react";
+import { useRef, useMemo, useState } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
 import { Environment, Sky, ContactShadows } from "@react-three/drei";
 import { Water } from "three-stdlib";
-import * as THREE from "this";
+import * as THREE from "three"; // Fixed: changed "this" to "three"
 
 extend({ Water });
 
-/* Monolithic Stairclase */
+/* Monolithic Staircase */
 const Staircase = ({ position, width, texture, rotation }) => {
   const stepHeight = 0.5;
   const stepDepth = 0.8;
@@ -83,29 +83,31 @@ export default function Scene({ currentView }) {
 
   // INITIAL LOAD SETUP
   useMemo(() => {
-    // Start way out right, and slightly higher (Y: 2.5) to clear the window sill comfortably
-    camera.position.set(60, 2.5, 14); 
-    lookAtTarget.current.set(0, 2.5, 14);
+    // Start way out right at a comfortable height to clear the window frame
+    camera.position.set(60, 3.5, 12); 
+    lookAtTarget.current.set(0, 3.5, 12);
     camera.lookAt(lookAtTarget.current);
-  }, []);
+  }, [camera]); // Added camera dependency
 
   useFrame((state, delta) => {
     const isHome = currentView === "home";
     
+    // THE SWEET SPOT
     const sweetSpotPos = new THREE.Vector3(-15, 1.5, 30);
     const sweetSpotLook = new THREE.Vector3(12, 1.5, 0);
 
+    // THE EXIT
     const exitPos = new THREE.Vector3(-10, 1.5, -50);
     const exitLook = new THREE.Vector3(-10, 1.5, -100);
 
-    // INTRO FLOW
+    // INTRO FLOW: Guiding the camera safely through the window
     if (!introFinished && isHome) {
-        if (camera.position.x > 8) {
-            // Stage 1: Comfortable clearance height (2.5) while passing through the window frame
-            camera.position.lerp(new THREE.Vector3(0, 2.5, 14), 0.007);
-            lookAtTarget.current.lerp(new THREE.Vector3(-20, 2.5, 14), 0.007);
+        if (camera.position.x > 5) {
+            // Stage 1: Move through the window at height 3.5 to clear the sill comfortably
+            camera.position.lerp(new THREE.Vector3(0, 3.5, 12), 0.007);
+            lookAtTarget.current.lerp(new THREE.Vector3(-20, 3.5, 12), 0.007);
         } else {
-            // Stage 2: Wall is cleared, now settle into the cinematic low "Sweet Spot"
+            // Stage 2: Wall cleared, now settle into the Sweet Spot
             setIntroFinished(true);
         }
     } else {
@@ -139,6 +141,7 @@ export default function Scene({ currentView }) {
         </mesh>
         <Staircase position={[5.0, 1.5, 1.0]} rotation={[0, -Math.PI / 2, 0]} width={20} texture={pinkStoneTex} />
         
+        {/* LEFT WALL */}
         <group position={[-16, -1, 0]}>
           <mesh castShadow receiveShadow position={[1, 8.5, 0]}><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
           <WallOpening position={[6, 0, 0]} colorProps={pinkProps} />
@@ -146,6 +149,7 @@ export default function Scene({ currentView }) {
           <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
         </group>
 
+        {/* RIGHT WALL (WINDOW) */}
         <group position={[17, -1, 1]} rotation={[0, -Math.PI / 2, 0]}>
           <mesh castShadow receiveShadow position={[4, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
           <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={pinkProps} />
