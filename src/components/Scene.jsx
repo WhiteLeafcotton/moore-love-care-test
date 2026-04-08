@@ -6,7 +6,7 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* Monolithic Staircase - Flipped for Outward Descent */
+/* Monolithic Staircase - Locked & Widened */
 const Staircase = ({ position, width, texture, rotation }) => {
   const stepHeight = 0.5;
   const stepDepth = 0.8;
@@ -61,39 +61,32 @@ export default function Scene({ currentView }) {
 
   const pinkStoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
   const travertineTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/travertine.jpg`);
-  const waterNormals = useLoader(
-    THREE.TextureLoader,
-    "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg"
-  );
+  const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
 
   useMemo(() => {
-    if (pinkStoneTex) {
-      pinkStoneTex.wrapS = pinkStoneTex.wrapT = THREE.RepeatWrapping;
-    }
-    if (travertineTex) {
-      travertineTex.wrapS = travertineTex.wrapT = THREE.RepeatWrapping;
-    }
+    if (pinkStoneTex) { pinkStoneTex.wrapS = pinkStoneTex.wrapT = THREE.RepeatWrapping; }
+    if (travertineTex) { travertineTex.wrapS = travertineTex.wrapT = THREE.RepeatWrapping; }
   }, [pinkStoneTex, travertineTex]);
 
   const pinkProps = { map: pinkStoneTex, color: "#fcd7d7", roughness: 0.8 };
   const purpleProps = { map: travertineTex, color: "#d1c4e9", roughness: 0.8 };
 
   useFrame((state, delta) => {
-    const targetPos = currentView === "home" ? [-10, 1.0, 15] : [35, 6, 10];
-    const targetLook = currentView === "home" ? [17.0, 1.5, 0.5] : [70, 0, 5];
-
+    // CAMERA: Pulled slightly more to the left (X=-25) to center the new wider stairs
+    const targetPos = currentView === 'home' ? [-25, 6, 45] : [35, 6, 10];
+    const targetLook = currentView === 'home' ? [12, 1, 0] : [70, 0, 5];
+    
     camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
     camera.lookAt(new THREE.Vector3(...targetLook));
-
-    if (waterRef.current)
-      waterRef.current.material.uniforms["time"].value += delta * 0.2;
+    
+    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.2;
   });
 
   return (
     <>
       <Sky sunPosition={[-35, 0.08, 15]} />
       <Environment preset="dawn" />
-
+      
       <group position={[0, 0, 0]}>
         {/* PLATFORM */}
         <mesh receiveShadow position={[12, -2.0, 15]}>
@@ -101,15 +94,15 @@ export default function Scene({ currentView }) {
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* ✅ FIXED STAIRS (ONLY CHANGE IS Z POSITION) */}
-        <Staircase
-          position={[5.0, 1.5, -11.8]}
-          rotation={[0, -Math.PI / 2, 0]}
-          width={12}
-          texture={travertineTex}
+        {/* STAIRS: Position locked at [5, 1.5, 1] and width increased to 20 */}
+        <Staircase 
+          position={[5.0, 1.5, 1.0]} 
+          rotation={[0, -Math.PI / 2, 0]} 
+          width={20} 
+          texture={travertineTex} 
         />
 
-        {/* PINK WALL */}
+        {/* PINK WALL SIDE */}
         <group position={[-16, -1, 0]}>
           <mesh position={[1, 8.5, 0]}>
             <boxGeometry args={[4, 17, 2]} />
@@ -123,7 +116,7 @@ export default function Scene({ currentView }) {
           </mesh>
         </group>
 
-        {/* PURPLE WALL */}
+        {/* PURPLE WALL SIDE */}
         <group position={[17, -1, 1]} rotation={[0, -Math.PI / 2, 0]}>
           <mesh position={[4, 8.5, 0]}>
             <boxGeometry args={[8, 17, 2]} />
@@ -140,18 +133,11 @@ export default function Scene({ currentView }) {
 
       <water
         ref={waterRef}
-        args={[
-          new THREE.PlaneGeometry(2000, 2000),
-          {
-            textureWidth: 512,
-            textureHeight: 512,
-            waterNormals,
-            sunDirection: new THREE.Vector3(10, 1, 20),
-            sunColor: 0xffffff,
-            waterColor: 0xa19089,
-            distortionScale: 0.4,
-          },
-        ]}
+        args={[new THREE.PlaneGeometry(2000, 2000), {
+          textureWidth: 512, textureHeight: 512, waterNormals, 
+          sunDirection: new THREE.Vector3(10, 1, 20), sunColor: 0xffffff, 
+          waterColor: 0xa19089, distortionScale: 0.4,
+        }]}
         rotation={[-Math.PI / 2, 0, 0]}
         position={[0, -1, 0]}
       />
