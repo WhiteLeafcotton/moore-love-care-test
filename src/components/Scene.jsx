@@ -62,9 +62,9 @@ export default function Scene({ currentView }) {
       <Environment preset="dawn" />
       
       <group position={[0, 0, 0]}>
-        {/* PLATFORM: Aligned to Pink doorway start and Purple outer edge */}
-        <mesh receiveShadow position={[12, -0.5, 15]}>
-          <boxGeometry args={[9, 1, 28]} />
+        {/* PLATFORM: Height increased to 2.5 to sit under window edges */}
+        <mesh receiveShadow position={[12, -0.25, 15]}>
+          <boxGeometry args={[9, 2.5, 28]} />
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
