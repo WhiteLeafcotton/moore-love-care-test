@@ -6,7 +6,7 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* Monolithic Staircase: Massive 13.5 unit width */
+/* Monolithic Staircase */
 const Staircase = ({ position, width, texture, rotation }) => {
   const stepHeight = 0.5;
   const stepDepth = 0.8;
@@ -73,11 +73,10 @@ export default function Scene({ currentView }) {
   const purpleProps = { map: travertineTex, color: "#d1c4e9", roughness: 0.8 };
 
   useFrame((state, delta) => {
-    // FIXED: Shifted X to -12 to move right toward purple wall without spinning
-    const targetPos = currentView === 'home' ? [-12, 1.2, 12] : [35, 6, 10];
-    const targetLook = currentView === 'home' ? [16, 7, 0] : [70, 0, 5];
+    // UPDATED: Backed away (Z=28), moved left (X=-20), and leveled height (Y=1.5)
+    const targetPos = currentView === 'home' ? [-20, 1.5, 28] : [35, 6, 10];
+    const targetLook = currentView === 'home' ? [16, 1.5, 0] : [70, 0, 5];
     
-    // Smooth lerping to fixed coordinates
     camera.position.lerp(new THREE.Vector3(...targetPos), 0.02);
     camera.lookAt(new THREE.Vector3(...targetLook));
     
@@ -90,13 +89,11 @@ export default function Scene({ currentView }) {
       <Environment preset="dawn" />
       
       <group position={[0, 0, 0]}>
-        {/* PLATFORM */}
         <mesh receiveShadow position={[12, -2.0, 15]}>
           <boxGeometry args={[9, 8.0, 28]} />
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* STAIRCASE */}
         <Staircase 
           position={[7.5, 1.5, 1.1]} 
           rotation={[0, -Math.PI / 2, 0]} 
@@ -104,7 +101,6 @@ export default function Scene({ currentView }) {
           texture={travertineTex} 
         />
 
-        {/* FRONT PINK WALL */}
         <group position={[-16, -1, 0]}>
           <mesh position={[1, 8.5, 0]}>
             <boxGeometry args={[4, 17, 2]} />
@@ -118,7 +114,6 @@ export default function Scene({ currentView }) {
           </mesh>
         </group>
 
-        {/* PURPLE WALL */}
         <group position={[17, -1, 1]} rotation={[0, -Math.PI / 2, 0]}>
           <mesh position={[4, 8.5, 0]}>
             <boxGeometry args={[8, 17, 2]} />
