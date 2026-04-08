@@ -6,14 +6,14 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* Modular Staircase: Final precision alignment for the inner corner */
-const Staircase = ({ position, width, texture }) => {
+/* Modular Staircase: Rotated 45-degrees to point outward into the water */
+const Staircase = ({ position, width, texture, rotation }) => {
   const stepHeight = 0.5;
   const stepDepth = 0.8;
   const numSteps = 12; 
 
   return (
-    <group position={position}>
+    <group position={position} rotation={rotation}>
       {Array.from({ length: numSteps }).map((_, i) => (
         <mesh key={i} position={[0, -i * stepHeight, i * stepDepth]}>
           <boxGeometry args={[width, stepHeight, stepDepth]} />
@@ -86,9 +86,10 @@ export default function Scene({ currentView }) {
           <meshStandardMaterial map={travertineTex} color="#f1dfd8" />
         </mesh>
 
-        {/* STAIRCASE: Precise inner-corner placement */}
+        {/* STAIRCASE: Rotated 45 degrees outward from corner */}
         <Staircase 
           position={[7.5, 1.5, 1.05]} 
+          rotation={[0, Math.PI / 4, 0]} 
           width={4.5} 
           texture={travertineTex} 
         />
