@@ -140,41 +140,24 @@ export default function Scene({ currentView }) {
         mieDirectionalG={0.95}
       />
 
-      {/*  SUN SYSTEM */}
-      <group position={[-10, 35, -150]}>
-        {/* Core - The "Hot" center */}
-        <mesh>
-          <sphereGeometry args={[8, 32, 32]} />
-          <meshBasicMaterial color="#ffffff" toneMapped={false} />
-        </mesh>
-
-        {/* Inner Glow - The "Godlike" intensity */}
-        <sprite scale={[60, 60, 1]}>
-          <spriteMaterial 
-            transparent 
-            opacity={0.35} 
-            color="#ffeeb3" 
-            map={new THREE.TextureLoader().load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/lensflare/lensflare0.png')}
-            blending={THREE.AdditiveBlending}
-          />
-        </sprite>
-
-        {/* Outer Haze - Dreamy atmosphere bleed */}
-        <sprite scale={[150, 150, 1]}>
-          <spriteMaterial 
-            transparent 
-            opacity={0.15} 
-            color="#ffc1e3" 
-            map={new THREE.TextureLoader().load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/lensflare/lensflare0.png')}
-            blending={THREE.AdditiveBlending}
-          />
-        </sprite>
-
-        {/* Sun Flare Light - Casts the golden light onto the scene */}
-        <pointLight intensity={8} distance={500} color="#ffdf91" decay={2} />
-      </group>
-
-      <Environment preset="sunset" />
+      {/* GODLIKE SUN - Minimalist, Realistic, Distant */}
+      <mesh position={[-500, 1000, -2000]}> 
+        {/* We move it extremely far away to reduce perspective scaling and increase realism */}
+        <sphereGeometry args={[50, 32, 32]} />
+        <meshBasicMaterial 
+          color="#ffffff" 
+          toneMapped={false} /* This keeps it blindingly bright */
+          visible={true} 
+        />
+        {/* We use a powerful light source with a massive distance to create a wash of light */}
+        <directionalLight 
+          position={[0, 0, 0]} /* Light originates at the sun's position */
+          intensity={6} 
+          color="#ffebbb" 
+          castShadow 
+          shadow-mapSize={[2048, 2048]} 
+        />
+      </mesh>
       {/* ENHANCED VOLUMETRIC CLOUDS */}
       <group>
         {/* Main Sun-blocking Cloud */}
