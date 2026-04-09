@@ -143,11 +143,46 @@ export default function Scene({ currentView }) {
       <Environment preset="sunset" />
       <fog attach="fog" args={["#ffc0e6", 15, 260]} />
 
-      {/* VOLUMETRIC CLOUDS */}
-      <Cloud position={[-40, 60, -120]} speed={0.2} opacity={0.5} segments={16} bounds={[60, 20, 20]} volume={6} color="#ffd6f0" />
-      <Cloud position={[20, 80, -150]} speed={0.15} opacity={0.45} segments={16} bounds={[80, 25, 25]} volume={7} color="#fbcfe8" />
-      <Cloud position={[80, 70, -130]} speed={0.18} opacity={0.4} segments={16} bounds={[70, 20, 20]} volume={6} color="#e9d5ff" />
-      <Cloud position={[-100, 90, -180]} speed={0.12} opacity={0.35} segments={14} bounds={[90, 30, 30]} volume={8} color="#dbeafe" />
+      {/* VOLUMETRIC CLOUDS — BIG, LOW, CINEMATIC */}
+<Cloud
+  position={[-20, 35, -60]}
+  speed={0.2}
+  opacity={0.55}
+  segments={18}
+  bounds={[120, 40, 40]}
+  volume={8}
+  color="#ffd6f0"
+/>
+
+<Cloud
+  position={[30, 45, -80]}
+  speed={0.15}
+  opacity={0.5}
+  segments={18}
+  bounds={[140, 45, 45]}
+  volume={9}
+  color="#fbcfe8"
+/>
+
+<Cloud
+  position={[90, 40, -70]}
+  speed={0.18}
+  opacity={0.45}
+  segments={18}
+  bounds={[130, 40, 40]}
+  volume={8}
+  color="#e9d5ff"
+/>
+
+<Cloud
+  position={[-100, 50, -100]}
+  speed={0.12}
+  opacity={0.4}
+  segments={16}
+  bounds={[160, 50, 50]}
+  volume={10}
+  color="#dbeafe"
+/>
 
       {/* LIGHTING */}
       <directionalLight position={[-20, 25, 15]} intensity={1.3} castShadow shadow-mapSize={[2048, 2048]} />
