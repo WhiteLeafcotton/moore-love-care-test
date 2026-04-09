@@ -140,24 +140,53 @@ export default function Scene({ currentView }) {
         mieDirectionalG={0.95}
       />
 
-      {/* GODLIKE SUN - Minimalist, Realistic, Distant */}
-      <mesh position={[-500, 1000, -2000]}> 
-        {/* We move it extremely far away to reduce perspective scaling and increase realism */}
-        <sphereGeometry args={[50, 32, 32]} />
-        <meshBasicMaterial 
-          color="#ffffff" 
-          toneMapped={false} /* This keeps it blindingly bright */
-          visible={true} 
+      {/* GODLIKE SUN - Abstract, Soft, Gentle */}
+      {/* We keep the sphere position, slightly further back for subtlety */}
+      <mesh position={[-10, 35, -160]}>
+        <sphereGeometry args={[18, 32, 32]} />
+        <meshStandardMaterial 
+          color="#fff6e0" /* Base color of the "sun disk" */
+          emissive="#ffd69e" /* Soft golden glow */
+          emissiveIntensity={2} /* Gentle intensity, doesn't overblow */
+          roughness={1} /* Keeps the sphere surface matte */
+          metalness={0} 
         />
-        {/* We use a powerful light source with a massive distance to create a wash of light */}
-        <directionalLight 
-          position={[0, 0, 0]} /* Light originates at the sun's position */
-          intensity={6} 
-          color="#ffebbb" 
-          castShadow 
-          shadow-mapSize={[2048, 2048]} 
-        />
+        {/* We use a weak point light just to give the immediate clouds some warm backlighting */}
+        <pointLight intensity={0.5} distance={200} color="#ffe0a3" decay={2} />
       </mesh>
+
+      <Environment preset="sunset" />
+      <fog attach="fog" args={["#ffc0e6", 15, 260]} />
+
+      {/* REFRESHED CLOUDS (Ensuring they look 'locked in') */}
+      <group>
+        <Cloud position={[-10, 30, -100]} speed={0.2} opacity={0.8} segments={24} bounds={[60, 20, 20]} volume={15} color="#ffd6f0" />
+        <Cloud position={[-60, 45, -80]} speed={0.1} opacity={0.4} segments={12} bounds={[40, 20, 20]} volume={5} color="#fbcfe8" />
+        <Cloud position={[40, 50, -120]} speed={0.15} opacity={0.5} segments={20} bounds={[100, 30, 30]} volume={10} color="#e9d5ff" />
+        <Cloud position={[0, 60, -150]} speed={0.05} opacity={0.3} segments={10} bounds={[200, 40, 40]} volume={20} color="#ffffff" />
+        <Cloud position={[100, 30, -50]} speed={0.2} opacity={0.6} segments={15} bounds={[50, 20, 20]} volume={6} color="#dbeafe" />
+      </group>
+
+      {/* REVISED LIGHTING - For soft shadows and ambient warmth */}
+      {/* 1. HemisphereLight: This is the key. It provides general sky light without harsh shadows. */}
+      <hemisphereLight 
+        intensity={0.8} 
+        color="#ffc0cb" /* Sky color (warm pink) */
+        groundColor="#bfa6a0" /* Ground reflection color (water/sand) */
+      />
+
+      {/* 2. Soft Fill Light: A gentle directional light for defined (but soft) shadows */}
+      <directionalLight 
+        position={[-15, 30, 10]} 
+        intensity={0.4} /* Drastically reduced intensity to prevent "dark shadows" */
+        castShadow 
+        shadow-mapSize={[2048, 2048]} 
+        shadow-bias={-0.001} /* Helps reduce shadow acne on the smooth architecture */
+      />
+
+      {/* 3. The existing accent points (keeping them for sparkle on the architecture) */}
+      <pointLight position={[10, 5, 10]} intensity={1.2} color="#ffd6e7" />
+      <pointLight position={[0, 3, 0]} intensity={0.6} color="#ffc0cb" />
       {/* ENHANCED VOLUMETRIC CLOUDS */}
       <group>
         {/* Main Sun-blocking Cloud */}
