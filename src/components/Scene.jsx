@@ -6,6 +6,46 @@ import * as THREE from "three";
 
 extend({ Water });
 
+/* Grassy Hills with Procedural Wind Sway */
+const GrassyHills = ({ windSpeed }) => {
+  const meshRef = useRef();
+  
+  const geom = useMemo(() => {
+    // Large terrain plane
+    const g = new THREE.PlaneGeometry(400, 400, 60, 60);
+    const vertices = g.attributes.position.array;
+    for (let i = 0; i < vertices.length; i += 3) {
+      const x = vertices[i];
+      const y = vertices[i + 1];
+      // Create rolling hill height logic
+      vertices[i + 2] = 
+        Math.sin(x * 0.04) * Math.cos(y * 0.04) * 10 + 
+        Math.sin(x * 0.08) * 3;
+    }
+    g.computeVertexNormals();
+    return g;
+  }, []);
+
+  useFrame((state) => {
+    if (meshRef.current) {
+      // Gentle swaying of the entire terrain group to simulate grass movement
+      meshRef.current.rotation.z = Math.sin(state.clock.elapsedTime * windSpeed) * 0.015;
+    }
+  });
+
+  return (
+    <mesh 
+      ref={meshRef} 
+      geometry={geom} 
+      rotation={[-Math.PI / 2, 0, 0]} 
+      position={[0, -3.5, -40]} 
+      receiveShadow
+    >
+      <meshStandardMaterial color="#b8e0c9" roughness={0.9} metalness={0} />
+    </mesh>
+  );
+};
+
 /* Monolithic Staircase */
 const Staircase = ({ position, width, texture, rotation }) => {
   const stepHeight = 0.5;
@@ -83,8 +123,8 @@ export default function Scene({ currentView }) {
   const pinkProps = { map: pinkStoneTex, color: "#fcd7d7", roughness: 0.65, metalness: 0.05 };
 
   useEffect(() => {
-    // Initial snap to the closer mobile position or desktop sweet spot
-    const startPos = isMobile ? new THREE.Vector3(-20, 5, 40) : new THREE.Vector3(-15, 1.5, 30);
+    // Backed up camera for mobile initialization (Z=60)
+    const startPos = isMobile ? new THREE.Vector3(-30, 8, 60) : new THREE.Vector3(-15, 1.5, 30);
     camera.position.copy(startPos);
     camera.lookAt(12, 1.5, 0);
   }, [camera, isMobile]);
@@ -93,7 +133,8 @@ export default function Scene({ currentView }) {
     const isHome = currentView === "home";
     const LERP_SPEED = 0.04;
 
-    const sweetSpotPos = isMobile ? new THREE.Vector3(-20, 5, 40) : new THREE.Vector3(-15, 1.5, 30);
+    // Mobile camera sweet spot: wide and cinematic
+    const sweetSpotPos = isMobile ? new THREE.Vector3(-30, 8, 65) : new THREE.Vector3(-15, 1.5, 30);
     const sweetSpotLook = new THREE.Vector3(12, 1.5, 0);
 
     const exitFinalPos = new THREE.Vector3(-8, 1.5, -100);
@@ -115,10 +156,10 @@ export default function Scene({ currentView }) {
       sunPlasmaRef.current.offset.y -= delta * 0.05;
     }
 
-    // GENTLE WIND
+    // HIGH INTENSITY WIND
     if (cloudGroupRef.current) {
-      cloudGroupRef.current.position.x += delta * 0.4;
-      if (cloudGroupRef.current.position.x > 80) cloudGroupRef.current.position.x = -80;
+      cloudGroupRef.current.position.x += delta * 1.8;
+      if (cloudGroupRef.current.position.x > 180) cloudGroupRef.current.position.x = -180;
     }
   });
 
@@ -126,7 +167,10 @@ export default function Scene({ currentView }) {
     <>
       <Sky distance={450000} sunPosition={[-10, 6, -100]} inclination={0.49} azimuth={0.25} turbidity={12} rayleigh={0.3} mieCoefficient={0.02} mieDirectionalG={0.95} />
 
-      {/* TRANSLUCENT ALIVE SUN */}
+      {/* GRASSY HILLS */}
+      <GrassyHills windSpeed={0.8} />
+
+      {/* SUN UNIT */}
       <mesh position={[-10, 45, -180]}>
         <sphereGeometry args={[isMobile ? 18 : 22, 64, 64]} />
         <meshStandardMaterial 
@@ -143,26 +187,27 @@ export default function Scene({ currentView }) {
       </mesh>
 
       <Environment preset="sunset" />
-      <fog attach="fog" args={["#ffc0e6", 15, 260]} />
+      <fog attach="fog" args={["#ffc0e6", 15, 320]} />
 
-      {/* WINDY CLOUD SYSTEM */}
+      {/* DENSE WINDY CLOUD SYSTEM */}
       <group ref={cloudGroupRef}>
-        {/* Clouds surrounding and crossing the sun */}
-        <Cloud position={[-10, 45, -165]} speed={0.2} opacity={0.7} segments={25} bounds={[40, 15, 10]} volume={15} color="#ffd1dc" />
-        <Cloud position={[20, 50, -175]} speed={0.1} opacity={0.5} segments={20} bounds={[30, 10, 5]} volume={12} color="#e6e6fa" />
-        <Cloud position={[-40, 55, -170]} speed={0.15} opacity={0.4} segments={15} bounds={[50, 10, 10]} volume={10} color="#b0e0e6" />
+        {/* Core Cluster near Sun */}
+        <Cloud position={[-10, 45, -165]} speed={0.5} opacity={0.7} segments={30} bounds={[50, 20, 10]} volume={20} color="#ffd1dc" />
+        <Cloud position={[30, 55, -175]} speed={0.4} opacity={0.6} segments={25} bounds={[40, 15, 5]} volume={15} color="#e6e6fa" />
+        <Cloud position={[-50, 40, -160]} speed={0.6} opacity={0.5} segments={20} bounds={[60, 20, 10]} volume={18} color="#b0e0e6" />
         
-        {/* Drift Layers */}
-        <Cloud position={[-60, 30, -100]} speed={0.2} opacity={0.8} segments={24} bounds={[60, 20, 20]} volume={15} color="#ffd6f0" />
-        <Cloud position={[60, 40, -120]} speed={0.15} opacity={0.6} segments={20} bounds={[100, 30, 30]} volume={10} color="#e9d5ff" />
-        <Cloud position={[0, 60, -150]} speed={0.05} opacity={0.3} segments={10} bounds={[200, 40, 40]} volume={20} color="#ffffff" />
+        {/* Sky Fillers */}
+        <Cloud position={[0, 35, -150]} speed={0.3} opacity={0.4} segments={20} bounds={[100, 10, 10]} volume={12} color="#fce7f3" />
+        <Cloud position={[-100, 30, -80]} speed={0.2} opacity={0.5} segments={24} bounds={[80, 20, 20]} volume={20} color="#ffd6f0" />
+        <Cloud position={[100, 50, -100]} speed={0.3} opacity={0.4} segments={20} bounds={[120, 30, 30]} volume={15} color="#e9d5ff" />
+        <Cloud position={[-20, 75, -140]} speed={0.1} opacity={0.3} segments={15} bounds={[250, 40, 40]} volume={30} color="#ffffff" />
       </group>
 
       <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#ffc0e6" />
-      <directionalLight position={[-15, 30, 10]} intensity={0.1} castShadow={false} />
+      <directionalLight position={[-15, 30, 10]} intensity={0.1} />
       <pointLight position={[10, 5, 10]} intensity={0.8} color="#ffd6e7" />
 
-      {/* STRUCTURE */}
+      {/* ARCHITECTURE */}
       <group position={[0, 0, 0]}>
         <mesh castShadow receiveShadow position={[12, -2.0, 15]}>
           <boxGeometry args={[14, 8.0, 28]} />
@@ -185,6 +230,7 @@ export default function Scene({ currentView }) {
       
       <ContactShadows position={[12, -1.9, 15]} opacity={0.15} scale={60} blur={4} far={12} />
 
+      {/* INFINITE WATER */}
       <water
         ref={waterRef}
         args={[
@@ -201,7 +247,7 @@ export default function Scene({ currentView }) {
           },
         ]}
         rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, -1, 0]}
+        position={[0, -1.2, 0]}
       />
     </>
   );
