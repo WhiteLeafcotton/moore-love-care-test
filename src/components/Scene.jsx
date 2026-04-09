@@ -81,10 +81,13 @@ export default function Scene({ currentView }) {
     }
     if (sunPlasmaTex) {
       sunPlasmaTex.wrapS = sunPlasmaTex.wrapT = THREE.RepeatWrapping;
-      sunPlasmaTex.repeat.set(1, 1);
+      sunPlasmaTex.repeat.set(1.5, 1.5);
       sunPlasmaRef.current = sunPlasmaTex;
     }
-  }, [pinkStoneTex, sunPlasmaTex]);
+    if (waterNormals) {
+      waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
+    }
+  }, [pinkStoneTex, sunPlasmaTex, waterNormals]);
 
   const pinkProps = {
     map: pinkStoneTex,
@@ -133,15 +136,15 @@ export default function Scene({ currentView }) {
 
     camera.lookAt(lookAtTarget.current);
 
-    // Animate Water
+    // Tropical Water Animation
     if (waterRef.current) {
-      waterRef.current.material.uniforms["time"].value += delta * 0.25;
+      waterRef.current.material.uniforms["time"].value += delta * 0.15;
     }
 
-    // Animate Sun Surface (The "Alive" effect)
+    // Enhanced Lava Sun Animation (Multi-axis churn)
     if (sunPlasmaRef.current) {
-      sunPlasmaRef.current.offset.x += delta * 0.04;
-      sunPlasmaRef.current.offset.y -= delta * 0.02;
+      sunPlasmaRef.current.offset.x += delta * 0.06;
+      sunPlasmaRef.current.offset.y += delta * 0.03;
     }
   });
 
@@ -159,18 +162,19 @@ export default function Scene({ currentView }) {
         mieDirectionalG={0.95}
       />
 
-     {/* GODLIKE SUN - 3D Alive Globe */}
+     {/* GODLIKE SUN - Enhanced "Alive" Lava Globe */}
       <mesh position={[-10, 45, -180]}>
         <sphereGeometry args={[22, 64, 64]} />
         <meshStandardMaterial 
-          color="#ffffff" 
-          emissive="#ffcc80" 
+          color="#ffca7d" 
+          emissive="#ff8c00" 
           emissiveMap={sunPlasmaTex}
-          emissiveIntensity={2.5}
-          roughness={0.3}
-          metalness={0.2}
+          emissiveIntensity={4}
+          roughness={0.2}
+          metalness={0.5}
         />
-        <pointLight intensity={3} distance={150} color="#fff1d4" decay={1} />
+        {/* Soft Volumetric Warmth */}
+        <pointLight intensity={4} distance={200} color="#ffaa33" decay={1.5} />
       </mesh>
 
       <Environment preset="sunset" />
@@ -185,21 +189,23 @@ export default function Scene({ currentView }) {
         <Cloud position={[100, 30, -50]} speed={0.2} opacity={0.6} segments={15} bounds={[50, 20, 20]} volume={6} color="#dbeafe" />
       </group>
 
-      {/* SOFT GLOBAL LIGHTING */}
-      <hemisphereLight intensity={0.9} color="#ffc0cb" groundColor="#bfa6a0" />
+      {/* LIGHTING - ULTRA LIGHT & NO DARK SHADOWS */}
+      <ambientLight intensity={1.2} color="#ffffff" />
+      <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#00f2ff" />
+      
+      {/* Very soft directional light just for a hint of shape */}
       <directionalLight 
         position={[-15, 30, 10]} 
-        intensity={0.4} 
-        castShadow 
-        shadow-mapSize={[2048, 2048]} 
-        shadow-bias={-0.001} 
+        intensity={0.3} 
+        castShadow={false} /* Turned off shadow casting to keep everything light */
       />
-      <pointLight position={[10, 5, 10]} intensity={1.2} color="#ffd6e7" />
-      <pointLight position={[0, 3, 0]} intensity={0.6} color="#ffc0cb" />
+      
+      <pointLight position={[10, 5, 10]} intensity={1.5} color="#ffd6e7" />
+      <pointLight position={[0, 3, 0]} intensity={1} color="#ffffff" />
 
       {/* STRUCTURE */}
       <group position={[0, 0, 0]}>
-        <mesh castShadow receiveShadow position={[12, -2.0, 15]}>
+        <mesh position={[12, -2.0, 15]}>
           <boxGeometry args={[14, 8.0, 28]} />
           <meshStandardMaterial {...pinkProps} />
         </mesh>
@@ -207,35 +213,33 @@ export default function Scene({ currentView }) {
         <Staircase position={[5.0, 1.5, 1.0]} rotation={[0, -Math.PI / 2, 0]} width={20} texture={pinkStoneTex} />
 
         <group position={[-16, -1, 0]}>
-          <mesh castShadow receiveShadow position={[1, 8.5, 0]}>
+          <mesh position={[1, 8.5, 0]}>
             <boxGeometry args={[4, 17, 2]} />
             <meshStandardMaterial {...pinkProps} />
           </mesh>
           <WallOpening position={[6, 0, 0]} colorProps={pinkProps} />
           <WallOpening position={[12, 0, 0]} colorProps={pinkProps} />
-          <mesh castShadow receiveShadow position={[24, 8.5, 0]}>
+          <mesh position={[24, 8.5, 0]}>
             <boxGeometry args={[18, 17, 2]} />
             <meshStandardMaterial {...pinkProps} />
           </mesh>
         </group>
 
         <group position={[17, -1, 1]} rotation={[0, -Math.PI / 2, 0]}>
-          <mesh castShadow receiveShadow position={[4, 8.5, 0]}>
+          <mesh position={[4, 8.5, 0]}>
             <boxGeometry args={[8, 17, 2]} />
             <meshStandardMaterial {...pinkProps} />
           </mesh>
           <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={pinkProps} />
           <WallOpening position={[17, 0, 0]} isWindow={true} colorProps={pinkProps} />
-          <mesh castShadow receiveShadow position={[24, 8.5, 0]}>
+          <mesh position={[24, 8.5, 0]}>
             <boxGeometry args={[8, 17, 2]} />
             <meshStandardMaterial {...pinkProps} />
           </mesh>
         </group>
       </group>
 
-      <ContactShadows position={[12, -1.9, 15]} opacity={0.45} scale={50} blur={2.5} far={12} />
-
-      {/* WATER */}
+      {/* TROPICAL PARADISE WATER */}
       <water
         ref={waterRef}
         args={[
@@ -244,10 +248,10 @@ export default function Scene({ currentView }) {
             textureWidth: 512,
             textureHeight: 512,
             waterNormals,
-            sunDirection: new THREE.Vector3(-20, 25, 15),
-            sunColor: 0xffe3f2,
-            waterColor: 0xbfa6a0,
-            distortionScale: 0.6,
+            sunDirection: new THREE.Vector3(0, 1, 0), // Shifted to prevent horizontal white glare
+            sunColor: 0x00d9ff, // Water catches cyan light instead of white
+            waterColor: 0x006b80, // Deep tropical teal
+            distortionScale: 1.5, // Gentler ripples
           },
         ]}
         rotation={[-Math.PI / 2, 0, 0]}
