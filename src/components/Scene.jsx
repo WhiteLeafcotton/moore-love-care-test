@@ -117,7 +117,7 @@ export default function Scene({ currentView }) {
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
   const sunPlasmaTex = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
   
-  // NEW: Loading your reference grass texture (image_2.png)
+  // NEW: Loading youur reference grass texture (image_2.png)
   const grassHillsTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/reference_grass.png`);
 
   useMemo(() => {
