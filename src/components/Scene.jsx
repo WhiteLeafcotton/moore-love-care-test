@@ -7,17 +7,17 @@ import * as THREE from "three";
 extend({ Water });
 
 /* Grassy Hills with Procedural Wind Sway */
-const GrassyHills = ({ windSpeed }) => {
+const GrassyHills = ({ windSpeed, textureMap }) => {
   const meshRef = useRef();
   
   const geom = useMemo(() => {
-    // Large terrain plane
+    // LARGE TERRAIN PLANE - POSITION LOCKED
     const g = new THREE.PlaneGeometry(400, 400, 60, 60);
     const vertices = g.attributes.position.array;
     for (let i = 0; i < vertices.length; i += 3) {
       const x = vertices[i];
       const y = vertices[i + 1];
-      // Create rolling hill height logic
+      // Generate rolling hill height logic
       vertices[i + 2] = 
         Math.sin(x * 0.04) * Math.cos(y * 0.04) * 10 + 
         Math.sin(x * 0.08) * 3;
@@ -38,10 +38,18 @@ const GrassyHills = ({ windSpeed }) => {
       ref={meshRef} 
       geometry={geom} 
       rotation={[-Math.PI / 2, 0, 0]} 
+      // THE LOCKED POSITION YOU LOVE
       position={[0, -3.5, -40]} 
       receiveShadow
     >
-      <meshStandardMaterial color="#b8e0c9" roughness={0.9} metalness={0} />
+      <meshStandardMaterial 
+        // Applying the texture you provided
+        map={textureMap}
+        // Base color slightly darker to handle emissive light wash
+        color="#fff" 
+        roughness={0.9} 
+        metalness={0} 
+      />
     </mesh>
   );
 };
@@ -104,9 +112,13 @@ export default function Scene({ currentView }) {
 
   const isMobile = size.width < 768;
 
+  // TEXTURE LOADING
   const pinkStoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
   const sunPlasmaTex = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
+  
+  // NEW: Loading your reference grass texture (image_2.png)
+  const grassHillsTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/reference_grass.png`);
 
   useMemo(() => {
     if (pinkStoneTex) {
@@ -118,12 +130,18 @@ export default function Scene({ currentView }) {
       sunPlasmaTex.repeat.set(1.5, 1.5);
       sunPlasmaRef.current = sunPlasmaTex;
     }
-  }, [pinkStoneTex, sunPlasmaTex]);
+    // Configuring the new grass texture
+    if (grassHillsTex) {
+      grassHillsTex.wrapS = grassHillsTex.wrapT = THREE.RepeatWrapping;
+      // Controlling repeat factor prevents stretching and pixelation on large mesh
+      grassHillsTex.repeat.set(4, 4); 
+    }
+  }, [pinkStoneTex, sunPlasmaTex, grassHillsTex]);
 
   const pinkProps = { map: pinkStoneTex, color: "#fcd7d7", roughness: 0.65, metalness: 0.05 };
 
   useEffect(() => {
-    // Backed up camera for mobile initialization (Z=60)
+    // Initial snap to the closer mobile position or desktop sweet spot
     const startPos = isMobile ? new THREE.Vector3(-30, 8, 60) : new THREE.Vector3(-15, 1.5, 30);
     camera.position.copy(startPos);
     camera.lookAt(12, 1.5, 0);
@@ -133,7 +151,6 @@ export default function Scene({ currentView }) {
     const isHome = currentView === "home";
     const LERP_SPEED = 0.04;
 
-    // Mobile camera sweet spot: wide and cinematic
     const sweetSpotPos = isMobile ? new THREE.Vector3(-30, 8, 65) : new THREE.Vector3(-15, 1.5, 30);
     const sweetSpotLook = new THREE.Vector3(12, 1.5, 0);
 
@@ -167,8 +184,8 @@ export default function Scene({ currentView }) {
     <>
       <Sky distance={450000} sunPosition={[-10, 6, -100]} inclination={0.49} azimuth={0.25} turbidity={12} rayleigh={0.3} mieCoefficient={0.02} mieDirectionalG={0.95} />
 
-      {/* GRASSY HILLS */}
-      <GrassyHills windSpeed={0.8} />
+      {/* GRASSY HILLS - Passing the new textureMap prop */}
+      <GrassyHills windSpeed={0.8} textureMap={grassHillsTex} />
 
       {/* SUN UNIT */}
       <mesh position={[-10, 45, -180]}>
