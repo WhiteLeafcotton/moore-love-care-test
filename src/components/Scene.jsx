@@ -61,7 +61,6 @@ export default function Scene({ currentView }) {
   const lookAtTarget = useRef(new THREE.Vector3(12, 1.5, 0));
   const baseUrl = import.meta.env.BASE_URL || "/";
 
-  // MOBILE CHECK
   const isMobile = size.width < 768;
 
   const pinkStoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
@@ -93,19 +92,19 @@ export default function Scene({ currentView }) {
     metalness: 0.05,
   };
 
-  // Initialize at the sweet spot immediately
   useEffect(() => {
-    const startPos = isMobile ? new THREE.Vector3(-25, 10, 50) : new THREE.Vector3(-15, 1.5, 30);
+    // Adjusted mobile start position to be lower and closer
+    const startPos = isMobile ? new THREE.Vector3(-20, 4, 35) : new THREE.Vector3(-15, 1.5, 30);
     camera.position.copy(startPos);
     camera.lookAt(12, 1.5, 0);
   }, [camera, isMobile]);
 
   useFrame((state, delta) => {
     const isHome = currentView === "home";
-    const LERP_SPEED = 0.04; // Faster response since there's no long intro travel
+    const LERP_SPEED = 0.04;
 
-    // Define positions based on device
-    const sweetSpotPos = isMobile ? new THREE.Vector3(-25, 10, 55) : new THREE.Vector3(-15, 1.5, 30);
+    // Mobile sweet spot lowered to prevent that "too high" feeling
+    const sweetSpotPos = isMobile ? new THREE.Vector3(-20, 5, 40) : new THREE.Vector3(-15, 1.5, 30);
     const sweetSpotLook = new THREE.Vector3(12, 1.5, 0);
 
     const exitFinalPos = new THREE.Vector3(-8, 1.5, -100);
@@ -115,7 +114,6 @@ export default function Scene({ currentView }) {
       camera.position.lerp(sweetSpotPos, LERP_SPEED);
       lookAtTarget.current.lerp(sweetSpotLook, LERP_SPEED);
     } else {
-      // Direct, clean travel out the door
       camera.position.lerp(exitFinalPos, LERP_SPEED);
       lookAtTarget.current.lerp(exitLook, LERP_SPEED);
     }
@@ -145,7 +143,6 @@ export default function Scene({ currentView }) {
         mieDirectionalG={0.95}
       />
 
-      {/* TRANSLUCENT ALIVE SUN */}
       <mesh position={[-10, 45, -180]}>
         <sphereGeometry args={[isMobile ? 18 : 22, 64, 64]} />
         <meshStandardMaterial 
@@ -164,16 +161,23 @@ export default function Scene({ currentView }) {
       <Environment preset="sunset" />
       <fog attach="fog" args={["#ffc0e6", 15, 260]} />
 
-      {/* CLOUDS - Positioned for cinematic depth on both mobile and desktop */}
+      {/* ENHANCED PASTEL CLOUD SYSTEM */}
       <group>
+        {/* Large Foreground Clouds for Sweet Spot View */}
+        <Cloud position={[-30, 15, 10]} speed={0.2} opacity={0.4} segments={20} bounds={[40, 10, 10]} volume={10} color="#ffd1dc" />
+        <Cloud position={[25, 20, 5]} speed={0.1} opacity={0.3} segments={15} bounds={[30, 5, 5]} volume={8} color="#e6e6fa" />
+        
+        {/* Main Background Bank */}
         <Cloud position={[-10, 30, -100]} speed={0.2} opacity={0.8} segments={24} bounds={[60, 20, 20]} volume={15} color="#ffd6f0" />
         <Cloud position={[-60, 45, -80]} speed={0.1} opacity={0.4} segments={12} bounds={[40, 20, 20]} volume={5} color="#fbcfe8" />
-        <Cloud position={[40, 50, -120]} speed={0.15} opacity={0.5} segments={20} bounds={[100, 30, 30]} volume={10} color="#e9d5ff" />
+        <Cloud position={[40, 50, -120]} speed={0.15} opacity={0.5} segments={20} bounds={[100, 30, 30]} volume={10} color="#b0e0e6" />
         <Cloud position={[0, 60, -150]} speed={0.05} opacity={0.3} segments={10} bounds={[200, 40, 40]} volume={20} color="#ffffff" />
-        <Cloud position={[100, 30, -50]} speed={0.2} opacity={0.6} segments={15} bounds={[50, 20, 20]} volume={6} color="#dbeafe" />
+        
+        {/* New Pinks & Pastels for Desktop Width */}
+        <Cloud position={[80, 25, -60]} speed={0.2} opacity={0.5} segments={15} bounds={[50, 20, 20]} volume={12} color="#fce7f3" />
+        <Cloud position={[-80, 20, -40]} speed={0.1} opacity={0.4} segments={18} bounds={[60, 15, 15]} volume={10} color="#fae8ff" />
       </group>
 
-      {/* LIGHTING */}
       <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#ffc0e6" />
       <directionalLight position={[-15, 30, 10]} intensity={0.1} castShadow={false} />
       <pointLight position={[10, 5, 10]} intensity={0.8} color="#ffd6e7" />
