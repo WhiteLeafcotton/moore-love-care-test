@@ -140,17 +140,41 @@ export default function Scene({ currentView }) {
         mieDirectionalG={0.95}
       />
 
-      {/* GLOWING SUN MESH (Behind Clouds for God Rays effect) */}
-      <mesh position={[-10, 35, -150]}>
-        <sphereGeometry args={[15, 32, 32]} />
-        <meshBasicMaterial color="#fff9e6" toneMapped={false} />
-        {/* Adding a point light here to make the clouds around it glow */}
-        <pointLight intensity={5} distance={300} color="#ffdf91" />
-      </mesh>
+      {/*  SUN SYSTEM */}
+      <group position={[-10, 35, -150]}>
+        {/* Core - The "Hot" center */}
+        <mesh>
+          <sphereGeometry args={[8, 32, 32]} />
+          <meshBasicMaterial color="#ffffff" toneMapped={false} />
+        </mesh>
+
+        {/* Inner Glow - The "Godlike" intensity */}
+        <sprite scale={[60, 60, 1]}>
+          <spriteMaterial 
+            transparent 
+            opacity={0.35} 
+            color="#ffeeb3" 
+            map={new THREE.TextureLoader().load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/lensflare/lensflare0.png')}
+            blending={THREE.AdditiveBlending}
+          />
+        </sprite>
+
+        {/* Outer Haze - Dreamy atmosphere bleed */}
+        <sprite scale={[150, 150, 1]}>
+          <spriteMaterial 
+            transparent 
+            opacity={0.15} 
+            color="#ffc1e3" 
+            map={new THREE.TextureLoader().load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/lensflare/lensflare0.png')}
+            blending={THREE.AdditiveBlending}
+          />
+        </sprite>
+
+        {/* Sun Flare Light - Casts the golden light onto the scene */}
+        <pointLight intensity={8} distance={500} color="#ffdf91" decay={2} />
+      </group>
 
       <Environment preset="sunset" />
-      <fog attach="fog" args={["#ffc0e6", 15, 260]} />
-
       {/* ENHANCED VOLUMETRIC CLOUDS */}
       <group>
         {/* Main Sun-blocking Cloud */}
