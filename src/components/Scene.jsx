@@ -58,21 +58,15 @@ export default function Scene({ currentView }) {
   const { camera, size } = useThree();
   const waterRef = useRef();
   const sunPlasmaRef = useRef();
-  const cloudGroupRef = useRef(); // Ref for the wind effect
+  const cloudGroupRef = useRef();
   const lookAtTarget = useRef(new THREE.Vector3(12, 1.5, 0));
   const baseUrl = import.meta.env.BASE_URL || "/";
 
   const isMobile = size.width < 768;
 
   const pinkStoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
-  const waterNormals = useLoader(
-    THREE.TextureLoader,
-    "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg"
-  );
-  const sunPlasmaTex = useLoader(
-    THREE.TextureLoader,
-    "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg"
-  );
+  const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
+  const sunPlasmaTex = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
 
   useMemo(() => {
     if (pinkStoneTex) {
@@ -86,15 +80,11 @@ export default function Scene({ currentView }) {
     }
   }, [pinkStoneTex, sunPlasmaTex]);
 
-  const pinkProps = {
-    map: pinkStoneTex,
-    color: "#fcd7d7",
-    roughness: 0.65,
-    metalness: 0.05,
-  };
+  const pinkProps = { map: pinkStoneTex, color: "#fcd7d7", roughness: 0.65, metalness: 0.05 };
 
   useEffect(() => {
-    const startPos = isMobile ? new THREE.Vector3(-20, 4, 35) : new THREE.Vector3(-15, 1.5, 30);
+    // Initial snap to the closer mobile position or desktop sweet spot
+    const startPos = isMobile ? new THREE.Vector3(-20, 5, 40) : new THREE.Vector3(-15, 1.5, 30);
     camera.position.copy(startPos);
     camera.lookAt(12, 1.5, 0);
   }, [camera, isMobile]);
@@ -119,22 +109,16 @@ export default function Scene({ currentView }) {
 
     camera.lookAt(lookAtTarget.current);
 
-    // WATER ANIMATION
-    if (waterRef.current) {
-      waterRef.current.material.uniforms["time"].value += delta * 0.2;
-    }
-
-    // SUN ANIMATION
+    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.2;
     if (sunPlasmaRef.current) {
       sunPlasmaRef.current.offset.x += delta * 0.03;
       sunPlasmaRef.current.offset.y -= delta * 0.05;
     }
 
-    // GENTLE WIND ANIMATION
+    // GENTLE WIND
     if (cloudGroupRef.current) {
-      cloudGroupRef.current.position.x += delta * 0.5; // Drift speed
-      // Loop the clouds back if they go too far
-      if (cloudGroupRef.current.position.x > 100) cloudGroupRef.current.position.x = -100;
+      cloudGroupRef.current.position.x += delta * 0.4;
+      if (cloudGroupRef.current.position.x > 80) cloudGroupRef.current.position.x = -80;
     }
   });
 
@@ -151,7 +135,7 @@ export default function Scene({ currentView }) {
           emissiveMap={sunPlasmaTex}
           emissiveIntensity={4}
           transparent={true}
-          opacity={0.7} // Slightly more opaque so it doesn't "eat" the clouds
+          opacity={0.7} 
           roughness={0.1}
           metalness={0.8}
         />
@@ -161,18 +145,17 @@ export default function Scene({ currentView }) {
       <Environment preset="sunset" />
       <fog attach="fog" args={["#ffc0e6", 15, 260]} />
 
-      {/* WINDY PASTEL CLOUD SYSTEM */}
+      {/* WINDY CLOUD SYSTEM */}
       <group ref={cloudGroupRef}>
-        {/* Clouds specifically positioned to cross the sun */}
-        <Cloud position={[-10, 45, -160]} speed={0.2} opacity={0.6} segments={20} bounds={[30, 10, 10]} volume={12} color="#ffd1dc" />
-        <Cloud position={[20, 40, -170]} speed={0.1} opacity={0.5} segments={15} bounds={[40, 5, 5]} volume={10} color="#e6e6fa" />
+        {/* Clouds surrounding and crossing the sun */}
+        <Cloud position={[-10, 45, -165]} speed={0.2} opacity={0.7} segments={25} bounds={[40, 15, 10]} volume={15} color="#ffd1dc" />
+        <Cloud position={[20, 50, -175]} speed={0.1} opacity={0.5} segments={20} bounds={[30, 10, 5]} volume={12} color="#e6e6fa" />
+        <Cloud position={[-40, 55, -170]} speed={0.15} opacity={0.4} segments={15} bounds={[50, 10, 10]} volume={10} color="#b0e0e6" />
         
-        {/* High Altitude Haze */}
-        <Cloud position={[-80, 70, -150]} speed={0.05} opacity={0.3} segments={10} bounds={[200, 20, 20]} volume={25} color="#ffffff" />
-        
-        {/* Background Bank (Further away from the Arena) */}
-        <Cloud position={[-60, 35, -120]} speed={0.15} opacity={0.5} segments={20} bounds={[100, 15, 15]} volume={15} color="#b0e0e6" />
-        <Cloud position={[70, 30, -130]} speed={0.2} opacity={0.4} segments={15} bounds={[60, 15, 15]} volume={10} color="#fce7f3" />
+        {/* Drift Layers */}
+        <Cloud position={[-60, 30, -100]} speed={0.2} opacity={0.8} segments={24} bounds={[60, 20, 20]} volume={15} color="#ffd6f0" />
+        <Cloud position={[60, 40, -120]} speed={0.15} opacity={0.6} segments={20} bounds={[100, 30, 30]} volume={10} color="#e9d5ff" />
+        <Cloud position={[0, 60, -150]} speed={0.05} opacity={0.3} segments={10} bounds={[200, 40, 40]} volume={20} color="#ffffff" />
       </group>
 
       <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#ffc0e6" />
