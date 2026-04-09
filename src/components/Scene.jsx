@@ -1,6 +1,6 @@
 import { useRef, useMemo, useState } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
-import { Environment, Sky, ContactShadows } from "@react-three/drei";
+import { Environment, Sky, ContactShadows, Cloud } from "@react-three/drei";
 import { Water } from "three-stdlib";
 import * as THREE from "three";
 
@@ -81,9 +81,7 @@ export default function Scene({ currentView }) {
     metalness: 0.05,
   };
 
-  // INITIAL LOAD SETUP
   useMemo(() => {
-    // Eye-level (8.5), Backed up for framing (65), Aligned with window (12)
     camera.position.set(65, 8.5, 12); 
     lookAtTarget.current.set(0, 8.5, 12);
     camera.lookAt(lookAtTarget.current);
@@ -91,40 +89,34 @@ export default function Scene({ currentView }) {
 
   useFrame((state, delta) => {
     const isHome = currentView === "home";
-    const LERP_SPEED = 0.008; // Slow, luxurious glide for everything
+    const LERP_SPEED = 0.008;
 
-    // 1. INTRO WAYPOINTS
-    const introCenterPoint = new THREE.Vector3(5, 8.5, 12); // Directly inside window
+    const introCenterPoint = new THREE.Vector3(5, 8.5, 12);
     const sweetSpotPos = new THREE.Vector3(-15, 1.5, 30);
     const sweetSpotLook = new THREE.Vector3(12, 1.5, 0);
 
-    // 2. EXIT WAYPOINTS (Door closest to stairs is at Z: -10 relative to group)
-    // Absolute position for that door is roughly Z: 10
-    const doorClearancePos = new THREE.Vector3(-8, 1.5, 10); // Center of doorway
+    const doorClearancePos = new THREE.Vector3(-8, 1.5, 10);
     const exitFinalPos = new THREE.Vector3(-8, 1.5, -80);
     const exitLook = new THREE.Vector3(-8, 1.5, -150);
 
     if (!introFinished && isHome) {
-        // Move straight through the window center first
-        if (camera.position.x > 8) {
-            camera.position.lerp(introCenterPoint, LERP_SPEED);
-            lookAtTarget.current.lerp(new THREE.Vector3(-20, 8.5, 12), LERP_SPEED);
-        } else {
-            setIntroFinished(true);
-        }
+      if (camera.position.x > 8) {
+        camera.position.lerp(introCenterPoint, LERP_SPEED);
+        lookAtTarget.current.lerp(new THREE.Vector3(-20, 8.5, 12), LERP_SPEED);
+      } else {
+        setIntroFinished(true);
+      }
     } else if (isHome) {
-        // Settle into Sweet Spot
-        camera.position.lerp(sweetSpotPos, LERP_SPEED);
-        lookAtTarget.current.lerp(sweetSpotLook, LERP_SPEED);
+      camera.position.lerp(sweetSpotPos, LERP_SPEED);
+      lookAtTarget.current.lerp(sweetSpotLook, LERP_SPEED);
     } else {
-        // EXIT: Go to the doorway center first, then glide out
-        if (camera.position.z > 12) {
-             camera.position.lerp(doorClearancePos, LERP_SPEED);
-             lookAtTarget.current.lerp(exitLook, LERP_SPEED);
-        } else {
-             camera.position.lerp(exitFinalPos, LERP_SPEED);
-             lookAtTarget.current.lerp(exitLook, LERP_SPEED);
-        }
+      if (camera.position.z > 12) {
+        camera.position.lerp(doorClearancePos, LERP_SPEED);
+        lookAtTarget.current.lerp(exitLook, LERP_SPEED);
+      } else {
+        camera.position.lerp(exitFinalPos, LERP_SPEED);
+        lookAtTarget.current.lerp(exitLook, LERP_SPEED);
+      }
     }
 
     camera.lookAt(lookAtTarget.current);
@@ -136,83 +128,71 @@ export default function Scene({ currentView }) {
 
   return (
     <>
+      {/* DREAMY SKY */}
       <Sky
-  distance={450000}
-  sunPosition={[-10, 6, 20]}
-  inclination={0.49}
-  azimuth={0.25}
-  turbidity={12}
-  rayleigh={0.8} // ↓ kills the heavy blue tone
-  mieCoefficient={0.02}
-  mieDirectionalG={0.95}
-/>
+        distance={450000}
+        sunPosition={[-10, 6, 20]}
+        inclination={0.49}
+        azimuth={0.25}
+        turbidity={12}
+        rayleigh={0.3}
+        mieCoefficient={0.02}
+        mieDirectionalG={0.95}
+      />
 
-<Environment preset="sunset" />
+      <Environment preset="sunset" />
+      <fog attach="fog" args={["#ffc0e6", 15, 260]} />
 
-{/* FULL SCENE ATMOSPHERIC GRADIENT (this is the key) */}
-<fog attach="fog" args={["#f6c1d4", 20, 250]} />
+      {/* VOLUMETRIC CLOUDS */}
+      <Cloud position={[-40, 60, -120]} speed={0.2} opacity={0.5} segments={16} bounds={[60, 20, 20]} volume={6} color="#ffd6f0" />
+      <Cloud position={[20, 80, -150]} speed={0.15} opacity={0.45} segments={16} bounds={[80, 25, 25]} volume={7} color="#fbcfe8" />
+      <Cloud position={[80, 70, -130]} speed={0.18} opacity={0.4} segments={16} bounds={[70, 20, 20]} volume={6} color="#e9d5ff" />
+      <Cloud position={[-100, 90, -180]} speed={0.12} opacity={0.35} segments={14} bounds={[90, 30, 30]} volume={8} color="#dbeafe" />
 
-{/* MASSIVE CLOUD LAYERS (cover entire sky, not patches) */}
-<mesh position={[0, 120, -200]}>
-  <planeGeometry args={[2000, 800]} />
-  <meshBasicMaterial
-    color="#ffd6f0"
-    transparent
-    opacity={0.35}
-    depthWrite={false}
-  />
-</mesh>
-
-<mesh position={[0, 160, -300]}>
-  <planeGeometry args={[2200, 900]} />
-  <meshBasicMaterial
-    color="#d0bfff"
-    transparent
-    opacity={0.25}
-    depthWrite={false}
-  />
-</mesh>
-
-<mesh position={[0, 200, -400]}>
-  <planeGeometry args={[2400, 1000]} />
-  <meshBasicMaterial
-    color="#bde0fe"
-    transparent
-    opacity={0.2}
-    depthWrite={false}
-  />
-</mesh>
+      {/* LIGHTING */}
       <directionalLight position={[-20, 25, 15]} intensity={1.3} castShadow shadow-mapSize={[2048, 2048]} />
       <pointLight position={[10, 5, 10]} intensity={1.2} color="#ffd6e7" />
       <pointLight position={[0, 3, 0]} intensity={0.6} color="#ffc0cb" />
 
+      {/* STRUCTURE */}
       <group position={[0, 0, 0]}>
         <mesh castShadow receiveShadow position={[12, -2.0, 15]}>
           <boxGeometry args={[14, 8.0, 28]} />
           <meshStandardMaterial {...pinkProps} />
         </mesh>
-        
+
         <Staircase position={[5.0, 1.5, 1.0]} rotation={[0, -Math.PI / 2, 0]} width={20} texture={pinkStoneTex} />
-        
-        {/* LEFT WALL */}
+
         <group position={[-16, -1, 0]}>
-          <mesh castShadow receiveShadow position={[1, 8.5, 0]}><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
-          <WallOpening position={[6, 0, 0]} colorProps={pinkProps} /> {/* EXIT DOORWAY */}
-          <WallOpening position={[12, 0, 0]} colorProps={pinkProps} /> 
-          <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
+          <mesh castShadow receiveShadow position={[1, 8.5, 0]}>
+            <boxGeometry args={[4, 17, 2]} />
+            <meshStandardMaterial {...pinkProps} />
+          </mesh>
+          <WallOpening position={[6, 0, 0]} colorProps={pinkProps} />
+          <WallOpening position={[12, 0, 0]} colorProps={pinkProps} />
+          <mesh castShadow receiveShadow position={[24, 8.5, 0]}>
+            <boxGeometry args={[18, 17, 2]} />
+            <meshStandardMaterial {...pinkProps} />
+          </mesh>
         </group>
 
-        {/* RIGHT WALL */}
         <group position={[17, -1, 1]} rotation={[0, -Math.PI / 2, 0]}>
-          <mesh castShadow receiveShadow position={[4, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
+          <mesh castShadow receiveShadow position={[4, 8.5, 0]}>
+            <boxGeometry args={[8, 17, 2]} />
+            <meshStandardMaterial {...pinkProps} />
+          </mesh>
           <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={pinkProps} />
           <WallOpening position={[17, 0, 0]} isWindow={true} colorProps={pinkProps} />
-          <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
+          <mesh castShadow receiveShadow position={[24, 8.5, 0]}>
+            <boxGeometry args={[8, 17, 2]} />
+            <meshStandardMaterial {...pinkProps} />
+          </mesh>
         </group>
       </group>
 
       <ContactShadows position={[12, -1.9, 15]} opacity={0.45} scale={50} blur={2.5} far={12} />
 
+      {/* WATER */}
       <water
         ref={waterRef}
         args={[
@@ -222,7 +202,7 @@ export default function Scene({ currentView }) {
             textureHeight: 512,
             waterNormals,
             sunDirection: new THREE.Vector3(-20, 25, 15),
-            sunColor: 0xffffff,
+            sunColor: 0xffe3f2,
             waterColor: 0xbfa6a0,
             distortionScale: 0.6,
           },
