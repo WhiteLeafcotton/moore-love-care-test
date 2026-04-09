@@ -142,7 +142,7 @@ export default function Scene({ currentView }) {
   inclination={0.49} // sunset angle
   azimuth={0.25}
   turbidity={10} // hazy, dreamy air
-  rayleigh={3}   // soft atmospheric scattering
+  rayleigh={3}   // soft atmospheric skcattering
   mieCoefficient={0.008}
   mieDirectionalG={0.9}
 />
