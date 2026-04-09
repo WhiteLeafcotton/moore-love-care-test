@@ -131,7 +131,7 @@ export default function Scene({ currentView }) {
       {/* DREAMY SKY */}
       <Sky
         distance={450000}
-        sunPosition={[-10, 6, 20]}
+        sunPosition={[-10, 6, -100]}
         inclination={0.49}
         azimuth={0.25}
         turbidity={12}
@@ -140,49 +140,71 @@ export default function Scene({ currentView }) {
         mieDirectionalG={0.95}
       />
 
+      {/* GLOWING SUN MESH (Behind Clouds for God Rays effect) */}
+      <mesh position={[-10, 35, -150]}>
+        <sphereGeometry args={[15, 32, 32]} />
+        <meshBasicMaterial color="#fff9e6" toneMapped={false} />
+        {/* Adding a point light here to make the clouds around it glow */}
+        <pointLight intensity={5} distance={300} color="#ffdf91" />
+      </mesh>
+
       <Environment preset="sunset" />
       <fog attach="fog" args={["#ffc0e6", 15, 260]} />
 
-      {/* VOLUMETRIC CLOUDS — BIG, LOW, CINEMATIC */}
-<Cloud
-  position={[-20, 35, -60]}
-  speed={0.2}
-  opacity={0.55}
-  segments={18}
-  bounds={[120, 40, 40]}
-  volume={8}
-  color="#ffd6f0"
-/>
+      {/* ENHANCED VOLUMETRIC CLOUDS */}
+      <group>
+        {/* Main Sun-blocking Cloud */}
+        <Cloud
+          position={[-10, 30, -100]}
+          speed={0.2}
+          opacity={0.8}
+          segments={24}
+          bounds={[60, 20, 20]}
+          volume={15}
+          color="#ffd6f0"
+        />
 
-<Cloud
-  position={[30, 45, -80]}
-  speed={0.15}
-  opacity={0.5}
-  segments={18}
-  bounds={[140, 45, 45]}
-  volume={9}
-  color="#fbcfe8"
-/>
+        {/* Scattered Clouds - Various Sizes */}
+        <Cloud
+          position={[-60, 45, -80]}
+          speed={0.1}
+          opacity={0.4}
+          segments={12}
+          bounds={[40, 20, 20]}
+          volume={5}
+          color="#fbcfe8"
+        />
 
-<Cloud
-  position={[90, 40, -70]}
-  speed={0.18}
-  opacity={0.45}
-  segments={18}
-  bounds={[130, 40, 40]}
-  volume={8}
-  color="#e9d5ff"
-/>
+        <Cloud
+          position={[40, 50, -120]}
+          speed={0.15}
+          opacity={0.5}
+          segments={20}
+          bounds={[100, 30, 30]}
+          volume={10}
+          color="#e9d5ff"
+        />
 
-<Cloud
-  position={[-100, 50, -100]}
-  speed={0.12}
-  opacity={0.4}
-  segments={16}
-  bounds={[160, 50, 50]}
-  volume={10}
-  color="#dbeafe"
-/>
+        <Cloud
+          position={[0, 60, -150]}
+          speed={0.05}
+          opacity={0.3}
+          segments={10}
+          bounds={[200, 40, 40]}
+          volume={20}
+          color="#ffffff"
+        />
+
+        <Cloud
+          position={[100, 30, -50]}
+          speed={0.2}
+          opacity={0.6}
+          segments={15}
+          bounds={[50, 20, 20]}
+          volume={6}
+          color="#dbeafe"
+        />
+      </group>
 
       {/* LIGHTING */}
       <directionalLight position={[-20, 25, 15]} intensity={1.3} castShadow shadow-mapSize={[2048, 2048]} />
