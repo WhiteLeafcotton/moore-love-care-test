@@ -136,8 +136,52 @@ export default function Scene({ currentView }) {
 
   return (
     <>
-      <Sky sunPosition={[-35, 5, 15]} />
-      <Environment preset="sunset" />
+      <Sky
+  distance={450000}
+  sunPosition={[-20, 8, 20]}
+  inclination={0.49} // sunset angle
+  azimuth={0.25}
+  turbidity={10} // hazy, dreamy air
+  rayleigh={3}   // soft atmospheric scattering
+  mieCoefficient={0.008}
+  mieDirectionalG={0.9}
+/>
+
+<Environment preset="sunset" />
+
+{/* Soft Gradient Atmosphere Tint */}
+<fog attach="fog" args={["#f8c6d8", 60, 180]} />
+
+{/* Dreamy Cloud Layer */}
+<mesh position={[0, 60, -100]}>
+  <planeGeometry args={[600, 300]} />
+  <meshBasicMaterial
+    transparent
+    opacity={0.35}
+    depthWrite={false}
+    color="#ffd6f0"
+  />
+</mesh>
+
+<mesh position={[100, 80, -150]}>
+  <planeGeometry args={[500, 250]} />
+  <meshBasicMaterial
+    transparent
+    opacity={0.25}
+    depthWrite={false}
+    color="#cdb4ff"
+  />
+</mesh>
+
+<mesh position={[-120, 70, -120]}>
+  <planeGeometry args={[550, 280]} />
+  <meshBasicMaterial
+    transparent
+    opacity={0.2}
+    depthWrite={false}
+    color="#bde0fe"
+  />
+</mesh>
       <directionalLight position={[-20, 25, 15]} intensity={1.3} castShadow shadow-mapSize={[2048, 2048]} />
       <pointLight position={[10, 5, 10]} intensity={1.2} color="#ffd6e7" />
       <pointLight position={[0, 3, 0]} intensity={0.6} color="#ffc0cb" />
