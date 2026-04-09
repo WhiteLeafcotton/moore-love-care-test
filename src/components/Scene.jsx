@@ -1,6 +1,6 @@
 import { useRef, useMemo, useState } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
-import { Environment, Sky, ContactShadows, useTexture } from "@react-three/drei";
+import { Environment, Sky, ContactShadows } from "@react-three/drei";
 import { Water } from "three-stdlib";
 import * as THREE from "three";
 
@@ -54,15 +54,12 @@ const WallOpening = ({ position, colorProps, width = 6, openingW = 3.5, height =
   </group>
 );
 
-export default function ModifiedScene({ currentView }) {
+export default function Scene({ currentView }) {
   const { camera } = useThree();
   const waterRef = useRef();
   const lookAtTarget = useRef(new THREE.Vector3(12, 1.5, 0));
   const [introFinished, setIntroFinished] = useState(false);
   const baseUrl = import.meta.env.BASE_URL || "/";
-
-  // Use the reference image as an environment texture to provide hazy, glowing reflections
-  const sunsetGradient = useTexture("https://i.imgur.com/vHq4V9G.png"); 
 
   const pinkStoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
   const waterNormals = useLoader(
@@ -84,7 +81,9 @@ export default function ModifiedScene({ currentView }) {
     metalness: 0.05,
   };
 
+  // INITIAL LOAD SETUP
   useMemo(() => {
+    // Eye-level (8.5), Backed up for framing (65), Aligned with window (12)
     camera.position.set(65, 8.5, 12); 
     lookAtTarget.current.set(0, 8.5, 12);
     camera.lookAt(lookAtTarget.current);
@@ -92,17 +91,21 @@ export default function ModifiedScene({ currentView }) {
 
   useFrame((state, delta) => {
     const isHome = currentView === "home";
-    const LERP_SPEED = 0.008;
+    const LERP_SPEED = 0.008; // Slow, luxurious glide for everything
 
-    const introCenterPoint = new THREE.Vector3(5, 8.5, 12);
+    // 1. INTRO WAYPOINTS
+    const introCenterPoint = new THREE.Vector3(5, 8.5, 12); // Directly inside window
     const sweetSpotPos = new THREE.Vector3(-15, 1.5, 30);
     const sweetSpotLook = new THREE.Vector3(12, 1.5, 0);
 
-    const doorClearancePos = new THREE.Vector3(-8, 1.5, 10);
+    // 2. EXIT WAYPOINTS (Door closest to stairs is at Z: -10 relative to group)
+    // Absolute position for that door is roughly Z: 10
+    const doorClearancePos = new THREE.Vector3(-8, 1.5, 10); // Center of doorway
     const exitFinalPos = new THREE.Vector3(-8, 1.5, -80);
     const exitLook = new THREE.Vector3(-8, 1.5, -150);
 
     if (!introFinished && isHome) {
+        // Move straight through the window center first
         if (camera.position.x > 8) {
             camera.position.lerp(introCenterPoint, LERP_SPEED);
             lookAtTarget.current.lerp(new THREE.Vector3(-20, 8.5, 12), LERP_SPEED);
@@ -110,9 +113,11 @@ export default function ModifiedScene({ currentView }) {
             setIntroFinished(true);
         }
     } else if (isHome) {
+        // Settle into Sweet Spot
         camera.position.lerp(sweetSpotPos, LERP_SPEED);
         lookAtTarget.current.lerp(sweetSpotLook, LERP_SPEED);
     } else {
+        // EXIT: Go to the doorway center first, then glide out
         if (camera.position.z > 12) {
              camera.position.lerp(doorClearancePos, LERP_SPEED);
              lookAtTarget.current.lerp(exitLook, LERP_SPEED);
@@ -131,18 +136,12 @@ export default function ModifiedScene({ currentView }) {
 
   return (
     <>
-      {/* Modified: Replaced the simple sunset preset with a textured environment map
-        and tuned the Sky component to match the specific gradient from the reference image.
-      */}
-      <Sky distance={450000} sunPosition={[-35, 5, 15]} inclination={0} azimuth={0.25} turbidity={8} rayleigh={2.5} />
-      <Environment map={sunsetGradient} background />
-      
+      <Sky sunPosition={[-35, 5, 15]} />
+      <Environment preset="sunset" />
       <directionalLight position={[-20, 25, 15]} intensity={1.3} castShadow shadow-mapSize={[2048, 2048]} />
-      {/* Modified: Point lights are softened to blend with the new golden-haze lighting */}
-      <pointLight position={[10, 5, 10]} intensity={1.0} color="#ffebf1" /> 
-      <pointLight position={[0, 3, 0]} intensity={0.5} color="#ffe8e0" />
+      <pointLight position={[10, 5, 10]} intensity={1.2} color="#ffd6e7" />
+      <pointLight position={[0, 3, 0]} intensity={0.6} color="#ffc0cb" />
 
-      {/* Structure remains unchanged below this line */}
       <group position={[0, 0, 0]}>
         <mesh castShadow receiveShadow position={[12, -2.0, 15]}>
           <boxGeometry args={[14, 8.0, 28]} />
@@ -154,7 +153,7 @@ export default function ModifiedScene({ currentView }) {
         {/* LEFT WALL */}
         <group position={[-16, -1, 0]}>
           <mesh castShadow receiveShadow position={[1, 8.5, 0]}><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
-          <WallOpening position={[6, 0, 0]} colorProps={pinkProps} />
+          <WallOpening position={[6, 0, 0]} colorProps={pinkProps} /> {/* EXIT DOORWAY */}
           <WallOpening position={[12, 0, 0]} colorProps={pinkProps} /> 
           <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
         </group>
