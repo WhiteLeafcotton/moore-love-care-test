@@ -6,7 +6,7 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* Monolithic Staircase */
+/* Monolithic Staircase (Untouched) */
 const Staircase = ({ position, width, texture, rotation }) => {
   const stepHeight = 0.5;
   const stepDepth = 0.8;
@@ -30,7 +30,7 @@ const Staircase = ({ position, width, texture, rotation }) => {
   );
 };
 
-/* Wall Segment */
+/* Wall Segment (Untouched) */
 const WallOpening = ({ position, colorProps, width = 6, openingW = 3.5, height = 17, openingH = 9, isWindow = false }) => (
   <group position={position}>
     <mesh castShadow receiveShadow position={[-(openingW + (width - openingW) / 2) / 2, height / 2, 0]}>
@@ -68,7 +68,6 @@ export default function Scene({ currentView }) {
     "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg"
   );
 
-  // Load noise texture for the sun's surface movement
   const sunPlasmaTex = useLoader(
     THREE.TextureLoader,
     "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg"
@@ -96,12 +95,6 @@ export default function Scene({ currentView }) {
     metalness: 0.05,
   };
 
-  useMemo(() => {
-    camera.position.set(65, 8.5, 12); 
-    lookAtTarget.current.set(0, 8.5, 12);
-    camera.lookAt(lookAtTarget.current);
-  }, [camera]);
-
   useFrame((state, delta) => {
     const isHome = currentView === "home";
     const LERP_SPEED = 0.008;
@@ -109,7 +102,6 @@ export default function Scene({ currentView }) {
     const introCenterPoint = new THREE.Vector3(5, 8.5, 12);
     const sweetSpotPos = new THREE.Vector3(-15, 1.5, 30);
     const sweetSpotLook = new THREE.Vector3(12, 1.5, 0);
-
     const doorClearancePos = new THREE.Vector3(-8, 1.5, 10);
     const exitFinalPos = new THREE.Vector3(-8, 1.5, -80);
     const exitLook = new THREE.Vector3(-8, 1.5, -150);
@@ -133,24 +125,20 @@ export default function Scene({ currentView }) {
         lookAtTarget.current.lerp(exitLook, LERP_SPEED);
       }
     }
-
     camera.lookAt(lookAtTarget.current);
 
-    // Tropical Water Animation
     if (waterRef.current) {
-      waterRef.current.material.uniforms["time"].value += delta * 0.15;
+      waterRef.current.material.uniforms["time"].value += delta * 0.2; 
     }
 
-    // Enhanced Lava Sun Animation (Multi-axis churn)
     if (sunPlasmaRef.current) {
-      sunPlasmaRef.current.offset.x += delta * 0.06;
-      sunPlasmaRef.current.offset.y += delta * 0.03;
+      sunPlasmaRef.current.offset.x += delta * 0.03;
+      sunPlasmaRef.current.offset.y -= delta * 0.05;
     }
   });
 
   return (
     <>
-      {/* DREAMY SKY */}
       <Sky
         distance={450000}
         sunPosition={[-10, 6, -100]}
@@ -162,25 +150,26 @@ export default function Scene({ currentView }) {
         mieDirectionalG={0.95}
       />
 
-     {/* GODLIKE SUN - Enhanced "Alive" Lava Globe */}
+     {/* TRANSLUCENT ALIVE SUN */}
       <mesh position={[-10, 45, -180]}>
         <sphereGeometry args={[22, 64, 64]} />
         <meshStandardMaterial 
-          color="#ffca7d" 
-          emissive="#ff8c00" 
+          color="#ffffff" 
+          emissive="#ffba5c" 
           emissiveMap={sunPlasmaTex}
-          emissiveIntensity={4}
-          roughness={0.2}
-          metalness={0.5}
+          emissiveIntensity={4} // Higher intensity to shine through transparency
+          transparent={true}
+          opacity={0.6} // Translucent effect
+          roughness={0.1}
+          metalness={0.8}
         />
-        {/* Soft Volumetric Warmth */}
-        <pointLight intensity={4} distance={200} color="#ffaa33" decay={1.5} />
+        <pointLight intensity={5} distance={400} color="#fff1d4" decay={1} />
       </mesh>
 
       <Environment preset="sunset" />
       <fog attach="fog" args={["#ffc0e6", 15, 260]} />
 
-      {/* LOCKED IN VOLUMETRIC CLOUDS */}
+      {/* CLOUDS */}
       <group>
         <Cloud position={[-10, 30, -100]} speed={0.2} opacity={0.8} segments={24} bounds={[60, 20, 20]} volume={15} color="#ffd6f0" />
         <Cloud position={[-60, 45, -80]} speed={0.1} opacity={0.4} segments={12} bounds={[40, 20, 20]} volume={5} color="#fbcfe8" />
@@ -189,69 +178,46 @@ export default function Scene({ currentView }) {
         <Cloud position={[100, 30, -50]} speed={0.2} opacity={0.6} segments={15} bounds={[50, 20, 20]} volume={6} color="#dbeafe" />
       </group>
 
-      {/* LIGHTING - ULTRA LIGHT & NO DARK SHADOWS */}
-      <ambientLight intensity={1.2} color="#ffffff" />
-      <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#00f2ff" />
-      
-      {/* Very soft directional light just for a hint of shape */}
-      <directionalLight 
-        position={[-15, 30, 10]} 
-        intensity={0.3} 
-        castShadow={false} /* Turned off shadow casting to keep everything light */
-      />
-      
-      <pointLight position={[10, 5, 10]} intensity={1.5} color="#ffd6e7" />
-      <pointLight position={[0, 3, 0]} intensity={1} color="#ffffff" />
+      {/* LIGHTING - Bright & Shadow-Lite */}
+      <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#ffc0e6" />
+      <directionalLight position={[-15, 30, 10]} intensity={0.1} castShadow={false} />
+      <pointLight position={[10, 5, 10]} intensity={0.8} color="#ffd6e7" />
 
       {/* STRUCTURE */}
       <group position={[0, 0, 0]}>
-        <mesh position={[12, -2.0, 15]}>
+        <mesh castShadow receiveShadow position={[12, -2.0, 15]}>
           <boxGeometry args={[14, 8.0, 28]} />
           <meshStandardMaterial {...pinkProps} />
         </mesh>
-
         <Staircase position={[5.0, 1.5, 1.0]} rotation={[0, -Math.PI / 2, 0]} width={20} texture={pinkStoneTex} />
-
         <group position={[-16, -1, 0]}>
-          <mesh position={[1, 8.5, 0]}>
-            <boxGeometry args={[4, 17, 2]} />
-            <meshStandardMaterial {...pinkProps} />
-          </mesh>
-          <WallOpening position={[6, 0, 0]} colorProps={pinkProps} />
-          <WallOpening position={[12, 0, 0]} colorProps={pinkProps} />
-          <mesh position={[24, 8.5, 0]}>
-            <boxGeometry args={[18, 17, 2]} />
-            <meshStandardMaterial {...pinkProps} />
-          </mesh>
+          <mesh castShadow receiveShadow position={[1, 8.5, 0]}><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
+          <WallOpening position={[6, 0, 0]} colorProps={pinkProps} /><WallOpening position={[12, 0, 0]} colorProps={pinkProps} />
+          <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
         </group>
-
         <group position={[17, -1, 1]} rotation={[0, -Math.PI / 2, 0]}>
-          <mesh position={[4, 8.5, 0]}>
-            <boxGeometry args={[8, 17, 2]} />
-            <meshStandardMaterial {...pinkProps} />
-          </mesh>
-          <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={pinkProps} />
-          <WallOpening position={[17, 0, 0]} isWindow={true} colorProps={pinkProps} />
-          <mesh position={[24, 8.5, 0]}>
-            <boxGeometry args={[8, 17, 2]} />
-            <meshStandardMaterial {...pinkProps} />
-          </mesh>
+          <mesh castShadow receiveShadow position={[4, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
+          <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={pinkProps} /><WallOpening position={[17, 0, 0]} isWindow={true} colorProps={pinkProps} />
+          <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
         </group>
       </group>
+      
+      <ContactShadows position={[12, -1.9, 15]} opacity={0.15} scale={60} blur={4} far={12} />
 
-      {/* TROPICAL PARADISE WATER */}
+      {/* IMPROVED WATER REFLECTIONS */}
       <water
         ref={waterRef}
         args={[
           new THREE.PlaneGeometry(2000, 2000),
           {
-            textureWidth: 512,
-            textureHeight: 512,
+            textureWidth: 1024, // Higher res for better reflections
+            textureHeight: 1024,
             waterNormals,
-            sunDirection: new THREE.Vector3(0, 1, 0), // Shifted to prevent horizontal white glare
-            sunColor: 0x00d9ff, // Water catches cyan light instead of white
-            waterColor: 0x006b80, // Deep tropical teal
-            distortionScale: 1.5, // Gentler ripples
+            sunDirection: new THREE.Vector3(-10, 45, -180).normalize(), // Aligned exactly with your Sun mesh
+            sunColor: 0xffffff,
+            waterColor: 0x224455, // Darker base makes reflections pop more
+            distortionScale: 0.5, // Much lower distortion for real ripples, not noise
+            alpha: 0.8, // Slight transparency to the water surface
           },
         ]}
         rotation={[-Math.PI / 2, 0, 0]}
