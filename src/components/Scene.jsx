@@ -1,4 +1,4 @@
-import { useRef, useMemo, useState } from "react";
+import { useRef, useMemo, useState, useEffect } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
 import { Environment, Sky, ContactShadows, Cloud } from "@react-three/drei";
 import { Water } from "three-stdlib";
@@ -6,7 +6,7 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* Monolithic Staircase (Untouched) */
+/* Monolithic Staircase */
 const Staircase = ({ position, width, texture, rotation }) => {
   const stepHeight = 0.5;
   const stepDepth = 0.8;
@@ -30,7 +30,7 @@ const Staircase = ({ position, width, texture, rotation }) => {
   );
 };
 
-/* Wall Segment (Untouched) */
+/* Wall Segment */
 const WallOpening = ({ position, colorProps, width = 6, openingW = 3.5, height = 17, openingH = 9, isWindow = false }) => (
   <group position={position}>
     <mesh castShadow receiveShadow position={[-(openingW + (width - openingW) / 2) / 2, height / 2, 0]}>
@@ -55,19 +55,20 @@ const WallOpening = ({ position, colorProps, width = 6, openingW = 3.5, height =
 );
 
 export default function Scene({ currentView }) {
-  const { camera } = useThree();
+  const { camera, size } = useThree();
   const waterRef = useRef();
-  const sunPlasmaRef = useRef(); 
+  const sunPlasmaRef = useRef();
   const lookAtTarget = useRef(new THREE.Vector3(12, 1.5, 0));
-  const [introFinished, setIntroFinished] = useState(false);
   const baseUrl = import.meta.env.BASE_URL || "/";
+
+  // MOBILE CHECK
+  const isMobile = size.width < 768;
 
   const pinkStoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
   const waterNormals = useLoader(
     THREE.TextureLoader,
     "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg"
   );
-
   const sunPlasmaTex = useLoader(
     THREE.TextureLoader,
     "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg"
@@ -83,10 +84,7 @@ export default function Scene({ currentView }) {
       sunPlasmaTex.repeat.set(1.5, 1.5);
       sunPlasmaRef.current = sunPlasmaTex;
     }
-    if (waterNormals) {
-      waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
-    }
-  }, [pinkStoneTex, sunPlasmaTex, waterNormals]);
+  }, [pinkStoneTex, sunPlasmaTex]);
 
   const pinkProps = {
     map: pinkStoneTex,
@@ -95,40 +93,37 @@ export default function Scene({ currentView }) {
     metalness: 0.05,
   };
 
+  // Initialize at the sweet spot immediately
+  useEffect(() => {
+    const startPos = isMobile ? new THREE.Vector3(-25, 10, 50) : new THREE.Vector3(-15, 1.5, 30);
+    camera.position.copy(startPos);
+    camera.lookAt(12, 1.5, 0);
+  }, [camera, isMobile]);
+
   useFrame((state, delta) => {
     const isHome = currentView === "home";
-    const LERP_SPEED = 0.008;
+    const LERP_SPEED = 0.04; // Faster response since there's no long intro travel
 
-    const introCenterPoint = new THREE.Vector3(5, 8.5, 12);
-    const sweetSpotPos = new THREE.Vector3(-15, 1.5, 30);
+    // Define positions based on device
+    const sweetSpotPos = isMobile ? new THREE.Vector3(-25, 10, 55) : new THREE.Vector3(-15, 1.5, 30);
     const sweetSpotLook = new THREE.Vector3(12, 1.5, 0);
-    const doorClearancePos = new THREE.Vector3(-8, 1.5, 10);
-    const exitFinalPos = new THREE.Vector3(-8, 1.5, -80);
-    const exitLook = new THREE.Vector3(-8, 1.5, -150);
 
-    if (!introFinished && isHome) {
-      if (camera.position.x > 8) {
-        camera.position.lerp(introCenterPoint, LERP_SPEED);
-        lookAtTarget.current.lerp(new THREE.Vector3(-20, 8.5, 12), LERP_SPEED);
-      } else {
-        setIntroFinished(true);
-      }
-    } else if (isHome) {
+    const exitFinalPos = new THREE.Vector3(-8, 1.5, -100);
+    const exitLook = new THREE.Vector3(-8, 1.5, -200);
+
+    if (isHome) {
       camera.position.lerp(sweetSpotPos, LERP_SPEED);
       lookAtTarget.current.lerp(sweetSpotLook, LERP_SPEED);
     } else {
-      if (camera.position.z > 12) {
-        camera.position.lerp(doorClearancePos, LERP_SPEED);
-        lookAtTarget.current.lerp(exitLook, LERP_SPEED);
-      } else {
-        camera.position.lerp(exitFinalPos, LERP_SPEED);
-        lookAtTarget.current.lerp(exitLook, LERP_SPEED);
-      }
+      // Direct, clean travel out the door
+      camera.position.lerp(exitFinalPos, LERP_SPEED);
+      lookAtTarget.current.lerp(exitLook, LERP_SPEED);
     }
+
     camera.lookAt(lookAtTarget.current);
 
     if (waterRef.current) {
-      waterRef.current.material.uniforms["time"].value += delta * 0.2; 
+      waterRef.current.material.uniforms["time"].value += delta * 0.2;
     }
 
     if (sunPlasmaRef.current) {
@@ -150,16 +145,16 @@ export default function Scene({ currentView }) {
         mieDirectionalG={0.95}
       />
 
-     {/* TRANSLUCENT ALIVE SUN */}
+      {/* TRANSLUCENT ALIVE SUN */}
       <mesh position={[-10, 45, -180]}>
-        <sphereGeometry args={[22, 64, 64]} />
+        <sphereGeometry args={[isMobile ? 18 : 22, 64, 64]} />
         <meshStandardMaterial 
           color="#ffffff" 
           emissive="#ffba5c" 
           emissiveMap={sunPlasmaTex}
-          emissiveIntensity={4} // Higher intensity to shine through transparency
+          emissiveIntensity={4}
           transparent={true}
-          opacity={0.6} // Translucent effect
+          opacity={0.6}
           roughness={0.1}
           metalness={0.8}
         />
@@ -169,7 +164,7 @@ export default function Scene({ currentView }) {
       <Environment preset="sunset" />
       <fog attach="fog" args={["#ffc0e6", 15, 260]} />
 
-      {/* CLOUDS */}
+      {/* CLOUDS - Positioned for cinematic depth on both mobile and desktop */}
       <group>
         <Cloud position={[-10, 30, -100]} speed={0.2} opacity={0.8} segments={24} bounds={[60, 20, 20]} volume={15} color="#ffd6f0" />
         <Cloud position={[-60, 45, -80]} speed={0.1} opacity={0.4} segments={12} bounds={[40, 20, 20]} volume={5} color="#fbcfe8" />
@@ -178,7 +173,7 @@ export default function Scene({ currentView }) {
         <Cloud position={[100, 30, -50]} speed={0.2} opacity={0.6} segments={15} bounds={[50, 20, 20]} volume={6} color="#dbeafe" />
       </group>
 
-      {/* LIGHTING - Bright & Shadow-Lite */}
+      {/* LIGHTING */}
       <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#ffc0e6" />
       <directionalLight position={[-15, 30, 10]} intensity={0.1} castShadow={false} />
       <pointLight position={[10, 5, 10]} intensity={0.8} color="#ffd6e7" />
@@ -192,32 +187,34 @@ export default function Scene({ currentView }) {
         <Staircase position={[5.0, 1.5, 1.0]} rotation={[0, -Math.PI / 2, 0]} width={20} texture={pinkStoneTex} />
         <group position={[-16, -1, 0]}>
           <mesh castShadow receiveShadow position={[1, 8.5, 0]}><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
-          <WallOpening position={[6, 0, 0]} colorProps={pinkProps} /><WallOpening position={[12, 0, 0]} colorProps={pinkProps} />
+          <WallOpening position={[6, 0, 0]} colorProps={pinkProps} />
+          <WallOpening position={[12, 0, 0]} colorProps={pinkProps} />
           <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
         </group>
         <group position={[17, -1, 1]} rotation={[0, -Math.PI / 2, 0]}>
           <mesh castShadow receiveShadow position={[4, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
-          <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={pinkProps} /><WallOpening position={[17, 0, 0]} isWindow={true} colorProps={pinkProps} />
+          <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={pinkProps} />
+          <WallOpening position={[17, 0, 0]} isWindow={true} colorProps={pinkProps} />
           <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
         </group>
       </group>
       
       <ContactShadows position={[12, -1.9, 15]} opacity={0.15} scale={60} blur={4} far={12} />
 
-      {/* IMPROVED WATER REFLECTIONS */}
+      {/* WATER */}
       <water
         ref={waterRef}
         args={[
           new THREE.PlaneGeometry(2000, 2000),
           {
-            textureWidth: 1024, // Higher res for better reflections
-            textureHeight: 1024,
+            textureWidth: isMobile ? 512 : 1024,
+            textureHeight: isMobile ? 512 : 1024,
             waterNormals,
-            sunDirection: new THREE.Vector3(-10, 45, -180).normalize(), // Aligned exactly with your Sun mesh
+            sunDirection: new THREE.Vector3(-10, 45, -180).normalize(),
             sunColor: 0xffffff,
-            waterColor: 0x224455, // Darker base makes reflections pop more
-            distortionScale: 0.5, // Much lower distortion for real ripples, not noise
-            alpha: 0.8, // Slight transparency to the water surface
+            waterColor: 0x224455,
+            distortionScale: isMobile ? 0.3 : 0.5,
+            alpha: 0.8,
           },
         ]}
         rotation={[-Math.PI / 2, 0, 0]}
