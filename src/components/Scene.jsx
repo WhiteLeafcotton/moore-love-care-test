@@ -140,19 +140,18 @@ export default function Scene({ currentView }) {
         mieDirectionalG={0.95}
       />
 
-      {/* GODLIKE SUN - Abstract, Soft, Gentle */}
-      {/* We keep the sphere position, slightly further back for subtlety */}
-      <mesh position={[-10, 35, -160]}>
-        <sphereGeometry args={[18, 32, 32]} />
+     {/* GODLIKE SUN - 3D Globe Style */}
+      <mesh position={[-10, 45, -180]}>
+        <sphereGeometry args={[22, 64, 64]} /> {/* Higher segments for a perfectly smooth globe */}
         <meshStandardMaterial 
-          color="#fff6e0" /* Base color of the "sun disk" */
-          emissive="#ffd69e" /* Soft golden glow */
-          emissiveIntensity={2} /* Gentle intensity, doesn't overblow */
-          roughness={1} /* Keeps the sphere surface matte */
-          metalness={0} 
+          color="#ffffff" 
+          emissive="#ffcc80" 
+          emissiveIntensity={1.5}
+          roughness={0.4} // Lower roughness allows the sun to catch highlights from its own light
+          metalness={0.1}
         />
-        {/* We use a weak point light just to give the immediate clouds some warm backlighting */}
-        <pointLight intensity={0.5} distance={200} color="#ffe0a3" decay={2} />
+        {/* Internal Glow: A light placed slightly inside the sphere to give it "volume" */}
+        <pointLight intensity={2} distance={100} color="#fff1d4" decay={1} />
       </mesh>
 
       <Environment preset="sunset" />
