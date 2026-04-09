@@ -138,48 +138,48 @@ export default function Scene({ currentView }) {
     <>
       <Sky
   distance={450000}
-  sunPosition={[-20, 8, 20]}
-  inclination={0.49} // sunset angle
+  sunPosition={[-10, 6, 20]}
+  inclination={0.49}
   azimuth={0.25}
-  turbidity={10} // hazy, dreamy air
-  rayleigh={3}   // soft atmospheric skcattering
-  mieCoefficient={0.008}
-  mieDirectionalG={0.9}
+  turbidity={12}
+  rayleigh={0.8} // ↓ kills the heavy blue tone
+  mieCoefficient={0.02}
+  mieDirectionalG={0.95}
 />
 
 <Environment preset="sunset" />
 
-{/* Soft Gradient Atmosphere Tint */}
-<fog attach="fog" args={["#f8c6d8", 60, 180]} />
+{/* FULL SCENE ATMOSPHERIC GRADIENT (this is the key) */}
+<fog attach="fog" args={["#f6c1d4", 20, 250]} />
 
-{/* Dreamy Cloud Layer */}
-<mesh position={[0, 60, -100]}>
-  <planeGeometry args={[600, 300]} />
+{/* MASSIVE CLOUD LAYERS (cover entire sky, not patches) */}
+<mesh position={[0, 120, -200]}>
+  <planeGeometry args={[2000, 800]} />
   <meshBasicMaterial
+    color="#ffd6f0"
     transparent
     opacity={0.35}
     depthWrite={false}
-    color="#ffd6f0"
   />
 </mesh>
 
-<mesh position={[100, 80, -150]}>
-  <planeGeometry args={[500, 250]} />
+<mesh position={[0, 160, -300]}>
+  <planeGeometry args={[2200, 900]} />
   <meshBasicMaterial
+    color="#d0bfff"
     transparent
     opacity={0.25}
     depthWrite={false}
-    color="#cdb4ff"
   />
 </mesh>
 
-<mesh position={[-120, 70, -120]}>
-  <planeGeometry args={[550, 280]} />
+<mesh position={[0, 200, -400]}>
+  <planeGeometry args={[2400, 1000]} />
   <meshBasicMaterial
+    color="#bde0fe"
     transparent
     opacity={0.2}
     depthWrite={false}
-    color="#bde0fe"
   />
 </mesh>
       <directionalLight position={[-20, 25, 15]} intensity={1.3} castShadow shadow-mapSize={[2048, 2048]} />
