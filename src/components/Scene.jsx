@@ -57,6 +57,7 @@ const WallOpening = ({ position, colorProps, width = 6, openingW = 3.5, height =
 export default function Scene({ currentView }) {
   const { camera } = useThree();
   const waterRef = useRef();
+  const sunPlasmaRef = useRef(); 
   const lookAtTarget = useRef(new THREE.Vector3(12, 1.5, 0));
   const [introFinished, setIntroFinished] = useState(false);
   const baseUrl = import.meta.env.BASE_URL || "/";
@@ -67,12 +68,23 @@ export default function Scene({ currentView }) {
     "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg"
   );
 
+  // Load noise texture for the sun's surface movement
+  const sunPlasmaTex = useLoader(
+    THREE.TextureLoader,
+    "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg"
+  );
+
   useMemo(() => {
     if (pinkStoneTex) {
       pinkStoneTex.wrapS = pinkStoneTex.wrapT = THREE.RepeatWrapping;
       pinkStoneTex.repeat.set(2, 2);
     }
-  }, [pinkStoneTex]);
+    if (sunPlasmaTex) {
+      sunPlasmaTex.wrapS = sunPlasmaTex.wrapT = THREE.RepeatWrapping;
+      sunPlasmaTex.repeat.set(1, 1);
+      sunPlasmaRef.current = sunPlasmaTex;
+    }
+  }, [pinkStoneTex, sunPlasmaTex]);
 
   const pinkProps = {
     map: pinkStoneTex,
@@ -121,8 +133,15 @@ export default function Scene({ currentView }) {
 
     camera.lookAt(lookAtTarget.current);
 
+    // Animate Water
     if (waterRef.current) {
       waterRef.current.material.uniforms["time"].value += delta * 0.25;
+    }
+
+    // Animate Sun Surface (The "Alive" effect)
+    if (sunPlasmaRef.current) {
+      sunPlasmaRef.current.offset.x += delta * 0.04;
+      sunPlasmaRef.current.offset.y -= delta * 0.02;
     }
   });
 
@@ -140,24 +159,24 @@ export default function Scene({ currentView }) {
         mieDirectionalG={0.95}
       />
 
-     {/* GODLIKE SUN - 3D Globe Style */}
+     {/* GODLIKE SUN - 3D Alive Globe */}
       <mesh position={[-10, 45, -180]}>
-        <sphereGeometry args={[22, 64, 64]} /> {/* Higher segments for a perfectly smooth globe */}
+        <sphereGeometry args={[22, 64, 64]} />
         <meshStandardMaterial 
           color="#ffffff" 
           emissive="#ffcc80" 
-          emissiveIntensity={1.5}
-          roughness={0.4} // Lower roughness allows the sun to catch highlights from its own light
-          metalness={0.1}
+          emissiveMap={sunPlasmaTex}
+          emissiveIntensity={2.5}
+          roughness={0.3}
+          metalness={0.2}
         />
-        {/* Internal Glow: A light placed slightly inside the sphere to give it "volume" */}
-        <pointLight intensity={2} distance={100} color="#fff1d4" decay={1} />
+        <pointLight intensity={3} distance={150} color="#fff1d4" decay={1} />
       </mesh>
 
       <Environment preset="sunset" />
       <fog attach="fog" args={["#ffc0e6", 15, 260]} />
 
-      {/* REFRESHED CLOUDS (Ensuring they look 'locked in') */}
+      {/* LOCKED IN VOLUMETRIC CLOUDS */}
       <group>
         <Cloud position={[-10, 30, -100]} speed={0.2} opacity={0.8} segments={24} bounds={[60, 20, 20]} volume={15} color="#ffd6f0" />
         <Cloud position={[-60, 45, -80]} speed={0.1} opacity={0.4} segments={12} bounds={[40, 20, 20]} volume={5} color="#fbcfe8" />
@@ -166,83 +185,15 @@ export default function Scene({ currentView }) {
         <Cloud position={[100, 30, -50]} speed={0.2} opacity={0.6} segments={15} bounds={[50, 20, 20]} volume={6} color="#dbeafe" />
       </group>
 
-      {/* REVISED LIGHTING - For soft shadows and ambient warmth */}
-      {/* 1. HemisphereLight: This is the key. It provides general sky light without harsh shadows. */}
-      <hemisphereLight 
-        intensity={0.8} 
-        color="#ffc0cb" /* Sky color (warm pink) */
-        groundColor="#bfa6a0" /* Ground reflection color (water/sand) */
-      />
-
-      {/* 2. Soft Fill Light: A gentle directional light for defined (but soft) shadows */}
+      {/* SOFT GLOBAL LIGHTING */}
+      <hemisphereLight intensity={0.9} color="#ffc0cb" groundColor="#bfa6a0" />
       <directionalLight 
         position={[-15, 30, 10]} 
-        intensity={0.4} /* Drastically reduced intensity to prevent "dark shadows" */
+        intensity={0.4} 
         castShadow 
         shadow-mapSize={[2048, 2048]} 
-        shadow-bias={-0.001} /* Helps reduce shadow acne on the smooth architecture */
+        shadow-bias={-0.001} 
       />
-
-      {/* 3. The existing accent points (keeping them for sparkle on the architecture) */}
-      <pointLight position={[10, 5, 10]} intensity={1.2} color="#ffd6e7" />
-      <pointLight position={[0, 3, 0]} intensity={0.6} color="#ffc0cb" />
-      {/* ENHANCED VOLUMETRIC CLOUDS */}
-      <group>
-        {/* Main Sun-blocking Cloud */}
-        <Cloud
-          position={[-10, 30, -100]}
-          speed={0.2}
-          opacity={0.8}
-          segments={24}
-          bounds={[60, 20, 20]}
-          volume={15}
-          color="#ffd6f0"
-        />
-
-        {/* Scattered Clouds - Various Sizes */}
-        <Cloud
-          position={[-60, 45, -80]}
-          speed={0.1}
-          opacity={0.4}
-          segments={12}
-          bounds={[40, 20, 20]}
-          volume={5}
-          color="#fbcfe8"
-        />
-
-        <Cloud
-          position={[40, 50, -120]}
-          speed={0.15}
-          opacity={0.5}
-          segments={20}
-          bounds={[100, 30, 30]}
-          volume={10}
-          color="#e9d5ff"
-        />
-
-        <Cloud
-          position={[0, 60, -150]}
-          speed={0.05}
-          opacity={0.3}
-          segments={10}
-          bounds={[200, 40, 40]}
-          volume={20}
-          color="#ffffff"
-        />
-
-        <Cloud
-          position={[100, 30, -50]}
-          speed={0.2}
-          opacity={0.6}
-          segments={15}
-          bounds={[50, 20, 20]}
-          volume={6}
-          color="#dbeafe"
-        />
-      </group>
-
-      {/* LIGHTING */}
-      <directionalLight position={[-20, 25, 15]} intensity={1.3} castShadow shadow-mapSize={[2048, 2048]} />
       <pointLight position={[10, 5, 10]} intensity={1.2} color="#ffd6e7" />
       <pointLight position={[0, 3, 0]} intensity={0.6} color="#ffc0cb" />
 
