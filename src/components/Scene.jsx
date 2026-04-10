@@ -6,73 +6,65 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* Grassy Hills with Procedural Wind Sway & Instanced Grass */
-const GrassyHills = ({ windSpeed }) => {
+import { Instances, Instance, Float } from "@react-three/drei";
+
+const GrassyHills = ({ windSpeed = 0.8 }) => {
   const meshRef = useRef();
-  const grassRef = useRef();
   
-  // 1. Create the Terrain Geometry (Same as yours, but kept for height mapping)
-  const { geometry, grassInstances } = useMemo(() => {
+  // 1. Define the hill shape function (so blades can find the floor height)
+  const getHeight = (x, y) => {
+    return Math.sin(x * 0.04) * Math.cos(y * 0.04) * 10 + Math.sin(x * 0.08) * 3;
+  };
+
+  const { geometry, grassData } = useMemo(() => {
+    // Create the base terrain
     const g = new THREE.PlaneGeometry(400, 400, 80, 80);
     const vertices = g.attributes.position.array;
-    const heightMap = (x, y) => Math.sin(x * 0.04) * Math.cos(y * 0.04) * 10 + Math.sin(x * 0.08) * 3;
-
     for (let i = 0; i < vertices.length; i += 3) {
-      vertices[i + 2] = heightMap(vertices[i], vertices[i + 1]);
+      vertices[i + 2] = getHeight(vertices[i], vertices[i + 1]);
     }
     g.computeVertexNormals();
 
-    // 2. Generate Grass Instance Positions
-    const count = 15000; // Adjust for performance
-    const dummy = new THREE.Object3D();
-    const positions = [];
-    
-    for (let i = 0; i < count; i++) {
+    // Generate random positions for 15,000 blades of grass
+    const data = [];
+    for (let i = 0; i < 15000; i++) {
       const x = (Math.random() - 0.5) * 400;
       const y = (Math.random() - 0.5) * 400;
-      const z = heightMap(x, y); // Match grass height to hill height
-      
-      dummy.position.set(x, y, z);
-      dummy.rotation.set(Math.PI / 2, 0, Math.random() * Math.PI);
-      dummy.scale.set(0.2, 0.2 + Math.random() * 0.5, 0.2); // Random blade heights
-      dummy.updateMatrix();
-      positions.push(dummy.matrix.clone());
-    }
-
-    return { geometry: g, grassInstances: positions };
-  }, []);
-
-  // 3. Animate the Wind
-  useFrame((state) => {
-    const t = state.clock.elapsedTime;
-    if (grassRef.current) {
-      // Subtle swaying by tilting the instances
-      const dummy = new THREE.Object3D();
-      grassInstances.forEach((matrix, i) => {
-        dummy.setRotationFromMatrix(matrix);
-        // Procedural wind logic: each blade sways based on its X position
-        const sway = Math.sin(t * windSpeed + (i % 100)) * 0.1;
-        dummy.rotation.x = (Math.PI / 2) + sway;
-        dummy.updateMatrix();
-        grassRef.current.setMatrixAt(i, dummy.matrix);
+      const z = getHeight(x, y);
+      data.push({
+        position: [x, y, z],
+        scale: 0.1 + Math.random() * 0.4,
+        rotation: Math.random() * Math.PI,
       });
-      grassRef.current.instanceMatrix.needsUpdate = true;
     }
-  });
+    return { geometry: g, grassData: data };
+  }, []);
 
   return (
     <group rotation={[-Math.PI / 2, 0, 0]} position={[0, -3.5, -40]}>
-      {/* The Hill Base */}
-      <mesh ref={meshRef} geometry={geometry} receiveShadow>
-        <meshStandardMaterial color="#3a5a40" roughness={1} metalness={0} />
+      {/* THE GROUND - A darker green 'soil' layer */}
+      <mesh geometry={geometry} receiveShadow>
+        <meshStandardMaterial color="#2d4c31" roughness={1} />
       </mesh>
 
-      {/* The Individual Grass Blades */}
-      <instancedMesh ref={grassRef} args={[null, null, grassInstances.length]}>
-        {/* Simple tapered box or cone as a "blade" */}
-        <coneGeometry args={[0.05, 1.5, 3]} /> 
-        <meshStandardMaterial color="#588157" roughness={1} />
-      </instancedMesh>
+      {/* THE GRASS BLADES - Using Instances for extreme performance */}
+      <Instances range={grassData.length}>
+        <coneGeometry args={[0.05, 1.2, 3]} /> {/* A tiny 3-sided cone is a perfect blade */}
+        <meshStandardMaterial color="#5e8a64" />
+
+        {grassData.map((props, i) => (
+          <group key={i} position={props.position} rotation={[Math.PI / 2, 0, props.rotation]}>
+            <Float 
+              speed={windSpeed * 2} 
+              rotationIntensity={0.8} 
+              floatIntensity={0.2} 
+              key={i}
+            >
+              <Instance scale={props.scale} />
+            </Float>
+          </group>
+        ))}
+      </Instances>
     </group>
   );
 };
