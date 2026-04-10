@@ -165,14 +165,24 @@ export default function Scene({ currentView }) {
     }
 
     if (cloudGroupRef.current) {
-      cloudGroupRef.current.position.x += delta * 0.6; // Slower drift for larger clouds
-      if (cloudGroupRef.current.position.x > 250) cloudGroupRef.current.position.x = -250;
+      cloudGroupRef.current.position.x += delta * 0.4;
+      if (cloudGroupRef.current.position.x > 300) cloudGroupRef.current.position.x = -300;
     }
   });
 
   return (
     <>
-      <Sky distance={450000} sunPosition={[-10, 6, -100]} inclination={0.49} azimuth={0.25} turbidity={12} rayleigh={0.3} mieCoefficient={0.02} mieDirectionalG={0.95} />
+      {/* UPDATED SKY FOR SUNSET VIBE */}
+      <Sky 
+        distance={450000} 
+        sunPosition={[-10, 2, -100]} // Lowered sun for sunset angle
+        inclination={0.6} 
+        azimuth={0.25} 
+        turbidity={8} 
+        rayleigh={6} // Increased for red/orange scattering
+        mieCoefficient={0.005} 
+        mieDirectionalG={0.8} 
+      />
 
       <GrassyHills textureMap={grassHillsTex} />
 
@@ -195,16 +205,18 @@ export default function Scene({ currentView }) {
       <Environment preset="sunset" />
       <fog attach="fog" args={["#ffc0e6", 15, 350]} />
 
-      {/* LARGE DIFFUSED SKY SYSTEM */}
+      {/* MASSIVE DIFFUSED SKY SYSTEM WITH DEPTH */}
       <group ref={cloudGroupRef}>
-        {/* Massive Horizon Fillers */}
-        <Cloud position={[-150, 40, -250]} speed={0.2} opacity={0.3} segments={40} bounds={[300, 40, 40]} volume={50} color="#ffd1dc" />
-        <Cloud position={[150, 60, -220]} speed={0.2} opacity={0.2} segments={40} bounds={[300, 50, 40]} volume={50} color="#e6e6fa" />
+        {/* Deep Background - Behind Sun */}
+        <Cloud position={[0, 60, -400]} speed={0.2} opacity={0.3} segments={60} bounds={[600, 100, 50]} volume={80} color="#ffd1dc" />
+        <Cloud position={[-200, 80, -350]} speed={0.1} opacity={0.2} segments={50} bounds={[500, 80, 40]} volume={70} color="#e6e6fa" />
         
-        {/* Main Sky Volume */}
-        <Cloud position={[0, 45, -180]} speed={0.3} opacity={0.4} segments={50} bounds={[150, 30, 20]} volume={30} color="#ffffff" />
-        <Cloud position={[-80, 70, -150]} speed={0.1} opacity={0.2} segments={30} bounds={[200, 60, 30]} volume={40} color="#fce7f3" />
-        <Cloud position={[80, 30, -120]} speed={0.2} opacity={0.2} segments={30} bounds={[180, 40, 50]} volume={30} color="#e9d5ff" />
+        {/* Middle Ground - Sky Fillers (kept high above water) */}
+        <Cloud position={[0, 45, -220]} speed={0.3} opacity={0.4} segments={50} bounds={[300, 40, 30]} volume={50} color="#ffffff" />
+        <Cloud position={[150, 55, -180]} speed={0.2} opacity={0.25} segments={40} bounds={[350, 50, 50]} volume={60} color="#fce7f3" />
+        
+        {/* High Altitude Atmospheric Layer */}
+        <Cloud position={[0, 110, -250]} speed={0.1} opacity={0.15} segments={40} bounds={[800, 40, 100]} volume={100} color="#e9d5ff" />
       </group>
 
       <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#ffc0e6" />
