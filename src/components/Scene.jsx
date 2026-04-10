@@ -165,28 +165,26 @@ export default function Scene({ currentView }) {
     }
 
     if (cloudGroupRef.current) {
-      cloudGroupRef.current.position.x += delta * 0.4;
-      if (cloudGroupRef.current.position.x > 300) cloudGroupRef.current.position.x = -300;
+      cloudGroupRef.current.position.x += delta * 0.3; // Slower for scale
+      if (cloudGroupRef.current.position.x > 400) cloudGroupRef.current.position.x = -400;
     }
   });
 
   return (
     <>
-      {/* UPDATED SKY FOR SUNSET VIBE */}
       <Sky 
         distance={450000} 
-        sunPosition={[-10, 2, -100]} // Lowered sun for sunset angle
+        sunPosition={[-10, 2, -100]} 
         inclination={0.6} 
         azimuth={0.25} 
         turbidity={8} 
-        rayleigh={6} // Increased for red/orange scattering
+        rayleigh={6} 
         mieCoefficient={0.005} 
         mieDirectionalG={0.8} 
       />
 
       <GrassyHills textureMap={grassHillsTex} />
 
-      {/* TONED DOWN SUN */}
       <mesh position={[-10, 55, -200]}>
         <sphereGeometry args={[isMobile ? 14 : 18, 64, 64]} />
         <meshStandardMaterial 
@@ -203,20 +201,25 @@ export default function Scene({ currentView }) {
       </mesh>
 
       <Environment preset="sunset" />
-      <fog attach="fog" args={["#ffc0e6", 15, 350]} />
+      <fog attach="fog" args={["#ffc0e6", 15, 400]} />
 
-      {/* MASSIVE DIFFUSED SKY SYSTEM WITH DEPTH */}
+      {/* RE-ENGINEERED MASSIVE SKY SYSTEM */}
       <group ref={cloudGroupRef}>
-        {/* Deep Background - Behind Sun */}
-        <Cloud position={[0, 60, -400]} speed={0.2} opacity={0.3} segments={60} bounds={[600, 100, 50]} volume={80} color="#ffd1dc" />
-        <Cloud position={[-200, 80, -350]} speed={0.1} opacity={0.2} segments={50} bounds={[500, 80, 40]} volume={70} color="#e6e6fa" />
+        {/* THE "BACK WALL" (Behind Sun) */}
+        <Cloud position={[0, 70, -450]} speed={0.2} opacity={0.3} segments={60} bounds={[800, 100, 50]} volume={120} color="#ffd1dc" />
+        <Cloud position={[-100, 90, -420]} speed={0.1} opacity={0.25} segments={50} bounds={[600, 80, 40]} volume={100} color="#ffffff" />
         
-        {/* Middle Ground - Sky Fillers (kept high above water) */}
-        <Cloud position={[0, 45, -220]} speed={0.3} opacity={0.4} segments={50} bounds={[300, 40, 30]} volume={50} color="#ffffff" />
-        <Cloud position={[150, 55, -180]} speed={0.2} opacity={0.25} segments={40} bounds={[350, 50, 50]} volume={60} color="#fce7f3" />
-        
-        {/* High Altitude Atmospheric Layer */}
-        <Cloud position={[0, 110, -250]} speed={0.1} opacity={0.15} segments={40} bounds={[800, 40, 100]} volume={100} color="#e9d5ff" />
+        {/* PASTEL YELLOW ACCENTS (Massive & Diffused) */}
+        <Cloud position={[200, 50, -300]} speed={0.2} opacity={0.3} segments={40} bounds={[400, 60, 50]} volume={80} color="#fff9c4" />
+        <Cloud position={[-250, 40, -280]} speed={0.3} opacity={0.2} segments={40} bounds={[350, 50, 60]} volume={70} color="#fdf4b8" />
+
+        {/* BRIGHT WHITE FILLERS */}
+        <Cloud position={[0, 60, -200]} speed={0.4} opacity={0.4} segments={50} bounds={[500, 40, 40]} volume={90} color="#ffffff" />
+        <Cloud position={[-300, 100, -250]} speed={0.1} opacity={0.15} segments={40} bounds={[600, 100, 80]} volume={110} color="#ffffff" />
+
+        {/* MID-GROUND DEPTH (Kept high above water) */}
+        <Cloud position={[180, 45, -150]} speed={0.2} opacity={0.35} segments={40} bounds={[300, 30, 40]} volume={60} color="#fce7f3" />
+        <Cloud position={[-180, 55, -180]} speed={0.2} opacity={0.25} segments={40} bounds={[350, 40, 50]} volume={70} color="#e9d5ff" />
       </group>
 
       <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#ffc0e6" />
@@ -249,7 +252,7 @@ export default function Scene({ currentView }) {
       <water
         ref={waterRef}
         args={[
-          new THREE.PlaneGeometry(2500, 2500),
+          new THREE.PlaneGeometry(3000, 3000),
           {
             textureWidth: isMobile ? 512 : 1024,
             textureHeight: isMobile ? 512 : 1024,
