@@ -76,6 +76,7 @@ const GrassyHills = ({ windSpeed }) => {
     </group>
   );
 };
+
 /* Monolithic Staircase */
 const Staircase = ({ position, width, texture, rotation }) => {
   const stepHeight = 0.5;
