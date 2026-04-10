@@ -165,8 +165,8 @@ export default function Scene({ currentView }) {
     }
 
     if (cloudGroupRef.current) {
-      cloudGroupRef.current.position.x += delta * 0.3; // Slower for scale
-      if (cloudGroupRef.current.position.x > 400) cloudGroupRef.current.position.x = -400;
+      cloudGroupRef.current.position.x += delta * 0.3;
+      if (cloudGroupRef.current.position.x > 500) cloudGroupRef.current.position.x = -500;
     }
   });
 
@@ -201,25 +201,25 @@ export default function Scene({ currentView }) {
       </mesh>
 
       <Environment preset="sunset" />
-      <fog attach="fog" args={["#ffc0e6", 15, 400]} />
+      <fog attach="fog" args={["#ffc0e6", 15, 450]} />
 
-      {/* RE-ENGINEERED MASSIVE SKY SYSTEM */}
+      {/* RE-ENGINEERED MASSIVE SKY SYSTEM - NO WATER CONTACT */}
       <group ref={cloudGroupRef}>
-        {/* THE "BACK WALL" (Behind Sun) */}
-        <Cloud position={[0, 70, -450]} speed={0.2} opacity={0.3} segments={60} bounds={[800, 100, 50]} volume={120} color="#ffd1dc" />
-        <Cloud position={[-100, 90, -420]} speed={0.1} opacity={0.25} segments={50} bounds={[600, 80, 40]} volume={100} color="#ffffff" />
+        {/* Deep Horizon (Y: 70-90) */}
+        <Cloud position={[0, 80, -450]} speed={0.2} opacity={0.3} segments={60} bounds={[1000, 100, 50]} volume={150} color="#ffd1dc" />
+        <Cloud position={[-100, 100, -420]} speed={0.1} opacity={0.25} segments={50} bounds={[800, 80, 40]} volume={120} color="#ffffff" />
         
-        {/* PASTEL YELLOW ACCENTS (Massive & Diffused) */}
-        <Cloud position={[200, 50, -300]} speed={0.2} opacity={0.3} segments={40} bounds={[400, 60, 50]} volume={80} color="#fff9c4" />
-        <Cloud position={[-250, 40, -280]} speed={0.3} opacity={0.2} segments={40} bounds={[350, 50, 60]} volume={70} color="#fdf4b8" />
+        {/* Pastel Yellow Layers (Y: 50-70) */}
+        <Cloud position={[300, 60, -320]} speed={0.2} opacity={0.3} segments={50} bounds={[500, 60, 50]} volume={100} color="#fff9c4" />
+        <Cloud position={[-300, 55, -300]} speed={0.3} opacity={0.2} segments={50} bounds={[450, 50, 60]} volume={90} color="#fdf4b8" />
 
-        {/* BRIGHT WHITE FILLERS */}
-        <Cloud position={[0, 60, -200]} speed={0.4} opacity={0.4} segments={50} bounds={[500, 40, 40]} volume={90} color="#ffffff" />
-        <Cloud position={[-300, 100, -250]} speed={0.1} opacity={0.15} segments={40} bounds={[600, 100, 80]} volume={110} color="#ffffff" />
+        {/* High Altitude White Layers (Y: 110-140) */}
+        <Cloud position={[0, 130, -350]} speed={0.4} opacity={0.4} segments={60} bounds={[900, 60, 40]} volume={130} color="#ffffff" />
+        <Cloud position={[-400, 110, -380]} speed={0.1} opacity={0.2} segments={50} bounds={[1000, 80, 80]} volume={140} color="#ffffff" />
 
-        {/* MID-GROUND DEPTH (Kept high above water) */}
-        <Cloud position={[180, 45, -150]} speed={0.2} opacity={0.35} segments={40} bounds={[300, 30, 40]} volume={60} color="#fce7f3" />
-        <Cloud position={[-180, 55, -180]} speed={0.2} opacity={0.25} segments={40} bounds={[350, 40, 50]} volume={70} color="#e9d5ff" />
+        {/* Foreground Atmosphere (Y: 45-60) - Raised to keep clear of water line at -1.2 */}
+        <Cloud position={[200, 45, -200]} speed={0.2} opacity={0.35} segments={40} bounds={[400, 40, 40]} volume={80} color="#fce7f3" />
+        <Cloud position={[-200, 50, -220]} speed={0.2} opacity={0.25} segments={40} bounds={[450, 40, 50]} volume={90} color="#e9d5ff" />
       </group>
 
       <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#ffc0e6" />
@@ -252,7 +252,7 @@ export default function Scene({ currentView }) {
       <water
         ref={waterRef}
         args={[
-          new THREE.PlaneGeometry(3000, 3000),
+          new THREE.PlaneGeometry(4000, 4000),
           {
             textureWidth: isMobile ? 512 : 1024,
             textureHeight: isMobile ? 512 : 1024,
