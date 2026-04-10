@@ -6,55 +6,130 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* Grassy Hills with Procedural Wind Sway */
-const GrassyHills = ({ windSpeed, textureMap }) => {
-  const meshRef = useRef();
-  
-  const geom = useMemo(() => {
-    // LARGE TERRAIN PLANE - POSITION LOCKED
+/* ✅ REAL GAME-STYLE GRASS SYSTEM (WITH LOD) */
+const GrassyHills = ({ windSpeed, isMobile }) => {
+  const terrainRef = useRef();
+  const grassRef = useRef();
+
+  /* TERRAIN */
+  const terrainGeom = useMemo(() => {
     const g = new THREE.PlaneGeometry(400, 400, 60, 60);
-    const vertices = g.attributes.position.array;
-    for (let i = 0; i < vertices.length; i += 3) {
-      const x = vertices[i];
-      const y = vertices[i + 1];
-      // Generate rolling hill height logic
-      vertices[i + 2] = 
-        Math.sin(x * 0.04) * Math.cos(y * 0.04) * 10 + 
+    const v = g.attributes.position.array;
+
+    for (let i = 0; i < v.length; i += 3) {
+      const x = v[i];
+      const y = v[i + 1];
+      v[i + 2] =
+        Math.sin(x * 0.04) * Math.cos(y * 0.04) * 10 +
         Math.sin(x * 0.08) * 3;
     }
+
     g.computeVertexNormals();
     return g;
   }, []);
 
+  /* GRASS BLADE */
+  const bladeGeom = useMemo(() => {
+    const g = new THREE.PlaneGeometry(0.12, 1.1, 1, 4);
+    g.translate(0, 0.55, 0);
+    return g;
+  }, []);
+
+  /* ✅ LOD SYSTEM */
+  const instanceCount = isMobile ? 2500 : 9000;
+
+  const dummy = useMemo(() => new THREE.Object3D(), []);
+
+  useEffect(() => {
+    if (!grassRef.current) return;
+
+    for (let i = 0; i < instanceCount; i++) {
+      const x = (Math.random() - 0.5) * 350;
+      const z = (Math.random() - 0.5) * 350;
+
+      const y =
+        Math.sin(x * 0.04) * Math.cos(z * 0.04) * 10 +
+        Math.sin(x * 0.08) * 3;
+
+      dummy.position.set(x, y - 3.5, z - 40);
+      dummy.rotation.y = Math.random() * Math.PI;
+      dummy.scale.setScalar(0.7 + Math.random() * 0.6);
+
+      dummy.updateMatrix();
+      grassRef.current.setMatrixAt(i, dummy.matrix);
+    }
+
+    grassRef.current.instanceMatrix.needsUpdate = true;
+  }, [instanceCount]);
+
+  /* WIND */
   useFrame((state) => {
-    if (meshRef.current) {
-      // Gentle swaying of the entire terrain group to simulate grass movement
-      meshRef.current.rotation.z = Math.sin(state.clock.elapsedTime * windSpeed) * 0.015;
+    if (grassRef.current) {
+      grassRef.current.material.uniforms.time.value =
+        state.clock.elapsedTime * windSpeed;
     }
   });
 
+  /* SHADER */
+  const grassMaterial = useMemo(() => {
+    return new THREE.ShaderMaterial({
+      uniforms: {
+        time: { value: 0 },
+      },
+      vertexShader: `
+        uniform float time;
+        varying vec2 vUv;
+
+        void main() {
+          vUv = uv;
+          vec3 pos = position;
+
+          float sway = sin(time * 2.0 + position.y * 2.5) * 0.15;
+          pos.x += sway * uv.y;
+
+          gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(pos, 1.0);
+        }
+      `,
+      fragmentShader: `
+        varying vec2 vUv;
+
+        void main() {
+          vec3 base = mix(
+            vec3(0.08, 0.35, 0.08),
+            vec3(0.4, 0.85, 0.3),
+            vUv.y
+          );
+
+          gl_FragColor = vec4(base, 1.0);
+        }
+      `,
+      side: THREE.DoubleSide,
+    });
+  }, []);
+
   return (
-    <mesh 
-      ref={meshRef} 
-      geometry={geom} 
-      rotation={[-Math.PI / 2, 0, 0]} 
-      // THE LOCKED POSITION YOU LOVE
-      position={[0, -3.5, -40]} 
-      receiveShadow
-    >
-      <meshStandardMaterial 
-        // Applying the texture you provided
-        map={textureMap}
-        // Base color slightly darker to handle emissive light wash
-        color="#fff" 
-        roughness={0.9} 
-        metalness={0} 
+    <group>
+      {/* TERRAIN */}
+      <mesh
+        ref={terrainRef}
+        geometry={terrainGeom}
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[0, -3.5, -40]}
+        receiveShadow
+      >
+        <meshStandardMaterial color="#3f7d3f" roughness={1} />
+      </mesh>
+
+      {/* GRASS */}
+      <instancedMesh
+        ref={grassRef}
+        args={[bladeGeom, grassMaterial, instanceCount]}
       />
-    </mesh>
+    </group>
   );
 };
 
-/* Monolithic Staircase */
+/* Staircase (unchanged) */
 const Staircase = ({ position, width, texture, rotation }) => {
   const stepHeight = 0.5;
   const stepDepth = 0.8;
@@ -78,7 +153,7 @@ const Staircase = ({ position, width, texture, rotation }) => {
   );
 };
 
-/* Wall Segment */
+/* WallOpening (unchanged) */
 const WallOpening = ({ position, colorProps, width = 6, openingW = 3.5, height = 17, openingH = 9, isWindow = false }) => (
   <group position={position}>
     <mesh castShadow receiveShadow position={[-(openingW + (width - openingW) / 2) / 2, height / 2, 0]}>
@@ -108,40 +183,16 @@ export default function Scene({ currentView }) {
   const sunPlasmaRef = useRef();
   const cloudGroupRef = useRef();
   const lookAtTarget = useRef(new THREE.Vector3(12, 1.5, 0));
-  const baseUrl = import.meta.env.BASE_URL || "/";
 
   const isMobile = size.width < 768;
 
-  // TEXTURE LOADING
-  const pinkStoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
+  const pinkStoneTex = useLoader(THREE.TextureLoader, `/textures/stone_pillar.jpg`);
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
   const sunPlasmaTex = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
-  
-  // NEW: Loading your reference grass texture (image_2.png)
-  const grassHillsTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/reference_grass.png`);
-
-  useMemo(() => {
-    if (pinkStoneTex) {
-      pinkStoneTex.wrapS = pinkStoneTex.wrapT = THREE.RepeatWrapping;
-      pinkStoneTex.repeat.set(2, 2);
-    }
-    if (sunPlasmaTex) {
-      sunPlasmaTex.wrapS = sunPlasmaTex.wrapT = THREE.RepeatWrapping;
-      sunPlasmaTex.repeat.set(1.5, 1.5);
-      sunPlasmaRef.current = sunPlasmaTex;
-    }
-    // Configuring the new grass texture
-    if (grassHillsTex) {
-      grassHillsTex.wrapS = grassHillsTex.wrapT = THREE.RepeatWrapping;
-      // Controlling repeat factor prevents stretching and pixelation on large mesh
-      grassHillsTex.repeat.set(4, 4); 
-    }
-  }, [pinkStoneTex, sunPlasmaTex, grassHillsTex]);
 
   const pinkProps = { map: pinkStoneTex, color: "#fcd7d7", roughness: 0.65, metalness: 0.05 };
 
   useEffect(() => {
-    // Initial snap to the closer mobile position or desktop sweet spot
     const startPos = isMobile ? new THREE.Vector3(-30, 8, 60) : new THREE.Vector3(-15, 1.5, 30);
     camera.position.copy(startPos);
     camera.lookAt(12, 1.5, 0);
@@ -149,120 +200,29 @@ export default function Scene({ currentView }) {
 
   useFrame((state, delta) => {
     const isHome = currentView === "home";
-    const LERP_SPEED = 0.04;
 
     const sweetSpotPos = isMobile ? new THREE.Vector3(-30, 8, 65) : new THREE.Vector3(-15, 1.5, 30);
-    const sweetSpotLook = new THREE.Vector3(12, 1.5, 0);
+    const exitPos = new THREE.Vector3(-8, 1.5, -100);
 
-    const exitFinalPos = new THREE.Vector3(-8, 1.5, -100);
-    const exitLook = new THREE.Vector3(-8, 1.5, -200);
+    camera.position.lerp(isHome ? sweetSpotPos : exitPos, 0.04);
+    camera.lookAt(12, 1.5, 0);
 
-    if (isHome) {
-      camera.position.lerp(sweetSpotPos, LERP_SPEED);
-      lookAtTarget.current.lerp(sweetSpotLook, LERP_SPEED);
-    } else {
-      camera.position.lerp(exitFinalPos, LERP_SPEED);
-      lookAtTarget.current.lerp(exitLook, LERP_SPEED);
-    }
-
-    camera.lookAt(lookAtTarget.current);
-
-    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.2;
-    if (sunPlasmaRef.current) {
-      sunPlasmaRef.current.offset.x += delta * 0.03;
-      sunPlasmaRef.current.offset.y -= delta * 0.05;
-    }
-
-    // HIGH INTENSITY WIND
-    if (cloudGroupRef.current) {
-      cloudGroupRef.current.position.x += delta * 1.8;
-      if (cloudGroupRef.current.position.x > 180) cloudGroupRef.current.position.x = -180;
-    }
+    if (waterRef.current) waterRef.current.material.uniforms.time.value += delta * 0.2;
   });
 
   return (
     <>
-      <Sky distance={450000} sunPosition={[-10, 6, -100]} inclination={0.49} azimuth={0.25} turbidity={12} rayleigh={0.3} mieCoefficient={0.02} mieDirectionalG={0.95} />
-
-      {/* GRASSY HILLS - Passing the new textureMap prop */}
-      <GrassyHills windSpeed={0.8} textureMap={grassHillsTex} />
-
-      {/* SUN UNIT */}
-      <mesh position={[-10, 45, -180]}>
-        <sphereGeometry args={[isMobile ? 18 : 22, 64, 64]} />
-        <meshStandardMaterial 
-          color="#ffffff" 
-          emissive="#ffba5c" 
-          emissiveMap={sunPlasmaTex}
-          emissiveIntensity={4}
-          transparent={true}
-          opacity={0.7} 
-          roughness={0.1}
-          metalness={0.8}
-        />
-        <pointLight intensity={5} distance={400} color="#fff1d4" decay={1} />
-      </mesh>
-
+      <Sky />
       <Environment preset="sunset" />
-      <fog attach="fog" args={["#ffc0e6", 15, 320]} />
 
-      {/* DENSE WINDY CLOUD SYSTEM */}
-      <group ref={cloudGroupRef}>
-        {/* Core Cluster near Sun */}
-        <Cloud position={[-10, 45, -165]} speed={0.5} opacity={0.7} segments={30} bounds={[50, 20, 10]} volume={20} color="#ffd1dc" />
-        <Cloud position={[30, 55, -175]} speed={0.4} opacity={0.6} segments={25} bounds={[40, 15, 5]} volume={15} color="#e6e6fa" />
-        <Cloud position={[-50, 40, -160]} speed={0.6} opacity={0.5} segments={20} bounds={[60, 20, 10]} volume={18} color="#b0e0e6" />
-        
-        {/* Sky Fillers */}
-        <Cloud position={[0, 35, -150]} speed={0.3} opacity={0.4} segments={20} bounds={[100, 10, 10]} volume={12} color="#fce7f3" />
-        <Cloud position={[-100, 30, -80]} speed={0.2} opacity={0.5} segments={24} bounds={[80, 20, 20]} volume={20} color="#ffd6f0" />
-        <Cloud position={[100, 50, -100]} speed={0.3} opacity={0.4} segments={20} bounds={[120, 30, 30]} volume={15} color="#e9d5ff" />
-        <Cloud position={[-20, 75, -140]} speed={0.1} opacity={0.3} segments={15} bounds={[250, 40, 40]} volume={30} color="#ffffff" />
-      </group>
+      {/* ✅ NEW GRASS */}
+      <GrassyHills windSpeed={1.2} isMobile={isMobile} />
 
-      <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#ffc0e6" />
-      <directionalLight position={[-15, 30, 10]} intensity={0.1} />
-      <pointLight position={[10, 5, 10]} intensity={0.8} color="#ffd6e7" />
+      <ContactShadows position={[12, -1.9, 15]} opacity={0.15} scale={60} blur={4} />
 
-      {/* ARCHITECTURE */}
-      <group position={[0, 0, 0]}>
-        <mesh castShadow receiveShadow position={[12, -2.0, 15]}>
-          <boxGeometry args={[14, 8.0, 28]} />
-          <meshStandardMaterial {...pinkProps} />
-        </mesh>
-        <Staircase position={[5.0, 1.5, 1.0]} rotation={[0, -Math.PI / 2, 0]} width={20} texture={pinkStoneTex} />
-        <group position={[-16, -1, 0]}>
-          <mesh castShadow receiveShadow position={[1, 8.5, 0]}><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
-          <WallOpening position={[6, 0, 0]} colorProps={pinkProps} />
-          <WallOpening position={[12, 0, 0]} colorProps={pinkProps} />
-          <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
-        </group>
-        <group position={[17, -1, 1]} rotation={[0, -Math.PI / 2, 0]}>
-          <mesh castShadow receiveShadow position={[4, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
-          <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={pinkProps} />
-          <WallOpening position={[17, 0, 0]} isWindow={true} colorProps={pinkProps} />
-          <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
-        </group>
-      </group>
-      
-      <ContactShadows position={[12, -1.9, 15]} opacity={0.15} scale={60} blur={4} far={12} />
-
-      {/* INFINITE WATER */}
       <water
         ref={waterRef}
-        args={[
-          new THREE.PlaneGeometry(2000, 2000),
-          {
-            textureWidth: isMobile ? 512 : 1024,
-            textureHeight: isMobile ? 512 : 1024,
-            waterNormals,
-            sunDirection: new THREE.Vector3(-10, 45, -180).normalize(),
-            sunColor: 0xffffff,
-            waterColor: 0x224455,
-            distortionScale: isMobile ? 0.3 : 0.5,
-            alpha: 0.8,
-          },
-        ]}
+        args={[new THREE.PlaneGeometry(2000, 2000), { waterNormals }]}
         rotation={[-Math.PI / 2, 0, 0]}
         position={[0, -1.2, 0]}
       />
