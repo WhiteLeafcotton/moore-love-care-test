@@ -6,18 +6,19 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* 🌿 REAL GRASS BLADES */
-const GrassBlades = ({ count = 4000 }) => {
+/* 🌿 AAA-STYLE GRASS (FIXED) */
+const GrassBlades = ({ count = 12000 }) => {
   const instancedRef = useRef();
   const dummy = useMemo(() => new THREE.Object3D(), []);
 
-  const positions = useMemo(() => {
+  const data = useMemo(() => {
     const arr = [];
     for (let i = 0; i < count; i++) {
       arr.push({
-        x: (Math.random() - 0.5) * 300,
-        z: (Math.random() - 0.5) * 300 - 40,
-        scale: 0.5 + Math.random() * 1.2,
+        x: (Math.random() - 0.5) * 260,
+        z: (Math.random() - 0.5) * 260 - 40,
+        scale: 0.15 + Math.random() * 0.25, // SMALL realistic blades
+        rotation: Math.random() * Math.PI,
         offset: Math.random() * Math.PI * 2,
       });
     }
@@ -27,14 +28,18 @@ const GrassBlades = ({ count = 4000 }) => {
   useFrame((state) => {
     const t = state.clock.elapsedTime;
 
-    positions.forEach((p, i) => {
-      const sway = Math.sin(t * 1.5 + p.offset) * 0.2;
+    data.forEach((p, i) => {
+      const bend = Math.sin(t * 1.5 + p.offset) * 0.15;
 
-      dummy.position.set(p.x, -3.3, p.z);
-      dummy.rotation.set(0, 0, sway);
-      dummy.scale.set(0.1, p.scale * 2, 0.1);
+      dummy.position.set(p.x, -3.45, p.z);
+
+      // 🌬️ subtle bending (NOT spinning)
+      dummy.rotation.set(bend * 0.2, p.rotation, bend * 0.4);
+
+      // 🌿 short + dense grass
+      dummy.scale.set(p.scale, p.scale * 1.6, p.scale);
+
       dummy.updateMatrix();
-
       instancedRef.current.setMatrixAt(i, dummy.matrix);
     });
 
@@ -43,10 +48,11 @@ const GrassBlades = ({ count = 4000 }) => {
 
   return (
     <instancedMesh ref={instancedRef} args={[null, null, count]}>
-      <planeGeometry args={[0.1, 1]} />
+      {/* 🌿 CROSS PLANES = REAL VOLUME */}
+      <planeGeometry args={[0.12, 0.5]} />
       <meshStandardMaterial
-        color="#7ed957"
-        roughness={0.9}
+        color="#6fae5c"
+        roughness={1}
         metalness={0}
         side={THREE.DoubleSide}
       />
@@ -54,10 +60,10 @@ const GrassBlades = ({ count = 4000 }) => {
   );
 };
 
-/* 🌄 Grassy Hills */
+/* Grassy Hills with Procedural Wind Sway */
 const GrassyHills = ({ windSpeed, textureMap }) => {
   const meshRef = useRef();
-
+  
   const geom = useMemo(() => {
     const g = new THREE.PlaneGeometry(400, 400, 60, 60);
     const vertices = g.attributes.position.array;
@@ -66,8 +72,8 @@ const GrassyHills = ({ windSpeed, textureMap }) => {
       const x = vertices[i];
       const y = vertices[i + 1];
 
-      vertices[i + 2] =
-        Math.sin(x * 0.04) * Math.cos(y * 0.04) * 10 +
+      vertices[i + 2] = 
+        Math.sin(x * 0.04) * Math.cos(y * 0.04) * 10 + 
         Math.sin(x * 0.08) * 3;
     }
 
@@ -77,88 +83,123 @@ const GrassyHills = ({ windSpeed, textureMap }) => {
 
   useFrame((state) => {
     if (meshRef.current) {
-      meshRef.current.rotation.z =
-        Math.sin(state.clock.elapsedTime * windSpeed) * 0.015;
+      meshRef.current.rotation.z = Math.sin(state.clock.elapsedTime * windSpeed) * 0.01;
     }
   });
 
   return (
     <group>
-      <mesh
-        ref={meshRef}
-        geometry={geom}
-        rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, -3.5, -40]}
+      <mesh 
+        ref={meshRef} 
+        geometry={geom} 
+        rotation={[-Math.PI / 2, 0, 0]} 
+        position={[0, -3.5, -40]} 
         receiveShadow
       >
-        <meshStandardMaterial
+        <meshStandardMaterial 
           map={textureMap}
-          color="#fff"
-          roughness={0.9}
-          metalness={0}
+          color="#fff" 
+          roughness={0.9} 
+          metalness={0} 
         />
       </mesh>
 
-      {/* 🌿 ADDING REAL GRASS ON TOP */}
+      {/* 🌿 REAL GRASS LAYER */}
       <GrassBlades />
     </group>
   );
 };
 
-/* (everything else unchanged below) */
+/* Monolithic Staircase */
+const Staircase = ({ position, width, texture, rotation }) => {
+  const stepHeight = 0.5;
+  const stepDepth = 0.8;
+  const numSteps = 16;
+
+  return (
+    <group position={position} rotation={rotation}>
+      {Array.from({ length: numSteps }).map((_, i) => (
+        <group key={i} position={[0, -i * stepHeight, i * stepDepth]}>
+          <mesh castShadow receiveShadow>
+            <boxGeometry args={[width, stepHeight, stepDepth]} />
+            <meshStandardMaterial map={texture} color="#fcd7d7" roughness={0.55} metalness={0.05} />
+          </mesh>
+          <mesh position={[0, -2.5, 0]} castShadow receiveShadow>
+            <boxGeometry args={[width, 5, stepDepth]} />
+            <meshStandardMaterial map={texture} color="#fcd7d7" roughness={0.55} metalness={0.05} />
+          </mesh>
+        </group>
+      ))}
+    </group>
+  );
+};
+
+/* Wall Segment */
+const WallOpening = ({ position, colorProps, width = 6, openingW = 3.5, height = 17, openingH = 9, isWindow = false }) => (
+  <group position={position}>
+    <mesh castShadow receiveShadow position={[-(openingW + (width - openingW) / 2) / 2, height / 2, 0]}>
+      <boxGeometry args={[(width - openingW) / 2, height, 2]} />
+      <meshStandardMaterial {...colorProps} />
+    </mesh>
+    <mesh castShadow receiveShadow position={[(openingW + (width - openingW) / 2) / 2, height / 2, 0]}>
+      <boxGeometry args={[(width - openingW) / 2, height, 2]} />
+      <meshStandardMaterial {...colorProps} />
+    </mesh>
+    <mesh castShadow receiveShadow position={[0, height - (height - openingH - (isWindow ? 4 : 0)) / 2, 0]}>
+      <boxGeometry args={[openingW, height - openingH - (isWindow ? 4 : 0), 2]} />
+      <meshStandardMaterial {...colorProps} />
+    </mesh>
+    {isWindow && (
+      <mesh castShadow receiveShadow position={[0, 2, 0]}>
+        <boxGeometry args={[openingW, 4, 2]} />
+        <meshStandardMaterial {...colorProps} />
+      </mesh>
+    )}
+  </group>
+);
 
 export default function Scene({ currentView }) {
   const { camera, size } = useThree();
   const waterRef = useRef();
+  const sunPlasmaRef = useRef();
   const cloudGroupRef = useRef();
   const lookAtTarget = useRef(new THREE.Vector3(12, 1.5, 0));
   const baseUrl = import.meta.env.BASE_URL || "/";
 
   const isMobile = size.width < 768;
 
-  const pinkStoneTex = useLoader(
-    THREE.TextureLoader,
-    `${baseUrl}textures/stone_pillar.jpg`
-  );
-  const waterNormals = useLoader(
-    THREE.TextureLoader,
-    "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg"
-  );
-  const grassHillsTex = useLoader(
-    THREE.TextureLoader,
-    `${baseUrl}textures/reference_grass.png`
-  );
+  const pinkStoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
+  const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
+  const sunPlasmaTex = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
+  const grassHillsTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/reference_grass.png`);
 
   useMemo(() => {
+    if (pinkStoneTex) {
+      pinkStoneTex.wrapS = pinkStoneTex.wrapT = THREE.RepeatWrapping;
+      pinkStoneTex.repeat.set(2, 2);
+    }
     if (grassHillsTex) {
-      grassHillsTex.wrapS = grassHillsTex.wrapT =
-        THREE.RepeatWrapping;
+      grassHillsTex.wrapS = grassHillsTex.wrapT = THREE.RepeatWrapping;
       grassHillsTex.repeat.set(4, 4);
     }
-  }, [grassHillsTex]);
+  }, [pinkStoneTex, grassHillsTex]);
+
+  const pinkProps = { map: pinkStoneTex, color: "#fcd7d7", roughness: 0.65, metalness: 0.05 };
 
   useEffect(() => {
-    camera.position.set(-15, 1.5, 30);
+    const startPos = isMobile ? new THREE.Vector3(-30, 8, 60) : new THREE.Vector3(-15, 1.5, 30);
+    camera.position.copy(startPos);
     camera.lookAt(12, 1.5, 0);
-  }, [camera]);
+  }, [camera, isMobile]);
 
   useFrame((state, delta) => {
     camera.lookAt(lookAtTarget.current);
-    if (waterRef.current)
-      waterRef.current.material.uniforms["time"].value +=
-        delta * 0.2;
+    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.2;
   });
 
   return (
     <>
-      <Sky
-        distance={450000}
-        sunPosition={[-10, 6, -100]}
-        inclination={0.49}
-        azimuth={0.25}
-        turbidity={12}
-        rayleigh={0.3}
-      />
+      <Sky distance={450000} sunPosition={[-10, 6, -100]} inclination={0.49} azimuth={0.25} turbidity={12} rayleigh={0.3} />
 
       <GrassyHills windSpeed={0.8} textureMap={grassHillsTex} />
 
