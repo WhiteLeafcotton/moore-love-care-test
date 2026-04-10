@@ -7,68 +7,111 @@ import * as THREE from "three";
 extend({ Water });
 
 
-import { Instances, Instance, Float } from "@react-three/drei";
+import { useMemo, useRef, useEffect } from "react";
+import * as THREE from "three";
+import { useFrame } from "@react-three/fiber";
 
-const GrassyHills = ({ windSpeed = 0.8 }) => {
-  const meshRef = useRef();
-  
-  // 1. Define the hill shape function (so blades can find the floor height)
+const GrassyHills = ({ windSpeed = 1.0 }) => {
+  const instanceRef = useRef();
+  const count = 25000;
+
+  // 1. Terrain Elevation Logic
   const getHeight = (x, y) => {
     return Math.sin(x * 0.04) * Math.cos(y * 0.04) * 10 + Math.sin(x * 0.08) * 3;
   };
 
-  const { geometry, grassData } = useMemo(() => {
-    // Create the base terrain
-    const g = new THREE.PlaneGeometry(400, 400, 80, 80);
-    const vertices = g.attributes.position.array;
-    for (let i = 0; i < vertices.length; i += 3) {
-      vertices[i + 2] = getHeight(vertices[i], vertices[i + 1]);
+  const { geometry, terrainGeom } = useMemo(() => {
+    // Terrain
+    const tg = new THREE.PlaneGeometry(400, 400, 80, 80);
+    const pos = tg.attributes.position.array;
+    for (let i = 0; i < pos.length; i += 3) {
+      pos[i + 2] = getHeight(pos[i], pos[i + 1]);
     }
-    g.computeVertexNormals();
+    tg.computeVertexNormals();
 
-    // Generate random positions for 15,000 blades of grass
-    const data = [];
-    for (let i = 0; i < 15000; i++) {
-      const x = (Math.random() - 0.5) * 400;
-      const y = (Math.random() - 0.5) * 400;
-      const z = getHeight(x, y);
-      data.push({
-        position: [x, y, z],
-        scale: 0.1 + Math.random() * 0.4,
-        rotation: Math.random() * Math.PI,
-      });
-    }
-    return { geometry: g, grassData: data };
+    // Grass Blade: Add segments (1, 4) so it can actually bend
+    const g = new THREE.PlaneGeometry(0.15, 1, 1, 4);
+    g.translate(0, 0.5, 0); // Pivot at bottom
+
+    return { geometry: g, terrainGeom: tg };
   }, []);
 
+  // 2. Populate Instances
+  useEffect(() => {
+    const dummy = new THREE.Object3D();
+    for (let i = 0; i < count; i++) {
+      const x = (Math.random() - 0.5) * 380;
+      const y = (Math.random() - 0.5) * 380;
+      const z = getHeight(x, y);
+
+      dummy.position.set(x, y, z);
+      // Random rotation around Y-axis for organic look
+      dummy.rotation.set(Math.PI / 2, 0, Math.random() * Math.PI);
+      dummy.scale.setScalar(0.3 + Math.random() * 0.7);
+      dummy.updateMatrix();
+      instanceRef.current.setMatrixAt(i, dummy.matrix);
+    }
+    instanceRef.current.instanceMatrix.needsUpdate = true;
+  }, [count]);
+
+  // 3. Shader Material for Vertex Animation
+  const grassMaterial = useMemo(() => {
+    const mat = new THREE.MeshStandardMaterial({
+      color: "#4e7a54",
+      side: THREE.DoubleSide,
+    });
+
+    // Inject custom shader logic
+    mat.onBeforeCompile = (shader) => {
+      shader.uniforms.uTime = { value: 0 };
+      
+      // Add uniform to the top of vertex shader
+      shader.vertexShader = `
+        uniform float uTime;
+      ` + shader.vertexShader;
+
+      // Replace the position calculation
+      shader.vertexShader = shader.vertexShader.replace(
+        "#include <begin_vertex>",
+        `
+        vec3 transformed = vec3(position);
+        
+        // Calculate a wave based on time and world position
+        float wave = sin(uTime * 2.0 + instanceMatrix[3][0] * 0.5) * 0.15;
+        wave += sin(uTime * 1.2 + instanceMatrix[3][1] * 0.3) * 0.1;
+        
+        // Only bend the upper parts of the blade (uv.y goes from 0 at bottom to 1 at top)
+        // Note: PlaneGeometry uv.y is 0 at top, 1 at bottom usually, 
+        // but since we translated and rotated, we use position.y
+        float bend = pow(position.y, 2.0) * wave;
+        
+        transformed.x += bend;
+        transformed.z += bend * 0.5;
+        `
+      );
+      mat.userData.shader = shader;
+    };
+    return mat;
+  }, []);
+
+  useFrame((state) => {
+    const t = state.clock.elapsedTime * windSpeed;
+    if (grassMaterial.userData.shader) {
+      grassMaterial.userData.shader.uniforms.uTime.value = t;
+    }
+  });
+
   return (
-    <group rotation={[-Math.PI / 2, 0, 0]} position={[0, -3.5, -40]}>
-      {/* THE GROUND - A darker green 'soil' layer */}
-      <mesh geometry={geometry} receiveShadow>
+    <group rotation={[-Math.PI / 2, 0, 0]} position={[0, -3.5, -20]}>
+      <mesh geometry={terrainGeom} receiveShadow>
         <meshStandardMaterial color="#2d4c31" roughness={1} />
       </mesh>
 
-      {/* THE GRASS BLADES - Using Instances for extreme performance */}
-      <Instances range={grassData.length}>
-        <coneGeometry args={[0.05, 1.2, 3]} /> {/* A tiny 3-sided cone is a perfect blade */}
-        <meshStandardMaterial color="#5e8a64" />
-
-        {grassData.map((props, i) => (
-          <group key={i} position={props.position} rotation={[Math.PI / 2, 0, props.rotation]}>
-            <Float 
-              speed={windSpeed * 2} 
-              rotationIntensity={0.8} 
-              floatIntensity={0.2} 
-              key={i}
-            >
-              <Instance scale={props.scale} />
-            </Float>
-          </group>
-        ))}
-      </Instances>
+      <instancedMesh ref={instanceRef} args={[geometry, grassMaterial, count]} castShadow />
     </group>
   );
 };
+
 
 /* Monolithic Staircase */
 const Staircase = ({ position, width, texture, rotation }) => {
