@@ -6,9 +6,19 @@ import * as THREE from "three";
 
 extend({ Water });
 
-const GrassyHills = ({ windSpeed = 1.0 }) => {
+import React, { useRef, useMemo, useEffect } from "react";
+import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
+import { Environment, Sky, Water } from "@react-three/drei";
+import * as THREE from "three";
+// Make sure this utility is imported to handle the geometry merge
+import * as BufferGeometryUtils from "three/examples/jsm/utils/BufferGeometryUtils.js";
+
+const GrassyHills = () => {
   const instanceRef = useRef();
-  const count = 75000; // High density for the "Unseen" look
+  
+  // 100,000 instances for a true "carpet" look. 
+  // InstancedMesh handles this easily on modern GPUs.
+  const count = 100000; 
 
   const getHeight = (x, y) => {
     return Math.sin(x * 0.04) * Math.cos(y * 0.04) * 10 + Math.sin(x * 0.08) * 3;
@@ -22,10 +32,10 @@ const GrassyHills = ({ windSpeed = 1.0 }) => {
     }
     tg.computeVertexNormals();
 
-    // Use a Star geometry (3 planes) for maximum volume
-    const baseG = new THREE.PlaneGeometry(0.18, 1.5, 1, 6);
-    baseG.translate(0, 0.75, 0);
-    const starGeo = THREE.BufferGeometryUtils.mergeGeometries([
+    // The "Star" geometry: 3 planes ensure the grass is thick from every angle
+    const baseG = new THREE.PlaneGeometry(0.25, 1.8, 1, 2);
+    baseG.translate(0, 0.9, 0); 
+    const starGeo = BufferGeometryUtils.mergeGeometries([
       baseG.clone(),
       baseG.clone().rotateY(Math.PI / 3),
       baseG.clone().rotateY((Math.PI / 3) * 2)
@@ -37,139 +47,53 @@ const GrassyHills = ({ windSpeed = 1.0 }) => {
   useEffect(() => {
     const dummy = new THREE.Object3D();
     const root = Math.sqrt(count);
-    const spacing = 350 / root;
+    const size = 380; // Area size
+    const spacing = size / root;
 
     for (let i = 0; i < count; i++) {
-      const x = (i % root) * spacing - 175 + (Math.random() - 0.5) * spacing;
-      const y = Math.floor(i / root) * spacing - 175 + (Math.random() - 0.5) * spacing;
+      // GRID PLACEMENT: Ensures every inch is covered
+      const ix = i % root;
+      const iy = Math.floor(i / root);
+      
+      const x = (ix * spacing - size/2) + (Math.random() - 0.5) * spacing;
+      const y = (iy * spacing - size/2) + (Math.random() - 0.5) * spacing;
       const z = getHeight(x, y);
 
       dummy.position.set(x, y, z);
-      dummy.rotation.set(0, Math.random() * Math.PI, 0); 
-      // Vary the height scale for that "fluffy" uneven look
-      dummy.scale.set(1, 0.5 + Math.random() * 1.2, 1);
+      // Random rotation so it looks natural
+      dummy.rotation.set(0, Math.random() * Math.PI, 0);
+      // Random scale for that "wild" look
+      dummy.scale.setScalar(0.7 + Math.random() * 0.8);
+      
       dummy.updateMatrix();
       instanceRef.current.setMatrixAt(i, dummy.matrix);
     }
     instanceRef.current.instanceMatrix.needsUpdate = true;
   }, [count]);
 
-  const grassMaterial = useMemo(() => {
-    const mat = new THREE.MeshStandardMaterial({
-      side: THREE.DoubleSide,
-      roughness: 0.6,
-    });
-
-    mat.onBeforeCompile = (shader) => {
-      shader.uniforms.uTime = { value: 0 };
-      shader.vertexShader = `uniform float uTime; varying float vHeight; varying vec3 vWorldPos;` + shader.vertexShader;
-      
-      shader.vertexShader = shader.vertexShader.replace(
-        "#include <begin_vertex>",
-        `
-        vec3 transformed = vec3(position);
-        vHeight = position.y;
-        vWorldPos = (instanceMatrix * vec4(position, 1.0)).xyz;
-
-        // Wave logic with spatial noise for "Unseen" style flowing
-        float wave = sin(uTime * 1.2 + vWorldPos.x * 0.1 + vWorldPos.z * 0.1) * 0.25;
-        wave += cos(uTime * 0.8 + vWorldPos.x * 0.2) * 0.1;
-        
-        // Bend the top of the blade only
-        transformed.x += pow(max(0.0, vHeight), 2.5) * wave;
-        transformed.z += pow(max(0.0, vHeight), 2.5) * wave * 0.5;
-        `
-      );
-
-      shader.fragmentShader = `varying float vHeight; varying vec3 vWorldPos;` + shader.fragmentShader;
-      shader.fragmentShader = shader.fragmentShader.replace(
-        "#include <color_fragment>",
-        `
-        #include <color_fragment>
-        
-        // Define colors based on the "Unseen" aesthetic (soft pastels/warm greens)
-        vec3 rootColor = vec3(0.02, 0.1, 0.05);
-        vec3 tipColor = vec3(0.6, 0.75, 0.3);
-        
-        // Add "SSS" (Subsurface Scattering) glow effect
-        float glow = pow(vHeight, 2.0) * 1.2;
-        vec3 finalColor = mix(rootColor, tipColor, vHeight);
-        
-        // Subtle noise to vary color per patch
-        float noise = sin(vWorldPos.x * 2.0) * cos(vWorldPos.z * 2.0) * 0.1;
-        diffuseColor.rgb = finalColor + (glow * 0.15) + noise;
-        `
-      );
-      mat.userData.shader = shader;
-    };
-    return mat;
-  }, []);
-
-  useFrame((state) => {
-    if (grassMaterial.userData.shader) {
-      grassMaterial.userData.shader.uniforms.uTime.value = state.clock.elapsedTime * windSpeed;
-    }
-  });
-
   return (
     <group rotation={[-Math.PI / 2, 0, 0]} position={[0, -3.5, -20]}>
+      {/* Dark ground to make the grass pop */}
       <mesh geometry={terrainGeom}>
-        <meshStandardMaterial color="#081408" />
+        <meshStandardMaterial color="#020802" />
       </mesh>
-      <instancedMesh ref={instanceRef} args={[geometry, grassMaterial, count]} castShadow />
+      <instancedMesh ref={instanceRef} args={[geometry, null, count]}>
+        <meshStandardMaterial color="#4e7a54" side={THREE.DoubleSide} />
+      </instancedMesh>
     </group>
   );
 };
 
-/* -------------------------------------------------------------------------- */
-/* 2. ARCHITECTURAL COMPONENTS (Fixed & Cleaned)                              */
-/* -------------------------------------------------------------------------- */
-
-const Staircase = ({ position, width, texture, rotation }) => {
-  const stepHeight = 0.5;
-  const stepDepth = 0.8;
-  const numSteps = 16;
+export default function Scene() {
   return (
-    <group position={position} rotation={rotation}>
-      {Array.from({ length: numSteps }).map((_, i) => (
-        <group key={i} position={[0, -i * stepHeight, i * stepDepth]}>
-          <mesh castShadow receiveShadow>
-            <boxGeometry args={[width, stepHeight, stepDepth]} />
-            <meshStandardMaterial map={texture} color="#fcd7d7" roughness={0.55} />
-          </mesh>
-          <mesh position={[0, -2.5, 0]} castShadow receiveShadow>
-            <boxGeometry args={[width, 5, stepDepth]} />
-            <meshStandardMaterial map={texture} color="#fcd7d7" />
-          </mesh>
-        </group>
-      ))}
-    </group>
+    <>
+      <Sky distance={450000} sunPosition={[-10, 6, -100]} />
+      <Environment preset="sunset" />
+      <GrassyHills />
+      <directionalLight position={[-10, 20, 10]} intensity={1.5} />
+    </>
   );
-};
-
-const WallOpening = ({ position, colorProps, width = 6, openingW = 3.5, height = 17, openingH = 9, isWindow = false }) => (
-  <group position={position}>
-    <mesh castShadow receiveShadow position={[-(openingW + (width - openingW) / 2) / 2, height / 2, 0]}>
-      <boxGeometry args={[(width - openingW) / 2, height, 2]} />
-      <meshStandardMaterial {...colorProps} />
-    </mesh>
-    <mesh castShadow receiveShadow position={[(openingW + (width - openingW) / 2) / 2, height / 2, 0]}>
-      <boxGeometry args={[(width - openingW) / 2, height, 2]} />
-      <meshStandardMaterial {...colorProps} />
-    </mesh>
-    <mesh castShadow receiveShadow position={[0, height - (height - openingH - (isWindow ? 4 : 0)) / 2, 0]}>
-      <boxGeometry args={[openingW, height - openingH - (isWindow ? 4 : 0), 2]} />
-      <meshStandardMaterial {...colorProps} />
-    </mesh>
-    {isWindow && (
-      <mesh castShadow receiveShadow position={[0, 2, 0]}>
-        <boxGeometry args={[openingW, 4, 2]} />
-        <meshStandardMaterial {...colorProps} />
-      </mesh>
-    )}
-  </group>
-);
-
+}
 /* -------------------------------------------------------------------------- */
 /* 3. MAIN SCENE                                                              */
 /* -------------------------------------------------------------------------- */
