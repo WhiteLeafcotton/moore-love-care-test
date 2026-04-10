@@ -11,16 +11,33 @@ const GrassyHills = ({ windSpeed, textureMap }) => {
   const meshRef = useRef();
   
   const geom = useMemo(() => {
-    // LARGE TERRAIN PLANE - POSITION LOCKED
-    const g = new THREE.PlaneGeometry(400, 400, 60, 60);
+    const g = new THREE.PlaneGeometry(400, 400, 80, 80);
     const vertices = g.attributes.position.array;
+    
     for (let i = 0; i < vertices.length; i += 3) {
       const x = vertices[i];
       const y = vertices[i + 1];
-      // Generate rolling hill height logic
-      vertices[i + 2] = 
+      
+      // Calculate distance from center (Arena area)
+      const dist = Math.sqrt(x * x + y * y);
+      
+      // If within 45 units of center, flatten the terrain
+      // Smoothly blend the transition so it doesn't look like a sharp cut
+      const flatZone = 45;
+      const smoothZone = 20;
+      let influence = 1.0;
+      
+      if (dist < flatZone) {
+        influence = 0;
+      } else if (dist < flatZone + smoothZone) {
+        influence = (dist - flatZone) / smoothZone;
+      }
+
+      // Rolling hill height logic applied only outside the arena
+      vertices[i + 2] = (
         Math.sin(x * 0.04) * Math.cos(y * 0.04) * 10 + 
-        Math.sin(x * 0.08) * 3;
+        Math.sin(x * 0.08) * 3
+      ) * influence;
     }
     g.computeVertexNormals();
     return g;
@@ -28,7 +45,6 @@ const GrassyHills = ({ windSpeed, textureMap }) => {
 
   useFrame((state) => {
     if (meshRef.current) {
-      // Gentle swaying of the entire terrain group to simulate grass movement
       meshRef.current.rotation.z = Math.sin(state.clock.elapsedTime * windSpeed) * 0.015;
     }
   });
@@ -38,14 +54,11 @@ const GrassyHills = ({ windSpeed, textureMap }) => {
       ref={meshRef} 
       geometry={geom} 
       rotation={[-Math.PI / 2, 0, 0]} 
-      // THE LOCKED POSITION YOU LOVE
       position={[0, -3.5, -40]} 
       receiveShadow
     >
       <meshStandardMaterial 
-        // Applying the texture you provided
         map={textureMap}
-        // Base color slightly darker to handle emissive light wash
         color="#fff" 
         roughness={0.9} 
         metalness={0} 
@@ -112,12 +125,9 @@ export default function Scene({ currentView }) {
 
   const isMobile = size.width < 768;
 
-  // TEXTURE LOADING
   const pinkStoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
   const sunPlasmaTex = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
-  
-  // NEW: Loading your reference grass texture (image_2.png)
   const grassHillsTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/reference_grass.png`);
 
   useMemo(() => {
@@ -130,10 +140,8 @@ export default function Scene({ currentView }) {
       sunPlasmaTex.repeat.set(1.5, 1.5);
       sunPlasmaRef.current = sunPlasmaTex;
     }
-    // Configuring the new grass texture
     if (grassHillsTex) {
       grassHillsTex.wrapS = grassHillsTex.wrapT = THREE.RepeatWrapping;
-      // Controlling repeat factor prevents stretching and pixelation on large mesh
       grassHillsTex.repeat.set(4, 4); 
     }
   }, [pinkStoneTex, sunPlasmaTex, grassHillsTex]);
@@ -141,7 +149,6 @@ export default function Scene({ currentView }) {
   const pinkProps = { map: pinkStoneTex, color: "#fcd7d7", roughness: 0.65, metalness: 0.05 };
 
   useEffect(() => {
-    // Initial snap to the closer mobile position or desktop sweet spot
     const startPos = isMobile ? new THREE.Vector3(-30, 8, 60) : new THREE.Vector3(-15, 1.5, 30);
     camera.position.copy(startPos);
     camera.lookAt(12, 1.5, 0);
@@ -150,10 +157,8 @@ export default function Scene({ currentView }) {
   useFrame((state, delta) => {
     const isHome = currentView === "home";
     const LERP_SPEED = 0.04;
-
     const sweetSpotPos = isMobile ? new THREE.Vector3(-30, 8, 65) : new THREE.Vector3(-15, 1.5, 30);
     const sweetSpotLook = new THREE.Vector3(12, 1.5, 0);
-
     const exitFinalPos = new THREE.Vector3(-8, 1.5, -100);
     const exitLook = new THREE.Vector3(-8, 1.5, -200);
 
@@ -173,9 +178,8 @@ export default function Scene({ currentView }) {
       sunPlasmaRef.current.offset.y -= delta * 0.05;
     }
 
-    // HIGH INTENSITY WIND
     if (cloudGroupRef.current) {
-      cloudGroupRef.current.position.x += delta * 1.8;
+      cloudGroupRef.current.position.x += delta * 1.5;
       if (cloudGroupRef.current.position.x > 180) cloudGroupRef.current.position.x = -180;
     }
   });
@@ -184,10 +188,8 @@ export default function Scene({ currentView }) {
     <>
       <Sky distance={450000} sunPosition={[-10, 6, -100]} inclination={0.49} azimuth={0.25} turbidity={12} rayleigh={0.3} mieCoefficient={0.02} mieDirectionalG={0.95} />
 
-      {/* GRASSY HILLS - Passing the new textureMap prop */}
       <GrassyHills windSpeed={0.8} textureMap={grassHillsTex} />
 
-      {/* SUN UNIT */}
       <mesh position={[-10, 45, -180]}>
         <sphereGeometry args={[isMobile ? 18 : 22, 64, 64]} />
         <meshStandardMaterial 
@@ -206,18 +208,21 @@ export default function Scene({ currentView }) {
       <Environment preset="sunset" />
       <fog attach="fog" args={["#ffc0e6", 15, 320]} />
 
-      {/* DENSE WINDY CLOUD SYSTEM */}
+      {/* REBALANCED CLOUD SYSTEM */}
       <group ref={cloudGroupRef}>
-        {/* Core Cluster near Sun */}
-        <Cloud position={[-10, 45, -165]} speed={0.5} opacity={0.7} segments={30} bounds={[50, 20, 10]} volume={20} color="#ffd1dc" />
-        <Cloud position={[30, 55, -175]} speed={0.4} opacity={0.6} segments={25} bounds={[40, 15, 5]} volume={15} color="#e6e6fa" />
-        <Cloud position={[-50, 40, -160]} speed={0.6} opacity={0.5} segments={20} bounds={[60, 20, 10]} volume={18} color="#b0e0e6" />
+        {/* Left Side Balance */}
+        <Cloud position={[-100, 45, -120]} speed={0.4} opacity={0.5} segments={20} bounds={[40, 10, 10]} volume={15} color="#ffd1dc" />
+        <Cloud position={[-60, 60, -160]} speed={0.3} opacity={0.4} segments={20} bounds={[50, 15, 10]} volume={12} color="#e6e6fa" />
         
-        {/* Sky Fillers */}
-        <Cloud position={[0, 35, -150]} speed={0.3} opacity={0.4} segments={20} bounds={[100, 10, 10]} volume={12} color="#fce7f3" />
-        <Cloud position={[-100, 30, -80]} speed={0.2} opacity={0.5} segments={24} bounds={[80, 20, 20]} volume={20} color="#ffd6f0" />
-        <Cloud position={[100, 50, -100]} speed={0.3} opacity={0.4} segments={20} bounds={[120, 30, 30]} volume={15} color="#e9d5ff" />
-        <Cloud position={[-20, 75, -140]} speed={0.1} opacity={0.3} segments={15} bounds={[250, 40, 40]} volume={30} color="#ffffff" />
+        {/* Center / Sun Area */}
+        <Cloud position={[-10, 50, -170]} speed={0.5} opacity={0.6} segments={30} bounds={[60, 20, 10]} volume={20} color="#ffffff" />
+        
+        {/* Right Side Balance */}
+        <Cloud position={[60, 55, -150]} speed={0.4} opacity={0.5} segments={20} bounds={[50, 15, 10]} volume={15} color="#fce7f3" />
+        <Cloud position={[110, 40, -100]} speed={0.3} opacity={0.4} segments={25} bounds={[60, 20, 20]} volume={18} color="#e9d5ff" />
+
+        {/* High Altitude Spread */}
+        <Cloud position={[0, 80, -200]} speed={0.2} opacity={0.2} segments={40} bounds={[300, 50, 50]} volume={40} color="#ffffff" />
       </group>
 
       <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#ffc0e6" />
@@ -247,7 +252,6 @@ export default function Scene({ currentView }) {
       
       <ContactShadows position={[12, -1.9, 15]} opacity={0.15} scale={60} blur={4} far={12} />
 
-      {/* INFINITE WATER */}
       <water
         ref={waterRef}
         args={[
