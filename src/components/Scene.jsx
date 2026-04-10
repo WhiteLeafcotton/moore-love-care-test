@@ -6,10 +6,8 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* Grassy Hills with Procedural Wind Sway */
-const GrassyHills = ({ windSpeed, textureMap }) => {
-  const meshRef = useRef();
-  
+/* Grassy Hills - Now Static */
+const GrassyHills = ({ textureMap }) => {
   const geom = useMemo(() => {
     const g = new THREE.PlaneGeometry(400, 400, 80, 80);
     const vertices = g.attributes.position.array;
@@ -18,11 +16,7 @@ const GrassyHills = ({ windSpeed, textureMap }) => {
       const x = vertices[i];
       const y = vertices[i + 1];
       
-      // Calculate distance from center (Arena area)
       const dist = Math.sqrt(x * x + y * y);
-      
-      // If within 45 units of center, flatten the terrain
-      // Smoothly blend the transition so it doesn't look like a sharp cut
       const flatZone = 45;
       const smoothZone = 20;
       let influence = 1.0;
@@ -33,7 +27,6 @@ const GrassyHills = ({ windSpeed, textureMap }) => {
         influence = (dist - flatZone) / smoothZone;
       }
 
-      // Rolling hill height logic applied only outside the arena
       vertices[i + 2] = (
         Math.sin(x * 0.04) * Math.cos(y * 0.04) * 10 + 
         Math.sin(x * 0.08) * 3
@@ -43,15 +36,9 @@ const GrassyHills = ({ windSpeed, textureMap }) => {
     return g;
   }, []);
 
-  useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.z = Math.sin(state.clock.elapsedTime * windSpeed) * 0.015;
-    }
-  });
-
+  // useFrame logic removed to keep hills still
   return (
     <mesh 
-      ref={meshRef} 
       geometry={geom} 
       rotation={[-Math.PI / 2, 0, 0]} 
       position={[0, -3.5, -40]} 
@@ -179,7 +166,7 @@ export default function Scene({ currentView }) {
     }
 
     if (cloudGroupRef.current) {
-      cloudGroupRef.current.position.x += delta * 1.5;
+      cloudGroupRef.current.position.x += delta * 1.2;
       if (cloudGroupRef.current.position.x > 180) cloudGroupRef.current.position.x = -180;
     }
   });
@@ -188,41 +175,35 @@ export default function Scene({ currentView }) {
     <>
       <Sky distance={450000} sunPosition={[-10, 6, -100]} inclination={0.49} azimuth={0.25} turbidity={12} rayleigh={0.3} mieCoefficient={0.02} mieDirectionalG={0.95} />
 
-      <GrassyHills windSpeed={0.8} textureMap={grassHillsTex} />
+      <GrassyHills textureMap={grassHillsTex} />
 
+      {/* TONED DOWN SUN */}
       <mesh position={[-10, 45, -180]}>
-        <sphereGeometry args={[isMobile ? 18 : 22, 64, 64]} />
+        <sphereGeometry args={[isMobile ? 16 : 20, 64, 64]} />
         <meshStandardMaterial 
-          color="#ffffff" 
+          color="#fff4e6" 
           emissive="#ffba5c" 
           emissiveMap={sunPlasmaTex}
-          emissiveIntensity={4}
+          emissiveIntensity={1.8} // Lowered for a softer glow
           transparent={true}
-          opacity={0.7} 
-          roughness={0.1}
-          metalness={0.8}
+          opacity={0.6} // More blended with the sky
+          roughness={0.2}
+          metalness={0.5}
         />
-        <pointLight intensity={5} distance={400} color="#fff1d4" decay={1} />
+        <pointLight intensity={3} distance={400} color="#fff1d4" decay={1.5} />
       </mesh>
 
       <Environment preset="sunset" />
       <fog attach="fog" args={["#ffc0e6", 15, 320]} />
 
-      {/* REBALANCED CLOUD SYSTEM */}
+      {/* BALANCED CLOUD SYSTEM */}
       <group ref={cloudGroupRef}>
-        {/* Left Side Balance */}
         <Cloud position={[-100, 45, -120]} speed={0.4} opacity={0.5} segments={20} bounds={[40, 10, 10]} volume={15} color="#ffd1dc" />
         <Cloud position={[-60, 60, -160]} speed={0.3} opacity={0.4} segments={20} bounds={[50, 15, 10]} volume={12} color="#e6e6fa" />
-        
-        {/* Center / Sun Area */}
         <Cloud position={[-10, 50, -170]} speed={0.5} opacity={0.6} segments={30} bounds={[60, 20, 10]} volume={20} color="#ffffff" />
-        
-        {/* Right Side Balance */}
         <Cloud position={[60, 55, -150]} speed={0.4} opacity={0.5} segments={20} bounds={[50, 15, 10]} volume={15} color="#fce7f3" />
         <Cloud position={[110, 40, -100]} speed={0.3} opacity={0.4} segments={25} bounds={[60, 20, 20]} volume={18} color="#e9d5ff" />
-
-        {/* High Altitude Spread */}
-        <Cloud position={[0, 80, -200]} speed={0.2} opacity={0.2} segments={40} bounds={[300, 50, 50]} volume={40} color="#ffffff" />
+        <Cloud position={[0, 80, -200]} speed={0.2} opacity={0.15} segments={40} bounds={[300, 50, 50]} volume={40} color="#ffffff" />
       </group>
 
       <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#ffc0e6" />
