@@ -6,7 +6,7 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* Grassy Hills - Now Static */
+/* Grassy Hills - Static & Clear of Arena */
 const GrassyHills = ({ textureMap }) => {
   const geom = useMemo(() => {
     const g = new THREE.PlaneGeometry(400, 400, 80, 80);
@@ -36,7 +36,6 @@ const GrassyHills = ({ textureMap }) => {
     return g;
   }, []);
 
-  // useFrame logic removed to keep hills still
   return (
     <mesh 
       geometry={geom} 
@@ -166,8 +165,8 @@ export default function Scene({ currentView }) {
     }
 
     if (cloudGroupRef.current) {
-      cloudGroupRef.current.position.x += delta * 1.2;
-      if (cloudGroupRef.current.position.x > 180) cloudGroupRef.current.position.x = -180;
+      cloudGroupRef.current.position.x += delta * 0.6; // Slower drift for larger clouds
+      if (cloudGroupRef.current.position.x > 250) cloudGroupRef.current.position.x = -250;
     }
   });
 
@@ -178,32 +177,34 @@ export default function Scene({ currentView }) {
       <GrassyHills textureMap={grassHillsTex} />
 
       {/* TONED DOWN SUN */}
-      <mesh position={[-10, 45, -180]}>
-        <sphereGeometry args={[isMobile ? 16 : 20, 64, 64]} />
+      <mesh position={[-10, 55, -200]}>
+        <sphereGeometry args={[isMobile ? 14 : 18, 64, 64]} />
         <meshStandardMaterial 
           color="#fff4e6" 
           emissive="#ffba5c" 
           emissiveMap={sunPlasmaTex}
-          emissiveIntensity={1.8} // Lowered for a softer glow
+          emissiveIntensity={1.2} 
           transparent={true}
-          opacity={0.6} // More blended with the sky
+          opacity={0.5} 
           roughness={0.2}
           metalness={0.5}
         />
-        <pointLight intensity={3} distance={400} color="#fff1d4" decay={1.5} />
+        <pointLight intensity={2} distance={500} color="#fff1d4" decay={1.5} />
       </mesh>
 
       <Environment preset="sunset" />
-      <fog attach="fog" args={["#ffc0e6", 15, 320]} />
+      <fog attach="fog" args={["#ffc0e6", 15, 350]} />
 
-      {/* BALANCED CLOUD SYSTEM */}
+      {/* LARGE DIFFUSED SKY SYSTEM */}
       <group ref={cloudGroupRef}>
-        <Cloud position={[-100, 45, -120]} speed={0.4} opacity={0.5} segments={20} bounds={[40, 10, 10]} volume={15} color="#ffd1dc" />
-        <Cloud position={[-60, 60, -160]} speed={0.3} opacity={0.4} segments={20} bounds={[50, 15, 10]} volume={12} color="#e6e6fa" />
-        <Cloud position={[-10, 50, -170]} speed={0.5} opacity={0.6} segments={30} bounds={[60, 20, 10]} volume={20} color="#ffffff" />
-        <Cloud position={[60, 55, -150]} speed={0.4} opacity={0.5} segments={20} bounds={[50, 15, 10]} volume={15} color="#fce7f3" />
-        <Cloud position={[110, 40, -100]} speed={0.3} opacity={0.4} segments={25} bounds={[60, 20, 20]} volume={18} color="#e9d5ff" />
-        <Cloud position={[0, 80, -200]} speed={0.2} opacity={0.15} segments={40} bounds={[300, 50, 50]} volume={40} color="#ffffff" />
+        {/* Massive Horizon Fillers */}
+        <Cloud position={[-150, 40, -250]} speed={0.2} opacity={0.3} segments={40} bounds={[300, 40, 40]} volume={50} color="#ffd1dc" />
+        <Cloud position={[150, 60, -220]} speed={0.2} opacity={0.2} segments={40} bounds={[300, 50, 40]} volume={50} color="#e6e6fa" />
+        
+        {/* Main Sky Volume */}
+        <Cloud position={[0, 45, -180]} speed={0.3} opacity={0.4} segments={50} bounds={[150, 30, 20]} volume={30} color="#ffffff" />
+        <Cloud position={[-80, 70, -150]} speed={0.1} opacity={0.2} segments={30} bounds={[200, 60, 30]} volume={40} color="#fce7f3" />
+        <Cloud position={[80, 30, -120]} speed={0.2} opacity={0.2} segments={30} bounds={[180, 40, 50]} volume={30} color="#e9d5ff" />
       </group>
 
       <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#ffc0e6" />
@@ -236,7 +237,7 @@ export default function Scene({ currentView }) {
       <water
         ref={waterRef}
         args={[
-          new THREE.PlaneGeometry(2000, 2000),
+          new THREE.PlaneGeometry(2500, 2500),
           {
             textureWidth: isMobile ? 512 : 1024,
             textureHeight: isMobile ? 512 : 1024,
