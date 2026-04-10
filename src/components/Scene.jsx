@@ -6,36 +6,50 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* 1. 3D INSTANCED GRASS COMPONENT */
-const GRASS_COUNT = 45000; 
-const GrassyHills = ({ windSpeed = 1.0 }) => {
+/* 1. GRASSY HILLS (Hills + 3D Blades) */
+const GrassyHills = ({ windSpeed = 1.2, textureMap }) => {
   const meshRef = useRef();
+  const hillRef = useRef();
 
-  const bladeGeometry = useMemo(() => {
-    const g = new THREE.PlaneGeometry(0.15, 0.75, 1, 4);
-    g.translate(0, 0.375, 0); 
+  // The Hill Geometry (from your reference)
+  const hillGeom = useMemo(() => {
+    const g = new THREE.PlaneGeometry(350, 350, 60, 60);
+    const pos = g.attributes.position.array;
+    for (let i = 0; i < pos.length; i += 3) {
+      const x = pos[i];
+      const y = pos[i + 1];
+      pos[i + 2] = Math.sin(x * 0.04) * Math.cos(y * 0.04) * 10 + Math.sin(x * 0.08) * 3;
+    }
+    g.computeVertexNormals();
     return g;
   }, []);
 
-  const instancedMeshArgs = useMemo(() => {
-    const positions = [];
-    for (let i = 0; i < GRASS_COUNT; i++) {
+  // The 3D Blade Setup
+  const bladeGeom = useMemo(() => {
+    const g = new THREE.PlaneGeometry(0.12, 0.7, 1, 3);
+    g.translate(0, 0.35, 0); 
+    return g;
+  }, []);
+
+  const bladeData = useMemo(() => {
+    const data = [];
+    for (let i = 0; i < 40000; i++) {
       const x = (Math.random() - 0.5) * 300;
       const z = (Math.random() - 0.5) * 300;
-      // Heights matching your hill logic
-      const y = Math.sin(x * 0.04) * Math.cos(z * 0.04) * 10 + Math.sin(x * 0.08) * 3 - 3.5;
-      positions.push(new THREE.Vector3(x, y, z));
+      const y = Math.sin(x * 0.04) * Math.cos(z * 0.04) * 10 + Math.sin(x * 0.08) * 3;
+      data.push({ pos: new THREE.Vector3(x, y, z), rot: Math.random() * Math.PI });
     }
-    return positions;
+    return data;
   }, []);
 
   const dummy = new THREE.Object3D();
   useFrame((state) => {
-    const time = state.clock.getElapsedTime();
-    instancedMeshArgs.forEach((pos, i) => {
-      dummy.position.copy(pos);
-      const noise = Math.sin(time * windSpeed + pos.x * 0.5) * 0.2;
-      dummy.rotation.set(noise, noise * 0.2, 0);
+    const t = state.clock.getElapsedTime();
+    bladeData.forEach((blade, i) => {
+      dummy.position.copy(blade.pos);
+      // Realistic individual sway
+      const sway = Math.sin(t * windSpeed + blade.pos.x * 0.3 + blade.pos.z * 0.2) * 0.2;
+      dummy.rotation.set(sway, blade.rot, 0);
       dummy.updateMatrix();
       meshRef.current.setMatrixAt(i, dummy.matrix);
     });
@@ -43,19 +57,25 @@ const GrassyHills = ({ windSpeed = 1.0 }) => {
   });
 
   return (
-    <group position={[0, 0, -40]}>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -3.5, 0]} receiveShadow>
-        <planeGeometry args={[400, 400, 40, 40]} />
-        <meshStandardMaterial color="#ffc2e2" roughness={1} />
+    <group position={[0, -3.5, -40]}>
+      {/* THE HILL SURFACE (Uses your reference grass texture) */}
+      <mesh geometry={hillGeom} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+        <meshStandardMaterial 
+          map={textureMap} 
+          color={textureMap ? "#fff" : "#ffc2e2"} 
+          roughness={0.9} 
+        />
       </mesh>
-      <instancedMesh ref={meshRef} args={[bladeGeometry, null, GRASS_COUNT]} castShadow>
+
+      {/* THE 3D BLADES (Growing out of the hill) */}
+      <instancedMesh ref={meshRef} args={[bladeGeom, null, 40000]} castShadow>
         <meshStandardMaterial color="#fcaed5" side={THREE.DoubleSide} alphaTest={0.5} />
       </instancedMesh>
     </group>
   );
 };
 
-/* 2. STAIRCASE COMPONENT */
+/* 2. STAIRCASE */
 const Staircase = ({ position, width, texture, rotation }) => {
   const stepHeight = 0.5;
   const stepDepth = 0.8;
@@ -78,31 +98,7 @@ const Staircase = ({ position, width, texture, rotation }) => {
   );
 };
 
-/* 3. WALL COMPONENT */
-const WallOpening = ({ position, colorProps, width = 6, openingW = 3.5, height = 17, openingH = 9, isWindow = false }) => (
-  <group position={position}>
-    <mesh castShadow receiveShadow position={[-(openingW + (width - openingW) / 2) / 2, height / 2, 0]}>
-      <boxGeometry args={[(width - openingW) / 2, height, 2]} />
-      <meshStandardMaterial {...colorProps} />
-    </mesh>
-    <mesh castShadow receiveShadow position={[(openingW + (width - openingW) / 2) / 2, height / 2, 0]}>
-      <boxGeometry args={[(width - openingW) / 2, height, 2]} />
-      <meshStandardMaterial {...colorProps} />
-    </mesh>
-    <mesh castShadow receiveShadow position={[0, height - (height - openingH - (isWindow ? 4 : 0)) / 2, 0]}>
-      <boxGeometry args={[openingW, height - openingH - (isWindow ? 4 : 0), 2]} />
-      <meshStandardMaterial {...colorProps} />
-    </mesh>
-    {isWindow && (
-      <mesh castShadow receiveShadow position={[0, 2, 0]}>
-        <boxGeometry args={[openingW, 4, 2]} />
-        <meshStandardMaterial {...colorProps} />
-      </mesh>
-    )}
-  </group>
-);
-
-/* 4. MAIN SCENE */
+/* 3. MAIN SCENE */
 export default function Scene({ currentView }) {
   const { camera, size } = useThree();
   const waterRef = useRef();
@@ -113,11 +109,20 @@ export default function Scene({ currentView }) {
 
   const pinkStoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
-  const sunPlasmaTex = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
+  
+  // YOUR TEXTURE LOADING LOGIC
+  const grassHillsTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/reference_grass.png`, 
+    (loader) => { loader.onError = (err) => console.error("Grass texture 404:", err); }
+  );
 
   useMemo(() => {
     if (pinkStoneTex) { pinkStoneTex.wrapS = pinkStoneTex.wrapT = THREE.RepeatWrapping; pinkStoneTex.repeat.set(2, 2); }
-  }, [pinkStoneTex]);
+    if (grassHillsTex) {
+      grassHillsTex.wrapS = grassHillsTex.wrapT = THREE.RepeatWrapping;
+      grassHillsTex.repeat.set(8, 8);
+      grassHillsTex.anisotropy = 16;
+    }
+  }, [pinkStoneTex, grassHillsTex]);
 
   const pinkProps = { map: pinkStoneTex, color: "#fcd7d7", roughness: 0.65, metalness: 0.05 };
 
@@ -125,9 +130,7 @@ export default function Scene({ currentView }) {
     const isHome = currentView === "home";
     const LERP_SPEED = 0.04;
     const sweetSpotPos = isMobile ? new THREE.Vector3(-30, 8, 65) : new THREE.Vector3(-15, 1.5, 30);
-    const exitFinalPos = new THREE.Vector3(-8, 1.5, -100);
-
-    camera.position.lerp(isHome ? sweetSpotPos : exitFinalPos, LERP_SPEED);
+    camera.position.lerp(isHome ? sweetSpotPos : new THREE.Vector3(-8, 1.5, -100), LERP_SPEED);
     lookAtTarget.current.lerp(isHome ? new THREE.Vector3(12, 1.5, 0) : new THREE.Vector3(-8, 1.5, -200), LERP_SPEED);
     camera.lookAt(lookAtTarget.current);
 
@@ -142,8 +145,8 @@ export default function Scene({ currentView }) {
     <>
       <Sky distance={450000} sunPosition={[-10, 6, -100]} inclination={0.49} azimuth={0.25} turbidity={12} rayleigh={0.3} />
       
-      {/* CALLING THE GRASS COMPONENT HERE */}
-      <GrassyHills windSpeed={1.2} />
+      {/* THE BLADES OF BLOWING GRASS + HILLS */}
+      <GrassyHills windSpeed={1.4} textureMap={grassHillsTex} />
 
       <mesh position={[-10, 45, -180]}>
         <sphereGeometry args={[isMobile ? 18 : 22, 64, 64]} />
@@ -167,12 +170,6 @@ export default function Scene({ currentView }) {
           <meshStandardMaterial {...pinkProps} />
         </mesh>
         <Staircase position={[5.0, 1.5, 1.0]} rotation={[0, -Math.PI / 2, 0]} width={20} texture={pinkStoneTex} />
-        <group position={[-16, -1, 0]}>
-          <mesh castShadow receiveShadow position={[1, 8.5, 0]}><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
-          <WallOpening position={[6, 0, 0]} colorProps={pinkProps} />
-          <WallOpening position={[12, 0, 0]} colorProps={pinkProps} />
-          <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
-        </group>
       </group>
 
       <water
