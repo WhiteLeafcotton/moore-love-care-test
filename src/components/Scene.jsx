@@ -8,15 +8,13 @@ extend({ Water });
 
 const GrassyHills = ({ windSpeed = 1.0 }) => {
   const instanceRef = useRef();
-  // Games use high counts (50k-100k) but optimize with "Frustum Culling"
-  const count = 55000; 
+  const count = 75000; // High density for the "Unseen" look
 
   const getHeight = (x, y) => {
     return Math.sin(x * 0.04) * Math.cos(y * 0.04) * 10 + Math.sin(x * 0.08) * 3;
   };
 
   const { geometry, terrainGeom } = useMemo(() => {
-    // 1. High-res Terrain
     const tg = new THREE.PlaneGeometry(400, 400, 100, 100);
     const pos = tg.attributes.position.array;
     for (let i = 0; i < pos.length; i += 3) {
@@ -24,19 +22,14 @@ const GrassyHills = ({ windSpeed = 1.0 }) => {
     }
     tg.computeVertexNormals();
 
-    // 2. AAA TRIPLE-CROSS GEOMETRY
-    const bladeW = 0.15;
-    const bladeH = 1.4;
-    const baseG = new THREE.PlaneGeometry(bladeW, bladeH, 1, 4);
-    baseG.translate(0, bladeH / 2, 0); // Pivot at bottom
-
-    // Create 3 planes at different angles to form a "Star"
-    const p1 = baseG.clone();
-    const p2 = baseG.clone().rotateY(Math.PI / 3);
-    const p3 = baseG.clone().rotateY((Math.PI / 3) * 2);
-
-    // Merge them into one single geometry for performance
-    const starGeo = THREE.BufferGeometryUtils.mergeGeometries([p1, p2, p3]);
+    // Use a Star geometry (3 planes) for maximum volume
+    const baseG = new THREE.PlaneGeometry(0.18, 1.5, 1, 6);
+    baseG.translate(0, 0.75, 0);
+    const starGeo = THREE.BufferGeometryUtils.mergeGeometries([
+      baseG.clone(),
+      baseG.clone().rotateY(Math.PI / 3),
+      baseG.clone().rotateY((Math.PI / 3) * 2)
+    ]);
 
     return { geometry: starGeo, terrainGeom: tg };
   }, []);
@@ -44,23 +37,17 @@ const GrassyHills = ({ windSpeed = 1.0 }) => {
   useEffect(() => {
     const dummy = new THREE.Object3D();
     const root = Math.sqrt(count);
-    const spacing = 360 / root;
+    const spacing = 350 / root;
 
     for (let i = 0; i < count; i++) {
-      const row = i % root;
-      const col = Math.floor(i / root);
-      
-      // Jittered grid placement (avoids the "scattered" look)
-      const x = (row * spacing - 180) + (Math.random() - 0.5) * spacing;
-      const y = (col * spacing - 180) + (Math.random() - 0.5) * spacing;
+      const x = (i % root) * spacing - 175 + (Math.random() - 0.5) * spacing;
+      const y = Math.floor(i / root) * spacing - 175 + (Math.random() - 0.5) * spacing;
       const z = getHeight(x, y);
 
       dummy.position.set(x, y, z);
-      // Only rotate on Y so they stay vertical
       dummy.rotation.set(0, Math.random() * Math.PI, 0); 
-      // Vary heights significantly for organic feel
-      dummy.scale.set(1, 0.6 + Math.random() * 0.8, 1);
-      
+      // Vary the height scale for that "fluffy" uneven look
+      dummy.scale.set(1, 0.5 + Math.random() * 1.2, 1);
       dummy.updateMatrix();
       instanceRef.current.setMatrixAt(i, dummy.matrix);
     }
@@ -70,48 +57,47 @@ const GrassyHills = ({ windSpeed = 1.0 }) => {
   const grassMaterial = useMemo(() => {
     const mat = new THREE.MeshStandardMaterial({
       side: THREE.DoubleSide,
-      roughness: 0.7,
-      metalness: 0,
+      roughness: 0.6,
     });
 
     mat.onBeforeCompile = (shader) => {
       shader.uniforms.uTime = { value: 0 };
-      shader.vertexShader = `uniform float uTime; varying float vHeight;` + shader.vertexShader;
+      shader.vertexShader = `uniform float uTime; varying float vHeight; varying vec3 vWorldPos;` + shader.vertexShader;
       
       shader.vertexShader = shader.vertexShader.replace(
         "#include <begin_vertex>",
         `
         vec3 transformed = vec3(position);
         vHeight = position.y;
+        vWorldPos = (instanceMatrix * vec4(position, 1.0)).xyz;
 
-        // Realistic Wind: Simplex-style noise approximation
-        float windTime = uTime * 1.8;
-        float noise = sin(windTime + instanceMatrix[3][0] * 0.4) * 0.12;
-        noise += cos(windTime * 0.5 + instanceMatrix[3][1] * 0.2) * 0.08;
+        // Wave logic with spatial noise for "Unseen" style flowing
+        float wave = sin(uTime * 1.2 + vWorldPos.x * 0.1 + vWorldPos.z * 0.1) * 0.25;
+        wave += cos(uTime * 0.8 + vWorldPos.x * 0.2) * 0.1;
         
-        // Tilt the whole blade slightly away from center for volume
-        transformed.x += sin(instanceMatrix[3][0]) * 0.1;
-        
-        // Sway the tips only
-        float bend = pow(max(0.0, vHeight), 2.2) * noise;
-        transformed.x += bend;
-        transformed.z += bend * 0.4;
+        // Bend the top of the blade only
+        transformed.x += pow(max(0.0, vHeight), 2.5) * wave;
+        transformed.z += pow(max(0.0, vHeight), 2.5) * wave * 0.5;
         `
       );
 
-      shader.fragmentShader = `varying float vHeight;` + shader.fragmentShader;
+      shader.fragmentShader = `varying float vHeight; varying vec3 vWorldPos;` + shader.fragmentShader;
       shader.fragmentShader = shader.fragmentShader.replace(
         "#include <color_fragment>",
         `
         #include <color_fragment>
-        // Color 1: Deep forest base
-        // Color 2: Bright sun-lit tips
-        vec3 baseColor = vec3(0.02, 0.08, 0.02);
-        vec3 tipColor = vec3(0.45, 0.65, 0.15);
         
-        // Add a slight "ambient occlusion" at the roots
-        float occl = smoothstep(0.0, 0.3, vHeight);
-        diffuseColor.rgb = mix(baseColor, tipColor, vHeight) * occl;
+        // Define colors based on the "Unseen" aesthetic (soft pastels/warm greens)
+        vec3 rootColor = vec3(0.02, 0.1, 0.05);
+        vec3 tipColor = vec3(0.6, 0.75, 0.3);
+        
+        // Add "SSS" (Subsurface Scattering) glow effect
+        float glow = pow(vHeight, 2.0) * 1.2;
+        vec3 finalColor = mix(rootColor, tipColor, vHeight);
+        
+        // Subtle noise to vary color per patch
+        float noise = sin(vWorldPos.x * 2.0) * cos(vWorldPos.z * 2.0) * 0.1;
+        diffuseColor.rgb = finalColor + (glow * 0.15) + noise;
         `
       );
       mat.userData.shader = shader;
@@ -127,9 +113,8 @@ const GrassyHills = ({ windSpeed = 1.0 }) => {
 
   return (
     <group rotation={[-Math.PI / 2, 0, 0]} position={[0, -3.5, -20]}>
-      {/* Terrain Base (Darkened to hide ground) */}
-      <mesh geometry={terrainGeom} receiveShadow>
-        <meshStandardMaterial color="#051005" roughness={1} />
+      <mesh geometry={terrainGeom}>
+        <meshStandardMaterial color="#081408" />
       </mesh>
       <instancedMesh ref={instanceRef} args={[geometry, grassMaterial, count]} castShadow />
     </group>
