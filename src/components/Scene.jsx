@@ -1,4 +1,4 @@
-import { useRef, useMemo, useState, useEffect } from "react";
+import React, { useRef, useMemo, useEffect } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
 import { Environment, Sky, ContactShadows, Cloud } from "@react-three/drei";
 import { Water } from "three-stdlib";
@@ -6,22 +6,20 @@ import * as THREE from "three";
 
 extend({ Water });
 
-
-import { useMemo, useRef, useEffect } from "react";
-import * as THREE from "three";
-import { useFrame } from "@react-three/fiber";
-
+/* -------------------------------------------------------------------------- */
+/* 1. GRASS COMPONENT                              */
+/* -------------------------------------------------------------------------- */
 const GrassyHills = ({ windSpeed = 1.0 }) => {
   const instanceRef = useRef();
   const count = 25000;
 
-  // 1. Terrain Elevation Logic
+  // Elevation logic used for both terrain and grass placement
   const getHeight = (x, y) => {
     return Math.sin(x * 0.04) * Math.cos(y * 0.04) * 10 + Math.sin(x * 0.08) * 3;
   };
 
   const { geometry, terrainGeom } = useMemo(() => {
-    // Terrain
+    // 1. Generate Terrain
     const tg = new THREE.PlaneGeometry(400, 400, 80, 80);
     const pos = tg.attributes.position.array;
     for (let i = 0; i < pos.length; i += 3) {
@@ -29,14 +27,14 @@ const GrassyHills = ({ windSpeed = 1.0 }) => {
     }
     tg.computeVertexNormals();
 
-    // Grass Blade: Add segments (1, 4) so it can actually bend
+    // 2. Generate Blade Geometry (Segments allow bending)
     const g = new THREE.PlaneGeometry(0.15, 1, 1, 4);
-    g.translate(0, 0.5, 0); // Pivot at bottom
+    g.translate(0, 0.5, 0); // Pivot at base
 
     return { geometry: g, terrainGeom: tg };
   }, []);
 
-  // 2. Populate Instances
+  // Populate Instances on mount
   useEffect(() => {
     const dummy = new THREE.Object3D();
     for (let i = 0; i < count; i++) {
@@ -45,7 +43,6 @@ const GrassyHills = ({ windSpeed = 1.0 }) => {
       const z = getHeight(x, y);
 
       dummy.position.set(x, y, z);
-      // Random rotation around Y-axis for organic look
       dummy.rotation.set(Math.PI / 2, 0, Math.random() * Math.PI);
       dummy.scale.setScalar(0.3 + Math.random() * 0.7);
       dummy.updateMatrix();
@@ -54,82 +51,94 @@ const GrassyHills = ({ windSpeed = 1.0 }) => {
     instanceRef.current.instanceMatrix.needsUpdate = true;
   }, [count]);
 
-  // 3. Shader Material for Vertex Animation
+  // Shader Material for swaying and color gradients
   const grassMaterial = useMemo(() => {
     const mat = new THREE.MeshStandardMaterial({
-      color: "#4e7a54",
+      color: "#4e7a54", // Base color
       side: THREE.DoubleSide,
     });
 
-    // Inject custom shader logic
     mat.onBeforeCompile = (shader) => {
       shader.uniforms.uTime = { value: 0 };
       
-      // Add uniform to the top of vertex shader
       shader.vertexShader = `
         uniform float uTime;
+        varying float vHeight; 
       ` + shader.vertexShader;
 
-      // Replace the position calculation
       shader.vertexShader = shader.vertexShader.replace(
         "#include <begin_vertex>",
         `
         vec3 transformed = vec3(position);
+        vHeight = position.y; // Pass height to fragment shader
+
+        // Wind logic: sway based on time and instance position
+        float wave = sin(uTime * 2.0 + instanceMatrix[3][0] * 0.4) * 0.15;
+        wave += sin(uTime * 1.3 + instanceMatrix[3][1] * 0.3) * 0.1;
         
-        // Calculate a wave based on time and world position
-        float wave = sin(uTime * 2.0 + instanceMatrix[3][0] * 0.5) * 0.15;
-        wave += sin(uTime * 1.2 + instanceMatrix[3][1] * 0.3) * 0.1;
-        
-        // Only bend the upper parts of the blade (uv.y goes from 0 at bottom to 1 at top)
-        // Note: PlaneGeometry uv.y is 0 at top, 1 at bottom usually, 
-        // but since we translated and rotated, we use position.y
+        // Bend only the tips (power of 2 creates a curve)
         float bend = pow(position.y, 2.0) * wave;
         
         transformed.x += bend;
         transformed.z += bend * 0.5;
         `
       );
+
+      // Add a simple color gradient in the fragment shader
+      shader.fragmentShader = `
+        varying float vHeight;
+      ` + shader.fragmentShader;
+
+      shader.fragmentShader = shader.fragmentShader.replace(
+        "#include <color_fragment>",
+        `
+        #include <color_fragment>
+        // Mix base color with a lighter tip color
+        vec3 tipColor = vec3(0.6, 0.8, 0.4);
+        diffuseColor.rgb = mix(diffuseColor.rgb, tipColor, vHeight * 0.6);
+        `
+      );
+
       mat.userData.shader = shader;
     };
     return mat;
   }, []);
 
   useFrame((state) => {
-    const t = state.clock.elapsedTime * windSpeed;
     if (grassMaterial.userData.shader) {
-      grassMaterial.userData.shader.uniforms.uTime.value = t;
+      grassMaterial.userData.shader.uniforms.uTime.value = state.clock.elapsedTime * windSpeed;
     }
   });
 
   return (
     <group rotation={[-Math.PI / 2, 0, 0]} position={[0, -3.5, -20]}>
       <mesh geometry={terrainGeom} receiveShadow>
-        <meshStandardMaterial color="#2d4c31" roughness={1} />
+        <meshStandardMaterial color="#223a25" roughness={1} />
       </mesh>
-
       <instancedMesh ref={instanceRef} args={[geometry, grassMaterial, count]} castShadow />
     </group>
   );
 };
 
+/* -------------------------------------------------------------------------- */
+/* 2. ARCHITECTURAL COMPONENTS                         */
+/* -------------------------------------------------------------------------- */
 
-/* Monolithic Staircase */
 const Staircase = ({ position, width, texture, rotation }) => {
   const stepHeight = 0.5;
   const stepDepth = 0.8;
   const numSteps = 16;
-
   return (
     <group position={position} rotation={rotation}>
       {Array.from({ length: numSteps }).map((_, i) => (
         <group key={i} position={[0, -i * stepHeight, i * stepDepth]}>
           <mesh castShadow receiveShadow>
             <boxGeometry args={[width, stepHeight, stepDepth]} />
-            <meshStandardMaterial map={texture} color="#fcd7d7" roughness={0.55} metalness={0.05} />
+            <meshStandardMaterial map={texture} color="#fcd7d7" roughness={0.55} />
           </mesh>
           <mesh position={[0, -2.5, 0]} castShadow receiveShadow>
             <boxGeometry args={[width, 5, stepDepth]} />
-            <meshStandardMaterial map={texture} color="#fcd7d7" roughness={0.55} metalness={0.05} />
+            <meshStandardMaterial map={texture} color="#fcd7d7" />
           </mesh>
         </group>
       ))}
@@ -137,7 +146,6 @@ const Staircase = ({ position, width, texture, rotation }) => {
   );
 };
 
-/* Wall Segment */
 const WallOpening = ({ position, colorProps, width = 6, openingW = 3.5, height = 17, openingH = 9, isWindow = false }) => (
   <group position={position}>
     <mesh castShadow receiveShadow position={[-(openingW + (width - openingW) / 2) / 2, height / 2, 0]}>
@@ -161,52 +169,40 @@ const WallOpening = ({ position, colorProps, width = 6, openingW = 3.5, height =
   </group>
 );
 
+/* -------------------------------------------------------------------------- */
+/* 3. MAIN SCENE                               */
+/* -------------------------------------------------------------------------- */
+
 export default function Scene({ currentView }) {
   const { camera, size } = useThree();
   const waterRef = useRef();
-  const sunPlasmaRef = useRef();
   const cloudGroupRef = useRef();
   const lookAtTarget = useRef(new THREE.Vector3(12, 1.5, 0));
   const baseUrl = import.meta.env.BASE_URL || "/";
-
   const isMobile = size.width < 768;
 
+  // Assets
   const pinkStoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
-  const sunPlasmaTex = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
 
-  useMemo(() => {
+  useEffect(() => {
     if (pinkStoneTex) {
       pinkStoneTex.wrapS = pinkStoneTex.wrapT = THREE.RepeatWrapping;
       pinkStoneTex.repeat.set(2, 2);
     }
-    if (sunPlasmaTex) {
-      sunPlasmaTex.wrapS = sunPlasmaTex.wrapT = THREE.RepeatWrapping;
-      sunPlasmaTex.repeat.set(1.5, 1.5);
-      sunPlasmaRef.current = sunPlasmaTex;
-    }
-  }, [pinkStoneTex, sunPlasmaTex]);
+  }, [pinkStoneTex]);
 
   const pinkProps = { map: pinkStoneTex, color: "#fcd7d7", roughness: 0.65, metalness: 0.05 };
-
-  useEffect(() => {
-    // Backed up camera for mobile initialization (Z=60)
-    const startPos = isMobile ? new THREE.Vector3(-30, 8, 60) : new THREE.Vector3(-15, 1.5, 30);
-    camera.position.copy(startPos);
-    camera.lookAt(12, 1.5, 0);
-  }, [camera, isMobile]);
 
   useFrame((state, delta) => {
     const isHome = currentView === "home";
     const LERP_SPEED = 0.04;
-
-    // Mobile camera sweet spot: wide and cinematic
     const sweetSpotPos = isMobile ? new THREE.Vector3(-30, 8, 65) : new THREE.Vector3(-15, 1.5, 30);
     const sweetSpotLook = new THREE.Vector3(12, 1.5, 0);
-
     const exitFinalPos = new THREE.Vector3(-8, 1.5, -100);
     const exitLook = new THREE.Vector3(-8, 1.5, -200);
 
+    // Camera Interpolation
     if (isHome) {
       camera.position.lerp(sweetSpotPos, LERP_SPEED);
       lookAtTarget.current.lerp(sweetSpotLook, LERP_SPEED);
@@ -214,16 +210,10 @@ export default function Scene({ currentView }) {
       camera.position.lerp(exitFinalPos, LERP_SPEED);
       lookAtTarget.current.lerp(exitLook, LERP_SPEED);
     }
-
     camera.lookAt(lookAtTarget.current);
 
+    // Water/Cloud Animation
     if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.2;
-    if (sunPlasmaRef.current) {
-      sunPlasmaRef.current.offset.x += delta * 0.03;
-      sunPlasmaRef.current.offset.y -= delta * 0.05;
-    }
-
-    // HIGH INTENSITY WIND
     if (cloudGroupRef.current) {
       cloudGroupRef.current.position.x += delta * 1.8;
       if (cloudGroupRef.current.position.x > 180) cloudGroupRef.current.position.x = -180;
@@ -232,49 +222,29 @@ export default function Scene({ currentView }) {
 
   return (
     <>
-      <Sky distance={450000} sunPosition={[-10, 6, -100]} inclination={0.49} azimuth={0.25} turbidity={12} rayleigh={0.3} mieCoefficient={0.02} mieDirectionalG={0.95} />
-
-      {/* GRASSY HILLS */}
+      <Sky distance={450000} sunPosition={[-10, 6, -100]} inclination={0.49} azimuth={0.25} turbidity={12} rayleigh={0.3} />
+      
       <GrassyHills windSpeed={0.8} />
-
-      {/* SUN UNIT */}
-      <mesh position={[-10, 45, -180]}>
-        <sphereGeometry args={[isMobile ? 18 : 22, 64, 64]} />
-        <meshStandardMaterial 
-          color="#ffffff" 
-          emissive="#ffba5c" 
-          emissiveMap={sunPlasmaTex}
-          emissiveIntensity={4}
-          transparent={true}
-          opacity={0.7} 
-          roughness={0.1}
-          metalness={0.8}
-        />
-        <pointLight intensity={5} distance={400} color="#fff1d4" decay={1} />
-      </mesh>
 
       <Environment preset="sunset" />
       <fog attach="fog" args={["#ffc0e6", 15, 320]} />
 
-      {/* DENSE WINDY CLOUD SYSTEM */}
+      {/* Sun/Light Sources */}
+      <mesh position={[-10, 45, -180]}>
+        <sphereGeometry args={[isMobile ? 18 : 22, 64, 64]} />
+        <meshStandardMaterial color="#ffffff" emissive="#ffba5c" emissiveIntensity={4} transparent opacity={0.7} />
+        <pointLight intensity={5} distance={400} color="#fff1d4" />
+      </mesh>
+
       <group ref={cloudGroupRef}>
-        {/* Core Cluster near Sun */}
-        <Cloud position={[-10, 45, -165]} speed={0.5} opacity={0.7} segments={30} bounds={[50, 20, 10]} volume={20} color="#ffd1dc" />
-        <Cloud position={[30, 55, -175]} speed={0.4} opacity={0.6} segments={25} bounds={[40, 15, 5]} volume={15} color="#e6e6fa" />
-        <Cloud position={[-50, 40, -160]} speed={0.6} opacity={0.5} segments={20} bounds={[60, 20, 10]} volume={18} color="#b0e0e6" />
-        
-        {/* Sky Fillers */}
-        <Cloud position={[0, 35, -150]} speed={0.3} opacity={0.4} segments={20} bounds={[100, 10, 10]} volume={12} color="#fce7f3" />
-        <Cloud position={[-100, 30, -80]} speed={0.2} opacity={0.5} segments={24} bounds={[80, 20, 20]} volume={20} color="#ffd6f0" />
-        <Cloud position={[100, 50, -100]} speed={0.3} opacity={0.4} segments={20} bounds={[120, 30, 30]} volume={15} color="#e9d5ff" />
-        <Cloud position={[-20, 75, -140]} speed={0.1} opacity={0.3} segments={15} bounds={[250, 40, 40]} volume={30} color="#ffffff" />
+        <Cloud position={[-10, 45, -165]} opacity={0.7} segments={30} bounds={[50, 20, 10]} volume={20} color="#ffd1dc" />
+        <Cloud position={[30, 55, -175]} opacity={0.6} segments={25} bounds={[40, 15, 5]} volume={15} color="#e6e6fa" />
       </group>
 
       <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#ffc0e6" />
-      <directionalLight position={[-15, 30, 10]} intensity={0.1} />
       <pointLight position={[10, 5, 10]} intensity={0.8} color="#ffd6e7" />
 
-      {/* ARCHITECTURE */}
+      {/* Main Architecture */}
       <group position={[0, 0, 0]}>
         <mesh castShadow receiveShadow position={[12, -2.0, 15]}>
           <boxGeometry args={[14, 8.0, 28]} />
@@ -282,35 +252,29 @@ export default function Scene({ currentView }) {
         </mesh>
         <Staircase position={[5.0, 1.5, 1.0]} rotation={[0, -Math.PI / 2, 0]} width={20} texture={pinkStoneTex} />
         <group position={[-16, -1, 0]}>
-          <mesh castShadow receiveShadow position={[1, 8.5, 0]}><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
           <WallOpening position={[6, 0, 0]} colorProps={pinkProps} />
           <WallOpening position={[12, 0, 0]} colorProps={pinkProps} />
-          <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
-        </group>
-        <group position={[17, -1, 1]} rotation={[0, -Math.PI / 2, 0]}>
-          <mesh castShadow receiveShadow position={[4, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
-          <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={pinkProps} />
-          <WallOpening position={[17, 0, 0]} isWindow={true} colorProps={pinkProps} />
-          <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
+          <mesh castShadow receiveShadow position={[24, 8.5, 0]}>
+            <boxGeometry args={[18, 17, 2]} />
+            <meshStandardMaterial {...pinkProps} />
+          </mesh>
         </group>
       </group>
       
       <ContactShadows position={[12, -1.9, 15]} opacity={0.15} scale={60} blur={4} far={12} />
 
-      {/* INFINITE WATER */}
       <water
         ref={waterRef}
         args={[
           new THREE.PlaneGeometry(2000, 2000),
           {
-            textureWidth: isMobile ? 512 : 1024,
-            textureHeight: isMobile ? 512 : 1024,
+            textureWidth: 512,
+            textureHeight: 512,
             waterNormals,
             sunDirection: new THREE.Vector3(-10, 45, -180).normalize(),
             sunColor: 0xffffff,
             waterColor: 0x224455,
-            distortionScale: isMobile ? 0.3 : 0.5,
-            alpha: 0.8,
+            distortionScale: 0.4,
           },
         ]}
         rotation={[-Math.PI / 2, 0, 0]}
