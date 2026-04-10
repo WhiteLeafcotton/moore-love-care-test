@@ -6,6 +6,7 @@ import * as THREE from "three";
 
 extend({ Water });
 
+
 import { Instances, Instance, Float } from "@react-three/drei";
 
 const GrassyHills = ({ windSpeed = 0.8 }) => {
