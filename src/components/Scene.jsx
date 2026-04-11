@@ -6,14 +6,13 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* SOLARIUM SANCTUARY: WILD LEAFY OVERGROWTH
-   Uses a custom clump geometry to mimic the dense, leafy texture
-   of the reference image.
+/* SOLARIUM SANCTUARY: GREEN CORAL REEF SYSTEM
+   Replaces grass with 3D "Bio-Clumps" for deep, leafy volume.
 */
-const GrassyHills = ({ leafTexture }) => {
+const CoralReef = ({ reefTexture }) => {
   const meshRef = useRef();
-  // High density is key for the "carpet" feel
-  const COUNT = 85000; 
+  // Lower count than grass because each instance is a 3D volume, not a flat plane
+  const COUNT = 15000; 
   
   const getHillHeight = (x, z) => {
     const dist = Math.sqrt(x * x + z * z);
@@ -37,20 +36,22 @@ const GrassyHills = ({ leafTexture }) => {
     return g;
   }, []);
 
+  // CORAL GEOMETRY: Using a Dodecahedron creates that "brain coral" or "leafy clump" 3D look
+  const coralGeom = useMemo(() => new THREE.DodecahedronGeometry(0.8, 1), []);
+
   const dummy = new THREE.Object3D();
   
   useEffect(() => {
     for (let i = 0; i < COUNT; i++) {
-      const x = (Math.random() - 0.5) * 500;
-      const z = (Math.random() - 0.5) * 500;
+      const x = (Math.random() - 0.5) * 400;
+      const z = (Math.random() - 0.5) * 400;
       const y = getHillHeight(x, z);
       
       dummy.position.set(x, y, z);
-      // Random rotation ensures the leafy planes don't look repetitive
-      dummy.rotation.set(0, Math.random() * Math.PI, 0);
+      dummy.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
       
-      // Scaling creates the variation between "moss" and "ferns"
-      const s = 0.4 + Math.random() * 1.8;
+      // Varied scale creates the "reef" texture
+      const s = 0.5 + Math.pow(Math.random(), 3) * 4; 
       dummy.scale.set(s, s, s);
       
       dummy.updateMatrix();
@@ -61,24 +62,22 @@ const GrassyHills = ({ leafTexture }) => {
 
   return (
     <group position={[0, -4, -40]}>
-      {/* Dark ground layer for visual weight */}
+      {/* Deep dark base for that high-end contrast */}
       <mesh geometry={hillGeom}>
-        <meshStandardMaterial color="#050a01" roughness={1} />
+        <meshStandardMaterial color="#020800" roughness={1} />
       </mesh>
       
-      {/* The Leafy Instances */}
-      <instancedMesh ref={meshRef} args={[null, null, COUNT]}>
-        <planeGeometry args={[1.5, 1.5]} />
+      {/* The Coral Reef Instances */}
+      <instancedMesh ref={meshRef} args={[coralGeom, null, COUNT]}>
         <meshStandardMaterial 
-          map={leafTexture}
-          alphaTest={0.5} 
-          transparent
-          side={THREE.DoubleSide}
-          // The specific vibrant green from your reference
-          color="#a4cc3d" 
-          emissive="#2d3d05" 
-          emissiveIntensity={0.5}
-          roughness={0.6}
+          map={reefTexture}
+          // Vivid "Electric Moss" Green
+          color="#9eff00" 
+          // Bioluminescent glow effect matches your reference light rays
+          emissive="#2d5a00"
+          emissiveIntensity={1.2}
+          roughness={0.4}
+          metalness={0.1}
         />
       </instancedMesh>
     </group>
@@ -92,8 +91,8 @@ export default function Scene({ currentView }) {
   const baseUrl = import.meta.env.BASE_URL || "/";
   const isMobile = size.width < 768;
 
-  // Use a leafy/clump texture instead of a blade texture
-  const leafClumpTex = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/terrain/grasslight-big.jpg");
+  // Texture that adds "pores" or "leaf veins" to the coral clumps
+  const reefTex = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/terrain/grasslight-big.jpg");
   const pinkStoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
 
@@ -111,15 +110,15 @@ export default function Scene({ currentView }) {
 
   return (
     <>
-      <Sky sunPosition={[-10, 5, -100]} turbidity={8} rayleigh={2} />
+      <Sky sunPosition={[-10, 5, -100]} turbidity={5} rayleigh={1} />
       
-      <GrassyHills leafTexture={leafClumpTex} />
+      <CoralReef reefTexture={reefTex} />
       
       <Environment preset="sunset" />
-      <fog attach="fog" args={["#ffc0e6", 20, 400]} />
+      <fog attach="fog" args={["#ffc0e6", 10, 450]} />
 
-      <hemisphereLight intensity={1.8} color="#ffffff" groundColor="#ffc0e6" />
-      <directionalLight position={[-15, 30, 10]} intensity={0.6} castShadow />
+      <hemisphereLight intensity={2} color="#ffffff" groundColor="#ffc0e6" />
+      <directionalLight position={[-15, 30, 10]} intensity={1.5} castShadow />
 
       <group position={[0, 0, 0]}>
         <mesh castShadow receiveShadow position={[12, -2.0, 15]}>
@@ -136,9 +135,9 @@ export default function Scene({ currentView }) {
             waterNormals,
             sunDirection: new THREE.Vector3(-10, 10, -100).normalize(),
             sunColor: 0xffffff,
-            waterColor: 0x012b16,
-            distortionScale: 3.7,
-            alpha: 0.9,
+            waterColor: 0x001e0f,
+            distortionScale: 4,
+            alpha: 0.8,
           },
         ]}
         rotation={[-Math.PI / 2, 0, 0]}
