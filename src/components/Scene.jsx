@@ -8,15 +8,16 @@ extend({ Water });
 
 const GRASS_COUNT = 500000; 
 
+// 1. LOCKED-IN HILL LOGIC
 const getHillHeight = (x, z) => {
   const dist = Math.sqrt(x * x + z * z);
   const flatZone = 45; 
   const influence = dist < flatZone ? 0 : Math.min((dist - flatZone) / 25, 1.0);
 
   const hills = [
-    { x: 0, z: -80, h: 14, w: 35 },     
-    { x: -60, z: -40, h: 10, w: 25 },   
-    { x: 65, z: -35, h: 12, w: 30 }     
+    { x: 0, z: -80, h: 14, w: 35 },     // Rear Hill
+    { x: -60, z: -40, h: 10, w: 25 },   // Left Hill
+    { x: 65, z: -35, h: 12, w: 30 }     // Right Hill
   ];
 
   let hillHeight = 0;
@@ -30,19 +31,21 @@ const getHillHeight = (x, z) => {
 
 const GrassySassyHills = () => {
   const meshRef = useRef();
-
+  
+  // 2. Tapered & Curved Blade Geometry (Locked In)
   const bladeGeo = useMemo(() => {
     const g = new THREE.PlaneGeometry(0.04, 1.2, 1, 4);
     g.translate(0, 0.6, 0);
     const pos = g.attributes.position.array;
     for (let i = 0; i < pos.length; i += 3) {
       const h = pos[i + 1] / 1.2;
-      pos[i] += Math.pow(h, 2) * 0.15; 
+      pos[i] += Math.pow(h, 2) * 0.15; // Natural Droop
     }
     g.computeVertexNormals();
     return g;
   }, []);
 
+  // 3. The Soil Base (Now a shade of pastel pink)
   const terrainGeo = useMemo(() => {
     const g = new THREE.PlaneGeometry(400, 400, 150, 150);
     g.rotateX(-Math.PI / 2);
@@ -54,12 +57,12 @@ const GrassySassyHills = () => {
     return g;
   }, []);
 
-  // UPDATED: Nude/Sage Color Palette
+  // 4. UPDATED GRASS SHADER: Roots are now pinky-rose
   const grassMaterial = useMemo(() => new THREE.ShaderMaterial({
     uniforms: {
       uTime: { value: 0 },
-      uColorRoots: { value: new THREE.Color("#2a3b2a") }, // Sage shadow
-      uColorTips: { value: new THREE.Color("#dfdbc5") }   // Pastel Oat tip
+      uColorRoots: { value: new THREE.Color("#f5b6ca") }, // ROSE/PINKY BASE
+      uColorTips: { value: new THREE.Color("#dfdbc5") }   // Pastel Oat tip (Locked In)
     },
     vertexShader: `
       varying float vHeight;
@@ -67,13 +70,17 @@ const GrassySassyHills = () => {
       void main() {
         vHeight = position.y / 1.2;
         vec3 worldPos = (instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+        
+        // Fluid Motion: Multi-wave fBm (Locked In)
         float swell = sin(uTime * 0.5 + worldPos.x * 0.05 + worldPos.z * 0.05) * 0.3;
         float gust = sin(uTime * 2.0 + worldPos.x * 0.2) * 0.15;
         float shiver = sin(uTime * 6.0 + worldPos.z * 1.5) * 0.02;
         float totalWind = (swell + gust + shiver) * vHeight;
+        
         vec3 pos = position;
         pos.x += totalWind;
         pos.z += totalWind * 0.3;
+        
         gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(pos, 1.0);
       }
     `,
@@ -82,6 +89,7 @@ const GrassySassyHills = () => {
       uniform vec3 uColorRoots;
       uniform vec3 uColorTips;
       void main() {
+        // Roots are darker to create thickness
         float ao = pow(vHeight, 0.4); 
         vec3 color = mix(uColorRoots, uColorTips, vHeight);
         gl_FragColor = vec4(color * ao, 1.0);
@@ -99,9 +107,9 @@ const GrassySassyHills = () => {
         const z = (Math.random() - 0.5) * 400;
         const y = getHillHeight(x, z);
         if (y > 0.05) {
-          dummy.position.set(x, y - 0.05, z);
+          dummy.position.set(x, y - 0.1, z);
           dummy.rotation.y = Math.random() * Math.PI;
-          dummy.rotation.x = (Math.random() - 0.5) * 0.3;
+          dummy.rotation.x = (Math.random() - 0.5) * 0.3; // Randomized lean
           dummy.scale.setScalar(0.7 + Math.random() * 0.7);
           dummy.updateMatrix();
           meshRef.current.setMatrixAt(i, dummy.matrix);
@@ -118,15 +126,17 @@ const GrassySassyHills = () => {
 
   return (
     <group position={[0, -3.5, -40]}>
+      {/* 5. UPDATED SOIL MESH: color is now pinky-nude */}
       <mesh geometry={terrainGeo} receiveShadow>
-        <meshStandardMaterial color="#020500" roughness={1} />
+        <meshStandardMaterial color="#fcd7d7" roughness={1} />
       </mesh>
-      <instancedMesh ref={meshRef} args={[bladeGeo, grassMaterial, GRASS_COUNT]} castShadow />
+      {/* 6. High-density field (Locked In) */}
+      <instancedMesh ref={meshRef} args={[bladeGeo, grassMaterial, GRASS_COUNT]} castShadow receiveShadow />
     </group>
   );
 };
 
-/* --- ARCHITECTURE COMPONENTS --- */
+/* --- NO CHANGES BELOW: YOUR PERFECT ARCHITECTURE --- */
 const Staircase = ({ position, width, texture, rotation }) => {
   const stepHeight = 0.5; const stepDepth = 0.8; const numSteps = 16;
   return (
@@ -172,9 +182,9 @@ export default function Scene({ currentView }) {
   const sunPlasmaRef = useRef();
   const cloudGroupRef = useRef();
   const lookAtTarget = useRef(new THREE.Vector3(12, 1.5, 0));
+  const baseUrl = import.meta.env.BASE_URL || "/";
   const isMobile = size.width < 768;
 
-  const baseUrl = import.meta.env.BASE_URL || "/";
   const pinkStoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
   const sunPlasmaTex = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
@@ -183,6 +193,8 @@ export default function Scene({ currentView }) {
     if (pinkStoneTex) { pinkStoneTex.wrapS = pinkStoneTex.wrapT = THREE.RepeatWrapping; pinkStoneTex.repeat.set(2, 2); }
     if (sunPlasmaTex) { sunPlasmaTex.wrapS = sunPlasmaTex.wrapT = THREE.RepeatWrapping; sunPlasmaTex.repeat.set(1.5, 1.5); sunPlasmaRef.current = sunPlasmaTex; }
   }, [pinkStoneTex, sunPlasmaTex]);
+
+  const pinkProps = { map: pinkStoneTex, color: "#fcd7d7", roughness: 0.65, metalness: 0.05 };
 
   useFrame((state, delta) => {
     const isHome = currentView === "home";
@@ -205,11 +217,9 @@ export default function Scene({ currentView }) {
     }
   });
 
-  const pinkProps = { map: pinkStoneTex, color: "#fcd7d7", roughness: 0.65, metalness: 0.05 };
-
   return (
     <>
-      {/* ATMOSPHERICS */}
+      {/* ATMOSPHERICS (Locked In) */}
       <Sky distance={450000} sunPosition={[-10, 2, -100]} inclination={0.6} azimuth={0.25} turbidity={8} rayleigh={6} mieCoefficient={0.005} mieDirectionalG={0.8} />
       
       <mesh position={[-10, 55, -200]}>
@@ -222,12 +232,12 @@ export default function Scene({ currentView }) {
       <fog attach="fog" args={["#ffc0e6", 15, 450]} />
       <GrassySassyHills />
 
-      {/* UPDATED LIGHTING: Higher intensity for "Premium" definition */}
+      {/* LIGHTING SETUP (Boosted for Form - Locked In) */}
       <hemisphereLight intensity={1.8} color="#ffffff" groundColor="#ffc0e6" />
       <directionalLight position={[20, 50, -20]} intensity={2.5} castShadow shadow-mapSize={[2048, 2048]} />
       <pointLight position={[10, 15, 10]} intensity={1.2} color="#ffd6e7" />
 
-      {/* CLOUD LAYERS */}
+      {/* CLOUD LAYERS (Locked In) */}
       <group ref={cloudGroupRef}>
         <Cloud position={[0, 80, -450]} speed={0.2} opacity={0.3} segments={60} bounds={[1000, 100, 50]} volume={150} color="#ffd1dc" />
         <Cloud position={[-100, 100, -420]} speed={0.1} opacity={0.25} segments={50} bounds={[800, 80, 40]} volume={120} color="#ffffff" />
@@ -239,7 +249,7 @@ export default function Scene({ currentView }) {
         <Cloud position={[-200, 50, -220]} speed={0.2} opacity={0.25} segments={40} bounds={[450, 40, 50]} volume={90} color="#e9d5ff" />
       </group>
 
-      {/* ARCHITECTURE */}
+      {/* ARCHITECTURE (Locked In) */}
       <group position={[0, 0, 0]}>
         <mesh position={[12, -2.0, 15]} castShadow receiveShadow>
           <boxGeometry args={[14, 8.0, 28]} /><meshStandardMaterial {...pinkProps} />
@@ -260,7 +270,7 @@ export default function Scene({ currentView }) {
           <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
         </group>
       </group>
-
+      
       <ContactShadows position={[12, -1.9, 15]} opacity={0.15} scale={60} blur={4} far={12} />
 
       <water
@@ -269,7 +279,7 @@ export default function Scene({ currentView }) {
           waterNormals,
           sunDirection: new THREE.Vector3(-10, 45, -180).normalize(),
           sunColor: 0xffffff,
-          waterColor: 0x001e0f, // Dark contrast water
+          waterColor: 0x001e0f, // Locked in dark contrast water
           alpha: 0.8,
         }]}
         rotation={[-Math.PI / 2, 0, 0]}
