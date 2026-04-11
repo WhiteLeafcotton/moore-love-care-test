@@ -279,19 +279,19 @@ export default function Scene({ currentView }) {
         </group>
 
         <group>
-          {/* Couple B: Senior Couple */}
+          {/* Couple B: locked Senior Couple */}
           <group position={[14, 1.9, 12]} rotation={[0, -Math.PI * 0.7, 0]}>
             <BlockHumanoid scale={1} materialProps={butterProps} poseProps={{ cane: true, leftLegRotation: [0.3, 0, 0], rightLegRotation: [-0.3, 0, 0], position: [-0.3, 0, 0]}} />
             <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ leftLegRotation: [-0.3, 0, 0], rightLegRotation: [0.3, 0, 0], position: [0.4, 0, -0.1]}} />
           </group>
 
-          {/* Couple A: AGGRESSIVELY FORWARD TOWARD CAMERA (Higher Z, Lower X) */}
-          <group position={[4.5, 0.4, 21.5]} rotation={[0, Math.PI / 2, 0]}>
+          {/* Couple A: Adjusted position to sit on a step. We move them RIGHT on the X-axis while keeping Y/Z locked. */}
+          <group position={[11.5, -0.6, 26.5]} rotation={[0, Math.PI / 2, 0]}>
             <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
             <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
           </group>
 
-          {/* Couple C: Wheelchair Couple */}
+          {/* Couple C: locked Wheelchair Couple */}
           <group position={[14.5, 1.9, 17.5]} rotation={[0, Math.PI, 0]}>
             <SimpleWheelchair materialProps={butterProps} />
             <group position={[0, 0.2, 0]}>
@@ -310,7 +310,11 @@ export default function Scene({ currentView }) {
           waterNormals,
           sunDirection: new THREE.Vector3(-10, 10, -100).normalize(),
           sunColor: 0xffffff,
+          sunColor: 0xffffff,
+          sunColor: 0xffffff,
+          sunColor: 0xffffff,
           waterColor: 0x21162e, 
+          sunColor: 0xffffff,
           distortionScale: 1.0,
           alpha: 0.95,
         }]}
