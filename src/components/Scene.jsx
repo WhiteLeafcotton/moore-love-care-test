@@ -20,13 +20,22 @@ const getHillHeight = (x, z) => {
     { x: 110, z: -90, h: 14, w: 45 }
   ];
 
-  let h = 0;
-  hills.forEach(k => {
-    const d = Math.sqrt((x - k.x) ** 2 + (z - k.z) ** 2);
-    h += Math.exp(-(d / k.w) ** 2) * k.h;
-  });
+  let height = 0;
 
-  return h * influence;
+  for (let i = 0; i < hills.length; i++) {
+    const k = hills[i];
+
+    const dx = x - k.x;
+    const dz = z - k.z;
+    const d = Math.sqrt(dx * dx + dz * dz);
+
+    // ✅ SAFE math (no **)
+    const falloff = Math.exp(-Math.pow(d / k.w, 2));
+
+    height += falloff * k.h;
+  }
+
+  return height * influence;
 };
 
 /* ---------- GRASS ---------- */
@@ -44,6 +53,7 @@ const Grass = () => {
     g.rotateX(-Math.PI / 2);
 
     const pos = g.attributes.position.array;
+
     for (let i = 0; i < pos.length; i += 3) {
       pos[i + 1] = getHillHeight(pos[i], pos[i + 2]);
     }
@@ -61,10 +71,12 @@ const Grass = () => {
     vertexShader: `
       varying float vH;
       uniform float uTime;
+
       void main() {
         vH = position.y / 1.2;
 
         vec3 pos = position;
+
         float wind =
           sin(uTime * 1.5 + pos.x * 0.5) * 0.15 +
           sin(uTime * 3.0 + pos.z * 0.8) * 0.08;
@@ -78,10 +90,11 @@ const Grass = () => {
       varying float vH;
       uniform vec3 uRoot;
       uniform vec3 uTip;
+
       void main() {
         vec3 col = mix(uRoot, uTip, vH);
-        float depth = pow(vH,0.5);
-        gl_FragColor = vec4(col * depth,1.0);
+        float depth = pow(vH, 0.5);
+        gl_FragColor = vec4(col * depth, 1.0);
       }
     `,
     side: THREE.DoubleSide
@@ -103,6 +116,7 @@ const Grass = () => {
           dummy.rotation.y = Math.random() * Math.PI;
           dummy.scale.setScalar(0.6 + Math.random() * 0.8);
           dummy.updateMatrix();
+
           meshRef.current.setMatrixAt(i, dummy.matrix);
         }
       }
@@ -123,7 +137,7 @@ const Grass = () => {
   );
 };
 
-/* ---------- MAIN SCENE ---------- */
+/* ---------- SCENE ---------- */
 export default function Scene({ currentView }) {
   const { camera } = useThree();
 
@@ -144,7 +158,7 @@ export default function Scene({ currentView }) {
       toPos.current.set(10, 7, 24);
       toLook.current.set(12, 4, 15);
     } else {
-      toPos.current.set(0, 10, 90); // OPEN SPACE
+      toPos.current.set(0, 10, 90);
       toLook.current.set(12, 3, 10);
     }
   }, [currentView]);
@@ -169,22 +183,23 @@ export default function Scene({ currentView }) {
 
   return (
     <>
-      {/* SKY (no globe sun) */}
       <Sky sunPosition={[50, 40, -200]} turbidity={6} rayleigh={3} />
       <Environment preset="sunset" />
       <fog attach="fog" args={["#f5b0ff", 30, 300]} />
 
       <Grass />
 
-      {/* LIGHTING */}
       <hemisphereLight intensity={1.2} />
       <directionalLight position={[50, 40, -200]} intensity={1.2} castShadow />
 
-      {/* CLOUD */}
       <Cloud position={[0, 60, -200]} opacity={0.3} speed={0.2} />
 
-      {/* SHADOW */}
-      <ContactShadows position={[12, -2, 15]} opacity={0.2} scale={50} blur={4} />
+      <ContactShadows
+        position={[12, -2, 15]}
+        opacity={0.2}
+        scale={50}
+        blur={4}
+      />
     </>
   );
 }
