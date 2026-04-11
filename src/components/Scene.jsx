@@ -159,46 +159,70 @@ const WallOpening = ({ position, colorProps, width = 6, openingW = 4.8, height =
   </group>
 );
 
-/* --- REFINED ABSTRACT HUMANOID (Correct Proportions) --- */
-const SimpleHumanoid = ({ scale = 1, materialProps, rotation = [0, 0, 0], legRotation = [0, 0, 0], armProps = {}, legless = false }) => {
-  const { leftArmRotation = [0.2, 0, -0.1], rightArmRotation = [0.2, 0, 0.1], position = [0,0,0], cane = false } = armProps;
+/* --- THE NEW HUMANOID 3.0 (Block Figures like image_5.png) --- */
+const BlockHumanoid = ({ scale = 1, materialProps, stance = 'walking', poseProps = {} }) => {
+  const { torsoRotation = [0, 0, 0], leftLegRotation = [0, 0, 0], rightLegRotation = [0, 0, 0], leftArmRotation = [0.2, 0, -0.1], rightArmRotation = [0.2, 0, 0.1], position = [0,0,0], cane = false } = poseProps;
   
-  return (
-    <group scale={scale} rotation={rotation} position={position}>
-      {/* 1. RESTORED FLOATING HEAD: Nudged up, clear gap to body */}
-      <mesh position={[0, 1.9, 0]} castShadow receiveShadow>
-        <sphereGeometry args={[0.2, 32, 32]} />
-        <meshStandardMaterial {...materialProps} />
-      </mesh>
-      
-      {/* 2. CORRECT BODY SHAPE: Replaced lathe with smooth cylinder for upright proportions */}
-      <mesh position={[0, 1.2, 0]} castShadow receiveShadow>
-        <cylinderGeometry args={[0.14, 0.1, 1.2, 32, 1]} /> 
-        <meshStandardMaterial {...materialProps} />
-      </mesh>
-      
-      {!legless && (
-        <group position={[0, 0.5, 0]} rotation={legRotation}>
-          <mesh position={[-0.08, -0.4, 0]} castShadow receiveShadow>
-            <cylinderGeometry args={[0.04, 0.02, 0.8]} /><meshStandardMaterial {...materialProps} />
-          </mesh>
-          <mesh position={[0.08, -0.4, 0]} castShadow receiveShadow>
-            <cylinderGeometry args={[0.04, 0.02, 0.8]} /><meshStandardMaterial {...materialProps} />
-          </mesh>
-        </group>
-      )}
+  // Custom lathe shape to match the rounded "block" or "pillow" style of limbs and body
+  const limbPoints = useMemo(() => {
+    const pts = [];
+    pts.push(new THREE.Vector2(0, 0)); // base close
+    pts.push(new THREE.Vector2(0.06, 0.05)); // soft round start
+    pts.push(new THREE.Vector2(0.06, 0.85)); // straight section
+    pts.push(new THREE.Vector2(0, 0.9)); // top round close
+    return pts;
+  }, []);
 
-      {/* 2. CORRECT SHORT ARMS: Length reduced from 1.1 to 0.5 for real proportions */}
-      <group position={[0, 1.65, 0]}>
+  const torsoPoints = useMemo(() => {
+    const pts = [];
+    pts.push(new THREE.Vector2(0, 0)); // base close
+    pts.push(new THREE.Vector2(0.16, 0.1)); // soft round start
+    pts.push(new THREE.Vector2(0.16, 1.1)); // soft round top swell
+    pts.push(new THREE.Vector2(0, 1.2)); // top rounded close
+    return pts;
+  }, []);
+
+  return (
+    <group scale={scale} position={position}>
+      {/* Featureless Head */}
+      <mesh position={[0, 1.8, 0]} castShadow receiveShadow>
+        <sphereGeometry args={[0.22, 32, 32]} />
+        <meshStandardMaterial {...materialProps} />
+      </mesh>
+      
+      {/* Rounded Torso Block */}
+      <mesh position={[0, 1.15, 0]} castShadow receiveShadow rotation={[0,0,-Math.PI]}>
+        <latheGeometry args={[torsoPoints, 32, 0, Math.PI * 2]} />
+        <meshStandardMaterial {...materialProps} />
+      </mesh>
+      
+      {/* Separated rounded legs */}
+      <group position={[0, 0.5, 0]}>
+        {/* Left Leg */}
+        <mesh position={[-0.08, -0.4, 0]} castShadow receiveShadow rotation={leftLegRotation}>
+          <latheGeometry args={[limbPoints, 32, 0, Math.PI * 2]} />
+          <meshStandardMaterial {...materialProps} />
+        </mesh>
+        {/* Right Leg */}
+        <mesh position={[0.08, -0.4, 0]} castShadow receiveShadow rotation={rightLegRotation}>
+          <latheGeometry args={[limbPoints, 32, 0, Math.PI * 2]} />
+          <meshStandardMaterial {...materialProps} />
+        </mesh>
+      </group>
+
+      {/* Articulated rounded arms */}
+      <group position={[0, 1.5, 0]}>
         {/* Left Arm */}
-        <mesh position={[-0.2, -0.25, 0]} castShadow receiveShadow rotation={leftArmRotation}>
-          <cylinderGeometry args={[0.04, 0.025, 0.5]} /><meshStandardMaterial {...materialProps} />
+        <mesh position={[-0.2, -0.4, 0]} castShadow receiveShadow rotation={leftArmRotation}>
+          <latheGeometry args={[limbPoints, 32, 0, Math.PI * 2]} />
+          <meshStandardMaterial {...materialProps} />
         </mesh>
         {/* Right Arm */}
-        <mesh position={[0.2, -0.25, 0]} castShadow receiveShadow rotation={rightArmRotation}>
-          <cylinderGeometry args={[0.04, 0.025, 0.5]} /><meshStandardMaterial {...materialProps} />
+        <mesh position={[0.2, -0.4, 0]} castShadow receiveShadow rotation={rightArmRotation}>
+          <latheGeometry args={[limbPoints, 32, 0, Math.PI * 2]} />
+          <meshStandardMaterial {...materialProps} />
           {cane && (
-             <mesh position={[0, -0.2, 0.1]} castShadow receiveShadow rotation={[0,0,0]}>
+             <mesh position={[0, -0.45, 0.1]} castShadow receiveShadow rotation={[0,0,0]}>
                 <cylinderGeometry args={[0.015, 0.012, 1.1]} /><meshStandardMaterial color="#fcd7d7" roughness={0.4} />
             </mesh>
           )}
@@ -208,18 +232,14 @@ const SimpleHumanoid = ({ scale = 1, materialProps, rotation = [0, 0, 0], legRot
   );
 };
 
-/* --- SIMPLIFIED ARCHITECTURAL WHEELCHAIR --- */
+/* --- REFINED WHEELCHAIR --- */
 const SimpleWheelchair = ({ materialProps, frameColor }) => (
   <group>
-    {/* Clean Architectural Frame (Soft Pink) */}
-    <mesh position={[0, 0.4, 0]} castShadow receiveShadow>
-        <cylinderGeometry args={[0.02, 0.02, 1.0, 16, 1]} /><meshStandardMaterial color={frameColor} roughness={0.5} />
+    {/* Frame (Architectural Soft Pink) */}
+    <mesh position={[0, 0.45, 0]} castShadow receiveShadow>
+        <boxGeometry args={[0.6, 0.8, 0.1]} /><meshStandardMaterial color={frameColor} roughness={0.4} />
     </mesh>
-    <mesh position={[0, 0.65, -0.15]} rotation={[0.4, 0, 0]} castShadow receiveShadow>
-        <cylinderGeometry args={[0.02, 0.02, 1.1, 16, 1]} /><meshStandardMaterial color={frameColor} roughness={0.5} />
-    </mesh>
-    
-    {/* 3. WHEEL STYLING: Improved Torque Outline (Torus) instead of solid circle */}
+    {/* Refined "Torque" Large Wheels (Torus Outline) */}
     <group position={[0, 0.35, -0.1]}>
         <mesh position={[-0.3, 0, 0]} rotation={[0,0,Math.PI/2]} castShadow receiveShadow>
             <torusGeometry args={[0.35, 0.02, 16, 64]} />
@@ -230,18 +250,16 @@ const SimpleWheelchair = ({ materialProps, frameColor }) => (
              <meshStandardMaterial color="#2d1d3d" /> 
         </mesh>
     </group>
-    
     {/* Simplified Seat (Darkened "Butter" texture) */}
-    <mesh position={[0, 0.5, 0.0]} castShadow receiveShadow>
-        <boxGeometry args={[0.5, 0.05, 0.5]} /><meshStandardMaterial {...materialProps} color="#fcd7d7" />
+    <mesh position={[0, 0.55, 0.1]} castShadow receiveShadow>
+        <boxGeometry args={[0.5, 0.05, 0.6]} /><meshStandardMaterial {...materialProps} color="#fcd7d7" />
     </mesh>
-    
-    {/* Clean Push Handles */}
-    <group position={[0, 0.9, -0.2]}>
-        <mesh position={[-0.22, 0, -0.05]} rotation={[0,Math.PI/2,0]} castShadow receiveShadow>
+    {/* Push Handles */}
+    <group position={[0, 0.85, -0.2]}>
+        <mesh position={[-0.25, 0, 0]} rotation={[0,Math.PI/2,0]} castShadow receiveShadow>
             <cylinderGeometry args={[0.015, 0.015, 0.15]} /><meshStandardMaterial color={frameColor} />
         </mesh>
-        <mesh position={[0.22, 0, -0.05]} rotation={[0,Math.PI/2,0]} castShadow receiveShadow>
+        <mesh position={[0.25, 0, 0]} rotation={[0,Math.PI/2,0]} castShadow receiveShadow>
             <cylinderGeometry args={[0.015, 0.015, 0.15]} /><meshStandardMaterial color={frameColor} />
         </mesh>
     </group>
@@ -321,44 +339,44 @@ export default function Scene({ currentView }) {
           <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
         
-        {/* --- 3 COUPLESPopulating the Sanctuary --- */}
+        {/* --- THE HUMANOIDSPopulating the Sanctuary --- */}
         <group>
           <ContactShadows position={[12, 1.91, 15]} opacity={0.6} scale={20} blur={2.5} far={1} color="#3c1a59" />
           
-          {/* Couple 1: Distant Moore Love section */}
+          {/* Couple 1: Older & Younger walking away */}
           <group position={[14, 1.9, 12]} rotation={[0, -Math.PI * 0.7, 0]}>
-            <SimpleHumanoid scale={1.05} materialProps={butterProps} 
-                legRotation={[-0.05, 0, 0]}
-                armProps={{ cane: true, leftArmRotation: [0.3, 0, -0.05], rightArmRotation: [0.1, 0, 0.05], position: [-0.4, 0, 0]}} />
+            <BlockHumanoid scale={1.05} materialProps={butterProps} 
+                poseProps={{ cane: true, leftArmRotation: [0.3, 0, -0.05], rightArmRotation: [0.1, 0, 0.05], position: [-0.4, 0, 0]}} />
             
-            <SimpleHumanoid scale={0.9} materialProps={butterProps} stance="walking" 
-                legRotation={[0.05, 0, 0]}
-                armProps={{ leftArmRotation: [0.3, 0, -0.1], rightArmRotation: [-0.8, -0.2, 0.2], position: [0.4, 0, -0.1]}} />
+            <BlockHumanoid scale={0.9} materialProps={butterProps} stance="walking" 
+                poseProps={{ leftArmRotation: [0.3, 0, -0.1], rightArmRotation: [-0.8, -0.2, 0.2], position: [0.4, 0, -0.1]}} />
           </group>
           
-          {/* 3. Couple 2: FIXED STAIRS - Nudged DOWN to y:1.6 to plant feet on 2nd step */}
+          {/* Couple 2: FIXED STAIRS - SITTING candidly side-by-side on edge of second step from top */}
           <group position={[8, 1.6, 3.5]} rotation={[0, -Math.PI / 2, 0]}>
-             {/* Older */}
-            <SimpleHumanoid scale={0.95} materialProps={butterProps} position={[0,0,-0.1]}
-                rotation={[-0.1,0,0]} legRotation={[-0.2, 0, 0]}
-                armProps={{ leftArmRotation: [0.4, 0, -0.2], rightArmRotation: [0.4, 0, 0.2]}} />
-            {/* Younger "daughter" figure */}
-            <SimpleHumanoid scale={0.92} materialProps={butterProps} position={[0,-0.6, 0.7]}
-                rotation={[0.1,0,0]} legRotation={[0, 0, 0]}
-                armProps={{ leftArmRotation: [-0.9, 0, 0.2], rightArmRotation: [-0.9, 0, -0.2]}} />
+             {/* Older - Seated */}
+            <BlockHumanoid scale={0.95} materialProps={butterProps} position={[0,-0.6,-0.1]}
+                torsoRotation={[-0.1,0,0]} leftLegRotation={[Math.PI / 2, 0, 0]} rightLegRotation={[Math.PI / 2, 0, 0]}
+                poseProps={{ leftArmRotation: [0.4, 0, -0.2], rightArmRotation: [0.4, 0, 0.2]}} />
+            {/* Younger - Seated beside, angled in conversation */}
+            <BlockHumanoid scale={0.92} materialProps={butterProps} position={[0,-0.6, 0.7]}
+                torsoRotation={[0.1,0,0]} leftLegRotation={[Math.PI / 2, 0.2, 0]} rightLegRotation={[Math.PI / 2, -0.1, 0]}
+                poseProps={{ leftArmRotation: [-0.9, 0, 0.2], rightArmRotation: [-0.9, 0, -0.2]}} />
           </group>
           
-          {/* Couple 3: WHEELCHAIR candid - LOOKING LEFT PROFILE view (rotation PI) */}
+          {/* Couple 3: WHEELCHAIR candid - Looking left side profile */}
           <group position={[16, 1.9, 18]} rotation={[0, Math.PI, 0]}>
+            {/* Architectural Wheelchair */}
             <SimpleWheelchair materialProps={butterProps} frameColor="#fcd7d7" />
+            {/* Older figure seated (legless as requested) */}
             <group position={[0, -0.25, 0.0]} rotation={[-0.1, -0.1, 0]}>
-              <SimpleHumanoid scale={0.9} materialProps={butterProps} stance="seated"
-                  legless={true}
-                  armProps={{ leftArmRotation: [0.6, 0.1, -0.1], rightArmRotation: [0.7, 0.2, 0.1]}} />
+              <BlockHumanoid scale={0.9} materialProps={butterProps} stance="seated"
+                  poseProps={{ leftArmRotation: [0.6, 0.1, -0.1], rightArmRotation: [0.7, 0.2, 0.1]}} />
             </group>
+            {/* Helper figure standing behind */}
             <group position={[0, 0, -0.6]} rotation={[0.05, 0.05, 0]}>
-              <SimpleHumanoid scale={0.95} materialProps={butterProps} stance="leaning" 
-                  armProps={{ leftArmRotation: [-1.3, -0.2, 0.05], rightArmRotation: [-1.3, 0.2, -0.05]}} />
+              <BlockHumanoid scale={0.95} materialProps={butterProps} stance="leaning" 
+                  poseProps={{ leftArmRotation: [-1.3, -0.2, 0.05], rightArmRotation: [-1.3, 0.2, -0.05]}} />
             </group>
           </group>
           
