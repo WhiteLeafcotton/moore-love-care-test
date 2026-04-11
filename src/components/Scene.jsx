@@ -8,16 +8,15 @@ extend({ Water });
 
 const GRASS_COUNT = 500000; 
 
-// THE 3 HILL LOGIC (Respects Flat Zone for Architecture)
 const getHillHeight = (x, z) => {
   const dist = Math.sqrt(x * x + z * z);
   const flatZone = 45; 
   const influence = dist < flatZone ? 0 : Math.min((dist - flatZone) / 25, 1.0);
 
   const hills = [
-    { x: 0, z: -80, h: 14, w: 35 },     // Rear Hill
-    { x: -60, z: -40, h: 10, w: 25 },   // Left Hill
-    { x: 65, z: -35, h: 12, w: 30 }     // Right Hill
+    { x: 0, z: -80, h: 14, w: 35 },     
+    { x: -60, z: -40, h: 10, w: 25 },   
+    { x: 65, z: -35, h: 12, w: 30 }     
   ];
 
   let hillHeight = 0;
@@ -55,11 +54,12 @@ const GrassySassyHills = () => {
     return g;
   }, []);
 
+  // UPDATED: Nude/Sage Color Palette
   const grassMaterial = useMemo(() => new THREE.ShaderMaterial({
     uniforms: {
       uTime: { value: 0 },
-      uColorRoots: { value: new THREE.Color("#010400") }, 
-      uColorTips: { value: new THREE.Color("#8fb83e") }
+      uColorRoots: { value: new THREE.Color("#2a3b2a") }, // Sage shadow
+      uColorTips: { value: new THREE.Color("#dfdbc5") }   // Pastel Oat tip
     },
     vertexShader: `
       varying float vHeight;
@@ -209,25 +209,25 @@ export default function Scene({ currentView }) {
 
   return (
     <>
-      {/* RESTORED SKY & SUN */}
+      {/* ATMOSPHERICS */}
       <Sky distance={450000} sunPosition={[-10, 2, -100]} inclination={0.6} azimuth={0.25} turbidity={8} rayleigh={6} mieCoefficient={0.005} mieDirectionalG={0.8} />
       
       <mesh position={[-10, 55, -200]}>
         <sphereGeometry args={[isMobile ? 14 : 18, 64, 64]} />
         <meshStandardMaterial color="#fff4e6" emissive="#ffba5c" emissiveMap={sunPlasmaTex} emissiveIntensity={1.2} transparent={true} opacity={0.5} roughness={0.2} metalness={0.5} />
-        <pointLight intensity={2} distance={500} color="#fff1d4" decay={1.5} />
+        <pointLight intensity={2.5} distance={600} color="#fff1d4" decay={1.5} />
       </mesh>
 
       <Environment preset="sunset" />
       <fog attach="fog" args={["#ffc0e6", 15, 450]} />
       <GrassySassyHills />
 
-      {/* LIGHTS */}
-      <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#ffc0e6" />
-      <directionalLight position={[-15, 30, 10]} intensity={0.1} />
-      <pointLight position={[10, 5, 10]} intensity={0.8} color="#ffd6e7" />
+      {/* UPDATED LIGHTING: Higher intensity for "Premium" definition */}
+      <hemisphereLight intensity={1.8} color="#ffffff" groundColor="#ffc0e6" />
+      <directionalLight position={[20, 50, -20]} intensity={2.5} castShadow shadow-mapSize={[2048, 2048]} />
+      <pointLight position={[10, 15, 10]} intensity={1.2} color="#ffd6e7" />
 
-      {/* RESTORED CLOUD SYSTEM */}
+      {/* CLOUD LAYERS */}
       <group ref={cloudGroupRef}>
         <Cloud position={[0, 80, -450]} speed={0.2} opacity={0.3} segments={60} bounds={[1000, 100, 50]} volume={150} color="#ffd1dc" />
         <Cloud position={[-100, 100, -420]} speed={0.1} opacity={0.25} segments={50} bounds={[800, 80, 40]} volume={120} color="#ffffff" />
@@ -239,14 +239,13 @@ export default function Scene({ currentView }) {
         <Cloud position={[-200, 50, -220]} speed={0.2} opacity={0.25} segments={40} bounds={[450, 40, 50]} volume={90} color="#e9d5ff" />
       </group>
 
-      {/* ARCHITECTURE (Including missing wall group) */}
+      {/* ARCHITECTURE */}
       <group position={[0, 0, 0]}>
         <mesh position={[12, -2.0, 15]} castShadow receiveShadow>
           <boxGeometry args={[14, 8.0, 28]} /><meshStandardMaterial {...pinkProps} />
         </mesh>
         <Staircase position={[5.0, 1.5, 1.0]} rotation={[0, -Math.PI / 2, 0]} width={20} texture={pinkStoneTex} />
         
-        {/* Wall Group Left */}
         <group position={[-16, -1, 0]}>
           <mesh position={[1, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
           <WallOpening position={[6, 0, 0]} colorProps={pinkProps} />
@@ -254,7 +253,6 @@ export default function Scene({ currentView }) {
           <mesh position={[24, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
         </group>
 
-        {/* RESTORED Wall Group Right */}
         <group position={[17, -1, 1]} rotation={[0, -Math.PI / 2, 0]}>
           <mesh castShadow receiveShadow position={[4, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
           <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={pinkProps} />
@@ -271,7 +269,7 @@ export default function Scene({ currentView }) {
           waterNormals,
           sunDirection: new THREE.Vector3(-10, 45, -180).normalize(),
           sunColor: 0xffffff,
-          waterColor: 0x224455,
+          waterColor: 0x001e0f, // Dark contrast water
           alpha: 0.8,
         }]}
         rotation={[-Math.PI / 2, 0, 0]}
