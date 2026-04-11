@@ -285,8 +285,8 @@ export default function Scene({ currentView }) {
             <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ leftLegRotation: [-0.3, 0, 0], rightLegRotation: [0.3, 0, 0], position: [0.4, 0, -0.1]}} />
           </group>
 
-          {/* Couple A: Adjusted position to sit on a step. We move them RIGHT on the X-axis while keeping Y/Z locked. */}
-          <group position={[11.5, -0.6, 26.5]} rotation={[0, Math.PI / 2, 0]}>
+          {/* Couple A: BRINGING FORWARD (Lower Z) to sit clearly on step face */}
+          <group position={[12.5, -0.6, 17.5]} rotation={[0, Math.PI / 2, 0]}>
             <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
             <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
           </group>
@@ -310,11 +310,7 @@ export default function Scene({ currentView }) {
           waterNormals,
           sunDirection: new THREE.Vector3(-10, 10, -100).normalize(),
           sunColor: 0xffffff,
-          sunColor: 0xffffff,
-          sunColor: 0xffffff,
-          sunColor: 0xffffff,
           waterColor: 0x21162e, 
-          sunColor: 0xffffff,
           distortionScale: 1.0,
           alpha: 0.95,
         }]}
