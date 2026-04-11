@@ -232,7 +232,7 @@ export default function Scene({ currentView }) {
           <boxGeometry args={[14, 8.0, 28]} /><meshStandardMaterial {...pinkProps} />
         </mesh>
         
-        {/* PUSHED FURTHER: Staircase moved significantly forward (+Z) to clear all wall clipping */}
+        {/* PUSHEyyD FURTHER: Staircase moved significantly forward (+Z) to clear all wall clipping */}
         <Staircase position={[5.0, 1.5, 5.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} texture={pinkStoneTex} />
         
         <group position={[-16, -1, 0]}>
