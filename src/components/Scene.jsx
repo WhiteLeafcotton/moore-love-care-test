@@ -8,23 +8,20 @@ extend({ Water });
 
 const GRASS_COUNT = 400000; 
 
-// SEPARATE THE 3 HILLS (Strategic placement to frame the doorway)
 const getHillHeight = (x, z) => {
   const dist = Math.sqrt(x * x + z * z);
   const flatZone = 45; 
   const influence = dist < flatZone ? 0 : Math.min((dist - flatZone) / 25, 1.0);
 
-  // Adjusted widths (w) to be smaller and more conical (separated)
   const hills = [
-    { x: 20, z: -100, h: 18, w: 16 },    // Rear Center-Right (Sharp peak)
-    { x: -70, z: -50, h: 12, w: 12 },    // Far Left (Framing the exit)
-    { x: 55, z: -40, h: 14, w: 14 }     // Far Right (Framing the exit)
+    { x: 20, z: -100, h: 18, w: 16 },    
+    { x: -70, z: -50, h: 12, w: 12 },    
+    { x: 55, z: -40, h: 14, w: 14 }     
   ];
 
   let hillHeight = 0;
   hills.forEach(h => {
     const d = Math.sqrt(Math.pow(x - h.x, 2) + Math.pow(z - h.z, 2));
-    // Narrow Gaussian curve means distinct hills
     hillHeight += Math.exp(-Math.pow(d / h.w, 2)) * h.h;
   });
 
@@ -59,8 +56,8 @@ const GrassySassyHills = () => {
   const grassMaterial = useMemo(() => new THREE.ShaderMaterial({
     uniforms: {
       uTime: { value: 0 },
-      uColorRoots: { value: new THREE.Color("#1a0521") }, // Deep dark soil purple
-      uColorTips: { value: new THREE.Color("#d1a3ff") }  // Lavender tips
+      uColorRoots: { value: new THREE.Color("#1a0521") }, 
+      uColorTips: { value: new THREE.Color("#d1a3ff") }  
     },
     vertexShader: `
       varying float vHeight;
@@ -147,7 +144,6 @@ const Staircase = ({ position, width, texture, rotation }) => {
   );
 };
 
-// OpeningW widened slightly to make the doorway-exit look cleaner as you pass
 const WallOpening = ({ position, colorProps, width = 6, openingW = 4.8, height = 17, openingH = 9, isWindow = false }) => (
   <group position={position}>
     <mesh position={[-(openingW + (width - openingW) / 2) / 2, height / 2, 0]} castShadow receiveShadow>
@@ -187,20 +183,22 @@ export default function Scene({ currentView }) {
 
   useFrame((state, delta) => {
     const isHome = currentView === "home";
-    const LERP_SPEED = isHome ? 0.04 : 0.025; // Slower glide for the exit journey
+    const LERP_SPEED = isHome ? 0.04 : 0.025; 
 
-    // HOME POSITION: Low, left sweet spot (z: 28)
-    const homePos = isMobile ? new THREE.Vector3(-40, 10, 75) : new THREE.Vector3(-22, 3.5, 28);
+    // THE INTIMATE SWEET SPOT: 
+    // Moved closer (z: 18 instead of 28) and further inside (x: -12 instead of -22)
+    // and slightly lower (y: 2.8) to hide wall edges.
+    const homePos = isMobile ? new THREE.Vector3(-30, 8, 60) : new THREE.Vector3(-12, 2.8, 18);
     
-    // JOURNEY PATH: Modified to align exactly with the doorway opening at x:-24
+    // JOURNEY PATH THROUGH DOORWAY
     const doorwayX = -24.5;
     const collectionPos = new THREE.Vector3(doorwayX, 3.5, -450); 
     
     const targetPos = isHome ? homePos : collectionPos;
 
-    // TARGET LOOK:
-    const homeLook = new THREE.Vector3(-2, 1.5, 0); // Pointing towards the doorway/corner area
-    const collectionLook = new THREE.Vector3(doorwayX, 1.5, -1000); // Look far, far ahead through the separated hills
+    // TARGET LOOK: Pointing more specifically at the interaction of the stairs and water
+    const homeLook = new THREE.Vector3(2, 1.2, -5);
+    const collectionLook = new THREE.Vector3(doorwayX, 1.5, -1000); 
     
     const targetLook = isHome ? homeLook : collectionLook;
 
@@ -240,12 +238,14 @@ export default function Scene({ currentView }) {
       </group>
 
       <group position={[0, 0, 0]}>
+        {/* Main Floor/Corner */}
         <mesh position={[12, -2.0, 15]} castShadow receiveShadow>
           <boxGeometry args={[14, 8.0, 28]} /><meshStandardMaterial {...pinkProps} />
         </mesh>
+        
         <Staircase position={[5.0, 1.5, 1.0]} rotation={[0, -Math.PI / 2, 0]} width={20} texture={pinkStoneTex} />
         
-        {/* Wall Group Left (Doorway-Path centered near x:-24) */}
+        {/* Left Wall Set */}
         <group position={[-16, -1, 0]}>
           <mesh position={[1, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
           <WallOpening position={[6, 0, 0]} colorProps={pinkProps} />
@@ -253,6 +253,7 @@ export default function Scene({ currentView }) {
           <mesh position={[24, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
         </group>
 
+        {/* Right Wall Set */}
         <group position={[17, -1, 1]} rotation={[0, -Math.PI / 2, 0]}>
           <mesh castShadow receiveShadow position={[4, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
           <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={pinkProps} />
