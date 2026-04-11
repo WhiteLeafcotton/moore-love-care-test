@@ -1,15 +1,11 @@
-import { useRef, useMemo, useEffect } from "react";
-import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
-import { Environment, Sky } from "@react-three/drei";
-import { Water } from "three-stdlib";
+import { useRef, useMemo } from "react";
+import { useFrame, extend, useLoader } from "@react-three/fiber";
 import * as THREE from "three";
 
-extend({ Water });
-
-// Hill geometry logic
+// Hill height logic stays consistent for the "blanket" look
 const getHillHeight = (x, z) => {
   const dist = Math.sqrt(x * x + z * z);
-  const flatZone = 45; // Keeps the center clear for the water/structure
+  const flatZone = 45; 
   const smoothZone = 25;
   let influence = 1.0;
   if (dist < flatZone) influence = 0;
@@ -17,166 +13,75 @@ const getHillHeight = (x, z) => {
   return (Math.sin(x * 0.05) * Math.cos(z * 0.05) * 12 + Math.sin(x * 0.1) * 4) * influence;
 };
 
-const createHillGeom = () => {
-  const g = new THREE.PlaneGeometry(650, 650, 128, 128);
-  g.rotateX(-Math.PI / 2);
-  const pos = g.attributes.position.array;
-  for (let i = 0; i < pos.length; i += 3) {
-    pos[i + 1] = getHillHeight(pos[i], pos[i + 2]);
-  }
-  g.computeVertexNormals();
-  return g;
-};
-
-const WigglingSpaghettiReef = () => {
+const SandHills = () => {
   const meshRef = useRef();
-  // Very high density for the "blanket" effect
-  const COUNT = 6000; 
-  const hillGeom = useMemo(() => createHillGeom(), []);
   
-  // Extra thin and long for snake-like flexibility
-  const coralGeom = useMemo(() => {
-    const g = new THREE.CapsuleGeometry(0.06, 7.0, 4, 32); // High radial segments for smooth bending
-    g.translate(0, 3.5, 0); 
+  const geometry = useMemo(() => {
+    const g = new THREE.PlaneGeometry(650, 650, 256, 256); // High segments for smooth ripples
+    g.rotateX(-Math.PI / 2);
+    const pos = g.attributes.position.array;
+    for (let i = 0; i < pos.length; i += 3) {
+      pos[i + 1] = getHillHeight(pos[i], pos[i + 2]);
+    }
+    g.computeVertexNormals();
     return g;
   }, []);
 
-  const dummy = new THREE.Object3D();
-  
-  useEffect(() => {
-    let i = 0;
-    while (i < COUNT) {
-      const x = (Math.random() - 0.5) * 600;
-      const z = (Math.random() - 0.5) * 600;
-      const dist = Math.sqrt(x * x + z * z);
-      
-      // Only spawn on hills (blanket effect)
-      if (dist > 50) {
-        const y = getHillHeight(x, z);
-        dummy.position.set(x, y - 0.1, z);
-        dummy.rotation.set(0, Math.random() * Math.PI, 0);
-        
-        const s = 0.3 + Math.random() * 0.9; 
-        dummy.scale.set(s, s, s);
-        
-        dummy.updateMatrix();
-        meshRef.current.setMatrixAt(i, dummy.matrix);
-        i++;
-      }
-    }
-    meshRef.current.instanceMatrix.needsUpdate = true;
-  }, []);
-
-  const coralMaterial = useMemo(() => new THREE.ShaderMaterial({
+  const sandMaterial = useMemo(() => new THREE.ShaderMaterial({
     uniforms: {
       uTime: { value: 0 },
-      uColorPink: { value: new THREE.Color("#ff779b") },
-      uColorYellow: { value: new THREE.Color("#ffea00") },
-      uLightDir: { value: new THREE.Vector3(-15, 30, 10).normalize() },
-      uColorGlow: { value: new THREE.Color("#ffc0e6") }
+      uSandColor: { value: new THREE.Color("#fceabb") }, // Warm premium sand
+      uShadowColor: { value: new THREE.Color("#d4a373") },
+      uLightDir: { value: new THREE.Vector3(-10, 20, 10).normalize() }
     },
     vertexShader: `
       varying vec3 vNormal;
       varying vec3 vPosition;
-      uniform float uTime;
-
+      varying vec2 vUv;
       void main() {
         vNormal = normalize(normalMatrix * normal);
-        vec3 pos = position;
-
-        // SNAKE WIGGLE LOGIC
-        // Layered sine waves based on the height (pos.y) of the strand
-        float speed = uTime * 2.5;
-        float noise = instanceMatrix[3][0] + instanceMatrix[3][2]; // Unique offset per strand
-        
-        // Bend intensity increases as we move up the "spaghetti"
-        float bend = pow(pos.y / 7.0, 2.0) * 1.8;
-        
-        pos.x += sin(speed + pos.y * 0.8 + noise) * bend;
-        pos.z += cos(speed * 0.8 + pos.y * 0.5 + noise) * bend;
-
-        vPosition = pos;
-        gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(pos, 1.0);
+        vPosition = position;
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
       }
     `,
     fragmentShader: `
-      uniform vec3 uColorPink;
-      uniform vec3 uColorYellow;
+      uniform vec3 uSandColor;
+      uniform vec3 uShadowColor;
       uniform vec3 uLightDir;
-      uniform vec3 uColorGlow;
+      uniform float uTime;
       varying vec3 vNormal;
       varying vec3 vPosition;
+      varying vec2 vUv;
+
+      // Simple noise for grain
+      float hash(vec2 p) {
+        return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+      }
 
       void main() {
-        float mixRatio = clamp(vPosition.y / 7.0, 0.0, 1.0);
-        vec3 candyColor = mix(uColorYellow, uColorPink, mixRatio);
+        float diffuse = max(dot(vNormal, uLightDir), 0.0);
         
-        float diffuse = max(dot(uLightDir, vNormal), 0.4);
-        float rim = pow(1.0 - max(dot(vNormal, vec3(0,0,1)), 0.0), 4.0);
+        // Add subtle ripples based on UV
+        float ripples = sin(vUv.x * 100.0 + vUv.y * 50.0) * 0.05;
         
-        gl_FragColor = vec4((candyColor * diffuse) + (uColorGlow * rim * 0.7), 1.0);
+        // Add "Sparkle" grain
+        float grain = hash(vUv * 1000.0);
+        float sparkle = pow(grain, 50.0) * 2.0; // Sharp, tiny glints
+
+        vec3 color = mix(uShadowColor, uSandColor, diffuse + ripples);
+        color += sparkle * diffuse; // Sparkle only in light
+
+        gl_FragColor = vec4(color, 1.0);
       }
     `
   }), []);
 
   useFrame((state) => {
-    coralMaterial.uniforms.uTime.value = state.clock.getElapsedTime();
+    sandMaterial.uniforms.uTime.value = state.clock.getElapsedTime();
   });
 
   return (
-    <group position={[0, -4, -40]}>
-      <mesh geometry={hillGeom}>
-        <meshStandardMaterial color="#010300" roughness={1} />
-      </mesh>
-      <instancedMesh ref={meshRef} args={[coralGeom, coralMaterial, COUNT]} />
-    </group>
+    <mesh ref={meshRef} geometry={geometry} material={sandMaterial} position={[0, -4, -40]} />
   );
 };
-
-export default function Scene({ currentView }) {
-  const { camera } = useThree();
-  const waterRef = useRef();
-  const lookAtTarget = useRef(new THREE.Vector3(12, 1.5, 0));
-  const baseUrl = import.meta.env.BASE_URL || "/";
-
-  const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
-  const pinkStoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
-
-  useFrame((state, delta) => {
-    const isHome = currentView === "home";
-    const targetPos = new THREE.Vector3(-15, 1.5, 30);
-    const exitPos = new THREE.Vector3(-8, 1.5, -100);
-    camera.position.lerp(isHome ? targetPos : exitPos, 0.04);
-    camera.lookAt(lookAtTarget.current);
-    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.15;
-  });
-
-  return (
-    <>
-      <Sky sunPosition={[-10, 5, -100]} turbidity={5} rayleigh={1} />
-      <WigglingSpaghettiReef />
-      <Environment preset="sunset" />
-      <fog attach="fog" args={["#ffc0e6", 10, 550]} />
-      <hemisphereLight intensity={2.5} color="#ffffff" groundColor="#ffc0e6" />
-      
-      <mesh position={[12, -2.0, 15]}>
-        <boxGeometry args={[14, 8.0, 28]} />
-        <meshStandardMaterial map={pinkStoneTex} color="#fcd7d7" />
-      </mesh>
-
-      <water
-        ref={waterRef}
-        args={[new THREE.PlaneGeometry(5000, 5000), {
-          waterNormals,
-          sunDirection: new THREE.Vector3(-10, 10, -100).normalize(),
-          sunColor: 0xffffff,
-          waterColor: 0x001e0f,
-          distortionScale: 3.7,
-          alpha: 0.8,
-        }]}
-        rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, -1.2, 0]}
-      />
-    </>
-  );
-}
