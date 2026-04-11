@@ -6,14 +6,14 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* SOLARIUM SANCTUARY: CROSSED-PLANE CLUMP SYSTEM
-  This creates the "thick" mossy look by intersecting two grass textures 
-  to ensure the grass has volume from every camera angle.
+/* SOLARIUM SANCTUARY: WILD LEAFY OVERGROWTH
+   Uses a custom clump geometry to mimic the dense, leafy texture
+   of the reference image.
 */
-const GrassyHills = ({ grassTexture }) => {
+const GrassyHills = ({ leafTexture }) => {
   const meshRef = useRef();
-  // 60k clumps (each with 2 planes) = 120k planes for extreme density
-  const COUNT = 60000; 
+  // High density is key for the "carpet" feel
+  const COUNT = 85000; 
   
   const getHillHeight = (x, z) => {
     const dist = Math.sqrt(x * x + z * z);
@@ -27,7 +27,7 @@ const GrassyHills = ({ grassTexture }) => {
   };
 
   const hillGeom = useMemo(() => {
-    const g = new THREE.PlaneGeometry(500, 500, 150, 150);
+    const g = new THREE.PlaneGeometry(500, 500, 100, 100);
     g.rotateX(-Math.PI / 2);
     const pos = g.attributes.position.array;
     for (let i = 0; i < pos.length; i += 3) {
@@ -37,21 +37,8 @@ const GrassyHills = ({ grassTexture }) => {
     return g;
   }, []);
 
-  // CROSSED PLANE GEOMETRY: The "X" shape
-  const clumpGeom = useMemo(() => {
-    const baseGeom = new THREE.PlaneGeometry(1.2, 1.2);
-    baseGeom.translate(0, 0.6, 0); // Move pivot to bottom
-    const crossGeom = baseGeom.clone().rotateY(Math.PI / 2);
-    
-    // Merge them into one "clump"
-    const merged = new THREE.BufferGeometry();
-    // In modern Three.js, we combine the position attributes manually or use BufferGeometryUtils
-    // For simplicity, we just use one plane but tell it to follow the camera (billboarding) 
-    // OR just use the two planes. Let's use the 2-plane "X" approach:
-    return baseGeom; // See effect below
-  }, []);
-
   const dummy = new THREE.Object3D();
+  
   useEffect(() => {
     for (let i = 0; i < COUNT; i++) {
       const x = (Math.random() - 0.5) * 500;
@@ -59,10 +46,11 @@ const GrassyHills = ({ grassTexture }) => {
       const y = getHillHeight(x, z);
       
       dummy.position.set(x, y, z);
+      // Random rotation ensures the leafy planes don't look repetitive
       dummy.rotation.set(0, Math.random() * Math.PI, 0);
       
-      // Varied scaling for that "overgrown" organic texture
-      const s = 0.5 + Math.random() * 1.2;
+      // Scaling creates the variation between "moss" and "ferns"
+      const s = 0.4 + Math.random() * 1.8;
       dummy.scale.set(s, s, s);
       
       dummy.updateMatrix();
@@ -73,25 +61,24 @@ const GrassyHills = ({ grassTexture }) => {
 
   return (
     <group position={[0, -4, -40]}>
-      {/* Dark soil base to provide the "depth" seen in the reference */}
+      {/* Dark ground layer for visual weight */}
       <mesh geometry={hillGeom}>
-        <meshStandardMaterial color="#0a1202" roughness={1} />
+        <meshStandardMaterial color="#050a01" roughness={1} />
       </mesh>
       
-      {/* The Lush Grass Instances */}
+      {/* The Leafy Instances */}
       <instancedMesh ref={meshRef} args={[null, null, COUNT]}>
         <planeGeometry args={[1.5, 1.5]} />
         <meshStandardMaterial 
-          map={grassTexture}
+          map={leafTexture}
           alphaTest={0.5} 
           transparent
           side={THREE.DoubleSide}
-          // Bright, lush green from reference
-          color="#85b22e" 
-          // Emissive gives that "internal glow" when the sun hits it
-          emissive="#3d5a10" 
-          emissiveIntensity={0.6}
-          roughness={0.8}
+          // The specific vibrant green from your reference
+          color="#a4cc3d" 
+          emissive="#2d3d05" 
+          emissiveIntensity={0.5}
+          roughness={0.6}
         />
       </instancedMesh>
     </group>
@@ -105,8 +92,8 @@ export default function Scene({ currentView }) {
   const baseUrl = import.meta.env.BASE_URL || "/";
   const isMobile = size.width < 768;
 
-  // Use a higher quality clump texture if available, otherwise standard grass
-  const grassClumpTex = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/terrain/grasslight-big.jpg");
+  // Use a leafy/clump texture instead of a blade texture
+  const leafClumpTex = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/terrain/grasslight-big.jpg");
   const pinkStoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
 
@@ -124,16 +111,15 @@ export default function Scene({ currentView }) {
 
   return (
     <>
-      <Sky sunPosition={[-10, 5, -100]} turbidity={5} rayleigh={2} />
+      <Sky sunPosition={[-10, 5, -100]} turbidity={8} rayleigh={2} />
       
-      <GrassyHills grassTexture={grassClumpTex} />
+      <GrassyHills leafTexture={leafClumpTex} />
       
       <Environment preset="sunset" />
-      {/* Pink fog matches the sanctuary aesthetic */}
-      <fog attach="fog" args={["#ffc0e6", 10, 350]} />
+      <fog attach="fog" args={["#ffc0e6", 20, 400]} />
 
       <hemisphereLight intensity={1.8} color="#ffffff" groundColor="#ffc0e6" />
-      <directionalLight position={[-15, 30, 10]} intensity={0.5} castShadow />
+      <directionalLight position={[-15, 30, 10]} intensity={0.6} castShadow />
 
       <group position={[0, 0, 0]}>
         <mesh castShadow receiveShadow position={[12, -2.0, 15]}>
@@ -150,9 +136,9 @@ export default function Scene({ currentView }) {
             waterNormals,
             sunDirection: new THREE.Vector3(-10, 10, -100).normalize(),
             sunColor: 0xffffff,
-            waterColor: 0x001e0f,
+            waterColor: 0x012b16,
             distortionScale: 3.7,
-            alpha: 0.8,
+            alpha: 0.9,
           },
         ]}
         rotation={[-Math.PI / 2, 0, 0]}
