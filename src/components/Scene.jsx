@@ -6,8 +6,6 @@ import * as THREE from "three";
 
 extend({ Water });
 
-// 1. SHARED GEOMETRY FUNCTION
-// Defined outside components to prevent "ReferenceError: hillGeom is not defined"
 const getHillHeight = (x, z) => {
   const dist = Math.sqrt(x * x + z * z);
   const flatZone = 40;
@@ -19,7 +17,7 @@ const getHillHeight = (x, z) => {
 };
 
 const createHillGeom = () => {
-  const g = new THREE.PlaneGeometry(500, 500, 100, 100);
+  const g = new THREE.PlaneGeometry(600, 600, 128, 128);
   g.rotateX(-Math.PI / 2);
   const pos = g.attributes.position.array;
   for (let i = 0; i < pos.length; i += 3) {
@@ -29,14 +27,16 @@ const createHillGeom = () => {
   return g;
 };
 
-// 2. STYLIZED CANDY CORAL COMPONENT
-const CandyCoralReef = () => {
+const SpaghettiCoralReef = () => {
   const meshRef = useRef();
-  const COUNT = 180; 
+  // Very high count to create a dense, grassy reef effect
+  const COUNT = 3500; 
   const hillGeom = useMemo(() => createHillGeom(), []);
+  
+  // Adjusted: radius 0.1 and length 6.0 makes them look like thin spaghetti
   const coralGeom = useMemo(() => {
-    const g = new THREE.CapsuleGeometry(1, 4, 16, 32);
-    g.translate(0, 2, 0); 
+    const g = new THREE.CapsuleGeometry(0.1, 6.0, 4, 12);
+    g.translate(0, 3, 0); // Keep pivot at the base
     return g;
   }, []);
 
@@ -44,13 +44,17 @@ const CandyCoralReef = () => {
   
   useEffect(() => {
     for (let i = 0; i < COUNT; i++) {
-      const x = (Math.random() - 0.5) * 420;
-      const z = (Math.random() - 0.5) * 420;
+      const x = (Math.random() - 0.5) * 550;
+      const z = (Math.random() - 0.5) * 550;
       const y = getHillHeight(x, z);
-      dummy.position.set(x, y - 0.5, z);
-      dummy.rotation.set((Math.random() - 0.5) * 0.3, Math.random() * Math.PI, (Math.random() - 0.5) * 0.3);
-      const s = 0.8 + Math.pow(Math.random(), 3) * 15; 
+      
+      dummy.position.set(x, y - 0.1, z);
+      dummy.rotation.set(0, Math.random() * Math.PI, 0);
+      
+      // Variations in height
+      const s = 0.4 + Math.random() * 1.2; 
       dummy.scale.set(s, s, s);
+      
       dummy.updateMatrix();
       meshRef.current.setMatrixAt(i, dummy.matrix);
     }
@@ -59,6 +63,7 @@ const CandyCoralReef = () => {
 
   const coralMaterial = useMemo(() => new THREE.ShaderMaterial({
     uniforms: {
+      uTime: { value: 0 },
       uColorPink: { value: new THREE.Color("#ff779b") },
       uColorYellow: { value: new THREE.Color("#ffea00") },
       uLightDir: { value: new THREE.Vector3(-15, 30, 10).normalize() },
@@ -67,10 +72,21 @@ const CandyCoralReef = () => {
     vertexShader: `
       varying vec3 vNormal;
       varying vec3 vPosition;
+      uniform float uTime;
+
       void main() {
         vNormal = normalize(normalMatrix * normal);
-        vPosition = position;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        
+        vec3 pos = position;
+        // Higher power on pos.y makes the tips whip more violently like real spaghetti in wind
+        float windStrength = pow(pos.y, 2.0) * 0.18;
+        float wave = sin(uTime * 2.0 + instanceMatrix[3][0] * 0.5 + instanceMatrix[3][2] * 0.5);
+        
+        pos.x += wave * windStrength;
+        pos.z += cos(uTime * 1.5 + instanceMatrix[3][0]) * (windStrength * 0.5);
+
+        vPosition = pos;
+        gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(pos, 1.0);
       }
     `,
     fragmentShader: `
@@ -80,15 +96,23 @@ const CandyCoralReef = () => {
       uniform vec3 uColorGlow;
       varying vec3 vNormal;
       varying vec3 vPosition;
+
       void main() {
-        float mixRatio = clamp(vPosition.y / 4.0, 0.0, 1.0);
+        // Gradient stretched over the longer body
+        float mixRatio = clamp(vPosition.y / 6.0, 0.0, 1.0);
         vec3 candyColor = mix(uColorYellow, uColorPink, mixRatio);
-        float diffuse = max(dot(uLightDir, vNormal), 0.2);
-        float rim = pow(1.0 - max(dot(vNormal, vec3(0,0,1)), 0.0), 3.0);
-        gl_FragColor = vec4((candyColor * diffuse) + (uColorGlow * rim * 0.5), 1.0);
+        
+        float diffuse = max(dot(uLightDir, vNormal), 0.4);
+        float rim = pow(1.0 - max(dot(vNormal, vec3(0,0,1)), 0.0), 4.0);
+        
+        gl_FragColor = vec4((candyColor * diffuse) + (uColorGlow * rim * 0.6), 1.0);
       }
     `
   }), []);
+
+  useFrame((state) => {
+    coralMaterial.uniforms.uTime.value = state.clock.getElapsedTime();
+  });
 
   return (
     <group position={[0, -4, -40]}>
@@ -100,20 +124,18 @@ const CandyCoralReef = () => {
   );
 };
 
-// 3. MAIN SCENE
 export default function Scene({ currentView }) {
-  const { camera, size } = useThree();
+  const { camera } = useThree();
   const waterRef = useRef();
   const lookAtTarget = useRef(new THREE.Vector3(12, 1.5, 0));
   const baseUrl = import.meta.env.BASE_URL || "/";
-  const isMobile = size.width < 768;
 
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
   const pinkStoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
 
   useFrame((state, delta) => {
     const isHome = currentView === "home";
-    const targetPos = isMobile ? new THREE.Vector3(-30, 8, 65) : new THREE.Vector3(-15, 1.5, 30);
+    const targetPos = new THREE.Vector3(-15, 1.5, 30);
     const exitPos = new THREE.Vector3(-8, 1.5, -100);
     camera.position.lerp(isHome ? targetPos : exitPos, 0.04);
     camera.lookAt(lookAtTarget.current);
@@ -123,9 +145,9 @@ export default function Scene({ currentView }) {
   return (
     <>
       <Sky sunPosition={[-10, 5, -100]} turbidity={5} rayleigh={1} />
-      <CandyCoralReef />
+      <SpaghettiCoralReef />
       <Environment preset="sunset" />
-      <fog attach="fog" args={["#ffc0e6", 10, 400]} />
+      <fog attach="fog" args={["#ffc0e6", 10, 500]} />
       <hemisphereLight intensity={2.5} color="#ffffff" groundColor="#ffc0e6" />
       
       <mesh position={[12, -2.0, 15]}>
