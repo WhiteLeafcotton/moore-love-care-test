@@ -6,7 +6,6 @@ import * as THREE from "three";
 
 extend({ Water });
 
-// Hill height logic - centered to leave space for the sanctuary
 const getHillHeight = (x, z) => {
   const dist = Math.sqrt(x * x + z * z);
   const flatZone = 45; 
@@ -17,11 +16,13 @@ const getHillHeight = (x, z) => {
   return (Math.sin(x * 0.05) * Math.cos(z * 0.05) * 12 + Math.sin(x * 0.1) * 4) * influence;
 };
 
-const VelvetHills = () => {
+const VolumetricMossHills = () => {
+  const SHELL_COUNT = 15; // Number of "layers" to create depth
   const meshRef = useRef();
-  
+
+  // Create the base geometry once
   const geometry = useMemo(() => {
-    const g = new THREE.PlaneGeometry(650, 650, 256, 256);
+    const g = new THREE.PlaneGeometry(650, 650, 128, 128);
     g.rotateX(-Math.PI / 2);
     const pos = g.attributes.position.array;
     for (let i = 0; i < pos.length; i += 3) {
@@ -31,64 +32,77 @@ const VelvetHills = () => {
     return g;
   }, []);
 
-  // THE VELVET SHADER
-  const velvetMaterial = useMemo(() => new THREE.ShaderMaterial({
+  // Custom shader for the "shells"
+  const material = useMemo(() => new THREE.ShaderMaterial({
     uniforms: {
       uTime: { value: 0 },
-      uBaseColor: { value: new THREE.Color("#1a2e05") }, // Deep forest moss
-      uFuzzColor: { value: new THREE.Color("#a4cc3d") }, // Vibrant highlight green
-      uLightDir: { value: new THREE.Vector3(-10, 20, 10).normalize() }
+      uColorDark: { value: new THREE.Color("#0d1a01") },
+      uColorLight: { value: new THREE.Color("#99cc33") },
+      uShellCount: { value: SHELL_COUNT }
     },
+    transparent: true,
     vertexShader: `
-      varying vec3 vNormal;
-      varying vec3 vViewDir;
       varying vec2 vUv;
+      varying float vHeightFactor;
+      uniform float uShellCount;
+      attribute float shellIndex; // Custom attribute for which layer this is
+
       void main() {
-        vNormal = normalize(normalMatrix * normal);
-        vec4 worldPosition = modelMatrix * vec4(position, 1.0);
-        vViewDir = normalize(cameraPosition - worldPosition.xyz);
         vUv = uv;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        // Move each shell upwards based on its index
+        float h = (shellIndex / uShellCount) * 2.5; 
+        vHeightFactor = shellIndex / uShellCount;
+        
+        vec3 pos = position;
+        pos.y += h; // Displace layer upwards
+        
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
       }
     `,
     fragmentShader: `
-      uniform vec3 uBaseColor;
-      uniform vec3 uFuzzColor;
-      uniform vec3 uLightDir;
-      uniform float uTime;
-      varying vec3 vNormal;
-      varying vec3 vViewDir;
       varying vec2 vUv;
+      varying float vHeightFactor;
+      uniform vec3 uColorDark;
+      uniform vec3 uColorLight;
+
+      // Noise function to create the "blades" or "pores"
+      float hash(vec2 p) {
+        return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+      }
 
       void main() {
-        // Fresnel Effect: Stronger on the edges (rim lighting)
-        float fresnel = pow(1.0 - dot(vNormal, vViewDir), 3.0);
-        
-        // Simple noise for a non-perfect "organic" look
-        float noise = fract(sin(dot(vUv, vec2(12.9898, 78.233))) * 43758.5453);
-        
-        // Lighting
-        float diffuse = max(dot(vNormal, uLightDir), 0.0);
-        
-        // Mix the deep color with the "fuzzy" edge color
-        vec3 finalColor = mix(uBaseColor, uFuzzColor, fresnel + (diffuse * 0.3));
-        
-        // Add a very subtle organic "grain"
-        finalColor += noise * 0.02;
+        // Create a pattern of "holes" that gets thinner as we go up
+        float noise = hash(vUv * 1200.0);
+        if (noise < vHeightFactor) discard;
 
-        gl_FragColor = vec4(finalColor, 1.0);
+        // Darker at the bottom, lighter at the tips
+        vec3 color = mix(uColorDark, uColorLight, vHeightFactor);
+        
+        // Simple top-down shadowing
+        float alpha = 1.0 - vHeightFactor;
+        gl_FragColor = vec4(color, alpha + 0.2);
       }
-    `
+    `,
+    side: THREE.DoubleSide
   }), []);
 
   return (
-    <mesh 
-      ref={meshRef} 
-      geometry={geometry} 
-      material={velvetMaterial} 
-      position={[0, -4, -40]} 
-      receiveShadow 
-    />
+    <group position={[0, -4, -40]}>
+      {/* Build 15 layers of the hill */}
+      {[...Array(SHELL_COUNT)].map((_, i) => (
+        <mesh key={i} geometry={geometry}>
+          <primitive object={material} attach="material" />
+          {/* We pass the index to the shader to handle the height offset */}
+          <onBeforeRender onBeforeRender={(renderer, scene, camera, geometry) => {
+             material.uniforms.uTime.value = performance.now() / 1000;
+          }} />
+        </mesh>
+      ))}
+      {/* Dark ground filler to hide gaps */}
+      <mesh geometry={geometry}>
+        <meshStandardMaterial color="#050a01" />
+      </mesh>
+    </group>
   );
 };
 
@@ -104,8 +118,7 @@ export default function Scene({ currentView }) {
   useFrame((state, delta) => {
     const isHome = currentView === "home";
     const targetPos = new THREE.Vector3(-15, 1.5, 30);
-    const exitPos = new THREE.Vector3(-8, 1.5, -100);
-    camera.position.lerp(isHome ? targetPos : exitPos, 0.04);
+    camera.position.lerp(isHome ? targetPos : new THREE.Vector3(-8, 1.5, -100), 0.04);
     camera.lookAt(lookAtTarget.current);
     if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.15;
   });
@@ -113,15 +126,11 @@ export default function Scene({ currentView }) {
   return (
     <>
       <Sky sunPosition={[-10, 5, -100]} turbidity={5} rayleigh={1} />
-      
-      {/* THE NEW VELVET HILLS */}
-      <VelvetHills />
-      
+      <VolumetricMossHills />
       <Environment preset="sunset" />
       <fog attach="fog" args={["#ffc0e6", 10, 500]} />
       <hemisphereLight intensity={2.5} color="#ffffff" groundColor="#ffc0e6" />
       
-      {/* Central Sanctuary Structure */}
       <mesh position={[12, -2.0, 15]}>
         <boxGeometry args={[14, 8.0, 28]} />
         <meshStandardMaterial map={pinkStoneTex} color="#fcd7d7" />
