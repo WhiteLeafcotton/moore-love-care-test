@@ -1,232 +1,266 @@
 import { useRef, useMemo, useEffect } from "react";
-import { useThree, useFrame, extend } from "@react-three/fiber";
+import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
 import { Environment, Sky, Cloud, ContactShadows } from "@react-three/drei";
 import { Water } from "three-stdlib";
 import * as THREE from "three";
 
 extend({ Water });
 
-const GRASS_COUNT = 400000;
+const GRASS_COUNT = 400000; 
 
-/* ---------- TERRAIN (UNCHANGED) ---------- */
 const getHillHeight = (x, z) => {
   const dist = Math.sqrt(x * x + z * z);
-  const flatZone = 65;
-  const influence = dist < flatZone ? 0 : Math.min((dist - flatZone) / 40, 1);
+  const flatZone = 45; 
+  const influence = dist < flatZone ? 0 : Math.min((dist - flatZone) / 25, 1.0);
 
   const hills = [
-    { x: 0, z: -140, h: 18, w: 50 },
-    { x: -100, z: -80, h: 12, w: 40 },
-    { x: 110, z: -90, h: 14, w: 45 }
+    { x: 0, z: -80, h: 14, w: 35 },     
+    { x: -60, z: -40, h: 10, w: 25 },   
+    { x: 65, z: -35, h: 12, w: 30 }     
   ];
 
-  let height = 0;
+  let hillHeight = 0;
+  hills.forEach(h => {
+    const d = Math.sqrt(Math.pow(x - h.x, 2) + Math.pow(z - h.z, 2));
+    hillHeight += Math.exp(-Math.pow(d / h.w, 2)) * h.h;
+  });
 
-  for (let i = 0; i < hills.length; i++) {
-    const k = hills[i];
-    const dx = x - k.x;
-    const dz = z - k.z;
-    const d = Math.sqrt(dx * dx + dz * dz);
-    const falloff = Math.exp(-Math.pow(d / k.w, 2));
-    height += falloff * k.h;
-  }
-
-  return height * influence;
+  return hillHeight * influence;
 };
 
-/* ---------- PRO GRASS ---------- */
-const Grass = () => {
+const GrassySassyHills = () => {
   const meshRef = useRef();
 
-  const blade = useMemo(() => {
-    const g = new THREE.PlaneGeometry(0.035, 1.4, 1, 6);
-    g.translate(0, 0.7, 0);
-
-    // taper shape
+  const bladeGeo = useMemo(() => {
+    const g = new THREE.PlaneGeometry(0.05, 1.2, 1, 4);
+    g.translate(0, 0.6, 0);
     const pos = g.attributes.position.array;
     for (let i = 0; i < pos.length; i += 3) {
-      const y = pos[i + 1] / 1.4;
-      pos[i] *= (1.0 - y * 0.85);
+      const h = pos[i + 1] / 1.2;
+      pos[i] += Math.pow(h, 2) * 0.15; 
     }
-
     g.computeVertexNormals();
     return g;
   }, []);
 
-  const terrain = useMemo(() => {
-    const g = new THREE.PlaneGeometry(500, 500, 160, 160);
+  const terrainGeo = useMemo(() => {
+    const g = new THREE.PlaneGeometry(400, 400, 150, 150);
     g.rotateX(-Math.PI / 2);
-
     const pos = g.attributes.position.array;
     for (let i = 0; i < pos.length; i += 3) {
       pos[i + 1] = getHillHeight(pos[i], pos[i + 2]);
     }
-
     g.computeVertexNormals();
     return g;
   }, []);
 
-  const material = useMemo(() => new THREE.ShaderMaterial({
+  const grassMaterial = useMemo(() => new THREE.ShaderMaterial({
     uniforms: {
       uTime: { value: 0 },
-      uRoot: { value: new THREE.Color("#140018") },
-      uTip: { value: new THREE.Color("#ff8cf5") }
+      uColorRoots: { value: new THREE.Color("#2a0a3d") }, // Darker purple soil/base
+      uColorTips: { value: new THREE.Color("#d1a3ff") }  // Lighter pinkish-purple tips
     },
     vertexShader: `
-      varying float vH;
-      varying float vNoise;
+      varying float vHeight;
       uniform float uTime;
-
-      float rand(vec2 co){
-        return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
-      }
-
       void main() {
-        vH = position.y / 1.4;
-
+        vHeight = position.y / 1.2;
+        vec3 worldPos = (instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+        float swell = sin(uTime * 0.5 + worldPos.x * 0.05 + worldPos.z * 0.05) * 0.3;
+        float gust = sin(uTime * 2.0 + worldPos.x * 0.2) * 0.15;
+        float totalWind = (swell + gust) * vHeight;
         vec3 pos = position;
-
-        vec3 world = (instanceMatrix * vec4(0.0,0.0,0.0,1.0)).xyz;
-        float noise = rand(world.xz);
-        vNoise = noise;
-
-        // layered wind (more natural)
-        float sway =
-          sin(uTime * 1.2 + world.x * 0.15) * 0.2 +
-          sin(uTime * 2.5 + world.z * 0.25) * 0.1 +
-          sin(uTime * 4.0 + world.x * 0.6) * 0.05;
-
-        // individual variation
-        sway *= (0.6 + noise * 0.8);
-
-        // bend stronger at top
-        pos.x += sway * pow(vH, 1.5);
-        pos.z += sway * 0.3 * vH;
-
-        gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(pos,1.0);
+        pos.x += totalWind;
+        pos.z += totalWind * 0.3;
+        gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(pos, 1.0);
       }
     `,
     fragmentShader: `
-      varying float vH;
-      varying float vNoise;
-      uniform vec3 uRoot;
-      uniform vec3 uTip;
-
+      varying float vHeight;
+      uniform vec3 uColorRoots;
+      uniform vec3 uColorTips;
       void main() {
-        // richer gradient
-        vec3 base = mix(uRoot, uTip, pow(vH, 0.8));
-
-        // subtle variation per blade
-        base *= (0.85 + vNoise * 0.3);
-
-        // depth shading
-        float shade = pow(vH, 0.6);
-
-        gl_FragColor = vec4(base * shade, 1.0);
+        float ao = pow(vHeight, 0.4); 
+        vec3 color = mix(uColorRoots, uColorTips, vHeight);
+        gl_FragColor = vec4(color * ao, 1.0);
       }
     `,
     side: THREE.DoubleSide
   }), []);
 
   useFrame((state) => {
-    material.uniforms.uTime.value = state.clock.getElapsedTime();
-
-    if (meshRef.current && !meshRef.current._done) {
+    grassMaterial.uniforms.uTime.value = state.clock.getElapsedTime();
+    if (meshRef.current && !meshRef.current._init) {
       const dummy = new THREE.Object3D();
-
       for (let i = 0; i < GRASS_COUNT; i++) {
-        const x = (Math.random() - 0.5) * 500;
-        const z = (Math.random() - 0.5) * 500;
+        const x = (Math.random() - 0.5) * 400;
+        const z = (Math.random() - 0.5) * 400;
         const y = getHillHeight(x, z);
-
         if (y > 0.05) {
-          dummy.position.set(x, y, z);
+          dummy.position.set(x, y - 0.05, z);
           dummy.rotation.y = Math.random() * Math.PI;
-
-          // slight lean variation
           dummy.rotation.x = (Math.random() - 0.5) * 0.2;
-
-          // varied scale
-          dummy.scale.setScalar(0.6 + Math.random() * 0.9);
-
+          dummy.scale.setScalar(0.6 + Math.random() * 0.8);
+          dummy.updateMatrix();
+          meshRef.current.setMatrixAt(i, dummy.matrix);
+        } else {
+          dummy.scale.setScalar(0);
           dummy.updateMatrix();
           meshRef.current.setMatrixAt(i, dummy.matrix);
         }
       }
-
       meshRef.current.instanceMatrix.needsUpdate = true;
-      meshRef.current._done = true;
+      meshRef.current._init = true;
     }
   });
 
   return (
-    <group position={[0, -3.5, -20]}>
-      <mesh geometry={terrain} receiveShadow>
-        <meshStandardMaterial color="#07020a" roughness={1} />
+    <group position={[0, -3.5, -40]}>
+      <mesh geometry={terrainGeo} receiveShadow>
+        <meshStandardMaterial color="#1a0521" roughness={1} />
       </mesh>
-
-      <instancedMesh ref={meshRef} args={[blade, material, GRASS_COUNT]} />
+      <instancedMesh ref={meshRef} args={[bladeGeo, grassMaterial, GRASS_COUNT]} castShadow />
     </group>
   );
 };
 
-/* ---------- SCENE (UNCHANGED) ---------- */
-export default function Scene({ currentView }) {
-  const { camera } = useThree();
+/* --- ARCHITECTURE --- */
+const Staircase = ({ position, width, texture, rotation }) => {
+  const stepHeight = 0.5; const stepDepth = 0.8; const numSteps = 16;
+  return (
+    <group position={position} rotation={rotation}>
+      {Array.from({ length: numSteps }).map((_, i) => (
+        <group key={i} position={[0, -i * stepHeight, i * stepDepth]}>
+          <mesh castShadow receiveShadow>
+            <boxGeometry args={[width, stepHeight, stepDepth]} />
+            <meshStandardMaterial map={texture} color="#fcd7d7" roughness={0.55} />
+          </mesh>
+          <mesh position={[0, -2.5, 0]} castShadow receiveShadow>
+            <boxGeometry args={[width, 5, stepDepth]} />
+            <meshStandardMaterial map={texture} color="#fcd7d7" roughness={0.55} />
+          </mesh>
+        </group>
+      ))}
+    </group>
+  );
+};
 
-  const transition = useRef(0);
-  const fromPos = useRef(new THREE.Vector3());
-  const toPos = useRef(new THREE.Vector3());
-  const fromLook = useRef(new THREE.Vector3());
-  const toLook = useRef(new THREE.Vector3());
-  const lookAt = useRef(new THREE.Vector3());
+const WallOpening = ({ position, colorProps, width = 6, openingW = 3.5, height = 17, openingH = 9, isWindow = false }) => (
+  <group position={position}>
+    <mesh position={[-(openingW + (width - openingW) / 2) / 2, height / 2, 0]} castShadow receiveShadow>
+      <boxGeometry args={[(width - openingW) / 2, height, 2]} /><meshStandardMaterial {...colorProps} />
+    </mesh>
+    <mesh position={[(openingW + (width - openingW) / 2) / 2, height / 2, 0]} castShadow receiveShadow>
+      <boxGeometry args={[(width - openingW) / 2, height, 2]} /><meshStandardMaterial {...colorProps} />
+    </mesh>
+    <mesh position={[0, height - (height - openingH - (isWindow ? 4 : 0)) / 2, 0]} castShadow receiveShadow>
+      <boxGeometry args={[openingW, height - openingH - (isWindow ? 4 : 0), 2]} /><meshStandardMaterial {...colorProps} />
+    </mesh>
+    {isWindow && (
+      <mesh position={[0, 2, 0]} castShadow receiveShadow>
+        <boxGeometry args={[openingW, 4, 2]} /><meshStandardMaterial {...colorProps} />
+      </mesh>
+    )}
+  </group>
+);
+
+export default function Scene({ currentView }) {
+  const { camera, size } = useThree();
+  const waterRef = useRef();
+  const cloudGroupRef = useRef();
+  const lookAtTarget = useRef(new THREE.Vector3(12, 1.5, 0));
+  const isMobile = size.width < 768;
+
+  const baseUrl = import.meta.env.BASE_URL || "/";
+  const pinkStoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
+  const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
 
   useEffect(() => {
-    transition.current = 0;
-    fromPos.current.copy(camera.position);
-    fromLook.current.copy(lookAt.current);
-
-    if (currentView === "home") {
-      toPos.current.set(10, 7, 24);
-      toLook.current.set(12, 4, 15);
-    } else {
-      toPos.current.set(0, 10, 90);
-      toLook.current.set(12, 3, 10);
+    if (pinkStoneTex) {
+      pinkStoneTex.wrapS = pinkStoneTex.wrapT = THREE.RepeatWrapping;
+      pinkStoneTex.repeat.set(2, 2);
     }
-  }, [currentView]);
+  }, [pinkStoneTex]);
 
-  useFrame(() => {
-    if (transition.current < 1) {
-      transition.current += 0.02;
+  useFrame((state, delta) => {
+    const isHome = currentView === "home";
+    const LERP_SPEED = 0.04;
 
-      const t = transition.current;
-      const ease = t < 0.5
-        ? 2 * t * t
-        : 1 - Math.pow(-2 * t + 2, 2) / 2;
+    // SWEET SPOT ADJUSTMENTS: Position is higher (y: 6) and closer (z: 25)
+    const targetPos = isHome 
+      ? (isMobile ? new THREE.Vector3(-35, 12, 70) : new THREE.Vector3(-12, 6, 25)) 
+      : new THREE.Vector3(25, 8, 40); // The "Open View" for Collection
 
-      const pos = new THREE.Vector3().lerpVectors(fromPos.current, toPos.current, ease);
-      const look = new THREE.Vector3().lerpVectors(fromLook.current, toLook.current, ease);
+    const targetLook = isHome 
+      ? new THREE.Vector3(10, 2, 5) 
+      : new THREE.Vector3(-20, 0, -20);
 
-      camera.position.copy(pos);
-      lookAt.current.copy(look);
-      camera.lookAt(lookAt.current);
+    camera.position.lerp(targetPos, LERP_SPEED);
+    lookAtTarget.current.lerp(targetLook, LERP_SPEED);
+    camera.lookAt(lookAtTarget.current);
+
+    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.15;
+    if (cloudGroupRef.current) {
+      cloudGroupRef.current.position.x += delta * 0.3;
+      if (cloudGroupRef.current.position.x > 500) cloudGroupRef.current.position.x = -500;
     }
   });
 
+  const pinkProps = { map: pinkStoneTex, color: "#fcd7d7", roughness: 0.65, metalness: 0.05 };
+
   return (
     <>
-      <Sky sunPosition={[50, 40, -200]} turbidity={6} rayleigh={3} />
+      <Sky distance={450000} sunPosition={[-10, 5, -100]} inclination={0.6} azimuth={0.25} turbidity={10} rayleigh={5} />
+      
       <Environment preset="sunset" />
-      <fog attach="fog" args={["#f5b0ff", 30, 300]} />
+      <fog attach="fog" args={["#f8e1ff", 10, 400]} />
+      
+      <GrassySassyHills />
 
-      <Grass />
+      <hemisphereLight intensity={1.2} color="#ffffff" groundColor="#b066ff" />
+      <directionalLight position={[-15, 30, 10]} intensity={0.5} castShadow />
+      <pointLight position={[10, 10, 10]} intensity={1.2} color="#ffd6e7" />
 
-      <hemisphereLight intensity={1.2} />
-      <directionalLight position={[50, 40, -200]} intensity={1.2} castShadow />
+      <group ref={cloudGroupRef}>
+        <Cloud position={[0, 80, -400]} speed={0.2} opacity={0.2} segments={40} color="#ffd1dc" />
+        <Cloud position={[-100, 100, -350]} speed={0.1} opacity={0.2} segments={40} color="#ffffff" />
+      </group>
 
-      <Cloud position={[0, 60, -200]} opacity={0.3} speed={0.2} />
+      <group position={[0, 0, 0]}>
+        <mesh position={[12, -2.0, 15]} castShadow receiveShadow>
+          <boxGeometry args={[14, 8.0, 28]} /><meshStandardMaterial {...pinkProps} />
+        </mesh>
+        <Staircase position={[5.0, 1.5, 1.0]} rotation={[0, -Math.PI / 2, 0]} width={20} texture={pinkStoneTex} />
+        
+        <group position={[-16, -1, 0]}>
+          <mesh position={[1, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
+          <WallOpening position={[6, 0, 0]} colorProps={pinkProps} />
+          <WallOpening position={[12, 0, 0]} colorProps={pinkProps} />
+          <mesh position={[24, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
+        </group>
 
-      <ContactShadows position={[12, -2, 15]} opacity={0.2} scale={50} blur={4} />
+        <group position={[17, -1, 1]} rotation={[0, -Math.PI / 2, 0]}>
+          <mesh castShadow receiveShadow position={[4, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
+          <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={pinkProps} />
+          <WallOpening position={[17, 0, 0]} isWindow={true} colorProps={pinkProps} />
+          <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
+        </group>
+      </group>
+
+      <ContactShadows position={[12, -1.9, 15]} opacity={0.2} scale={60} blur={3} far={10} />
+
+      <water
+        ref={waterRef}
+        args={[new THREE.PlaneGeometry(2000, 2000), {
+          waterNormals,
+          sunDirection: new THREE.Vector3(-10, 10, -100).normalize(),
+          sunColor: 0xffffff,
+          waterColor: 0x5a3b7d,
+          alpha: 0.6,
+        }]}
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[0, -1.4, 0]}
+      />
     </>
   );
 }

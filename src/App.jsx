@@ -7,6 +7,7 @@ export default function App() {
 
   return (
     <div style={{ width: "100vw", height: "100vh", background: "#f7ece8", position: "relative" }}>
+      {/* UI OVERLAY */}
       <div style={{
         position: "absolute", inset: 0, zIndex: 10, pointerEvents: "none",
         display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center"
@@ -17,11 +18,9 @@ export default function App() {
         }}>
           Moore Love & Care
         </h1>
-
         <p style={{ letterSpacing: "0.5em", fontSize: "10px", marginTop: "10px", color: "rgba(62, 62, 62, 0.6)" }}>
           THE SOLARIUM SANCTUARY
         </p>
-
         <button
           onClick={() => setCurrentView(v => v === "home" ? "collection" : "home")}
           style={{
@@ -35,10 +34,10 @@ export default function App() {
         </button>
       </div>
 
-      <Canvas
-        shadows
-        dpr={[1, 2]}
-        camera={{ position: [40, 15, 60], fov: 28 }}
+      <Canvas 
+        shadows 
+        dpr={[1, 2]} 
+        camera={{ position: [40, 15, 60], fov: 35 }} 
         gl={{ antialias: true }}
       >
         <Suspense fallback={null}>
