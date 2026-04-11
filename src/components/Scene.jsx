@@ -159,59 +159,57 @@ const WallOpening = ({ position, colorProps, width = 6, openingW = 4.8, height =
   </group>
 );
 
-/* --- FIXED HUMANOID: Closed head gap, planted feet --- */
+/* --- FIXED HUMANOID 3.1: Proper pivots for arms and legs --- */
 const BlockHumanoid = ({ scale = 1, materialProps, legless = false, poseProps = {} }) => {
   const { leftLegRotation = [0, 0, 0], rightLegRotation = [0, 0, 0], leftArmRotation = [0.2, 0, -0.1], rightArmRotation = [0.2, 0, 0.1], position = [0,0,0], cane = false } = poseProps;
   
-  const limbPoints = useMemo(() => {
-    const pts = [];
-    pts.push(new THREE.Vector2(0, 0), new THREE.Vector2(0.08, 0.05), new THREE.Vector2(0.08, 0.7), new THREE.Vector2(0, 0.75));
-    return pts;
+  // Pivot helper: translates geometry so it rotates from the top
+  const limbGeo = useMemo(() => {
+    const pts = [new THREE.Vector2(0, 0), new THREE.Vector2(0.08, 0.05), new THREE.Vector2(0.08, 0.7), new THREE.Vector2(0, 0.75)];
+    const g = new THREE.LatheGeometry(pts, 32);
+    g.translate(0, -0.75, 0); // Move pivot to the top
+    return g;
   }, []);
 
-  const torsoPoints = useMemo(() => {
-    const pts = [];
-    pts.push(new THREE.Vector2(0, 0), new THREE.Vector2(0.18, 0.1), new THREE.Vector2(0.18, 0.9), new THREE.Vector2(0, 1.0));
-    return pts;
+  const torsoGeo = useMemo(() => {
+    const pts = [new THREE.Vector2(0, 0), new THREE.Vector2(0.18, 0.1), new THREE.Vector2(0.18, 0.9), new THREE.Vector2(0, 1.0)];
+    return new THREE.LatheGeometry(pts, 32);
   }, []);
 
   return (
     <group scale={scale} position={position}>
-      {/* Head: Moved down to close the gap */}
-      <mesh position={[0, 1.45, 0]} castShadow receiveShadow>
+      {/* Floating Head */}
+      <mesh position={[0, 1.4, 0]} castShadow receiveShadow>
         <sphereGeometry args={[0.22, 32, 32]} />
         <meshStandardMaterial {...materialProps} />
       </mesh>
       
       {/* Torso */}
-      <mesh position={[0, 1.3, 0]} castShadow receiveShadow rotation={[0,0,-Math.PI]}>
-        <latheGeometry args={[torsoPoints, 32]} />
+      <mesh position={[0, 0.3, 0]} castShadow receiveShadow>
+        <primitive object={torsoGeo} />
         <meshStandardMaterial {...materialProps} />
       </mesh>
       
       {!legless && (
-        <group position={[0, 0.35, 0]}>
-          <mesh position={[-0.1, -0.35, 0]} castShadow receiveShadow rotation={leftLegRotation}>
-            <latheGeometry args={[limbPoints, 32]} />
-            <meshStandardMaterial {...materialProps} />
+        <group position={[0, 0.4, 0]}>
+          <mesh position={[-0.1, 0, 0]} rotation={leftLegRotation} castShadow>
+            <primitive object={limbGeo} /><meshStandardMaterial {...materialProps} />
           </mesh>
-          <mesh position={[0.1, -0.35, 0]} castShadow receiveShadow rotation={rightLegRotation}>
-            <latheGeometry args={[limbPoints, 32]} />
-            <meshStandardMaterial {...materialProps} />
+          <mesh position={[0.1, 0, 0]} rotation={rightLegRotation} castShadow>
+            <primitive object={limbGeo} /><meshStandardMaterial {...materialProps} />
           </mesh>
         </group>
       )}
 
+      {/* Arms pivoting from shoulders */}
       <group position={[0, 1.15, 0]}>
-        <mesh position={[-0.22, -0.3, 0]} castShadow receiveShadow rotation={leftArmRotation}>
-          <latheGeometry args={[limbPoints, 32]} />
-          <meshStandardMaterial {...materialProps} />
+        <mesh position={[-0.22, 0, 0]} rotation={leftArmRotation} castShadow>
+          <primitive object={limbGeo} /><meshStandardMaterial {...materialProps} />
         </mesh>
-        <mesh position={[0.22, -0.3, 0]} castShadow receiveShadow rotation={rightArmRotation}>
-          <latheGeometry args={[limbPoints, 32]} />
-          <meshStandardMaterial {...materialProps} />
+        <mesh position={[0.22, 0, 0]} rotation={rightArmRotation} castShadow>
+          <primitive object={limbGeo} /><meshStandardMaterial {...materialProps} />
           {cane && (
-             <mesh position={[0.05, -0.4, 0.1]} castShadow receiveShadow>
+             <mesh position={[0, -0.7, 0.1]} castShadow>
                 <cylinderGeometry args={[0.015, 0.015, 1.1]} /><meshStandardMaterial color="#fcd7d7" />
             </mesh>
           )}
@@ -221,44 +219,18 @@ const BlockHumanoid = ({ scale = 1, materialProps, legless = false, poseProps = 
   );
 };
 
-/* --- FIXED WHEELCHAIR: Structured frame and thick wheels --- */
+/* --- FIXED WHEELCHAIR --- */
 const SimpleWheelchair = ({ materialProps, frameColor }) => (
   <group>
-    {/* Main Seat and Backrest */}
-    <mesh position={[0, 0.55, 0]} castShadow receiveShadow>
-      <boxGeometry args={[0.6, 0.08, 0.6]} /><meshStandardMaterial color="#fce4e4" />
-    </mesh>
-    <mesh position={[0, 0.9, -0.25]} rotation={[0.1, 0, 0]} castShadow receiveShadow>
-      <boxGeometry args={[0.55, 0.7, 0.08]} /><meshStandardMaterial color="#fce4e4" />
-    </mesh>
-    
-    {/* Wheels: Thick Torus for structure */}
+    <mesh position={[0, 0.55, 0]} castShadow><boxGeometry args={[0.6, 0.08, 0.6]} /><meshStandardMaterial color="#fce4e4" /></mesh>
+    <mesh position={[0, 0.9, -0.25]} rotation={[0.1, 0, 0]} castShadow><boxGeometry args={[0.55, 0.7, 0.08]} /><meshStandardMaterial color="#fce4e4" /></mesh>
     <group position={[0, 0.45, -0.05]}>
-      <mesh position={[-0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]} castShadow>
-        <torusGeometry args={[0.4, 0.04, 16, 50]} />
-        <meshStandardMaterial color="#2d1d3d" />
-      </mesh>
-      <mesh position={[0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]} castShadow>
-        <torusGeometry args={[0.4, 0.04, 16, 50]} />
-        <meshStandardMaterial color="#2d1d3d" />
-      </mesh>
+      <mesh position={[-0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]} castShadow><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color="#2d1d3d" /></mesh>
+      <mesh position={[0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]} castShadow><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color="#2d1d3d" /></mesh>
     </group>
-
-    {/* Front casters and footrest rods */}
-    <group position={[0, 0.2, 0.4]}>
-      <mesh position={[-0.2, 0, 0]} castShadow><boxGeometry args={[0.05, 0.4, 0.05]} /><meshStandardMaterial color={frameColor}/></mesh>
-      <mesh position={[0.2, 0, 0]} castShadow><boxGeometry args={[0.05, 0.4, 0.05]} /><meshStandardMaterial color={frameColor}/></mesh>
-      <mesh position={[0, 0.1, 0.1]} castShadow><boxGeometry args={[0.5, 0.03, 0.2]} /><meshStandardMaterial color={frameColor}/></mesh>
-    </group>
-
-    {/* Push Handles */}
     <group position={[0, 1.25, -0.35]}>
-      <mesh position={[-0.25, 0, -0.1]} rotation={[Math.PI / 2, 0, 0]} castShadow>
-        <cylinderGeometry args={[0.02, 0.02, 0.2]} /><meshStandardMaterial color={frameColor} />
-      </mesh>
-      <mesh position={[0.25, 0, -0.1]} rotation={[Math.PI / 2, 0, 0]} castShadow>
-        <cylinderGeometry args={[0.02, 0.02, 0.2]} /><meshStandardMaterial color={frameColor} />
-      </mesh>
+      <mesh position={[-0.25, 0, -0.1]} rotation={[Math.PI / 2, 0, 0]} castShadow><cylinderGeometry args={[0.02, 0.02, 0.2]} /><meshStandardMaterial color={frameColor} /></mesh>
+      <mesh position={[0.25, 0, -0.1]} rotation={[Math.PI / 2, 0, 0]} castShadow><cylinderGeometry args={[0.02, 0.02, 0.2]} /><meshStandardMaterial color={frameColor} /></mesh>
     </group>
   </group>
 );
@@ -295,6 +267,7 @@ export default function Scene({ currentView }) {
       <hemisphereLight intensity={1.4} color="#ffffff" groundColor="#b066ff" />
       <directionalLight position={[-15, 30, 10]} intensity={0.6} castShadow />
 
+      {/* --- RESTORED ARCHITECTURE --- */}
       <group position={[0, 0, 0]}>
         <mesh position={[15.5, -2.1, 15.0]} castShadow receiveShadow>
           <boxGeometry args={[20, 8.0, 30]} /><meshStandardMaterial {...butterProps} />
@@ -309,30 +282,28 @@ export default function Scene({ currentView }) {
           <mesh position={[24, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
 
-        {/* --- CHARACTER POPULATION --- */}
+        {/* --- FIXED CHARACTERS --- */}
         <group>
-          {/* Walking Couple */}
+          {/* Couple 1: Walking away */}
           <group position={[14, 1.9, 12]} rotation={[0, -Math.PI * 0.7, 0]}>
-            <BlockHumanoid scale={1} materialProps={butterProps} poseProps={{ cane: true, leftLegRotation: [0.2, 0, 0], rightLegRotation: [-0.2, 0, 0], position: [-0.3, 0, 0]}} />
-            <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ leftLegRotation: [-0.2, 0, 0], rightLegRotation: [0.2, 0, 0], position: [0.4, 0, -0.1]}} />
+            <BlockHumanoid scale={1} materialProps={butterProps} poseProps={{ cane: true, leftLegRotation: [0.3, 0, 0], rightLegRotation: [-0.3, 0, 0], position: [-0.3, 0, 0]}} />
+            <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ leftLegRotation: [-0.3, 0, 0], rightLegRotation: [0.3, 0, 0], position: [0.4, 0, -0.1]}} />
           </group>
           
-          {/* Stair Couple: Sitting on 2nd step, legs hanging */}
-          <group position={[6.5, 1.0, 7.5]} rotation={[0, -Math.PI / 2, 0]}>
+          {/* Couple 2: Sitting on steps - RESTORED LOWER BODIES */}
+          <group position={[6.5, 1.2, 7.5]} rotation={[0, -Math.PI / 2, 0]}>
             <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ leftLegRotation: [1.4, 0, 0], rightLegRotation: [1.4, 0, 0], position: [0, 0, 0]}} />
             <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [1.4, 0, 0], rightLegRotation: [1.4, 0, 0], position: [0, 0, 0.7]}} />
           </group>
           
-          {/* Wheelchair Couple: Side profile */}
+          {/* Couple 3: Wheelchair profile - HELP PUSHING FROM BEHIND */}
           <group position={[16, 1.9, 18]} rotation={[0, Math.PI / 2, 0]}>
             <SimpleWheelchair frameColor="#fcd7d7" />
-            {/* Seated Figure */}
-            <group position={[0, 0.25, -0.05]}>
-              <BlockHumanoid scale={0.85} materialProps={butterProps} legless={true} poseProps={{ leftArmRotation: [0.8, 0, 0], rightArmRotation: [0.8, 0, 0]}} />
+            <group position={[0, 0.2, 0]}>
+              <BlockHumanoid scale={0.85} materialProps={butterProps} legless={true} poseProps={{ leftArmRotation: [0.7, 0, 0], rightArmRotation: [0.7, 0, 0]}} />
             </group>
-            {/* Helper */}
-            <group position={[0, 0, -0.7]}>
-              <BlockHumanoid scale={0.95} materialProps={butterProps} poseProps={{ leftArmRotation: [-1.1, 0, 0], rightArmRotation: [-1.1, 0, 0]}} />
+            <group position={[0, 0, -0.65]}>
+              <BlockHumanoid scale={0.95} materialProps={butterProps} poseProps={{ leftArmRotation: [-1.2, 0, 0], rightArmRotation: [-1.2, 0, 0]}} />
             </group>
           </group>
         </group>
