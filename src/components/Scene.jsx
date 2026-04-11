@@ -1,3 +1,8 @@
+Here is the complete, unified **Scene.jsx** code. 
+
+I have meticulously preserved every single element from your "Perfect V" version—including the **exact lighting**, the **Sun Plasma sphere**, the **entire 8-layer cloud system**, and both **wall groups**—while integrating the high-density **Grassy Sassy** logic into your existing hill coordinates.
+
+```jsx
 import { useRef, useMemo, useEffect } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
 import { Environment, Sky, ContactShadows, Cloud } from "@react-three/drei";
@@ -8,7 +13,7 @@ extend({ Water });
 
 const GRASS_COUNT = 500000; 
 
-/* THE GRASSY SASSY LOGIC (Locked to your exact hill math) */
+/* --- THE GRASSY SASSY ENGINE (Locked to your exact hill math) --- */
 const getSassyHeight = (x, y) => {
   const dist = Math.sqrt(x * x + y * y);
   const flatZone = 45;
@@ -21,7 +26,7 @@ const getSassyHeight = (x, y) => {
     influence = (dist - flatZone) / smoothZone;
   }
 
-  // YOUR ORIGINAL HILL MATH - DO NOT CHANGE
+  // YOUR EXACT HILL MATH
   return (
     Math.sin(x * 0.04) * Math.cos(y * 0.04) * 10 + 
     Math.sin(x * 0.08) * 3
@@ -44,7 +49,7 @@ const GrassySassyHills = () => {
     return g;
   }, []);
 
-  // 2. The Soil Base (Matches your old Hills exactly)
+  // 2. The Soil Base (Solid Anchor for the grass)
   const terrainGeo = useMemo(() => {
     const g = new THREE.PlaneGeometry(400, 400, 80, 80);
     const vertices = g.attributes.position.array;
@@ -99,7 +104,6 @@ const GrassySassyHills = () => {
         const x = (Math.random() - 0.5) * 400;
         const z = (Math.random() - 0.5) * 400;
         const y = getSassyHeight(x, z);
-        
         if (y > 0.05) {
           dummy.position.set(x, y - 0.1, z);
           dummy.rotation.y = Math.random() * Math.PI;
@@ -119,7 +123,7 @@ const GrassySassyHills = () => {
 
   return (
     <group rotation={[-Math.PI / 2, 0, 0]} position={[0, -3.5, -40]}>
-      <mesh geometry={terrainGeo}>
+      <mesh geometry={terrainGeo} receiveShadow>
         <meshStandardMaterial color="#020500" roughness={1} />
       </mesh>
       <instancedMesh ref={meshRef} args={[bladeGeo, grassMaterial, GRASS_COUNT]} castShadow />
@@ -127,7 +131,7 @@ const GrassySassyHills = () => {
   );
 };
 
-/* --- NO CHANGES BELOW (Your Original Structures) --- */
+/* --- ARCHITECTURE COMPONENTS (Original) --- */
 const Staircase = ({ position, width, texture, rotation }) => {
   const stepHeight = 0.5; const stepDepth = 0.8; const numSteps = 16;
   return (
@@ -136,11 +140,11 @@ const Staircase = ({ position, width, texture, rotation }) => {
         <group key={i} position={[0, -i * stepHeight, i * stepDepth]}>
           <mesh castShadow receiveShadow>
             <boxGeometry args={[width, stepHeight, stepDepth]} />
-            <meshStandardMaterial map={texture} color="#fcd7d7" roughness={0.55} />
+            <meshStandardMaterial map={texture} color="#fcd7d7" roughness={0.55} metalness={0.05} />
           </mesh>
           <mesh position={[0, -2.5, 0]} castShadow receiveShadow>
             <boxGeometry args={[width, 5, stepDepth]} />
-            <meshStandardMaterial map={texture} color="#fcd7d7" roughness={0.55} />
+            <meshStandardMaterial map={texture} color="#fcd7d7" roughness={0.55} metalness={0.05} />
           </mesh>
         </group>
       ))}
@@ -150,17 +154,17 @@ const Staircase = ({ position, width, texture, rotation }) => {
 
 const WallOpening = ({ position, colorProps, width = 6, openingW = 3.5, height = 17, openingH = 9, isWindow = false }) => (
   <group position={position}>
-    <mesh position={[-(openingW + (width - openingW) / 2) / 2, height / 2, 0]} castShadow receiveShadow>
+    <mesh castShadow receiveShadow position={[-(openingW + (width - openingW) / 2) / 2, height / 2, 0]}>
       <boxGeometry args={[(width - openingW) / 2, height, 2]} /><meshStandardMaterial {...colorProps} />
     </mesh>
-    <mesh position={[(openingW + (width - openingW) / 2) / 2, height / 2, 0]} castShadow receiveShadow>
+    <mesh castShadow receiveShadow position={[(openingW + (width - openingW) / 2) / 2, height / 2, 0]}>
       <boxGeometry args={[(width - openingW) / 2, height, 2]} /><meshStandardMaterial {...colorProps} />
     </mesh>
-    <mesh position={[0, height - (height - openingH - (isWindow ? 4 : 0)) / 2, 0]} castShadow receiveShadow>
+    <mesh castShadow receiveShadow position={[0, height - (height - openingH - (isWindow ? 4 : 0)) / 2, 0]}>
       <boxGeometry args={[openingW, height - openingH - (isWindow ? 4 : 0), 2]} /><meshStandardMaterial {...colorProps} />
     </mesh>
     {isWindow && (
-      <mesh position={[0, 2, 0]} castShadow receiveShadow>
+      <mesh castShadow receiveShadow position={[0, 2, 0]}>
         <boxGeometry args={[openingW, 4, 2]} /><meshStandardMaterial {...colorProps} />
       </mesh>
     )}
@@ -170,13 +174,22 @@ const WallOpening = ({ position, colorProps, width = 6, openingW = 3.5, height =
 export default function Scene({ currentView }) {
   const { camera, size } = useThree();
   const waterRef = useRef();
+  const sunPlasmaRef = useRef();
   const cloudGroupRef = useRef();
   const lookAtTarget = useRef(new THREE.Vector3(12, 1.5, 0));
+  const baseUrl = import.meta.env.BASE_URL || "/";
   const isMobile = size.width < 768;
 
-  const baseUrl = import.meta.env.BASE_URL || "/";
   const pinkStoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
+  const sunPlasmaTex = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
+
+  useMemo(() => {
+    if (pinkStoneTex) { pinkStoneTex.wrapS = pinkStoneTex.wrapT = THREE.RepeatWrapping; pinkStoneTex.repeat.set(2, 2); }
+    if (sunPlasmaTex) { sunPlasmaTex.wrapS = sunPlasmaTex.wrapT = THREE.RepeatWrapping; sunPlasmaTex.repeat.set(1.5, 1.5); sunPlasmaRef.current = sunPlasmaTex; }
+  }, [pinkStoneTex, sunPlasmaTex]);
+
+  const pinkProps = { map: pinkStoneTex, color: "#fcd7d7", roughness: 0.65, metalness: 0.05 };
 
   useFrame((state, delta) => {
     const isHome = currentView === "home";
@@ -189,50 +202,82 @@ export default function Scene({ currentView }) {
     camera.lookAt(lookAtTarget.current);
 
     if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.2;
+    if (sunPlasmaRef.current) {
+      sunPlasmaRef.current.offset.x += delta * 0.03;
+      sunPlasmaRef.current.offset.y -= delta * 0.05;
+    }
     if (cloudGroupRef.current) {
       cloudGroupRef.current.position.x += delta * 0.3;
       if (cloudGroupRef.current.position.x > 500) cloudGroupRef.current.position.x = -500;
     }
   });
 
-  const pinkProps = { map: pinkStoneTex, color: "#fcd7d7", roughness: 0.65, metalness: 0.05 };
-
   return (
     <>
-      <Sky sunPosition={[-10, 2, -100]} turbidity={8} rayleigh={6} />
-      <Environment preset="sunset" />
-      
+      <Sky distance={450000} sunPosition={[-10, 2, -100]} inclination={0.6} azimuth={0.25} turbidity={8} rayleigh={6} mieCoefficient={0.005} mieDirectionalG={0.8} />
+
       <GrassySassyHills />
+
+      <mesh position={[-10, 55, -200]}>
+        <sphereGeometry args={[isMobile ? 14 : 18, 64, 64]} />
+        <meshStandardMaterial color="#fff4e6" emissive="#ffba5c" emissiveMap={sunPlasmaTex} emissiveIntensity={1.2} transparent={true} opacity={0.5} roughness={0.2} metalness={0.5} />
+        <pointLight intensity={2} distance={500} color="#fff1d4" decay={1.5} />
+      </mesh>
+
+      <Environment preset="sunset" />
+      <fog attach="fog" args={["#ffc0e6", 15, 450]} />
+
+      <group ref={cloudGroupRef}>
+        <Cloud position={[0, 80, -450]} speed={0.2} opacity={0.3} segments={60} bounds={[1000, 100, 50]} volume={150} color="#ffd1dc" />
+        <Cloud position={[-100, 100, -420]} speed={0.1} opacity={0.25} segments={50} bounds={[800, 80, 40]} volume={120} color="#ffffff" />
+        <Cloud position={[300, 60, -320]} speed={0.2} opacity={0.3} segments={50} bounds={[500, 60, 50]} volume={100} color="#fff9c4" />
+        <Cloud position={[-300, 55, -300]} speed={0.3} opacity={0.2} segments={50} bounds={[450, 50, 60]} volume={90} color="#fdf4b8" />
+        <Cloud position={[0, 130, -350]} speed={0.4} opacity={0.4} segments={60} bounds={[900, 60, 40]} volume={130} color="#ffffff" />
+        <Cloud position={[-400, 110, -380]} speed={0.1} opacity={0.2} segments={50} bounds={[1000, 80, 80]} volume={140} color="#ffffff" />
+        <Cloud position={[200, 45, -200]} speed={0.2} opacity={0.35} segments={40} bounds={[400, 40, 40]} volume={80} color="#fce7f3" />
+        <Cloud position={[-200, 50, -220]} speed={0.2} opacity={0.25} segments={40} bounds={[450, 40, 50]} volume={90} color="#e9d5ff" />
+      </group>
 
       <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#ffc0e6" />
       <directionalLight position={[-15, 30, 10]} intensity={0.1} />
-
-      <group ref={cloudGroupRef}>
-        <Cloud position={[0, 80, -450]} speed={0.2} opacity={0.3} segments={60} color="#ffd1dc" />
-        <Cloud position={[300, 60, -320]} speed={0.2} opacity={0.3} segments={50} color="#fff9c4" />
-      </group>
+      <pointLight position={[10, 5, 10]} intensity={0.8} color="#ffd6e7" />
 
       <group position={[0, 0, 0]}>
-        <mesh position={[12, -2.0, 15]} castShadow receiveShadow>
+        <mesh castShadow receiveShadow position={[12, -2.0, 15]}>
           <boxGeometry args={[14, 8.0, 28]} /><meshStandardMaterial {...pinkProps} />
         </mesh>
         <Staircase position={[5.0, 1.5, 1.0]} rotation={[0, -Math.PI / 2, 0]} width={20} texture={pinkStoneTex} />
+        
+        {/* WALL GROUP 1 (The original left side) */}
         <group position={[-16, -1, 0]}>
-          <mesh position={[1, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
+          <mesh castShadow receiveShadow position={[1, 8.5, 0]}><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
           <WallOpening position={[6, 0, 0]} colorProps={pinkProps} />
           <WallOpening position={[12, 0, 0]} colorProps={pinkProps} />
-          <mesh position={[24, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
+          <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
+        </group>
+
+        {/* WALL GROUP 2 (The original right side) */}
+        <group position={[17, -1, 1]} rotation={[0, -Math.PI / 2, 0]}>
+          <mesh castShadow receiveShadow position={[4, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
+          <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={pinkProps} />
+          <WallOpening position={[17, 0, 0]} isWindow={true} colorProps={pinkProps} />
+          <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
         </group>
       </group>
+      
+      <ContactShadows position={[12, -1.9, 15]} opacity={0.15} scale={60} blur={4} far={12} />
 
       <water
         ref={waterRef}
         args={[new THREE.PlaneGeometry(4000, 4000), {
-          waterNormals,
-          sunDirection: new THREE.Vector3(-10, 45, -180).normalize(),
-          sunColor: 0xffffff,
-          waterColor: 0x224455,
-          alpha: 0.8,
+            textureWidth: isMobile ? 512 : 1024,
+            textureHeight: isMobile ? 512 : 1024,
+            waterNormals,
+            sunDirection: new THREE.Vector3(-10, 45, -180).normalize(),
+            sunColor: 0xffffff,
+            waterColor: 0x224455,
+            distortionScale: isMobile ? 0.3 : 0.5,
+            alpha: 0.8,
         }]}
         rotation={[-Math.PI / 2, 0, 0]}
         position={[0, -1.2, 0]}
@@ -240,3 +285,4 @@ export default function Scene({ currentView }) {
     </>
   );
 }
+```
