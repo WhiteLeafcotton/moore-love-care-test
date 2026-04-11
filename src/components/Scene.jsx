@@ -285,8 +285,8 @@ export default function Scene({ currentView }) {
             <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ leftLegRotation: [-0.3, 0, 0], rightLegRotation: [0.3, 0, 0], position: [0.4, 0, -0.1]}} />
           </group>
 
-          {/* Couple A: Facing water (0 rotation), positioned on edge of second step with bent legs */}
-          <group position={[6.5, 1.05, 10.1]} rotation={[0, 0, 0]}>
+          {/* Couple A: Facing water (PI rotation), positioned on edge of second step with bent legs */}
+          <group position={[7.8, 1.25, 11.2]} rotation={[0, Math.PI, 0]}>
             <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
             <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
           </group>
