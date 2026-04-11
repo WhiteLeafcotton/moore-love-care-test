@@ -180,19 +180,20 @@ export default function Scene({ currentView }) {
 
   useFrame((state, delta) => {
     const isHome = currentView === "home";
-    const LERP_SPEED = isHome ? 0.04 : 0.025; 
+    // Slightly slower glide for the exit journey (now turning and gliding)
+    const LERP_SPEED = isHome ? 0.04 : 0.018; 
 
-    // UPDATED SWEET SPOT: Moved X more to the right (-2)
-    const homePos = isMobile ? new THREE.Vector3(-25, 8, 65) : new THREE.Vector3(-2, 2.8, 22);
+    // THE RESTORED POSITION (Intimate left sweet spot)
+    const homePos = isMobile ? new THREE.Vector3(-30, 8, 60) : new THREE.Vector3(-12, 2.8, 18);
     
-    // JOURNEY PATH
+    // JOURNEY PATH THROUGH DOORWAY (x:-24)
     const doorwayX = -24.5;
     const collectionPos = new THREE.Vector3(doorwayX, 3.5, -450); 
     
     const targetPos = isHome ? homePos : collectionPos;
 
-    // TARGET LOOK: Looking slightly left to capture the architecture
-    const homeLook = new THREE.Vector3(-5, 1.2, -5);
+    // TARGET LOOK: UPDATED! Pointing towards the right side architecture (Staircase area)
+    const homeLook = new THREE.Vector3(20, 1.2, -5); 
     const collectionLook = new THREE.Vector3(doorwayX, 1.5, -1000); 
     
     const targetLook = isHome ? homeLook : collectionLook;
