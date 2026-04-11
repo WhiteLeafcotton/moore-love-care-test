@@ -180,22 +180,15 @@ export default function Scene({ currentView }) {
 
   useFrame((state, delta) => {
     const isHome = currentView === "home";
-    // Slightly slower glide for the exit journey (now turning and gliding)
     const LERP_SPEED = isHome ? 0.04 : 0.018; 
 
-    // THE RESTORED POSITION (Intimate left sweet spot)
     const homePos = isMobile ? new THREE.Vector3(-30, 8, 60) : new THREE.Vector3(-12, 2.8, 18);
-    
-    // JOURNEY PATH THROUGH DOORWAY (x:-24)
     const doorwayX = -24.5;
     const collectionPos = new THREE.Vector3(doorwayX, 3.5, -450); 
-    
     const targetPos = isHome ? homePos : collectionPos;
 
-    // TARGET LOOK: UPDATED! Pointing towards the right side architecture (Staircase area)
     const homeLook = new THREE.Vector3(20, 1.2, -5); 
     const collectionLook = new THREE.Vector3(doorwayX, 1.5, -1000); 
-    
     const targetLook = isHome ? homeLook : collectionLook;
 
     camera.position.lerp(targetPos, LERP_SPEED);
@@ -234,8 +227,9 @@ export default function Scene({ currentView }) {
       </group>
 
       <group position={[0, 0, 0]}>
-        <mesh position={[12, -2.0, 15]} castShadow receiveShadow>
-          <boxGeometry args={[14, 8.0, 28]} /><meshStandardMaterial {...pinkProps} />
+        {/* FIXED: Scaled down and moved slightly to avoid stair clipping */}
+        <mesh position={[14, -2.0, 13]} castShadow receiveShadow>
+          <boxGeometry args={[12, 8.0, 24]} /><meshStandardMaterial {...pinkProps} />
         </mesh>
         
         <Staircase position={[5.0, 1.5, 1.0]} rotation={[0, -Math.PI / 2, 0]} width={20} texture={pinkStoneTex} />
