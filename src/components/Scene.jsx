@@ -175,14 +175,11 @@ export default function Scene({ currentView }) {
     const isHome = currentView === "home";
     const LERP_SPEED = isHome ? 0.04 : 0.018; 
     
-    // ADJUSTED CAMERA: Desktop backed up to z:24. Mobile set to a vertical aesthetic crop at z:32
     const homePos = isMobile 
       ? new THREE.Vector3(-18, 12, 32) 
       : new THREE.Vector3(-14, 3.2, 24); 
     
     const targetPos = isHome ? homePos : new THREE.Vector3(-24.5, 3.5, -450);
-    
-    // TARGET: Centered on the structure
     const homeLook = new THREE.Vector3(20, 1.2, -2); 
     const targetLook = isHome ? homeLook : new THREE.Vector3(-24.5, 1.5, -1000);
 
@@ -190,7 +187,7 @@ export default function Scene({ currentView }) {
     lookAtTarget.current.lerp(targetLook, LERP_SPEED);
     camera.lookAt(lookAtTarget.current);
 
-    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.1;
+    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.08;
     if (cloudGroupRef.current) {
       cloudGroupRef.current.position.x += delta * 0.3;
       if (cloudGroupRef.current.position.x > 500) cloudGroupRef.current.position.x = -500;
@@ -246,9 +243,9 @@ export default function Scene({ currentView }) {
           waterNormals,
           sunDirection: new THREE.Vector3(-10, 10, -100).normalize(),
           sunColor: 0xffffff,
-          waterColor: 0x3d2a52, 
-          distortionScale: 1.5,
-          alpha: 0.8,
+          waterColor: 0x21162e, // Deepened for high-end "ink" look
+          distortionScale: 1.0, // Smoother, larger wave motion
+          alpha: 0.95, // Higher opacity for better surface reflections
         }]}
         rotation={[-Math.PI / 2, 0, 0]}
         position={[0, -1.45, 0]}
