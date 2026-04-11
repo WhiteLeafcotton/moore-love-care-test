@@ -53,8 +53,8 @@ const GrassySassyHills = () => {
   const grassMaterial = useMemo(() => new THREE.ShaderMaterial({
     uniforms: {
       uTime: { value: 0 },
-      uColorRoots: { value: new THREE.Color("#1a0521") }, 
-      uColorTips: { value: new THREE.Color("#d1a3ff") }  
+      uColorRoots: { value: new THREE.Color("#13051a") }, 
+      uColorTips: { value: new THREE.Color("#c292f5") }  
     },
     vertexShader: `
       varying float vHeight;
@@ -121,7 +121,7 @@ const GrassySassyHills = () => {
 };
 
 /* --- ARCHITECTURE --- */
-const Staircase = ({ position, width, texture, rotation }) => {
+const Staircase = ({ position, width, rotation, materialProps }) => {
   const stepHeight = 0.5; const stepDepth = 0.8; const numSteps = 16;
   return (
     <group position={position} rotation={rotation}>
@@ -129,11 +129,11 @@ const Staircase = ({ position, width, texture, rotation }) => {
         <group key={i} position={[0, -i * stepHeight, i * stepDepth]}>
           <mesh castShadow receiveShadow>
             <boxGeometry args={[width, stepHeight, stepDepth]} />
-            <meshStandardMaterial map={texture} color="#fcd7d7" roughness={0.55} />
+            <meshStandardMaterial {...materialProps} />
           </mesh>
           <mesh position={[0, -2.5, 0]} castShadow receiveShadow>
             <boxGeometry args={[width, 5, stepDepth]} />
-            <meshStandardMaterial map={texture} color="#fcd7d7" roughness={0.55} />
+            <meshStandardMaterial {...materialProps} />
           </mesh>
         </group>
       ))}
@@ -167,102 +167,106 @@ export default function Scene({ currentView }) {
   const lookAtTarget = useRef(new THREE.Vector3(12, 1.5, 0));
   const isMobile = size.width < 768;
 
-  const baseUrl = import.meta.env.BASE_URL || "/";
-  const pinkStoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
-
   useEffect(() => {
-    if (pinkStoneTex) {
-      pinkStoneTex.wrapS = pinkStoneTex.wrapT = THREE.RepeatWrapping;
-      pinkStoneTex.repeat.set(2, 2);
-    }
-  }, [pinkStoneTex]);
+    waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
+  }, [waterNormals]);
 
   useFrame((state, delta) => {
     const isHome = currentView === "home";
     const LERP_SPEED = isHome ? 0.04 : 0.018; 
-
     const homePos = isMobile ? new THREE.Vector3(-30, 8, 60) : new THREE.Vector3(-12, 2.8, 18);
-    const doorwayX = -24.5;
-    const collectionPos = new THREE.Vector3(doorwayX, 3.5, -450); 
-    const targetPos = isHome ? homePos : collectionPos;
-
-    const homeLook = new THREE.Vector3(20, 1.2, -5); 
-    const collectionLook = new THREE.Vector3(doorwayX, 1.5, -1000); 
-    const targetLook = isHome ? homeLook : collectionLook;
+    const targetPos = isHome ? homePos : new THREE.Vector3(-24.5, 3.5, -450);
+    const homeLook = new THREE.Vector3(22, 1.2, -5); 
+    const targetLook = isHome ? homeLook : new THREE.Vector3(-24.5, 1.5, -1000);
 
     camera.position.lerp(targetPos, LERP_SPEED);
     lookAtTarget.current.lerp(targetLook, LERP_SPEED);
     camera.lookAt(lookAtTarget.current);
 
-    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.15;
+    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.1;
     if (cloudGroupRef.current) {
       cloudGroupRef.current.position.x += delta * 0.3;
       if (cloudGroupRef.current.position.x > 500) cloudGroupRef.current.position.x = -500;
     }
   });
 
-  const pinkProps = { map: pinkStoneTex, color: "#fcd7d7", roughness: 0.65, metalness: 0.05 };
+  // BUTTER TEXTURE: High roughness makes it look soft and non-digital
+  const butterProps = { color: "#fce4e4", roughness: 0.9, metalness: 0.02 };
 
   return (
     <>
-      <Sky distance={450000} sunPosition={[-20, 8, -100]} inclination={0.6} azimuth={0.25} turbidity={10} rayleigh={5} />
+      {/* 4. THE FILTER: SVG noise overlay for film grain feel */}
+      <div style={{
+        position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+        pointerEvents: 'none', zIndex: 999,
+        background: 'radial-gradient(circle, transparent 20%, rgba(248, 225, 255, 0.15) 100%)',
+        opacity: 0.4, mixBlendMode: 'multiply'
+      }} />
+      <svg style={{ display: 'none' }}>
+        <filter id="noise">
+          <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" />
+          <feColorMatrix type="saturate" values="0" />
+        </filter>
+      </svg>
+      <div style={{
+        position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+        pointerEvents: 'none', zIndex: 1000, filter: 'url(#noise)', opacity: 0.03
+      }} />
+
+      <Sky distance={450000} sunPosition={[-20, 8, -100]} inclination={0.6} azimuth={0.25} turbidity={8} rayleigh={6} />
       <Environment preset="sunset" />
       <fog attach="fog" args={["#f8e1ff", 10, 400]} />
       
       <GrassySassyHills />
 
-      <hemisphereLight intensity={1.2} color="#ffffff" groundColor="#b066ff" />
-      <directionalLight position={[-15, 30, 10]} intensity={0.5} castShadow />
+      <hemisphereLight intensity={1.4} color="#ffffff" groundColor="#b066ff" />
+      <directionalLight position={[-15, 30, 10]} intensity={0.6} castShadow />
 
       <group ref={cloudGroupRef}>
         <Cloud position={[0, 80, -450]} speed={0.2} opacity={0.3} segments={60} bounds={[1000, 100, 50]} volume={150} color="#ffd1dc" />
         <Cloud position={[-100, 100, -420]} speed={0.1} opacity={0.25} segments={50} bounds={[800, 80, 40]} volume={120} color="#ffffff" />
-        <Cloud position={[300, 60, -320]} speed={0.2} opacity={0.3} segments={50} bounds={[500, 60, 50]} volume={100} color="#fff9c4" />
-        <Cloud position={[-300, 55, -300]} speed={0.3} opacity={0.2} segments={50} bounds={[450, 50, 60]} volume={90} color="#fdf4b8" />
-        <Cloud position={[0, 130, -350]} speed={0.4} opacity={0.4} segments={60} bounds={[900, 60, 40]} volume={130} color="#ffffff" />
-        <Cloud position={[-400, 110, -380]} speed={0.1} opacity={0.2} segments={50} bounds={[1000, 80, 80]} volume={140} color="#ffffff" />
         <Cloud position={[200, 45, -200]} speed={0.2} opacity={0.35} segments={40} bounds={[400, 40, 40]} volume={80} color="#fce7f3" />
-        <Cloud position={[-200, 50, -220]} speed={0.2} opacity={0.25} segments={40} bounds={[450, 40, 50]} volume={90} color="#e9d5ff" />
       </group>
 
       <group position={[0, 0, 0]}>
-        {/* PLATFORM nudged further to match the new stair Z-index */}
-        <mesh position={[12.5, -2.0, 19.5]} castShadow receiveShadow>
-          <boxGeometry args={[14, 8.0, 28]} /><meshStandardMaterial {...pinkProps} />
+        {/* DEEP SHADOWS: Adds weight to the building */}
+        <ContactShadows position={[12, -1.95, 20]} opacity={0.4} scale={50} blur={2.5} far={10} color="#2d1440" />
+
+        <mesh position={[12.5, -2.0, 22.5]} castShadow receiveShadow>
+          <boxGeometry args={[14, 8.0, 28]} /><meshStandardMaterial {...butterProps} />
         </mesh>
         
-        {/* PUSHEyyD FURTHER: Staircase moved significantly forward (+Z) to clear all wall clipping */}
-        <Staircase position={[5.0, 1.5, 5.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} texture={pinkStoneTex} />
+        <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={butterProps} />
         
         <group position={[-16, -1, 0]}>
-          <mesh position={[1, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
-          <WallOpening position={[6, 0, 0]} colorProps={pinkProps} />
-          <WallOpening position={[12, 0, 0]} colorProps={pinkProps} />
-          <mesh position={[24, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
+          <mesh position={[1, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
+          <WallOpening position={[6, 0, 0]} colorProps={butterProps} />
+          <WallOpening position={[12, 0, 0]} colorProps={butterProps} />
+          <mesh position={[24, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
 
         <group position={[17, -1, 1]} rotation={[0, -Math.PI / 2, 0]}>
-          <mesh castShadow receiveShadow position={[4, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
-          <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={pinkProps} />
-          <WallOpening position={[17, 0, 0]} isWindow={true} colorProps={pinkProps} />
-          <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
+          <mesh castShadow receiveShadow position={[4, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
+          <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={butterProps} />
+          <WallOpening position={[17, 0, 0]} isWindow={true} colorProps={butterProps} />
+          <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
       </group>
 
-      <ContactShadows position={[12, -1.9, 15]} opacity={0.2} scale={60} blur={3} far={10} />
-
+      {/* HIGH-END WATER: Clearer, simpler, calmer motion */}
       <water
         ref={waterRef}
         args={[new THREE.PlaneGeometry(2000, 2000), {
           waterNormals,
           sunDirection: new THREE.Vector3(-10, 10, -100).normalize(),
           sunColor: 0xffffff,
-          waterColor: 0x5a3b7d,
-          alpha: 0.6,
+          waterColor: 0x3d2a52, 
+          distortionScale: 1.5,
+          alpha: 0.8,
         }]}
         rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, -1.4, 0]}
+        position={[0, -1.45, 0]}
       />
     </>
   );
