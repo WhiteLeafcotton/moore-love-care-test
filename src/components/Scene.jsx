@@ -174,9 +174,16 @@ export default function Scene({ currentView }) {
   useFrame((state, delta) => {
     const isHome = currentView === "home";
     const LERP_SPEED = isHome ? 0.04 : 0.018; 
-    const homePos = isMobile ? new THREE.Vector3(-30, 8, 60) : new THREE.Vector3(-12, 2.8, 18);
+    
+    // ADJUSTED CAMERA: Desktop backed up to z:24. Mobile set to a vertical aesthetic crop at z:32
+    const homePos = isMobile 
+      ? new THREE.Vector3(-18, 12, 32) 
+      : new THREE.Vector3(-14, 3.2, 24); 
+    
     const targetPos = isHome ? homePos : new THREE.Vector3(-24.5, 3.5, -450);
-    const homeLook = new THREE.Vector3(22, 1.2, -5); 
+    
+    // TARGET: Centered on the structure
+    const homeLook = new THREE.Vector3(20, 1.2, -2); 
     const targetLook = isHome ? homeLook : new THREE.Vector3(-24.5, 1.5, -1000);
 
     camera.position.lerp(targetPos, LERP_SPEED);
@@ -212,14 +219,12 @@ export default function Scene({ currentView }) {
       <group position={[0, 0, 0]}>
         <ContactShadows position={[12, -1.95, 20]} opacity={0.4} scale={50} blur={2.5} far={10} color="#2d1440" />
 
-        {/* Nudged platform slightly down for better water fit */}
         <mesh position={[15.5, -2.1, 15.0]} castShadow receiveShadow>
           <boxGeometry args={[20, 8.0, 30]} /><meshStandardMaterial {...butterProps} />
         </mesh>
         
         <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={butterProps} />
         
-        {/* DROPPED: Both wall groups moved to -1.6 to touch the water at -1.45 */}
         <group position={[-16, -1.6, 0]}>
           <mesh position={[1, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
           <WallOpening position={[6, 0, 0]} colorProps={butterProps} />
