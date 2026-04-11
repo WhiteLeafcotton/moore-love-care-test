@@ -275,14 +275,14 @@ export default function Scene({ currentView }) {
             <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ leftLegRotation: [-0.3, 0, 0], rightLegRotation: [0.3, 0, 0], position: [0.4, 0, -0.1]}} />
           </group>
 
-          {/* Stair Couple: FIXED HEIGHT & LEGS */}
-          <group position={[6.5, 1.45, 7.5]} rotation={[0, -Math.PI / 2, 0]}>
+          {/* Couple A (Stair Couple): MOVED UP & FORWARD TO SHOW LEGS */}
+          <group position={[6.5, 1.6, 8.2]} rotation={[0, -Math.PI / 2, 0]}>
             <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ leftLegRotation: [1.4, 0, 0], rightLegRotation: [1.4, 0, 0]}} />
             <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [1.4, 0, 0], rightLegRotation: [1.4, 0, 0], position: [0, 0, 0.7]}} />
           </group>
 
-          {/* Wheelchair Couple: ADJUSTED PROFILE & POSITION */}
-          <group position={[18.5, 1.9, 15]} rotation={[0, Math.PI, 0]}>
+          {/* Couple C (Wheelchair Couple): BROUGHT ONTO PLATFORM + LOCKED ROTATION */}
+          <group position={[14.5, 1.9, 16]} rotation={[0, Math.PI, 0]}>
             <SimpleWheelchair materialProps={butterProps} frameColor="#fcd7d7" />
             <group position={[0, 0.2, 0]}>
               <BlockHumanoid scale={0.85} materialProps={butterProps} poseProps={{ leftLegRotation: [1.5, 0, 0], rightLegRotation: [1.5, 0, 0], leftArmRotation: [0.7, 0, 0], rightArmRotation: [0.7, 0, 0]}} />
@@ -292,7 +292,6 @@ export default function Scene({ currentView }) {
             </group>
           </group>
         </group>
-      </group>
 
       <water
         ref={waterRef}
