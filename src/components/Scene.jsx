@@ -191,29 +191,10 @@ export default function Scene({ currentView }) {
     }
   });
 
-  // BUTTER TEXTURE: High roughness makes it look soft and non-digital
   const butterProps = { color: "#fce4e4", roughness: 0.9, metalness: 0.02 };
 
   return (
     <>
-      {/* 4. THE FILTER: SVG noise overlay for film grain feel */}
-      <div style={{
-        position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-        pointerEvents: 'none', zIndex: 999,
-        background: 'radial-gradient(circle, transparent 20%, rgba(248, 225, 255, 0.15) 100%)',
-        opacity: 0.4, mixBlendMode: 'multiply'
-      }} />
-      <svg style={{ display: 'none' }}>
-        <filter id="noise">
-          <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" />
-          <feColorMatrix type="saturate" values="0" />
-        </filter>
-      </svg>
-      <div style={{
-        position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-        pointerEvents: 'none', zIndex: 1000, filter: 'url(#noise)', opacity: 0.03
-      }} />
-
       <Sky distance={450000} sunPosition={[-20, 8, -100]} inclination={0.6} azimuth={0.25} turbidity={8} rayleigh={6} />
       <Environment preset="sunset" />
       <fog attach="fog" args={["#f8e1ff", 10, 400]} />
@@ -230,7 +211,7 @@ export default function Scene({ currentView }) {
       </group>
 
       <group position={[0, 0, 0]}>
-        {/* DEEP SHADOWS: Adds weight to the building */}
+        {/* Soft Depth Shadows */}
         <ContactShadows position={[12, -1.95, 20]} opacity={0.4} scale={50} blur={2.5} far={10} color="#2d1440" />
 
         <mesh position={[12.5, -2.0, 22.5]} castShadow receiveShadow>
@@ -254,7 +235,6 @@ export default function Scene({ currentView }) {
         </group>
       </group>
 
-      {/* HIGH-END WATER: Clearer, simpler, calmer motion */}
       <water
         ref={waterRef}
         args={[new THREE.PlaneGeometry(2000, 2000), {
