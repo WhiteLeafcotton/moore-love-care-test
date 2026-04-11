@@ -8,7 +8,7 @@ extend({ Water });
 
 const GRASS_COUNT = 400000;
 
-/* ---------- TERRAIN ---------- */
+/* ---------- TERRAIN (UNCHANGED) ---------- */
 const getHillHeight = (x, z) => {
   const dist = Math.sqrt(x * x + z * z);
   const flatZone = 65;
@@ -24,27 +24,32 @@ const getHillHeight = (x, z) => {
 
   for (let i = 0; i < hills.length; i++) {
     const k = hills[i];
-
     const dx = x - k.x;
     const dz = z - k.z;
     const d = Math.sqrt(dx * dx + dz * dz);
-
-    // ✅ SAFE math (no **)
     const falloff = Math.exp(-Math.pow(d / k.w, 2));
-
     height += falloff * k.h;
   }
 
   return height * influence;
 };
 
-/* ---------- GRASS ---------- */
+/* ---------- PRO GRASS ---------- */
 const Grass = () => {
   const meshRef = useRef();
 
   const blade = useMemo(() => {
-    const g = new THREE.PlaneGeometry(0.04, 1.2, 1, 4);
-    g.translate(0, 0.6, 0);
+    const g = new THREE.PlaneGeometry(0.035, 1.4, 1, 6);
+    g.translate(0, 0.7, 0);
+
+    // taper shape
+    const pos = g.attributes.position.array;
+    for (let i = 0; i < pos.length; i += 3) {
+      const y = pos[i + 1] / 1.4;
+      pos[i] *= (1.0 - y * 0.85);
+    }
+
+    g.computeVertexNormals();
     return g;
   }, []);
 
@@ -53,7 +58,6 @@ const Grass = () => {
     g.rotateX(-Math.PI / 2);
 
     const pos = g.attributes.position.array;
-
     for (let i = 0; i < pos.length; i += 3) {
       pos[i + 1] = getHillHeight(pos[i], pos[i + 2]);
     }
@@ -70,31 +74,55 @@ const Grass = () => {
     },
     vertexShader: `
       varying float vH;
+      varying float vNoise;
       uniform float uTime;
 
+      float rand(vec2 co){
+        return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+      }
+
       void main() {
-        vH = position.y / 1.2;
+        vH = position.y / 1.4;
 
         vec3 pos = position;
 
-        float wind =
-          sin(uTime * 1.5 + pos.x * 0.5) * 0.15 +
-          sin(uTime * 3.0 + pos.z * 0.8) * 0.08;
+        vec3 world = (instanceMatrix * vec4(0.0,0.0,0.0,1.0)).xyz;
+        float noise = rand(world.xz);
+        vNoise = noise;
 
-        pos.x += wind * vH;
+        // layered wind (more natural)
+        float sway =
+          sin(uTime * 1.2 + world.x * 0.15) * 0.2 +
+          sin(uTime * 2.5 + world.z * 0.25) * 0.1 +
+          sin(uTime * 4.0 + world.x * 0.6) * 0.05;
+
+        // individual variation
+        sway *= (0.6 + noise * 0.8);
+
+        // bend stronger at top
+        pos.x += sway * pow(vH, 1.5);
+        pos.z += sway * 0.3 * vH;
 
         gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(pos,1.0);
       }
     `,
     fragmentShader: `
       varying float vH;
+      varying float vNoise;
       uniform vec3 uRoot;
       uniform vec3 uTip;
 
       void main() {
-        vec3 col = mix(uRoot, uTip, vH);
-        float depth = pow(vH, 0.5);
-        gl_FragColor = vec4(col * depth, 1.0);
+        // richer gradient
+        vec3 base = mix(uRoot, uTip, pow(vH, 0.8));
+
+        // subtle variation per blade
+        base *= (0.85 + vNoise * 0.3);
+
+        // depth shading
+        float shade = pow(vH, 0.6);
+
+        gl_FragColor = vec4(base * shade, 1.0);
       }
     `,
     side: THREE.DoubleSide
@@ -114,9 +142,14 @@ const Grass = () => {
         if (y > 0.05) {
           dummy.position.set(x, y, z);
           dummy.rotation.y = Math.random() * Math.PI;
-          dummy.scale.setScalar(0.6 + Math.random() * 0.8);
-          dummy.updateMatrix();
 
+          // slight lean variation
+          dummy.rotation.x = (Math.random() - 0.5) * 0.2;
+
+          // varied scale
+          dummy.scale.setScalar(0.6 + Math.random() * 0.9);
+
+          dummy.updateMatrix();
           meshRef.current.setMatrixAt(i, dummy.matrix);
         }
       }
@@ -137,7 +170,7 @@ const Grass = () => {
   );
 };
 
-/* ---------- SCENE ---------- */
+/* ---------- SCENE (UNCHANGED) ---------- */
 export default function Scene({ currentView }) {
   const { camera } = useThree();
 
@@ -150,7 +183,6 @@ export default function Scene({ currentView }) {
 
   useEffect(() => {
     transition.current = 0;
-
     fromPos.current.copy(camera.position);
     fromLook.current.copy(lookAt.current);
 
@@ -194,12 +226,7 @@ export default function Scene({ currentView }) {
 
       <Cloud position={[0, 60, -200]} opacity={0.3} speed={0.2} />
 
-      <ContactShadows
-        position={[12, -2, 15]}
-        opacity={0.2}
-        scale={50}
-        blur={4}
-      />
+      <ContactShadows position={[12, -2, 15]} opacity={0.2} scale={50} blur={4} />
     </>
   );
 }

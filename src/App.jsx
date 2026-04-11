@@ -6,71 +6,39 @@ export default function App() {
   const [currentView, setCurrentView] = useState("home");
 
   return (
-    <div style={{
-      width: "100vw",
-      height: "100vh",
-      background: "#f7ece8",
-      position: "relative"
-    }}>
-      
-      {/* UI */}
+    <div style={{ width: "100vw", height: "100vh", background: "#f7ece8", position: "relative" }}>
       <div style={{
-        position: "absolute",
-        inset: 0,
-        zIndex: 10,
-        pointerEvents: "none",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center"
+        position: "absolute", inset: 0, zIndex: 10, pointerEvents: "none",
+        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center"
       }}>
         <h1 style={{
-          fontSize: "clamp(2rem, 8vw, 4rem)",
-          letterSpacing: "0.15em",
-          color: "#3e3e3e",
-          fontWeight: 400,
-          margin: 0,
-          fontFamily: "'Cinzel', serif"
+          fontSize: "clamp(2rem, 8vw, 4rem)", letterSpacing: "0.15em",
+          color: "#3e3e3e", fontWeight: 400, margin: 0, fontFamily: "'Cinzel', serif"
         }}>
           Moore Love & Care
         </h1>
 
-        <p style={{
-          letterSpacing: "0.5em",
-          fontSize: "10px",
-          marginTop: "10px",
-          color: "rgba(62,62,62,0.6)"
-        }}>
+        <p style={{ letterSpacing: "0.5em", fontSize: "10px", marginTop: "10px", color: "rgba(62, 62, 62, 0.6)" }}>
           THE SOLARIUM SANCTUARY
         </p>
 
         <button
-          onClick={() =>
-            setCurrentView(v => v === "home" ? "collection" : "home")
-          }
+          onClick={() => setCurrentView(v => v === "home" ? "collection" : "home")}
           style={{
-            pointerEvents: "auto",
-            marginTop: "5vh",
-            padding: "15px 50px",
-            borderRadius: "50px",
-            border: "1px solid rgba(0,0,0,0.05)",
-            background: "rgba(255,255,255,0.85)",
-            backdropFilter: "blur(10px)",
-            letterSpacing: "0.2em",
-            fontSize: "11px",
-            cursor: "pointer",
-            textTransform: "uppercase"
+            pointerEvents: "auto", marginTop: "5vh", padding: "15px 50px",
+            borderRadius: "50px", border: "1px solid rgba(0,0,0,0.05)",
+            background: "rgba(255,255,255,0.85)", backdropFilter: "blur(10px)",
+            letterSpacing: "0.2em", fontSize: "11px", cursor: "pointer", textTransform: "uppercase"
           }}
         >
           {currentView === "home" ? "Explore Collection" : "Return Home"}
         </button>
       </div>
 
-      {/* 3D */}
       <Canvas
         shadows
         dpr={[1, 2]}
-        camera={{ position: [40, 15, 60], fov: 28 }} // 👈 tighter luxury lens
+        camera={{ position: [40, 15, 60], fov: 28 }}
         gl={{ antialias: true }}
       >
         <Suspense fallback={null}>
