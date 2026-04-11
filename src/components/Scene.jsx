@@ -6,7 +6,7 @@ import * as THREE from "three";
 
 extend({ Water });
 
-const GRASS_COUNT = 150000;
+const GRASS_COUNT = 150000; 
 
 const getHillHeight = (x, z) => {
   const dist = Math.sqrt(x * x + z * z);
@@ -25,25 +25,83 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
-// --- FIX: Defined WallOpening to resolve ReferenceErrors ---
-const WallOpening = ({ position, isWindow = false, colorProps }) => (
+const WallOpening = ({ position, colorProps, width = 6, openingW = 4.8, height = 17, openingH = 9, isWindow = false }) => (
   <group position={position}>
-    <mesh position={[0, 3, 0]} castShadow receiveShadow>
-      <boxGeometry args={[4, 6, 2]} />
-      <meshStandardMaterial {...colorProps} />
+    <mesh position={[-(openingW + (width - openingW) / 2) / 2, height / 2, 0]} castShadow receiveShadow>
+      <boxGeometry args={[(width - openingW) / 2, height, 2]} /><meshStandardMaterial {...colorProps} />
     </mesh>
-    <mesh position={[0, 14, 0]} castShadow receiveShadow>
-      <boxGeometry args={[4, 6, 2]} />
-      <meshStandardMaterial {...colorProps} />
+    <mesh position={[(openingW + (width - openingW) / 2) / 2, height / 2, 0]} castShadow receiveShadow>
+      <boxGeometry args={[(width - openingW) / 2, height, 2]} /><meshStandardMaterial {...colorProps} />
+    </mesh>
+    <mesh position={[0, height - (height - openingH - (isWindow ? 4 : 0)) / 2, 0]} castShadow receiveShadow>
+      <boxGeometry args={[openingW, height - openingH - (isWindow ? 4 : 0), 2]} /><meshStandardMaterial {...colorProps} />
     </mesh>
     {isWindow && (
-      <mesh position={[0, 8.5, 0]} castShadow receiveShadow>
-        <boxGeometry args={[4, 5, 2]} />
-        <meshStandardMaterial {...colorProps} transparent opacity={0.3} />
+      <mesh position={[0, 2, 0]} castShadow receiveShadow>
+        <boxGeometry args={[openingW, 4, 2]} /><meshStandardMaterial {...colorProps} />
       </mesh>
     )}
   </group>
 );
+
+const BlockHumanoid = ({ scale = 1, materialProps, stance = "standing", poseProps = {} }) => {
+  const { 
+    leftLegRotation = [0, 0, 0], 
+    rightLegRotation = [0, 0, 0], 
+    leftArmRotation = [0.2, 0, -0.1], 
+    rightArmRotation = [0.2, 0, 0.1], 
+    position = [0, 0, 0], 
+    rotation = [0, 0, 0], 
+    cane = false 
+  } = poseProps;
+  
+  const limbGeo = useMemo(() => {
+    const pts = [new THREE.Vector2(0, 0), new THREE.Vector2(0.08, 0.05), new THREE.Vector2(0.08, 0.75), new THREE.Vector2(0, 0.8)];
+    const g = new THREE.LatheGeometry(pts, 32);
+    g.translate(0, -0.8, 0); 
+    return g;
+  }, []);
+
+  const torsoGeo = useMemo(() => {
+    const pts = [new THREE.Vector2(0, 0), new THREE.Vector2(0.18, 0.1), new THREE.Vector2(0.18, 0.9), new THREE.Vector2(0, 1.0)];
+    return new THREE.LatheGeometry(pts, 32);
+  }, []);
+
+  return (
+    <group scale={scale} position={position} rotation={rotation}>
+      <mesh position={[0, 1.4, 0]} castShadow><sphereGeometry args={[0.22, 32, 32]} /><meshStandardMaterial {...materialProps} /></mesh>
+      <mesh position={[0, 0.3, 0]} castShadow><primitive object={torsoGeo} /><meshStandardMaterial {...materialProps} /></mesh>
+      
+      {/* Legs with Knee Bend logic */}
+      <group position={[0, 0.4, 0]}>
+        <group position={[-0.12, 0, 0]} rotation={leftLegRotation}>
+          <mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
+          {stance === "sitting" && (
+            <mesh position={[0, -0.75, 0.35]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+              <primitive object={limbGeo} /><meshStandardMaterial {...materialProps} />
+            </mesh>
+          )}
+        </group>
+        <group position={[0.12, 0, 0]} rotation={rightLegRotation}>
+          <mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
+          {stance === "sitting" && (
+            <mesh position={[0, -0.75, 0.35]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+              <primitive object={limbGeo} /><meshStandardMaterial {...materialProps} />
+            </mesh>
+          )}
+        </group>
+      </group>
+
+      <group position={[0, 1.2, 0]}>
+        <mesh position={[-0.22, 0, 0]} rotation={leftArmRotation} castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
+        <mesh position={[0.22, 0, 0]} rotation={rightArmRotation} castShadow>
+          <primitive object={limbGeo} /><meshStandardMaterial {...materialProps} />
+          {cane && <mesh position={[0, -0.7, 0.1]}><cylinderGeometry args={[0.015, 0.015, 1.1]} /><meshStandardMaterial color="#fcd7d7" /></mesh>}
+        </mesh>
+      </group>
+    </group>
+  );
+};
 
 const GrassySassyHills = () => {
   const meshRef = useRef();
@@ -159,57 +217,6 @@ const Staircase = ({ position, width, rotation, materialProps }) => {
   );
 };
 
-const BlockHumanoid = ({ scale = 1, materialProps, stance = "standing", poseProps = {} }) => {
-  const { leftLegRotation = [0, 0, 0], rightLegRotation = [0, 0, 0], leftArmRotation = [0.2, 0, -0.1], rightArmRotation = [0.2, 0, 0.1], position = [0,0,0], cane = false } = poseProps;
-  
-  const limbGeo = useMemo(() => {
-    const pts = [new THREE.Vector2(0, 0), new THREE.Vector2(0.08, 0.05), new THREE.Vector2(0.08, 0.75), new THREE.Vector2(0, 0.8)];
-    const g = new THREE.LatheGeometry(pts, 32);
-    g.translate(0, -0.8, 0); 
-    return g;
-  }, []);
-
-  const torsoGeo = useMemo(() => {
-    const pts = [new THREE.Vector2(0, 0), new THREE.Vector2(0.18, 0.1), new THREE.Vector2(0.18, 0.9), new THREE.Vector2(0, 1.0)];
-    return new THREE.LatheGeometry(pts, 32);
-  }, []);
-
-  return (
-    <group scale={scale} position={position}>
-      <mesh position={[0, 1.4, 0]} castShadow><sphereGeometry args={[0.22, 32, 32]} /><meshStandardMaterial {...materialProps} /></mesh>
-      <mesh position={[0, 0.3, 0]} castShadow><primitive object={torsoGeo} /><meshStandardMaterial {...materialProps} /></mesh>
-      
-      {/* Legs - Updated for natural sitting bend */}
-      <group position={[0, 0.4, 0]}>
-        <group position={[-0.12, 0, 0]} rotation={leftLegRotation}>
-          <mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
-          {stance === "sitting" && (
-            <mesh position={[0, -0.75, 0.35]} rotation={[Math.PI / 2, 0, 0]} castShadow>
-              <primitive object={limbGeo} /><meshStandardMaterial {...materialProps} />
-            </mesh>
-          )}
-        </group>
-        <group position={[0.12, 0, 0]} rotation={rightLegRotation}>
-          <mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
-          {stance === "sitting" && (
-            <mesh position={[0, -0.75, 0.35]} rotation={[Math.PI / 2, 0, 0]} castShadow>
-              <primitive object={limbGeo} /><meshStandardMaterial {...materialProps} />
-            </mesh>
-          )}
-        </group>
-      </group>
-
-      <group position={[0, 1.2, 0]}>
-        <mesh position={[-0.22, 0, 0]} rotation={leftArmRotation} castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
-        <mesh position={[0.22, 0, 0]} rotation={rightArmRotation} castShadow>
-          <primitive object={limbGeo} /><meshStandardMaterial {...materialProps} />
-          {cane && <mesh position={[0, -0.7, 0.1]}><cylinderGeometry args={[0.015, 0.015, 1.1]} /><meshStandardMaterial color="#fcd7d7" /></mesh>}
-        </mesh>
-      </group>
-    </group>
-  );
-};
-
 const SimpleWheelchair = ({ materialProps }) => (
   <group>
     <mesh position={[0, 0.55, 0]} castShadow><boxGeometry args={[0.6, 0.08, 0.6]} /><meshStandardMaterial color="#fce4e4" /></mesh>
@@ -282,25 +289,24 @@ export default function Scene({ currentView }) {
           <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
 
-        {/* Characters */}
         <group>
-          {/* Couple B (LOCKED) */}
+          {/* Couple B: Senior Couple (Locked) */}
           <group position={[14, 1.9, 12]} rotation={[0, -Math.PI * 0.7, 0]}>
             <BlockHumanoid scale={1} materialProps={butterProps} poseProps={{ cane: true, leftLegRotation: [0.3, 0, 0], rightLegRotation: [-0.3, 0, 0], position: [-0.3, 0, 0]}} />
             <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ leftLegRotation: [-0.3, 0, 0], rightLegRotation: [0.3, 0, 0], position: [0.4, 0, -0.1]}} />
           </group>
 
-          {/* Couple A (Stair Couple): Faced Water + Natural Leg Bend */}
+          {/* Couple A: Stair Couple - FACING WATER with natural sitting legs */}
           <group position={[6.5, 2.05, 8.4]} rotation={[0, -Math.PI / 2, 0]}>
             <BlockHumanoid scale={0.9} stance="sitting" materialProps={butterProps} poseProps={{ leftLegRotation: [1.45, 0, 0], rightLegRotation: [1.45, 0, 0], position: [-0.2, 0, 0]}} />
             <BlockHumanoid scale={0.88} stance="sitting" materialProps={butterProps} poseProps={{ leftLegRotation: [1.45, 0, 0], rightLegRotation: [1.45, 0, 0], position: [0.5, 0, 0]}} />
           </group>
 
-          {/* Couple C (Wheelchair Couple): LOCKED position */}
+          {/* Couple C: Wheelchair Couple - LOCKED position */}
           <group position={[14.5, 1.9, 17.5]} rotation={[0, Math.PI, 0]}>
             <SimpleWheelchair materialProps={butterProps} />
             <group position={[0, 0.2, 0]}>
-              <BlockHumanoid scale={0.85} stance="sitting" materialProps={butterProps} poseProps={{ leftLegRotation: [1.5, 0, 0], rightLegRotation: [1.5, 0, 0], leftArmRotation: [0.7, 0, 0], rightArmRotation: [0.7, 0, 0]}} />
+              <BlockHumanoid scale={0.85} stance="sitting" materialProps={butterProps} poseProps={{ rotation: [0, Math.PI, 0], leftLegRotation: [1.5, 0, 0], rightLegRotation: [1.5, 0, 0], leftArmRotation: [0.7, 0, 0], rightArmRotation: [0.7, 0, 0]}} />
             </group>
             <group position={[0, 0, -0.7]}>
               <BlockHumanoid scale={0.95} materialProps={butterProps} poseProps={{ leftArmRotation: [-1.1, 0, 0], rightArmRotation: [-1.1, 0, 0]}} />
