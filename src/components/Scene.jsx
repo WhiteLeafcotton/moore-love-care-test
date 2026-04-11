@@ -211,11 +211,11 @@ export default function Scene({ currentView }) {
       </group>
 
       <group position={[0, 0, 0]}>
-        {/* Soft Depth Shadows */}
         <ContactShadows position={[12, -1.95, 20]} opacity={0.4} scale={50} blur={2.5} far={10} color="#2d1440" />
 
-        <mesh position={[12.5, -2.0, 22.5]} castShadow receiveShadow>
-          <boxGeometry args={[14, 8.0, 28]} /><meshStandardMaterial {...butterProps} />
+        {/* FIXED PLATFORM: Widened and repositioned to tuck firmly into the corner */}
+        <mesh position={[15.5, -2.0, 15.0]} castShadow receiveShadow>
+          <boxGeometry args={[20, 8.0, 30]} /><meshStandardMaterial {...butterProps} />
         </mesh>
         
         <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={butterProps} />
