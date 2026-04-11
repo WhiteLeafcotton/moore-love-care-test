@@ -279,19 +279,19 @@ export default function Scene({ currentView }) {
         </group>
 
         <group>
-          {/* Couple B: locked Senior Couple */}
+          {/* Couple B: Senior Couple */}
           <group position={[14, 1.9, 12]} rotation={[0, -Math.PI * 0.7, 0]}>
             <BlockHumanoid scale={1} materialProps={butterProps} poseProps={{ cane: true, leftLegRotation: [0.3, 0, 0], rightLegRotation: [-0.3, 0, 0], position: [-0.3, 0, 0]}} />
             <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ leftLegRotation: [-0.3, 0, 0], rightLegRotation: [0.3, 0, 0], position: [0.4, 0, -0.1]}} />
           </group>
 
-          {/* Couple A: Moving them Left (Lower X) and Forward (Lower Z) so they aren't hidden by the front wall pillar */}
-          <group position={[8.5, -0.6, 14.5]} rotation={[0, Math.PI / 2, 0]}>
+          {/* Couple A: NEW POSITION - Lowered and shifted to the visible part of the steps */}
+          <group position={[10, -1.0, 18.5]} rotation={[0, Math.PI / 2, 0]}>
             <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
             <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
           </group>
 
-          {/* Couple C: locked Wheelchair Couple */}
+          {/* Couple C: Wheelchair Couple */}
           <group position={[14.5, 1.9, 17.5]} rotation={[0, Math.PI, 0]}>
             <SimpleWheelchair materialProps={butterProps} />
             <group position={[0, 0.2, 0]}>
