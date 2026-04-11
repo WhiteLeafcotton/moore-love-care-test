@@ -6,6 +6,7 @@ import * as THREE from "three";
 
 extend({ Water });
 
+// Hill height logic - properly isolated
 const getHillHeight = (x, z) => {
   const dist = Math.sqrt(x * x + z * z);
   const flatZone = 45; 
@@ -16,120 +17,36 @@ const getHillHeight = (x, z) => {
   return (Math.sin(x * 0.05) * Math.cos(z * 0.05) * 12 + Math.sin(x * 0.1) * 4) * influence;
 };
 
-const VolumetricMoss = () => {
+const SanctuaryHills = () => {
   const meshRef = useRef();
-  const SHELL_COUNT = 20; // More shells = softer, more realistic look
   
-  // 1. Create Hill Geometry
+  // Use a grass/rock texture to give the hills organic detail
+  const texture = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/terrain/grasslight-big.jpg");
+  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(8, 8);
+
   const geometry = useMemo(() => {
-    const g = new THREE.PlaneGeometry(650, 650, 128, 128);
+    // High segments (256) make the hills look smooth and high-end
+    const g = new THREE.PlaneGeometry(650, 650, 256, 256);
     g.rotateX(-Math.PI / 2);
     const pos = g.attributes.position.array;
     for (let i = 0; i < pos.length; i += 3) {
       pos[i + 1] = getHillHeight(pos[i], pos[i + 2]);
     }
-    
-    // Create a custom attribute for the shell index
-    const instancedIndex = new Float32Array(SHELL_COUNT * g.attributes.position.count);
     g.computeVertexNormals();
     return g;
   }, []);
 
-  // 2. The Professional Moss Shader
-  const material = useMemo(() => new THREE.ShaderMaterial({
-    uniforms: {
-      uTime: { value: 0 },
-      uColorDark: { value: new THREE.Color("#0a1501") }, // Deep base
-      uColorLight: { value: new THREE.Color("#7ba61a") }, // Soft sunlit tip
-      uShellCount: { value: SHELL_COUNT }
-    },
-    transparent: true,
-    vertexShader: `
-      varying vec2 vUv;
-      varying float vHeightFactor;
-      uniform float uShellCount;
-
-      void main() {
-        vUv = uv;
-        
-        // Use the instance matrix index to determine height offset
-        // In InstancedMesh, we can calculate height factor per instance
-        vHeightFactor = float(gl_InstanceID) / uShellCount;
-        
-        vec3 pos = position;
-        // Each layer is slightly higher than the last
-        pos.y += vHeightFactor * 2.5; 
-        
-        // Add a tiny bit of "wind" sway to the tips
-        float sway = sin(uTime + pos.x * 0.1) * 0.2 * vHeightFactor;
-        pos.x += sway;
-
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
-      }
-    `,
-    fragmentShader: `
-      varying vec2 vUv;
-      varying float vHeightFactor;
-      uniform vec3 uColorDark;
-      uniform vec3 uColorLight;
-
-      float hash(vec2 p) {
-        return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
-      }
-
-      void main() {
-        // High-frequency noise for "grass blades"
-        float noise = hash(vUv * 1500.0);
-        
-        // The higher the layer, the more pixels we "discard"
-        // This creates the illusion of individual strands
-        if (noise < vHeightFactor) discard;
-
-        // Color gradient from dark roots to light tips
-        vec3 color = mix(uColorDark, uColorLight, vHeightFactor);
-        
-        // Darken the base layers significantly for depth/occlusion
-        float ambientOcclusion = pow(vHeightFactor, 0.5);
-        
-        gl_FragColor = vec4(color * ambientOcclusion, 1.0 - vHeightFactor * 0.5);
-      }
-    `
-  }), []);
-
-  // Initialize instance matrices
-  useMemo(() => {
-    const dummy = new THREE.Object3D();
-    return [...Array(SHELL_COUNT)].map((_, i) => {
-      dummy.position.set(0, 0, 0);
-      dummy.updateMatrix();
-      return dummy.matrix.clone();
-    });
-  }, []);
-
-  useFrame((state) => {
-    material.uniforms.uTime.value = state.clock.getElapsedTime();
-  });
-
   return (
-    <group position={[0, -4, -40]}>
-      {/* The main shell mesh */}
-      <instancedMesh ref={meshRef} args={[geometry, material, SHELL_COUNT]}>
-        {/* Fill the instance matrices with identity matrices */}
-        {useMemo(() => {
-          const array = new Float32Array(SHELL_COUNT * 16);
-          for (let i = 0; i < SHELL_COUNT; i++) {
-            const mat = new THREE.Matrix4();
-            mat.toArray(array, i * 16);
-          }
-          return array;
-        }, []).map((val, i) => null)}
-      </instancedMesh>
-      
-      {/* A solid base layer so you don't see through the hills */}
-      <mesh geometry={geometry}>
-        <meshStandardMaterial color="#050a01" />
-      </mesh>
-    </group>
+    <mesh ref={meshRef} geometry={geometry} position={[0, -4, -40]} receiveShadow>
+      <meshStandardMaterial 
+        map={texture}
+        color="#3a5a2a" // Deep, realistic green
+        roughness={0.9} 
+        metalness={0.0}
+        flatShading={false}
+      />
+    </mesh>
   );
 };
 
@@ -145,7 +62,8 @@ export default function Scene({ currentView }) {
   useFrame((state, delta) => {
     const isHome = currentView === "home";
     const targetPos = new THREE.Vector3(-15, 1.5, 30);
-    camera.position.lerp(isHome ? targetPos : new THREE.Vector3(-8, 1.5, -100), 0.04);
+    const exitPos = new THREE.Vector3(-8, 1.5, -100);
+    camera.position.lerp(isHome ? targetPos : exitPos, 0.04);
     camera.lookAt(lookAtTarget.current);
     if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.15;
   });
@@ -153,12 +71,15 @@ export default function Scene({ currentView }) {
   return (
     <>
       <Sky sunPosition={[-10, 5, -100]} turbidity={5} rayleigh={1} />
-      <VolumetricMoss />
-      <Environment preset="sunset" />
-      <fog attach="fog" args={["#ffc0e6", 10, 500]} />
-      <hemisphereLight intensity={2.5} color="#ffffff" groundColor="#ffc0e6" />
       
-      <mesh position={[12, -2.0, 15]}>
+      <SanctuaryHills />
+      
+      <Environment preset="sunset" />
+      <fog attach="fog" args={["#ffc0e6", 10, 600]} />
+      <hemisphereLight intensity={2.0} color="#ffffff" groundColor="#ffc0e6" />
+      <directionalLight position={[-15, 30, 10]} intensity={1.5} castShadow />
+
+      <mesh position={[12, -2.0, 15]} castShadow>
         <boxGeometry args={[14, 8.0, 28]} />
         <meshStandardMaterial map={pinkStoneTex} color="#fcd7d7" />
       </mesh>
