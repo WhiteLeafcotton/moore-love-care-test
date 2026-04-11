@@ -6,10 +6,11 @@ import * as THREE from "three";
 
 extend({ Water });
 
+// Hill geometry logic
 const getHillHeight = (x, z) => {
   const dist = Math.sqrt(x * x + z * z);
-  const flatZone = 40;
-  const smoothZone = 30;
+  const flatZone = 45; // Keeps the center clear for the water/structure
+  const smoothZone = 25;
   let influence = 1.0;
   if (dist < flatZone) influence = 0;
   else if (dist < flatZone + smoothZone) influence = (dist - flatZone) / smoothZone;
@@ -17,7 +18,7 @@ const getHillHeight = (x, z) => {
 };
 
 const createHillGeom = () => {
-  const g = new THREE.PlaneGeometry(600, 600, 128, 128);
+  const g = new THREE.PlaneGeometry(650, 650, 128, 128);
   g.rotateX(-Math.PI / 2);
   const pos = g.attributes.position.array;
   for (let i = 0; i < pos.length; i += 3) {
@@ -27,36 +28,41 @@ const createHillGeom = () => {
   return g;
 };
 
-const SpaghettiCoralReef = () => {
+const WigglingSpaghettiReef = () => {
   const meshRef = useRef();
-  // Very high count to create a dense, grassy reef effect
-  const COUNT = 3500; 
+  // Very high density for the "blanket" effect
+  const COUNT = 6000; 
   const hillGeom = useMemo(() => createHillGeom(), []);
   
-  // Adjusted: radius 0.1 and length 6.0 makes them look like thin spaghetti
+  // Extra thin and long for snake-like flexibility
   const coralGeom = useMemo(() => {
-    const g = new THREE.CapsuleGeometry(0.1, 6.0, 4, 12);
-    g.translate(0, 3, 0); // Keep pivot at the base
+    const g = new THREE.CapsuleGeometry(0.06, 7.0, 4, 32); // High radial segments for smooth bending
+    g.translate(0, 3.5, 0); 
     return g;
   }, []);
 
   const dummy = new THREE.Object3D();
   
   useEffect(() => {
-    for (let i = 0; i < COUNT; i++) {
-      const x = (Math.random() - 0.5) * 550;
-      const z = (Math.random() - 0.5) * 550;
-      const y = getHillHeight(x, z);
+    let i = 0;
+    while (i < COUNT) {
+      const x = (Math.random() - 0.5) * 600;
+      const z = (Math.random() - 0.5) * 600;
+      const dist = Math.sqrt(x * x + z * z);
       
-      dummy.position.set(x, y - 0.1, z);
-      dummy.rotation.set(0, Math.random() * Math.PI, 0);
-      
-      // Variations in height
-      const s = 0.4 + Math.random() * 1.2; 
-      dummy.scale.set(s, s, s);
-      
-      dummy.updateMatrix();
-      meshRef.current.setMatrixAt(i, dummy.matrix);
+      // Only spawn on hills (blanket effect)
+      if (dist > 50) {
+        const y = getHillHeight(x, z);
+        dummy.position.set(x, y - 0.1, z);
+        dummy.rotation.set(0, Math.random() * Math.PI, 0);
+        
+        const s = 0.3 + Math.random() * 0.9; 
+        dummy.scale.set(s, s, s);
+        
+        dummy.updateMatrix();
+        meshRef.current.setMatrixAt(i, dummy.matrix);
+        i++;
+      }
     }
     meshRef.current.instanceMatrix.needsUpdate = true;
   }, []);
@@ -76,14 +82,18 @@ const SpaghettiCoralReef = () => {
 
       void main() {
         vNormal = normalize(normalMatrix * normal);
-        
         vec3 pos = position;
-        // Higher power on pos.y makes the tips whip more violently like real spaghetti in wind
-        float windStrength = pow(pos.y, 2.0) * 0.18;
-        float wave = sin(uTime * 2.0 + instanceMatrix[3][0] * 0.5 + instanceMatrix[3][2] * 0.5);
+
+        // SNAKE WIGGLE LOGIC
+        // Layered sine waves based on the height (pos.y) of the strand
+        float speed = uTime * 2.5;
+        float noise = instanceMatrix[3][0] + instanceMatrix[3][2]; // Unique offset per strand
         
-        pos.x += wave * windStrength;
-        pos.z += cos(uTime * 1.5 + instanceMatrix[3][0]) * (windStrength * 0.5);
+        // Bend intensity increases as we move up the "spaghetti"
+        float bend = pow(pos.y / 7.0, 2.0) * 1.8;
+        
+        pos.x += sin(speed + pos.y * 0.8 + noise) * bend;
+        pos.z += cos(speed * 0.8 + pos.y * 0.5 + noise) * bend;
 
         vPosition = pos;
         gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(pos, 1.0);
@@ -98,14 +108,13 @@ const SpaghettiCoralReef = () => {
       varying vec3 vPosition;
 
       void main() {
-        // Gradient stretched over the longer body
-        float mixRatio = clamp(vPosition.y / 6.0, 0.0, 1.0);
+        float mixRatio = clamp(vPosition.y / 7.0, 0.0, 1.0);
         vec3 candyColor = mix(uColorYellow, uColorPink, mixRatio);
         
         float diffuse = max(dot(uLightDir, vNormal), 0.4);
         float rim = pow(1.0 - max(dot(vNormal, vec3(0,0,1)), 0.0), 4.0);
         
-        gl_FragColor = vec4((candyColor * diffuse) + (uColorGlow * rim * 0.6), 1.0);
+        gl_FragColor = vec4((candyColor * diffuse) + (uColorGlow * rim * 0.7), 1.0);
       }
     `
   }), []);
@@ -145,9 +154,9 @@ export default function Scene({ currentView }) {
   return (
     <>
       <Sky sunPosition={[-10, 5, -100]} turbidity={5} rayleigh={1} />
-      <SpaghettiCoralReef />
+      <WigglingSpaghettiReef />
       <Environment preset="sunset" />
-      <fog attach="fog" args={["#ffc0e6", 10, 500]} />
+      <fog attach="fog" args={["#ffc0e6", 10, 550]} />
       <hemisphereLight intensity={2.5} color="#ffffff" groundColor="#ffc0e6" />
       
       <mesh position={[12, -2.0, 15]}>
