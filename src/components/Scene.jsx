@@ -7,36 +7,47 @@ import * as BufferGeometryUtils from "three/examples/jsm/utils/BufferGeometryUti
 
 extend({ Water });
 
-const INSTANCE_COUNT = 150000; // 150k clumps = ~2.25M blades
+const INSTANCE_COUNT = 150000; // 150k clumps concentrated on only 3 hills
 
+// Targeted 3-Hill Logic
 const getHillHeight = (x, z) => {
-  const dist = Math.sqrt(x * x + z * z);
-  let influence = dist < 45 ? 0 : Math.min((dist - 45) / 25, 1.0);
-  return (Math.sin(x * 0.05) * Math.cos(z * 0.05) * 12 + Math.sin(x * 0.1) * 4) * influence;
+  // Define 3 specific center points for the hills
+  const hills = [
+    { x: 0, z: 0, h: 14, w: 35 },     // Center Main Hill
+    { x: -45, z: -20, h: 10, w: 25 }, // Left Hill
+    { x: 40, z: -15, h: 12, w: 30 }   // Right Hill
+  ];
+
+  let totalHeight = 0;
+  hills.forEach(hill => {
+    const d = Math.sqrt(Math.pow(x - hill.x, 2) + Math.pow(z - hill.z, 2));
+    totalHeight += Math.exp(-Math.pow(d / hill.w, 2)) * hill.h;
+  });
+  
+  return totalHeight;
 };
 
-const BlenderMegaField = () => {
+const TripleHillSanctuary = () => {
   const meshRef = useRef();
 
-  // 1. GENERATE THE MEGA-CLUMP (15 blades per instance)
+  // Mega-Clump Geometry (15 blades per instance)
   const clumpGeo = useMemo(() => {
     const geometries = [];
     for (let i = 0; i < 15; i++) {
-      const g = new THREE.PlaneGeometry(0.06, 0.85, 1, 3);
-      g.translate(0, 0.425, 0);
+      const g = new THREE.PlaneGeometry(0.07, 0.9, 1, 3);
+      g.translate(0, 0.45, 0);
       const angle = Math.random() * Math.PI * 2;
-      const radius = Math.random() * 0.22;
+      const radius = Math.random() * 0.25;
       g.rotateY(angle);
       g.translate(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
-      g.rotateX((Math.random() - 0.5) * 0.3);
+      g.rotateX((Math.random() - 0.5) * 0.4);
       geometries.push(g);
     }
     return BufferGeometryUtils.mergeGeometries(geometries);
   }, []);
 
-  // 2. SOLID SOIL MESH (Matches your sanctuary hill logic)
   const terrainGeo = useMemo(() => {
-    const g = new THREE.PlaneGeometry(650, 650, 160, 160);
+    const g = new THREE.PlaneGeometry(300, 300, 150, 150);
     g.rotateX(-Math.PI / 2);
     const pos = g.attributes.position.array;
     for (let i = 0; i < pos.length; i += 3) {
@@ -46,20 +57,19 @@ const BlenderMegaField = () => {
     return g;
   }, []);
 
-  // 3. ADVANCED BLENDER SHADER
   const material = useMemo(() => new THREE.ShaderMaterial({
     uniforms: {
       uTime: { value: 0 },
-      uColorRoots: { value: new THREE.Color("#030801") }, // Deep base for thickness
+      uColorRoots: { value: new THREE.Color("#020500") },
       uColorTips: { value: new THREE.Color("#a1cc33") }
     },
     vertexShader: `
       varying float vHeight;
       uniform float uTime;
       void main() {
-        vHeight = position.y / 0.85;
+        vHeight = position.y / 0.9;
         vec3 worldPos = (instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
-        float wind = sin(uTime * 1.3 + worldPos.x * 0.08) * 0.22 * vHeight;
+        float wind = sin(uTime * 1.3 + worldPos.x * 0.1) * 0.25 * vHeight;
         vec3 pos = position;
         pos.x += wind;
         gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(pos, 1.0);
@@ -70,7 +80,7 @@ const BlenderMegaField = () => {
       uniform vec3 uColorRoots;
       uniform vec3 uColorTips;
       void main() {
-        float ao = pow(vHeight, 0.4); 
+        float ao = pow(vHeight, 0.35); 
         vec3 color = mix(uColorRoots, uColorTips, vHeight);
         gl_FragColor = vec4(color * ao, 1.0);
       }
@@ -83,14 +93,24 @@ const BlenderMegaField = () => {
     if (meshRef.current && !meshRef.current._init) {
       const dummy = new THREE.Object3D();
       for (let i = 0; i < INSTANCE_COUNT; i++) {
-        const x = (Math.random() - 0.5) * 600;
-        const z = (Math.random() - 0.5) * 600;
+        // Concentrate scattering within the 3-hill zone
+        const x = (Math.random() - 0.5) * 200;
+        const z = (Math.random() - 0.5) * 200;
         const y = getHillHeight(x, z);
-        dummy.position.set(x, y - 0.05, z);
-        dummy.rotation.y = Math.random() * Math.PI;
-        dummy.scale.setScalar(0.7 + Math.random() * 0.5);
-        dummy.updateMatrix();
-        meshRef.current.setMatrixAt(i, dummy.matrix);
+        
+        // Only place grass if the height is above a certain threshold (the hills)
+        if (y > 0.1) {
+          dummy.position.set(x, y - 0.05, z);
+          dummy.rotation.y = Math.random() * Math.PI;
+          dummy.scale.setScalar(0.8 + Math.random() * 0.6);
+          dummy.updateMatrix();
+          meshRef.current.setMatrixAt(i, dummy.matrix);
+        } else {
+          // Hide instances that fall on flat ground to boost density on hills
+          dummy.scale.setScalar(0);
+          dummy.updateMatrix();
+          meshRef.current.setMatrixAt(i, dummy.matrix);
+        }
       }
       meshRef.current.instanceMatrix.needsUpdate = true;
       meshRef.current._init = true;
@@ -98,9 +118,9 @@ const BlenderMegaField = () => {
   });
 
   return (
-    <group position={[0, -4.5, -40]}>
-      <mesh geometry={terrainGeo} receiveShadow>
-        <meshStandardMaterial color="#0a1501" roughness={1} />
+    <group position={[0, -5, 0]}>
+      <mesh geometry={terrainGeo}>
+        <meshStandardMaterial color="#050a00" roughness={1} />
       </mesh>
       <instancedMesh ref={meshRef} args={[clumpGeo, material, INSTANCE_COUNT]} castShadow />
     </group>
@@ -113,18 +133,18 @@ export default function Scene({ currentView }) {
 
   useFrame((state, delta) => {
     const isHome = currentView === "home";
-    const target = isHome ? new THREE.Vector3(-15, 6, 35) : new THREE.Vector3(-8, 4, -120);
+    const target = isHome ? new THREE.Vector3(-15, 8, 40) : new THREE.Vector3(0, 5, -80);
     camera.position.lerp(target, 0.04);
-    camera.lookAt(0, 0, 0);
+    camera.lookAt(0, 2, 0);
     if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.15;
   });
 
   return (
     <>
-      <Sky sunPosition={[-10, 5, -100]} turbidity={0.05} rayleigh={1.2} />
+      <Sky sunPosition={[-10, 5, -100]} turbidity={0.01} rayleigh={1} />
       <Environment preset="sunset" />
-      <BlenderMegaField />
-      <directionalLight position={[30, 50, 10]} intensity={3} castShadow />
+      <TripleHillSanctuary />
+      <directionalLight position={[30, 50, 10]} intensity={3.5} castShadow />
       <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#ffc0e6" />
       
       <water
@@ -137,7 +157,7 @@ export default function Scene({ currentView }) {
           alpha: 0.8,
         }]}
         rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, -1.2, 0]}
+        position={[0, -1.5, 0]}
       />
     </>
   );

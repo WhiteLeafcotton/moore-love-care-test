@@ -7,7 +7,7 @@ export default function App() {
 
   return (
     <div style={{ width: "100vw", height: "100vh", background: "#ffc0e6" }}>
-      <Canvas shadows camera={{ position: [-15, 6, 35], fov: 45 }}>
+      <Canvas shadows camera={{ position: [-15, 8, 40], fov: 45 }}>
         <Suspense fallback={null}>
           <Scene currentView={currentView} />
         </Suspense>
