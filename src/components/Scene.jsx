@@ -12,25 +12,21 @@ const getHillHeight = (x, z) => {
   const dist = Math.sqrt(x * x + z * z);
   const flatZone = 45; 
   const influence = dist < flatZone ? 0 : Math.min((dist - flatZone) / 25, 1.0);
-
   const hills = [
     { x: 0, z: -80, h: 14, w: 35 },     
     { x: -60, z: -40, h: 10, w: 25 },   
     { x: 65, z: -35, h: 12, w: 30 }     
   ];
-
   let hillHeight = 0;
   hills.forEach(h => {
     const d = Math.sqrt(Math.pow(x - h.x, 2) + Math.pow(z - h.z, 2));
     hillHeight += Math.exp(-Math.pow(d / h.w, 2)) * h.h;
   });
-
   return hillHeight * influence;
 };
 
 const GrassySassyHills = () => {
   const meshRef = useRef();
-
   const bladeGeo = useMemo(() => {
     const g = new THREE.PlaneGeometry(0.05, 1.2, 1, 4);
     g.translate(0, 0.6, 0);
@@ -57,8 +53,8 @@ const GrassySassyHills = () => {
   const grassMaterial = useMemo(() => new THREE.ShaderMaterial({
     uniforms: {
       uTime: { value: 0 },
-      uColorRoots: { value: new THREE.Color("#2a0a3d") }, // Darker purple soil/base
-      uColorTips: { value: new THREE.Color("#d1a3ff") }  // Lighter pinkish-purple tips
+      uColorRoots: { value: new THREE.Color("#1a0521") }, 
+      uColorTips: { value: new THREE.Color("#d1a3ff") }  
     },
     vertexShader: `
       varying float vHeight;
@@ -117,7 +113,7 @@ const GrassySassyHills = () => {
   return (
     <group position={[0, -3.5, -40]}>
       <mesh geometry={terrainGeo} receiveShadow>
-        <meshStandardMaterial color="#1a0521" roughness={1} />
+        <meshStandardMaterial color="#0c020f" roughness={1} />
       </mesh>
       <instancedMesh ref={meshRef} args={[bladeGeo, grassMaterial, GRASS_COUNT]} castShadow />
     </group>
@@ -184,16 +180,22 @@ export default function Scene({ currentView }) {
 
   useFrame((state, delta) => {
     const isHome = currentView === "home";
-    const LERP_SPEED = 0.04;
+    const LERP_SPEED = isHome ? 0.04 : 0.025; // Slightly slower glide for the exit journey
 
-    // SWEET SPOT ADJUSTMENTS: Position is higher (y: 6) and closer (z: 25)
-    const targetPos = isHome 
-      ? (isMobile ? new THREE.Vector3(-35, 12, 70) : new THREE.Vector3(-12, 6, 25)) 
-      : new THREE.Vector3(25, 8, 40); // The "Open View" for Collection
+    // THE JOURNEY PATHS
+    // Home: Your specific low/left sweet spot
+    const homePos = isMobile ? new THREE.Vector3(-40, 10, 75) : new THREE.Vector3(-22, 3.5, 28);
+    
+    // Collection: Glide over water, through the main doorway, past hills to open water
+    const collectionPos = new THREE.Vector3(-22, 3.5, -450); 
+    
+    const targetPos = isHome ? homePos : collectionPos;
 
-    const targetLook = isHome 
-      ? new THREE.Vector3(10, 2, 5) 
-      : new THREE.Vector3(-20, 0, -20);
+    // TARGET LOOK:
+    const homeLook = new THREE.Vector3(5, 1.5, 0);
+    const collectionLook = new THREE.Vector3(-22, 1, -1000); // Look far, far ahead out the door
+    
+    const targetLook = isHome ? homeLook : collectionLook;
 
     camera.position.lerp(targetPos, LERP_SPEED);
     lookAtTarget.current.lerp(targetLook, LERP_SPEED);
@@ -210,8 +212,8 @@ export default function Scene({ currentView }) {
 
   return (
     <>
-      <Sky distance={450000} sunPosition={[-10, 5, -100]} inclination={0.6} azimuth={0.25} turbidity={10} rayleigh={5} />
-      
+      {/* RESTORED SKY & DIRECTIONAL SUN (NO SPHERE) */}
+      <Sky distance={450000} sunPosition={[-20, 8, -100]} inclination={0.6} azimuth={0.25} turbidity={10} rayleigh={5} />
       <Environment preset="sunset" />
       <fog attach="fog" args={["#f8e1ff", 10, 400]} />
       
@@ -219,11 +221,17 @@ export default function Scene({ currentView }) {
 
       <hemisphereLight intensity={1.2} color="#ffffff" groundColor="#b066ff" />
       <directionalLight position={[-15, 30, 10]} intensity={0.5} castShadow />
-      <pointLight position={[10, 10, 10]} intensity={1.2} color="#ffd6e7" />
 
+      {/* RESTORED COMPLEX CLOUD SYSTEM */}
       <group ref={cloudGroupRef}>
-        <Cloud position={[0, 80, -400]} speed={0.2} opacity={0.2} segments={40} color="#ffd1dc" />
-        <Cloud position={[-100, 100, -350]} speed={0.1} opacity={0.2} segments={40} color="#ffffff" />
+        <Cloud position={[0, 80, -450]} speed={0.2} opacity={0.3} segments={60} bounds={[1000, 100, 50]} volume={150} color="#ffd1dc" />
+        <Cloud position={[-100, 100, -420]} speed={0.1} opacity={0.25} segments={50} bounds={[800, 80, 40]} volume={120} color="#ffffff" />
+        <Cloud position={[300, 60, -320]} speed={0.2} opacity={0.3} segments={50} bounds={[500, 60, 50]} volume={100} color="#fff9c4" />
+        <Cloud position={[-300, 55, -300]} speed={0.3} opacity={0.2} segments={50} bounds={[450, 50, 60]} volume={90} color="#fdf4b8" />
+        <Cloud position={[0, 130, -350]} speed={0.4} opacity={0.4} segments={60} bounds={[900, 60, 40]} volume={130} color="#ffffff" />
+        <Cloud position={[-400, 110, -380]} speed={0.1} opacity={0.2} segments={50} bounds={[1000, 80, 80]} volume={140} color="#ffffff" />
+        <Cloud position={[200, 45, -200]} speed={0.2} opacity={0.35} segments={40} bounds={[400, 40, 40]} volume={80} color="#fce7f3" />
+        <Cloud position={[-200, 50, -220]} speed={0.2} opacity={0.25} segments={40} bounds={[450, 40, 50]} volume={90} color="#e9d5ff" />
       </group>
 
       <group position={[0, 0, 0]}>
