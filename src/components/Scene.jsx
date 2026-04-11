@@ -16,11 +16,11 @@ const getHillHeight = (x, z) => {
   return (Math.sin(x * 0.05) * Math.cos(z * 0.05) * 12 + Math.sin(x * 0.1) * 4) * influence;
 };
 
-const VolumetricMossHills = () => {
-  const SHELL_COUNT = 15; // Number of "layers" to create depth
+const VolumetricMoss = () => {
   const meshRef = useRef();
-
-  // Create the base geometry once
+  const SHELL_COUNT = 20; // More shells = softer, more realistic look
+  
+  // 1. Create Hill Geometry
   const geometry = useMemo(() => {
     const g = new THREE.PlaneGeometry(650, 650, 128, 128);
     g.rotateX(-Math.PI / 2);
@@ -28,16 +28,19 @@ const VolumetricMossHills = () => {
     for (let i = 0; i < pos.length; i += 3) {
       pos[i + 1] = getHillHeight(pos[i], pos[i + 2]);
     }
+    
+    // Create a custom attribute for the shell index
+    const instancedIndex = new Float32Array(SHELL_COUNT * g.attributes.position.count);
     g.computeVertexNormals();
     return g;
   }, []);
 
-  // Custom shader for the "shells"
+  // 2. The Professional Moss Shader
   const material = useMemo(() => new THREE.ShaderMaterial({
     uniforms: {
       uTime: { value: 0 },
-      uColorDark: { value: new THREE.Color("#0d1a01") },
-      uColorLight: { value: new THREE.Color("#99cc33") },
+      uColorDark: { value: new THREE.Color("#0a1501") }, // Deep base
+      uColorLight: { value: new THREE.Color("#7ba61a") }, // Soft sunlit tip
       uShellCount: { value: SHELL_COUNT }
     },
     transparent: true,
@@ -45,17 +48,22 @@ const VolumetricMossHills = () => {
       varying vec2 vUv;
       varying float vHeightFactor;
       uniform float uShellCount;
-      attribute float shellIndex; // Custom attribute for which layer this is
 
       void main() {
         vUv = uv;
-        // Move each shell upwards based on its index
-        float h = (shellIndex / uShellCount) * 2.5; 
-        vHeightFactor = shellIndex / uShellCount;
+        
+        // Use the instance matrix index to determine height offset
+        // In InstancedMesh, we can calculate height factor per instance
+        vHeightFactor = float(gl_InstanceID) / uShellCount;
         
         vec3 pos = position;
-        pos.y += h; // Displace layer upwards
+        // Each layer is slightly higher than the last
+        pos.y += vHeightFactor * 2.5; 
         
+        // Add a tiny bit of "wind" sway to the tips
+        float sway = sin(uTime + pos.x * 0.1) * 0.2 * vHeightFactor;
+        pos.x += sway;
+
         gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
       }
     `,
@@ -65,40 +73,59 @@ const VolumetricMossHills = () => {
       uniform vec3 uColorDark;
       uniform vec3 uColorLight;
 
-      // Noise function to create the "blades" or "pores"
       float hash(vec2 p) {
         return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
       }
 
       void main() {
-        // Create a pattern of "holes" that gets thinner as we go up
-        float noise = hash(vUv * 1200.0);
+        // High-frequency noise for "grass blades"
+        float noise = hash(vUv * 1500.0);
+        
+        // The higher the layer, the more pixels we "discard"
+        // This creates the illusion of individual strands
         if (noise < vHeightFactor) discard;
 
-        // Darker at the bottom, lighter at the tips
+        // Color gradient from dark roots to light tips
         vec3 color = mix(uColorDark, uColorLight, vHeightFactor);
         
-        // Simple top-down shadowing
-        float alpha = 1.0 - vHeightFactor;
-        gl_FragColor = vec4(color, alpha + 0.2);
+        // Darken the base layers significantly for depth/occlusion
+        float ambientOcclusion = pow(vHeightFactor, 0.5);
+        
+        gl_FragColor = vec4(color * ambientOcclusion, 1.0 - vHeightFactor * 0.5);
       }
-    `,
-    side: THREE.DoubleSide
+    `
   }), []);
+
+  // Initialize instance matrices
+  useMemo(() => {
+    const dummy = new THREE.Object3D();
+    return [...Array(SHELL_COUNT)].map((_, i) => {
+      dummy.position.set(0, 0, 0);
+      dummy.updateMatrix();
+      return dummy.matrix.clone();
+    });
+  }, []);
+
+  useFrame((state) => {
+    material.uniforms.uTime.value = state.clock.getElapsedTime();
+  });
 
   return (
     <group position={[0, -4, -40]}>
-      {/* Build 15 layers of the hill */}
-      {[...Array(SHELL_COUNT)].map((_, i) => (
-        <mesh key={i} geometry={geometry}>
-          <primitive object={material} attach="material" />
-          {/* We pass the index to the shader to handle the height offset */}
-          <onBeforeRender onBeforeRender={(renderer, scene, camera, geometry) => {
-             material.uniforms.uTime.value = performance.now() / 1000;
-          }} />
-        </mesh>
-      ))}
-      {/* Dark ground filler to hide gaps */}
+      {/* The main shell mesh */}
+      <instancedMesh ref={meshRef} args={[geometry, material, SHELL_COUNT]}>
+        {/* Fill the instance matrices with identity matrices */}
+        {useMemo(() => {
+          const array = new Float32Array(SHELL_COUNT * 16);
+          for (let i = 0; i < SHELL_COUNT; i++) {
+            const mat = new THREE.Matrix4();
+            mat.toArray(array, i * 16);
+          }
+          return array;
+        }, []).map((val, i) => null)}
+      </instancedMesh>
+      
+      {/* A solid base layer so you don't see through the hills */}
       <mesh geometry={geometry}>
         <meshStandardMaterial color="#050a01" />
       </mesh>
@@ -126,7 +153,7 @@ export default function Scene({ currentView }) {
   return (
     <>
       <Sky sunPosition={[-10, 5, -100]} turbidity={5} rayleigh={1} />
-      <VolumetricMossHills />
+      <VolumetricMoss />
       <Environment preset="sunset" />
       <fog attach="fog" args={["#ffc0e6", 10, 500]} />
       <hemisphereLight intensity={2.5} color="#ffffff" groundColor="#ffc0e6" />
