@@ -1,12 +1,8 @@
 import { useRef, useMemo } from "react";
-import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
-import { Environment, Sky } from "@react-three/drei";
-import { Water } from "three-stdlib";
+import { useFrame, useLoader } from "@react-three/fiber";
 import * as THREE from "three";
 
-extend({ Water });
-
-// 1. The Core Terrain Logic (Matches your Sanctuary layout)
+// 1. Terrain Height Logic
 const getHillHeight = (x, z) => {
   const dist = Math.sqrt(x * x + z * z);
   const flatZone = 45; 
@@ -15,162 +11,103 @@ const getHillHeight = (x, z) => {
   return (Math.sin(x * 0.05) * Math.cos(z * 0.05) * 12 + Math.sin(x * 0.1) * 4) * influence;
 };
 
-const BlenderGrassHills = () => {
-  const count = 60000; // High density for that "thick" Blender look
+const BlenderRealismGrass = () => {
   const meshRef = useRef();
+  const count = 80000; // High density is key for the "thick" look
 
-  // 2. Create the "Blade" Geometry
+  // 2. Create a "Curved" Blade (More realistic than a flat plane)
   const bladeGeo = useMemo(() => {
-    const g = new THREE.PlaneGeometry(0.15, 1.2, 1, 3);
-    g.translate(0, 0.6, 0); // Origin at the bottom so it "grows" from the hill
+    const g = new THREE.PlaneGeometry(0.12, 1.0, 1, 4);
+    g.translate(0, 0.5, 0); // Bottom at origin
+    
+    // Curve the blade vertices slightly for a non-digital look
+    const pos = g.attributes.position.array;
+    for (let i = 0; i < pos.length; i += 3) {
+      const h = pos[i + 1];
+      pos[i] += Math.pow(h, 2) * 0.2; // Curve on X
+      pos[i + 2] += Math.pow(h, 2) * 0.1; // Curve on Z
+    }
     return g;
   }, []);
 
-  // 3. The "Wind & Light" Shader
+  // 3. The "Cycles-Style" Shader
   const material = useMemo(() => new THREE.ShaderMaterial({
     uniforms: {
       uTime: { value: 0 },
-      uColorDark: { value: new THREE.Color("#1a2e05") },
-      uColorLight: { value: new THREE.Color("#8cb32d") }
+      uColorBase: { value: new THREE.Color("#0d1a01") }, // Almost black-green roots
+      uColorMid: { value: new THREE.Color("#3a5a2a") },
+      uColorTip: { value: new THREE.Color("#8cb32d") }  // Sun-kissed tips
     },
     side: THREE.DoubleSide,
     vertexShader: `
       varying vec2 vUv;
       varying float vHeight;
       uniform float uTime;
-      
+
       void main() {
         vUv = uv;
         vHeight = position.y;
         
+        // Extract instance position from matrix
+        vec3 worldPos = vec3(instanceMatrix[3][0], instanceMatrix[3][1], instanceMatrix[3][2]);
+        
+        // Wind math: Large waves + Micro shivers
+        float wind = sin(uTime * 0.8 + worldPos.x * 0.05 + worldPos.z * 0.05) * 0.3;
+        wind += sin(uTime * 2.0 + worldPos.x * 0.5) * 0.05;
+        
         vec3 pos = position;
-        // Apply wind sway based on height (tops move more)
-        float sway = sin(uTime * 2.0 + (instanceMatrix[3][0] * 0.5)) * (vHeight * 0.2);
-        pos.x += sway;
-        pos.z += sway * 0.5;
+        pos.x += wind * vHeight; // Tips move more than base
+        pos.z += wind * 0.5 * vHeight;
 
         gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(pos, 1.0);
       }
     `,
     fragmentShader: `
       varying float vHeight;
-      uniform vec3 uColorDark;
-      uniform vec3 uColorLight;
+      uniform vec3 uColorBase;
+      uniform vec3 uColorMid;
+      uniform vec3 uColorTip;
 
       void main() {
-        // Gradient from base to tip
-        vec3 finalColor = mix(uColorDark, uColorLight, vHeight / 1.2);
-        gl_FragColor = vec4(finalColor, 1.0);
+        // Create a 3-way gradient for more organic depth
+        vec3 color = vHeight < 0.5 
+          ? mix(uColorBase, uColorMid, vHeight * 2.0) 
+          : mix(uColorMid, uColorTip, (vHeight - 0.5) * 2.0);
+          
+        // Ambient Occlusion: Darken the very bottom significantly
+        float ao = pow(vHeight, 0.4); 
+        
+        gl_FragColor = vec4(color * ao, 1.0);
       }
     `
   }), []);
 
-  // 4. Scatter logic (The "Geometry Node" equivalent)
-  const terrainGeo = useMemo(() => {
-    const g = new THREE.PlaneGeometry(650, 650, 128, 128);
-    g.rotateX(-Math.PI / 2);
-    const pos = g.attributes.position.array;
-    for (let i = 0; i < pos.length; i += 3) {
-      pos[i + 1] = getHillHeight(pos[i], pos[i + 2]);
-    }
-    g.computeVertexNormals();
-    return g;
-  }, []);
-
-  useMemo(() => {
-    const dummy = new THREE.Object3D();
-    const instancedMesh = new THREE.InstancedMesh(bladeGeo, material, count);
-    
-    for (let i = 0; i < count; i++) {
-      const x = (Math.random() - 0.5) * 600;
-      const z = (Math.random() - 0.5) * 600;
-      const y = getHillHeight(x, z);
-      
-      dummy.position.set(x, y - 4.1, z);
-      dummy.rotation.y = Math.random() * Math.PI;
-      dummy.scale.setScalar(0.5 + Math.random() * 1.5);
-      dummy.updateMatrix();
-      
-      // We'll set this directly on the ref in the return
-    }
-  }, []);
-
+  // 4. Initial Placement
   useFrame((state) => {
     material.uniforms.uTime.value = state.clock.getElapsedTime();
     
-    // Fill the instances manually for the first time
-    if (meshRef.current && !meshRef.current._initialized) {
+    if (meshRef.current && !meshRef.current._setup) {
       const dummy = new THREE.Object3D();
       for (let i = 0; i < count; i++) {
-        const x = (Math.random() - 0.5) * 550;
-        const z = (Math.random() - 0.5) * 550;
+        const x = (Math.random() - 0.5) * 580;
+        const z = (Math.random() - 0.5) * 580;
         const y = getHillHeight(x, z);
+        
         dummy.position.set(x, y, z);
         dummy.rotation.y = Math.random() * Math.PI;
-        dummy.scale.setScalar(0.4 + Math.random() * 0.8);
+        // Randomize lean
+        dummy.rotation.x = (Math.random() - 0.5) * 0.4;
+        dummy.scale.setScalar(0.5 + Math.random() * 1.2);
+        
         dummy.updateMatrix();
         meshRef.current.setMatrixAt(i, dummy.matrix);
       }
       meshRef.current.instanceMatrix.needsUpdate = true;
-      meshRef.current._initialized = true;
+      meshRef.current._setup = true;
     }
   });
 
   return (
-    <group position={[0, -4.1, -40]}>
-      {/* 1. The Individual Blades */}
-      <instancedMesh ref={meshRef} args={[bladeGeo, material, count]} />
-      
-      {/* 2. The Solid Ground (To prevent "gaps") */}
-      <mesh geometry={terrainGeo}>
-        <meshStandardMaterial color="#0a1501" roughness={1} />
-      </mesh>
-    </group>
+    <instancedMesh ref={meshRef} args={[bladeGeo, material, count]} position={[0, -4.1, -40]} />
   );
 };
-
-export default function Scene({ currentView }) {
-  const { camera } = useThree();
-  const waterRef = useRef();
-  const lookAtTarget = useRef(new THREE.Vector3(12, 1.5, 0));
-  const baseUrl = import.meta.env.BASE_URL || "/";
-
-  const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
-  const pinkStoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
-
-  useFrame((state, delta) => {
-    const isHome = currentView === "home";
-    camera.position.lerp(isHome ? new THREE.Vector3(-15, 1.5, 30) : new THREE.Vector3(-8, 1.5, -100), 0.04);
-    camera.lookAt(lookAtTarget.current);
-    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.15;
-  });
-
-  return (
-    <>
-      <Sky sunPosition={[-10, 5, -100]} turbidity={5} rayleigh={1} />
-      <BlenderGrassHills />
-      <Environment preset="sunset" />
-      <fog attach="fog" args={["#ffc0e6", 10, 550]} />
-      <hemisphereLight intensity={2.0} color="#ffffff" groundColor="#ffc0e6" />
-      <directionalLight position={[-10, 20, 10]} intensity={1.5} />
-      
-      <mesh position={[12, -2.0, 15]}>
-        <boxGeometry args={[14, 8.0, 28]} />
-        <meshStandardMaterial map={pinkStoneTex} color="#fcd7d7" />
-      </mesh>
-
-      <water
-        ref={waterRef}
-        args={[new THREE.PlaneGeometry(5000, 5000), {
-          waterNormals,
-          sunDirection: new THREE.Vector3(-10, 10, -100).normalize(),
-          sunColor: 0xffffff,
-          waterColor: 0x001e0f,
-          alpha: 0.8,
-        }]}
-        rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, -1.2, 0]}
-      />
-    </>
-  );
-}
