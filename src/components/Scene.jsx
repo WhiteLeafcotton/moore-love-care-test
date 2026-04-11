@@ -3,27 +3,40 @@ import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
 import { Environment, Sky } from "@react-three/drei";
 import { Water } from "three-stdlib";
 import * as THREE from "three";
+import * as BufferGeometryUtils from "three/examples/jsm/utils/BufferGeometryUtils";
 
 extend({ Water });
 
-const GRASS_COUNT = 250000; // Extreme density for Blender realism
+const INSTANCE_COUNT = 150000; // 150k clumps = ~2.25M blades
 
-// Standardized Hill Logic for both Ground and Grass
 const getHillHeight = (x, z) => {
   const dist = Math.sqrt(x * x + z * z);
-  const flatZone = 45; 
-  const smoothZone = 25;
-  let influence = dist < flatZone ? 0 : Math.min((dist - flatZone) / smoothZone, 1.0);
-  // Matches your "Sanctuary" hill profile
+  let influence = dist < 45 ? 0 : Math.min((dist - 45) / 25, 1.0);
   return (Math.sin(x * 0.05) * Math.cos(z * 0.05) * 12 + Math.sin(x * 0.1) * 4) * influence;
 };
 
-const BlenderHills = () => {
+const BlenderMegaField = () => {
   const meshRef = useRef();
 
-  // 1. Solid Ground Mesh (Prevents transparency)
+  // 1. GENERATE THE MEGA-CLUMP (15 blades per instance)
+  const clumpGeo = useMemo(() => {
+    const geometries = [];
+    for (let i = 0; i < 15; i++) {
+      const g = new THREE.PlaneGeometry(0.06, 0.85, 1, 3);
+      g.translate(0, 0.425, 0);
+      const angle = Math.random() * Math.PI * 2;
+      const radius = Math.random() * 0.22;
+      g.rotateY(angle);
+      g.translate(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
+      g.rotateX((Math.random() - 0.5) * 0.3);
+      geometries.push(g);
+    }
+    return BufferGeometryUtils.mergeGeometries(geometries);
+  }, []);
+
+  // 2. SOLID SOIL MESH (Matches your sanctuary hill logic)
   const terrainGeo = useMemo(() => {
-    const g = new THREE.PlaneGeometry(650, 650, 128, 128);
+    const g = new THREE.PlaneGeometry(650, 650, 160, 160);
     g.rotateX(-Math.PI / 2);
     const pos = g.attributes.position.array;
     for (let i = 0; i < pos.length; i += 3) {
@@ -33,27 +46,20 @@ const BlenderHills = () => {
     return g;
   }, []);
 
-  // 2. High-Density Grass Blade
-  const bladeGeo = useMemo(() => {
-    const g = new THREE.PlaneGeometry(0.08, 0.8, 1, 2);
-    g.translate(0, 0.4, 0); 
-    return g;
-  }, []);
-
-  // 3. The "Thick" Shader
+  // 3. ADVANCED BLENDER SHADER
   const material = useMemo(() => new THREE.ShaderMaterial({
     uniforms: {
       uTime: { value: 0 },
-      uColorRoots: { value: new THREE.Color("#0a1501") }, // Almost black for density
-      uColorTips: { value: new THREE.Color("#7ba61a") }
+      uColorRoots: { value: new THREE.Color("#030801") }, // Deep base for thickness
+      uColorTips: { value: new THREE.Color("#a1cc33") }
     },
     vertexShader: `
       varying float vHeight;
       uniform float uTime;
       void main() {
-        vHeight = position.y / 0.8;
+        vHeight = position.y / 0.85;
         vec3 worldPos = (instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
-        float wind = sin(uTime * 1.2 + worldPos.x * 0.1) * 0.25 * vHeight;
+        float wind = sin(uTime * 1.3 + worldPos.x * 0.08) * 0.22 * vHeight;
         vec3 pos = position;
         pos.x += wind;
         gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(pos, 1.0);
@@ -64,9 +70,9 @@ const BlenderHills = () => {
       uniform vec3 uColorRoots;
       uniform vec3 uColorTips;
       void main() {
+        float ao = pow(vHeight, 0.4); 
         vec3 color = mix(uColorRoots, uColorTips, vHeight);
-        // Fake Ambient Occlusion to make it look "thick"
-        gl_FragColor = vec4(color * pow(vHeight, 0.4), 1.0);
+        gl_FragColor = vec4(color * ao, 1.0);
       }
     `,
     side: THREE.DoubleSide
@@ -76,14 +82,13 @@ const BlenderHills = () => {
     material.uniforms.uTime.value = state.clock.getElapsedTime();
     if (meshRef.current && !meshRef.current._init) {
       const dummy = new THREE.Object3D();
-      for (let i = 0; i < GRASS_COUNT; i++) {
+      for (let i = 0; i < INSTANCE_COUNT; i++) {
         const x = (Math.random() - 0.5) * 600;
         const z = (Math.random() - 0.5) * 600;
         const y = getHillHeight(x, z);
-        
-        dummy.position.set(x, y, z);
+        dummy.position.set(x, y - 0.05, z);
         dummy.rotation.y = Math.random() * Math.PI;
-        dummy.scale.setScalar(0.5 + Math.random() * 0.8);
+        dummy.scale.setScalar(0.7 + Math.random() * 0.5);
         dummy.updateMatrix();
         meshRef.current.setMatrixAt(i, dummy.matrix);
       }
@@ -94,12 +99,10 @@ const BlenderHills = () => {
 
   return (
     <group position={[0, -4.5, -40]}>
-      {/* The Actual Solid Hills */}
-      <mesh geometry={terrainGeo}>
-        <meshStandardMaterial color="#1a2e05" roughness={1} />
+      <mesh geometry={terrainGeo} receiveShadow>
+        <meshStandardMaterial color="#0a1501" roughness={1} />
       </mesh>
-      {/* The Millions of Blades */}
-      <instancedMesh ref={meshRef} args={[bladeGeo, material, GRASS_COUNT]} />
+      <instancedMesh ref={meshRef} args={[clumpGeo, material, INSTANCE_COUNT]} castShadow />
     </group>
   );
 };
@@ -110,19 +113,20 @@ export default function Scene({ currentView }) {
 
   useFrame((state, delta) => {
     const isHome = currentView === "home";
-    camera.position.lerp(isHome ? new THREE.Vector3(-15, 5, 30) : new THREE.Vector3(-8, 5, -100), 0.04);
+    const target = isHome ? new THREE.Vector3(-15, 6, 35) : new THREE.Vector3(-8, 4, -120);
+    camera.position.lerp(target, 0.04);
     camera.lookAt(0, 0, 0);
     if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.15;
   });
 
   return (
     <>
-      <Sky sunPosition={[-10, 5, -100]} />
-      <BlenderHills />
+      <Sky sunPosition={[-10, 5, -100]} turbidity={0.05} rayleigh={1.2} />
       <Environment preset="sunset" />
-      <directionalLight position={[-10, 20, 10]} intensity={2.5} castShadow />
-      <hemisphereLight intensity={1} color="#ffffff" groundColor="#ffc0e6" />
-
+      <BlenderMegaField />
+      <directionalLight position={[30, 50, 10]} intensity={3} castShadow />
+      <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#ffc0e6" />
+      
       <water
         ref={waterRef}
         args={[new THREE.PlaneGeometry(5000, 5000), {
