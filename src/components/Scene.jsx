@@ -120,7 +120,6 @@ const GrassySassyHills = () => {
   );
 };
 
-/* --- ARCHITECTURE --- */
 const Staircase = ({ position, width, rotation, materialProps }) => {
   const stepHeight = 0.5; const stepDepth = 0.8; const numSteps = 16;
   return (
@@ -213,21 +212,22 @@ export default function Scene({ currentView }) {
       <group position={[0, 0, 0]}>
         <ContactShadows position={[12, -1.95, 20]} opacity={0.4} scale={50} blur={2.5} far={10} color="#2d1440" />
 
-        {/* FIXED PLATFORM: Widened and repositioned to tuck firmly into the corner */}
-        <mesh position={[15.5, -2.0, 15.0]} castShadow receiveShadow>
+        {/* Nudged platform slightly down for better water fit */}
+        <mesh position={[15.5, -2.1, 15.0]} castShadow receiveShadow>
           <boxGeometry args={[20, 8.0, 30]} /><meshStandardMaterial {...butterProps} />
         </mesh>
         
         <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={butterProps} />
         
-        <group position={[-16, -1, 0]}>
+        {/* DROPPED: Both wall groups moved to -1.6 to touch the water at -1.45 */}
+        <group position={[-16, -1.6, 0]}>
           <mesh position={[1, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
           <WallOpening position={[6, 0, 0]} colorProps={butterProps} />
           <WallOpening position={[12, 0, 0]} colorProps={butterProps} />
           <mesh position={[24, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
 
-        <group position={[17, -1, 1]} rotation={[0, -Math.PI / 2, 0]}>
+        <group position={[17, -1.6, 1]} rotation={[0, -Math.PI / 2, 0]}>
           <mesh castShadow receiveShadow position={[4, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
           <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={butterProps} />
           <WallOpening position={[17, 0, 0]} isWindow={true} colorProps={butterProps} />
