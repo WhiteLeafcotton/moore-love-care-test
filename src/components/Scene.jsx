@@ -1,6 +1,6 @@
 import { useRef, useMemo, useEffect } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
-import { Environment, Sky, ContactShadows } from "@react-three/drei";
+import { Environment, Sky, Cloud, ContactShadows } from "@react-three/drei";
 import { Water } from "three-stdlib";
 import * as THREE from "three";
 
@@ -159,13 +159,14 @@ const WallOpening = ({ position, colorProps, width = 6, openingW = 4.8, height =
   </group>
 );
 
+/* --- FIXED HUMANOID: Proper Pivots & Sitting logic --- */
 const BlockHumanoid = ({ scale = 1, materialProps, legless = false, poseProps = {} }) => {
   const { leftLegRotation = [0, 0, 0], rightLegRotation = [0, 0, 0], leftArmRotation = [0.2, 0, -0.1], rightArmRotation = [0.2, 0, 0.1], position = [0,0,0], cane = false } = poseProps;
   
   const limbGeo = useMemo(() => {
-    const pts = [new THREE.Vector2(0, 0), new THREE.Vector2(0.08, 0.05), new THREE.Vector2(0.08, 0.7), new THREE.Vector2(0, 0.75)];
+    const pts = [new THREE.Vector2(0, 0), new THREE.Vector2(0.08, 0.05), new THREE.Vector2(0.08, 0.75), new THREE.Vector2(0, 0.8)];
     const g = new THREE.LatheGeometry(pts, 32);
-    g.translate(0, -0.75, 0); 
+    g.translate(0, -0.8, 0); // Pivot at the top!
     return g;
   }, []);
 
@@ -176,38 +177,19 @@ const BlockHumanoid = ({ scale = 1, materialProps, legless = false, poseProps = 
 
   return (
     <group scale={scale} position={position}>
-      <mesh position={[0, 1.4, 0]} castShadow receiveShadow>
-        <sphereGeometry args={[0.22, 32, 32]} />
-        <meshStandardMaterial {...materialProps} />
-      </mesh>
-      
-      <mesh position={[0, 0.3, 0]} castShadow receiveShadow>
-        <primitive object={torsoGeo} />
-        <meshStandardMaterial {...materialProps} />
-      </mesh>
-      
+      <mesh position={[0, 1.4, 0]} castShadow><sphereGeometry args={[0.22, 32, 32]} /><meshStandardMaterial {...materialProps} /></mesh>
+      <mesh position={[0, 0.3, 0]} castShadow><primitive object={torsoGeo} /><meshStandardMaterial {...materialProps} /></mesh>
       {!legless && (
         <group position={[0, 0.4, 0]}>
-          <mesh position={[-0.12, 0, 0]} rotation={leftLegRotation} castShadow>
-            <primitive object={limbGeo} /><meshStandardMaterial {...materialProps} />
-          </mesh>
-          <mesh position={[0.12, 0, 0]} rotation={rightLegRotation} castShadow>
-            <primitive object={limbGeo} /><meshStandardMaterial {...materialProps} />
-          </mesh>
+          <mesh position={[-0.12, 0, 0]} rotation={leftLegRotation} castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
+          <mesh position={[0.12, 0, 0]} rotation={rightLegRotation} castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
         </group>
       )}
-
-      <group position={[0, 1.15, 0]}>
-        <mesh position={[-0.22, 0, 0]} rotation={leftArmRotation} castShadow>
-          <primitive object={limbGeo} /><meshStandardMaterial {...materialProps} />
-        </mesh>
+      <group position={[0, 1.2, 0]}>
+        <mesh position={[-0.22, 0, 0]} rotation={leftArmRotation} castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
         <mesh position={[0.22, 0, 0]} rotation={rightArmRotation} castShadow>
           <primitive object={limbGeo} /><meshStandardMaterial {...materialProps} />
-          {cane && (
-             <mesh position={[0, -0.7, 0.1]} castShadow>
-                <cylinderGeometry args={[0.015, 0.015, 1.1]} /><meshStandardMaterial color="#fcd7d7" />
-            </mesh>
-          )}
+          {cane && <mesh position={[0, -0.7, 0.1]}><cylinderGeometry args={[0.015, 0.015, 1.1]} /><meshStandardMaterial color="#fcd7d7" /></mesh>}
         </mesh>
       </group>
     </group>
@@ -219,8 +201,8 @@ const SimpleWheelchair = ({ materialProps, frameColor }) => (
     <mesh position={[0, 0.55, 0]} castShadow><boxGeometry args={[0.6, 0.08, 0.6]} /><meshStandardMaterial color="#fce4e4" /></mesh>
     <mesh position={[0, 0.9, -0.25]} rotation={[0.1, 0, 0]} castShadow><boxGeometry args={[0.55, 0.7, 0.08]} /><meshStandardMaterial color="#fce4e4" /></mesh>
     <group position={[0, 0.45, -0.05]}>
-      <mesh position={[-0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]} castShadow><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color="#2d1d3d" /></mesh>
-      <mesh position={[0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]} castShadow><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color="#2d1d3d" /></mesh>
+      <mesh position={[-0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]}><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color="#2d1d3d" /></mesh>
+      <mesh position={[0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]}><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color="#2d1d3d" /></mesh>
     </group>
   </group>
 );
@@ -228,6 +210,7 @@ const SimpleWheelchair = ({ materialProps, frameColor }) => (
 export default function Scene({ currentView }) {
   const { camera, size } = useThree();
   const waterRef = useRef();
+  const cloudGroupRef = useRef();
   const lookAtTarget = useRef(new THREE.Vector3(12, 1.5, 0));
   const isMobile = size.width < 768;
 
@@ -243,6 +226,10 @@ export default function Scene({ currentView }) {
     lookAtTarget.current.lerp(isHome ? new THREE.Vector3(20, 1.2, -2) : new THREE.Vector3(-24.5, 1.5, -1000), LERP_SPEED);
     camera.lookAt(lookAtTarget.current);
     if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.08;
+    if (cloudGroupRef.current) {
+      cloudGroupRef.current.position.x += delta * 0.3;
+      if (cloudGroupRef.current.position.x > 500) cloudGroupRef.current.position.x = -500;
+    }
   });
 
   const butterProps = { color: "#fce4e4", roughness: 0.9, metalness: 0.02 };
@@ -256,6 +243,11 @@ export default function Scene({ currentView }) {
       <hemisphereLight intensity={1.4} color="#ffffff" groundColor="#b066ff" />
       <directionalLight position={[-15, 30, 10]} intensity={0.6} castShadow />
 
+      <group ref={cloudGroupRef}>
+        <Cloud position={[0, 80, -450]} speed={0.2} opacity={0.3} segments={60} bounds={[1000, 100, 50]} volume={150} color="#ffd1dc" />
+        <Cloud position={[-100, 100, -420]} speed={0.1} opacity={0.25} segments={50} bounds={[800, 80, 40]} volume={120} color="#ffffff" />
+      </group>
+
       <group position={[0, 0, 0]}>
         <mesh position={[15.5, -2.1, 15.0]} castShadow receiveShadow>
           <boxGeometry args={[20, 8.0, 30]} /><meshStandardMaterial {...butterProps} />
@@ -263,12 +255,20 @@ export default function Scene({ currentView }) {
         
         <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={butterProps} />
         
-        {/* --- BACK WALL RESTORED --- */}
+        {/* BACK WALL RESTORED */}
         <group position={[-16, -1.6, 0]}>
           <mesh position={[1, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
           <WallOpening position={[6, 0, 0]} colorProps={butterProps} />
           <WallOpening position={[12, 0, 0]} colorProps={butterProps} />
           <mesh position={[24, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
+        </group>
+
+        {/* SIDE WALL WITH WINDOWS */}
+        <group position={[17, -1.6, 1]} rotation={[0, -Math.PI / 2, 0]}>
+          <mesh castShadow receiveShadow position={[4, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
+          <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={butterProps} />
+          <WallOpening position={[17, 0, 0]} isWindow={true} colorProps={butterProps} />
+          <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
 
         <group>
@@ -277,21 +277,21 @@ export default function Scene({ currentView }) {
             <BlockHumanoid scale={1} materialProps={butterProps} poseProps={{ cane: true, leftLegRotation: [0.3, 0, 0], rightLegRotation: [-0.3, 0, 0], position: [-0.3, 0, 0]}} />
             <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ leftLegRotation: [-0.3, 0, 0], rightLegRotation: [0.3, 0, 0], position: [0.4, 0, -0.1]}} />
           </group>
-          
-          {/* Stairs Couple: FIXED LOWER BODIES */}
+
+          {/* Stair Couple: FIXED LOWER BODIES (Full legs sitting) */}
           <group position={[6.5, 1.2, 7.5]} rotation={[0, -Math.PI / 2, 0]}>
-            <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ leftLegRotation: [1.4, 0, 0], rightLegRotation: [1.4, 0, 0], position: [0, 0, 0]}} />
+            <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ leftLegRotation: [1.4, 0, 0], rightLegRotation: [1.4, 0, 0]}} />
             <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [1.4, 0, 0], rightLegRotation: [1.4, 0, 0], position: [0, 0, 0.7]}} />
           </group>
-          
-          {/* Wheelchair Couple: PROFILE VIEW */}
+
+          {/* Wheelchair Couple: SIDE PROFILE */}
           <group position={[17, 1.9, 18]} rotation={[0, Math.PI / 2, 0]}>
-            <SimpleWheelchair frameColor="#fcd7d7" />
+            <SimpleWheelchair materialProps={butterProps} frameColor="#fcd7d7" />
             <group position={[0, 0.2, 0]}>
               <BlockHumanoid scale={0.85} materialProps={butterProps} poseProps={{ leftLegRotation: [1.5, 0, 0], rightLegRotation: [1.5, 0, 0], leftArmRotation: [0.7, 0, 0], rightArmRotation: [0.7, 0, 0]}} />
             </group>
             <group position={[0, 0, -0.7]}>
-              <BlockHumanoid scale={0.95} materialProps={butterProps} poseProps={{ leftArmRotation: [-1.1, 0, 0.1], rightArmRotation: [-1.1, 0, -0.1]}} />
+              <BlockHumanoid scale={0.95} materialProps={butterProps} poseProps={{ leftArmRotation: [-1.1, 0, 0], rightArmRotation: [-1.1, 0, 0]}} />
             </group>
           </group>
         </group>
