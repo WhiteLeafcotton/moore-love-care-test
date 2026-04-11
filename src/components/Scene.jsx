@@ -6,46 +6,56 @@ import * as THREE from "three";
 
 extend({ Water });
 
-const GRASS_COUNT = 150000; // The density required for a "Blender" look
+const GRASS_COUNT = 250000; // Extreme density for Blender realism
 
+// Standardized Hill Logic for both Ground and Grass
 const getHillHeight = (x, z) => {
   const dist = Math.sqrt(x * x + z * z);
   const flatZone = 45; 
   const smoothZone = 25;
   let influence = dist < flatZone ? 0 : Math.min((dist - flatZone) / smoothZone, 1.0);
+  // Matches your "Sanctuary" hill profile
   return (Math.sin(x * 0.05) * Math.cos(z * 0.05) * 12 + Math.sin(x * 0.1) * 4) * influence;
 };
 
-const BlenderGrassField = () => {
+const BlenderHills = () => {
   const meshRef = useRef();
 
-  // 1. Blade Geometry: Tapered and translated so it grows from the base
-  const bladeGeo = useMemo(() => {
-    const g = new THREE.PlaneGeometry(0.12, 0.75, 1, 3);
-    g.translate(0, 0.375, 0); 
+  // 1. Solid Ground Mesh (Prevents transparency)
+  const terrainGeo = useMemo(() => {
+    const g = new THREE.PlaneGeometry(650, 650, 128, 128);
+    g.rotateX(-Math.PI / 2);
+    const pos = g.attributes.position.array;
+    for (let i = 0; i < pos.length; i += 3) {
+      pos[i + 1] = getHillHeight(pos[i], pos[i + 2]);
+    }
+    g.computeVertexNormals();
     return g;
   }, []);
 
-  // 2. Realism Shader: Dark roots are the secret to visual thickness
+  // 2. High-Density Grass Blade
+  const bladeGeo = useMemo(() => {
+    const g = new THREE.PlaneGeometry(0.08, 0.8, 1, 2);
+    g.translate(0, 0.4, 0); 
+    return g;
+  }, []);
+
+  // 3. The "Thick" Shader
   const material = useMemo(() => new THREE.ShaderMaterial({
     uniforms: {
       uTime: { value: 0 },
-      uColorRoots: { value: new THREE.Color("#050a00") }, // Deep shadows
-      uColorTips: { value: new THREE.Color("#95c031") }   // Sun-lit green
+      uColorRoots: { value: new THREE.Color("#0a1501") }, // Almost black for density
+      uColorTips: { value: new THREE.Color("#7ba61a") }
     },
     vertexShader: `
       varying float vHeight;
       uniform float uTime;
       void main() {
-        vHeight = position.y / 0.75;
+        vHeight = position.y / 0.8;
         vec3 worldPos = (instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
-        
-        // Organic wind sway
-        float wind = sin(uTime * 1.5 + worldPos.x * 0.2) * 0.2 * vHeight;
+        float wind = sin(uTime * 1.2 + worldPos.x * 0.1) * 0.25 * vHeight;
         vec3 pos = position;
         pos.x += wind;
-        pos.z += wind * 0.5;
-
         gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(pos, 1.0);
       }
     `,
@@ -55,7 +65,8 @@ const BlenderGrassField = () => {
       uniform vec3 uColorTips;
       void main() {
         vec3 color = mix(uColorRoots, uColorTips, vHeight);
-        gl_FragColor = vec4(color * pow(vHeight, 0.5), 1.0);
+        // Fake Ambient Occlusion to make it look "thick"
+        gl_FragColor = vec4(color * pow(vHeight, 0.4), 1.0);
       }
     `,
     side: THREE.DoubleSide
@@ -69,11 +80,10 @@ const BlenderGrassField = () => {
         const x = (Math.random() - 0.5) * 600;
         const z = (Math.random() - 0.5) * 600;
         const y = getHillHeight(x, z);
-
-        dummy.position.set(x, y - 4.1, z);
+        
+        dummy.position.set(x, y, z);
         dummy.rotation.y = Math.random() * Math.PI;
-        dummy.rotation.x = (Math.random() - 0.5) * 0.4; // Natural tilt
-        dummy.scale.setScalar(0.4 + Math.random() * 0.8);
+        dummy.scale.setScalar(0.5 + Math.random() * 0.8);
         dummy.updateMatrix();
         meshRef.current.setMatrixAt(i, dummy.matrix);
       }
@@ -82,37 +92,41 @@ const BlenderGrassField = () => {
     }
   });
 
-  return <instancedMesh ref={meshRef} args={[bladeGeo, material, GRASS_COUNT]} />;
+  return (
+    <group position={[0, -4.5, -40]}>
+      {/* The Actual Solid Hills */}
+      <mesh geometry={terrainGeo}>
+        <meshStandardMaterial color="#1a2e05" roughness={1} />
+      </mesh>
+      {/* The Millions of Blades */}
+      <instancedMesh ref={meshRef} args={[bladeGeo, material, GRASS_COUNT]} />
+    </group>
+  );
 };
 
-// CRITICAL: The "export default" fixes your Rollup build error
 export default function Scene({ currentView }) {
   const { camera } = useThree();
   const waterRef = useRef();
-  const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
 
   useFrame((state, delta) => {
     const isHome = currentView === "home";
-    const targetPos = isHome ? new THREE.Vector3(-15, 1.5, 30) : new THREE.Vector3(-8, 1.5, -100);
-    camera.position.lerp(targetPos, 0.04);
-    camera.lookAt(12, 1.5, 0);
+    camera.position.lerp(isHome ? new THREE.Vector3(-15, 5, 30) : new THREE.Vector3(-8, 5, -100), 0.04);
+    camera.lookAt(0, 0, 0);
     if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.15;
   });
 
   return (
     <>
       <Sky sunPosition={[-10, 5, -100]} />
-      <BlenderGrassField />
+      <BlenderHills />
       <Environment preset="sunset" />
-      <fog attach="fog" args={["#ffc0e6", 10, 550]} />
-      
-      <directionalLight position={[-10, 20, 10]} intensity={2} castShadow />
-      <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#ffc0e6" />
+      <directionalLight position={[-10, 20, 10]} intensity={2.5} castShadow />
+      <hemisphereLight intensity={1} color="#ffffff" groundColor="#ffc0e6" />
 
       <water
         ref={waterRef}
         args={[new THREE.PlaneGeometry(5000, 5000), {
-          waterNormals,
+          waterNormals: useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg"),
           sunDirection: new THREE.Vector3(-10, 10, -100).normalize(),
           sunColor: 0xffffff,
           waterColor: 0x001e0f,
