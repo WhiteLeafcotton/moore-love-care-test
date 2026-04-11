@@ -227,12 +227,13 @@ export default function Scene({ currentView }) {
       </group>
 
       <group position={[0, 0, 0]}>
-        {/* FIXED: Scaled down and moved slightly to avoid stair clipping */}
-        <mesh position={[14, -2.0, 13]} castShadow receiveShadow>
-          <boxGeometry args={[12, 8.0, 24]} /><meshStandardMaterial {...pinkProps} />
+        {/* SNAP BACK: Resnapped to the stairs */}
+        <mesh position={[12.5, -2.0, 15]} castShadow receiveShadow>
+          <boxGeometry args={[14, 8.0, 28]} /><meshStandardMaterial {...pinkProps} />
         </mesh>
         
-        <Staircase position={[5.0, 1.5, 1.0]} rotation={[0, -Math.PI / 2, 0]} width={20} texture={pinkStoneTex} />
+        {/* WIDTH FIX: Stairs shortened to 17.5 to avoid left-wall clipping */}
+        <Staircase position={[5.0, 1.5, 1.0]} rotation={[0, -Math.PI / 2, 0]} width={17.5} texture={pinkStoneTex} />
         
         <group position={[-16, -1, 0]}>
           <mesh position={[1, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
