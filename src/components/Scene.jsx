@@ -1,12 +1,12 @@
 import { useRef, useMemo, useEffect } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
-import { Environment, Sky, Cloud, ContactShadows } from "@react-three/drei";
+import { Environment, Sky, Cloud } from "@react-three/drei";
 import { Water } from "three-stdlib";
 import * as THREE from "three";
 
 extend({ Water });
 
-const GRASS_COUNT = 400000; 
+const GRASS_COUNT = 150000; // Reduced slightly for memory performance
 
 const getHillHeight = (x, z) => {
   const dist = Math.sqrt(x * x + z * z);
@@ -40,7 +40,7 @@ const GrassySassyHills = () => {
   }, []);
 
   const terrainGeo = useMemo(() => {
-    const g = new THREE.PlaneGeometry(400, 400, 150, 150);
+    const g = new THREE.PlaneGeometry(400, 400, 100, 100);
     g.rotateX(-Math.PI / 2);
     const pos = g.attributes.position.array;
     for (let i = 0; i < pos.length; i += 3) {
@@ -95,7 +95,6 @@ const GrassySassyHills = () => {
         if (y > 0.05) {
           dummy.position.set(x, y - 0.05, z);
           dummy.rotation.y = Math.random() * Math.PI;
-          dummy.rotation.x = (Math.random() - 0.5) * 0.2;
           dummy.scale.setScalar(0.6 + Math.random() * 0.8);
           dummy.updateMatrix();
           meshRef.current.setMatrixAt(i, dummy.matrix);
@@ -243,8 +242,7 @@ export default function Scene({ currentView }) {
       <directionalLight position={[-15, 30, 10]} intensity={0.6} castShadow />
 
       <group ref={cloudGroupRef}>
-        <Cloud position={[0, 80, -450]} speed={0.2} opacity={0.3} segments={60} bounds={[1000, 100, 50]} volume={150} color="#ffd1dc" />
-        <Cloud position={[-100, 100, -420]} speed={0.1} opacity={0.25} segments={50} bounds={[800, 80, 40]} volume={120} color="#ffffff" />
+        <Cloud position={[0, 80, -450]} speed={0.2} opacity={0.3} segments={40} bounds={[1000, 100, 50]} volume={150} color="#ffd1dc" />
       </group>
 
       <group position={[0, 0, 0]}>
@@ -275,14 +273,14 @@ export default function Scene({ currentView }) {
             <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ leftLegRotation: [-0.3, 0, 0], rightLegRotation: [0.3, 0, 0], position: [0.4, 0, -0.1]}} />
           </group>
 
-          {/* Couple A (Stair Couple): MOVED UP & FORWARD TO SHOW LEGS */}
-          <group position={[6.5, 1.6, 8.2]} rotation={[0, -Math.PI / 2, 0]}>
-            <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ leftLegRotation: [1.4, 0, 0], rightLegRotation: [1.4, 0, 0]}} />
-            <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [1.4, 0, 0], rightLegRotation: [1.4, 0, 0], position: [0, 0, 0.7]}} />
+          {/* Couple A (Stair Couple): Positioned specifically to show legs hanging over the edge */}
+          <group position={[6.5, 2.05, 8.4]} rotation={[0, -Math.PI / 2, 0]}>
+            <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ leftLegRotation: [1.45, 0, 0], rightLegRotation: [1.45, 0, 0]}} />
+            <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [1.45, 0, 0], rightLegRotation: [1.45, 0, 0], position: [0, 0, 0.7]}} />
           </group>
 
-          {/* Couple C (Wheelchair Couple): BROUGHT ONTO PLATFORM + LOCKED ROTATION */}
-          <group position={[14.5, 1.9, 16]} rotation={[0, Math.PI, 0]}>
+          {/* Couple C (Wheelchair Couple): Pulled onto platform interior + Correct Rotation */}
+          <group position={[14.5, 1.9, 17.5]} rotation={[0, Math.PI, 0]}>
             <SimpleWheelchair materialProps={butterProps} frameColor="#fcd7d7" />
             <group position={[0, 0.2, 0]}>
               <BlockHumanoid scale={0.85} materialProps={butterProps} poseProps={{ leftLegRotation: [1.5, 0, 0], rightLegRotation: [1.5, 0, 0], leftArmRotation: [0.7, 0, 0], rightArmRotation: [0.7, 0, 0]}} />
@@ -292,6 +290,7 @@ export default function Scene({ currentView }) {
             </group>
           </group>
         </group>
+      </group>
 
       <water
         ref={waterRef}
