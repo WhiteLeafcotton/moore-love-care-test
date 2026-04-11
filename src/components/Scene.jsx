@@ -1,4 +1,4 @@
-import { useRef, useMemo, useEffect } from "react";
+import React, { useRef, useMemo, useEffect } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
 import { Environment, Sky, Cloud } from "@react-three/drei";
 import { Water } from "three-stdlib";
@@ -24,6 +24,26 @@ const getHillHeight = (x, z) => {
   });
   return hillHeight * influence;
 };
+
+// --- FIX: Defined WallOpening to resolve ReferenceErrors ---
+const WallOpening = ({ position, isWindow = false, colorProps }) => (
+  <group position={position}>
+    <mesh position={[0, 3, 0]} castShadow receiveShadow>
+      <boxGeometry args={[4, 6, 2]} />
+      <meshStandardMaterial {...colorProps} />
+    </mesh>
+    <mesh position={[0, 14, 0]} castShadow receiveShadow>
+      <boxGeometry args={[4, 6, 2]} />
+      <meshStandardMaterial {...colorProps} />
+    </mesh>
+    {isWindow && (
+      <mesh position={[0, 8.5, 0]} castShadow receiveShadow>
+        <boxGeometry args={[4, 5, 2]} />
+        <meshStandardMaterial {...colorProps} transparent opacity={0.3} />
+      </mesh>
+    )}
+  </group>
+);
 
 const GrassySassyHills = () => {
   const meshRef = useRef();
@@ -159,9 +179,8 @@ const BlockHumanoid = ({ scale = 1, materialProps, stance = "standing", poseProp
       <mesh position={[0, 1.4, 0]} castShadow><sphereGeometry args={[0.22, 32, 32]} /><meshStandardMaterial {...materialProps} /></mesh>
       <mesh position={[0, 0.3, 0]} castShadow><primitive object={torsoGeo} /><meshStandardMaterial {...materialProps} /></mesh>
       
-      {/* Legs */}
+      {/* Legs - Updated for natural sitting bend */}
       <group position={[0, 0.4, 0]}>
-        {/* Left Leg */}
         <group position={[-0.12, 0, 0]} rotation={leftLegRotation}>
           <mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
           {stance === "sitting" && (
@@ -170,7 +189,6 @@ const BlockHumanoid = ({ scale = 1, materialProps, stance = "standing", poseProp
             </mesh>
           )}
         </group>
-        {/* Right Leg */}
         <group position={[0.12, 0, 0]} rotation={rightLegRotation}>
           <mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
           {stance === "sitting" && (
@@ -272,8 +290,8 @@ export default function Scene({ currentView }) {
             <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ leftLegRotation: [-0.3, 0, 0], rightLegRotation: [0.3, 0, 0], position: [0.4, 0, -0.1]}} />
           </group>
 
-          {/* Couple A (Stair Couple): Facing Water + Natural Sitting Leg Bend */}
-          <group position={[6.5, 2.05, 8.4]} rotation={[0, 0, 0]}>
+          {/* Couple A (Stair Couple): Faced Water + Natural Leg Bend */}
+          <group position={[6.5, 2.05, 8.4]} rotation={[0, -Math.PI / 2, 0]}>
             <BlockHumanoid scale={0.9} stance="sitting" materialProps={butterProps} poseProps={{ leftLegRotation: [1.45, 0, 0], rightLegRotation: [1.45, 0, 0], position: [-0.2, 0, 0]}} />
             <BlockHumanoid scale={0.88} stance="sitting" materialProps={butterProps} poseProps={{ leftLegRotation: [1.45, 0, 0], rightLegRotation: [1.45, 0, 0], position: [0.5, 0, 0]}} />
           </group>
