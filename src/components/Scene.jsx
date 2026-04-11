@@ -1,55 +1,49 @@
 import { useRef, useMemo, useEffect } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
-import { Environment, Sky, ContactShadows, Cloud } from "@react-three/drei";
+import { Environment, Sky, Cloud, ContactShadows } from "@react-three/drei";
 import { Water } from "three-stdlib";
 import * as THREE from "three";
-import * as BufferGeometryUtils from "three/examples/jsm/utils/BufferGeometryUtils";
 
 extend({ Water });
 
-// Fix for baseUrl (keep this at global scope)
-const baseUrl = import.meta.env.BASE_URL || "/";
+const GRASS_COUNT = 500000; 
 
-const INSTANCE_COUNT = 150000; // Total clumps
-const BLADES_PER_CLUMP = 25; // 1. Thick, sassy clumping
-
+// THE 3 HILL LOGIC (Respects Flat Zone for Architecture)
 const getHillHeight = (x, z) => {
   const dist = Math.sqrt(x * x + z * z);
   const flatZone = 45; 
   const influence = dist < flatZone ? 0 : Math.min((dist - flatZone) / 25, 1.0);
+
   const hills = [
-    { x: 0, z: -80, h: 14, w: 35 },     
-    { x: -60, z: -40, h: 10, w: 25 },   
-    { x: 65, z: -35, h: 12, w: 30 }     
+    { x: 0, z: -80, h: 14, w: 35 },     // Rear Hill
+    { x: -60, z: -40, h: 10, w: 25 },   // Left Hill
+    { x: 65, z: -35, h: 12, w: 30 }     // Right Hill
   ];
+
   let hillHeight = 0;
   hills.forEach(h => {
     const d = Math.sqrt(Math.pow(x - h.x, 2) + Math.pow(z - h.z, 2));
     hillHeight += Math.exp(-Math.pow(d / h.w, 2)) * h.h;
   });
+
   return hillHeight * influence;
 };
 
-const GrassySassyEngine = () => {
+const GrassySassyHills = () => {
   const meshRef = useRef();
 
-  // 1. RE-ENGINEERED "SASSY" CLUMP (25 dynamic blades)
-  const clumpGeo = useMemo(() => {
-    const geometries = [];
-    for (let i = 0; i < BLADES_PER_CLUMP; i++) {
-      const g = new THREE.PlaneGeometry(0.06, 1.0, 1, 3);
-      g.translate(0, 0.5, 0);
-      const angle = Math.random() * Math.PI * 2;
-      const radius = Math.random() * 0.28; // Dynamic random scatter
-      g.rotateY(angle);
-      g.translate(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
-      g.rotateX((Math.random() - 0.5) * 0.45); // Randomized tilt
-      geometries.push(g);
+  const bladeGeo = useMemo(() => {
+    const g = new THREE.PlaneGeometry(0.04, 1.2, 1, 4);
+    g.translate(0, 0.6, 0);
+    const pos = g.attributes.position.array;
+    for (let i = 0; i < pos.length; i += 3) {
+      const h = pos[i + 1] / 1.2;
+      pos[i] += Math.pow(h, 2) * 0.15; 
     }
-    return BufferGeometryUtils.mergeGeometries(geometries);
+    g.computeVertexNormals();
+    return g;
   }, []);
 
-  // 2. THE SOIL BASE (Respects clearance logic)
   const terrainGeo = useMemo(() => {
     const g = new THREE.PlaneGeometry(400, 400, 150, 150);
     g.rotateX(-Math.PI / 2);
@@ -61,18 +55,17 @@ const GrassySassyEngine = () => {
     return g;
   }, []);
 
-  // 3. FLUID "SASSY" MOTION SHADER
   const grassMaterial = useMemo(() => new THREE.ShaderMaterial({
     uniforms: {
       uTime: { value: 0 },
-      uColorRoots: { value: new THREE.Color("#ac6075") }, // Dark Mauve/Rose Base
-      uColorTips: { value: new THREE.Color("#fcd7d7") }   // Pastel tips
+      uColorRoots: { value: new THREE.Color("#010400") }, 
+      uColorTips: { value: new THREE.Color("#8fb83e") }
     },
     vertexShader: `
       varying float vHeight;
       uniform float uTime;
       void main() {
-        vHeight = position.y / 1.0;
+        vHeight = position.y / 1.2;
         vec3 worldPos = (instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
         float swell = sin(uTime * 0.5 + worldPos.x * 0.05 + worldPos.z * 0.05) * 0.3;
         float gust = sin(uTime * 2.0 + worldPos.x * 0.2) * 0.15;
@@ -89,8 +82,7 @@ const GrassySassyEngine = () => {
       uniform vec3 uColorRoots;
       uniform vec3 uColorTips;
       void main() {
-        // High Ambient Occlusion for thickness illusion
-        float ao = pow(vHeight, 0.3); 
+        float ao = pow(vHeight, 0.4); 
         vec3 color = mix(uColorRoots, uColorTips, vHeight);
         gl_FragColor = vec4(color * ao, 1.0);
       }
@@ -98,18 +90,18 @@ const GrassySassyEngine = () => {
     side: THREE.DoubleSide
   }), []);
 
-  // Scatter Logic concentrated only on Hills
   useFrame((state) => {
     grassMaterial.uniforms.uTime.value = state.clock.getElapsedTime();
     if (meshRef.current && !meshRef.current._init) {
       const dummy = new THREE.Object3D();
-      for (let i = 0; i < INSTANCE_COUNT; i++) {
+      for (let i = 0; i < GRASS_COUNT; i++) {
         const x = (Math.random() - 0.5) * 400;
         const z = (Math.random() - 0.5) * 400;
         const y = getHillHeight(x, z);
         if (y > 0.05) {
           dummy.position.set(x, y - 0.05, z);
           dummy.rotation.y = Math.random() * Math.PI;
+          dummy.rotation.x = (Math.random() - 0.5) * 0.3;
           dummy.scale.setScalar(0.7 + Math.random() * 0.7);
           dummy.updateMatrix();
           meshRef.current.setMatrixAt(i, dummy.matrix);
@@ -126,17 +118,15 @@ const GrassySassyEngine = () => {
 
   return (
     <group position={[0, -3.5, -40]}>
-      {/* Soil base color (Fixed: Now deeper pink/mauve anchor) */}
       <mesh geometry={terrainGeo} receiveShadow>
-        <meshStandardMaterial color="#ac6075" roughness={1} />
+        <meshStandardMaterial color="#020500" roughness={1} />
       </mesh>
-      {/* 3.75 Million virtual blades concentrated only on Hills */}
-      <instancedMesh ref={meshRef} args={[clumpGeo, grassMaterial, INSTANCE_COUNT]} castShadow />
+      <instancedMesh ref={meshRef} args={[bladeGeo, grassMaterial, GRASS_COUNT]} castShadow />
     </group>
   );
 };
 
-/* --- NO CHANGES BELOW: ARCHITECTURE & ATMOSPHERE --- */
+/* --- ARCHITECTURE COMPONENTS --- */
 const Staircase = ({ position, width, texture, rotation }) => {
   const stepHeight = 0.5; const stepDepth = 0.8; const numSteps = 16;
   return (
@@ -184,7 +174,7 @@ export default function Scene({ currentView }) {
   const lookAtTarget = useRef(new THREE.Vector3(12, 1.5, 0));
   const isMobile = size.width < 768;
 
-  // Global scope baseUrl fix
+  const baseUrl = import.meta.env.BASE_URL || "/";
   const pinkStoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
   const sunPlasmaTex = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
@@ -193,8 +183,6 @@ export default function Scene({ currentView }) {
     if (pinkStoneTex) { pinkStoneTex.wrapS = pinkStoneTex.wrapT = THREE.RepeatWrapping; pinkStoneTex.repeat.set(2, 2); }
     if (sunPlasmaTex) { sunPlasmaTex.wrapS = sunPlasmaTex.wrapT = THREE.RepeatWrapping; sunPlasmaTex.repeat.set(1.5, 1.5); sunPlasmaRef.current = sunPlasmaTex; }
   }, [pinkStoneTex, sunPlasmaTex]);
-
-  const pinkProps = { map: pinkStoneTex, color: "#fcd7d7", roughness: 0.65, metalness: 0.05 };
 
   useFrame((state, delta) => {
     const isHome = currentView === "home";
@@ -217,24 +205,29 @@ export default function Scene({ currentView }) {
     }
   });
 
+  const pinkProps = { map: pinkStoneTex, color: "#fcd7d7", roughness: 0.65, metalness: 0.05 };
+
   return (
     <>
+      {/* RESTORED SKY & SUN */}
       <Sky distance={450000} sunPosition={[-10, 2, -100]} inclination={0.6} azimuth={0.25} turbidity={8} rayleigh={6} mieCoefficient={0.005} mieDirectionalG={0.8} />
       
       <mesh position={[-10, 55, -200]}>
         <sphereGeometry args={[isMobile ? 14 : 18, 64, 64]} />
         <meshStandardMaterial color="#fff4e6" emissive="#ffba5c" emissiveMap={sunPlasmaTex} emissiveIntensity={1.2} transparent={true} opacity={0.5} roughness={0.2} metalness={0.5} />
-        <pointLight intensity={2.5} distance={600} color="#fff1d4" decay={1.5} />
+        <pointLight intensity={2} distance={500} color="#fff1d4" decay={1.5} />
       </mesh>
 
       <Environment preset="sunset" />
       <fog attach="fog" args={["#ffc0e6", 15, 450]} />
-      <GrassySassyEngine />
+      <GrassySassyHills />
 
-      <hemisphereLight intensity={1.8} color="#ffffff" groundColor="#ffc0e6" />
-      <directionalLight position={[20, 50, -20]} intensity={2.5} castShadow shadow-mapSize={[2048, 2048]} />
-      <pointLight position={[10, 15, 10]} intensity={1.2} color="#ffd6e7" />
+      {/* LIGHTS */}
+      <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#ffc0e6" />
+      <directionalLight position={[-15, 30, 10]} intensity={0.1} />
+      <pointLight position={[10, 5, 10]} intensity={0.8} color="#ffd6e7" />
 
+      {/* RESTORED CLOUD SYSTEM */}
       <group ref={cloudGroupRef}>
         <Cloud position={[0, 80, -450]} speed={0.2} opacity={0.3} segments={60} bounds={[1000, 100, 50]} volume={150} color="#ffd1dc" />
         <Cloud position={[-100, 100, -420]} speed={0.1} opacity={0.25} segments={50} bounds={[800, 80, 40]} volume={120} color="#ffffff" />
@@ -246,17 +239,22 @@ export default function Scene({ currentView }) {
         <Cloud position={[-200, 50, -220]} speed={0.2} opacity={0.25} segments={40} bounds={[450, 40, 50]} volume={90} color="#e9d5ff" />
       </group>
 
+      {/* ARCHITECTURE (Including missing wall group) */}
       <group position={[0, 0, 0]}>
         <mesh position={[12, -2.0, 15]} castShadow receiveShadow>
           <boxGeometry args={[14, 8.0, 28]} /><meshStandardMaterial {...pinkProps} />
         </mesh>
         <Staircase position={[5.0, 1.5, 1.0]} rotation={[0, -Math.PI / 2, 0]} width={20} texture={pinkStoneTex} />
+        
+        {/* Wall Group Left */}
         <group position={[-16, -1, 0]}>
           <mesh position={[1, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
           <WallOpening position={[6, 0, 0]} colorProps={pinkProps} />
           <WallOpening position={[12, 0, 0]} colorProps={pinkProps} />
           <mesh position={[24, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
         </group>
+
+        {/* RESTORED Wall Group Right */}
         <group position={[17, -1, 1]} rotation={[0, -Math.PI / 2, 0]}>
           <mesh castShadow receiveShadow position={[4, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
           <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={pinkProps} />
@@ -270,13 +268,10 @@ export default function Scene({ currentView }) {
       <water
         ref={waterRef}
         args={[new THREE.PlaneGeometry(4000, 4000), {
-          textureWidth: isMobile ? 512 : 1024,
-          textureHeight: isMobile ? 512 : 1024,
           waterNormals,
           sunDirection: new THREE.Vector3(-10, 45, -180).normalize(),
           sunColor: 0xffffff,
-          waterColor: 0x001e0f, // Locked in dark water
-          distortionScale: isMobile ? 0.3 : 0.5,
+          waterColor: 0x224455,
           alpha: 0.8,
         }]}
         rotation={[-Math.PI / 2, 0, 0]}
