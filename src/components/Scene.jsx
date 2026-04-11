@@ -8,20 +8,26 @@ extend({ Water });
 
 const GRASS_COUNT = 400000; 
 
+// SEPARATE THE 3 HILLS (Strategic placement to frame the doorway)
 const getHillHeight = (x, z) => {
   const dist = Math.sqrt(x * x + z * z);
   const flatZone = 45; 
   const influence = dist < flatZone ? 0 : Math.min((dist - flatZone) / 25, 1.0);
+
+  // Adjusted widths (w) to be smaller and more conical (separated)
   const hills = [
-    { x: 0, z: -80, h: 14, w: 35 },     
-    { x: -60, z: -40, h: 10, w: 25 },   
-    { x: 65, z: -35, h: 12, w: 30 }     
+    { x: 20, z: -100, h: 18, w: 16 },    // Rear Center-Right (Sharp peak)
+    { x: -70, z: -50, h: 12, w: 12 },    // Far Left (Framing the exit)
+    { x: 55, z: -40, h: 14, w: 14 }     // Far Right (Framing the exit)
   ];
+
   let hillHeight = 0;
   hills.forEach(h => {
     const d = Math.sqrt(Math.pow(x - h.x, 2) + Math.pow(z - h.z, 2));
+    // Narrow Gaussian curve means distinct hills
     hillHeight += Math.exp(-Math.pow(d / h.w, 2)) * h.h;
   });
+
   return hillHeight * influence;
 };
 
@@ -53,8 +59,8 @@ const GrassySassyHills = () => {
   const grassMaterial = useMemo(() => new THREE.ShaderMaterial({
     uniforms: {
       uTime: { value: 0 },
-      uColorRoots: { value: new THREE.Color("#1a0521") }, 
-      uColorTips: { value: new THREE.Color("#d1a3ff") }  
+      uColorRoots: { value: new THREE.Color("#1a0521") }, // Deep dark soil purple
+      uColorTips: { value: new THREE.Color("#d1a3ff") }  // Lavender tips
     },
     vertexShader: `
       varying float vHeight;
@@ -141,7 +147,8 @@ const Staircase = ({ position, width, texture, rotation }) => {
   );
 };
 
-const WallOpening = ({ position, colorProps, width = 6, openingW = 3.5, height = 17, openingH = 9, isWindow = false }) => (
+// OpeningW widened slightly to make the doorway-exit look cleaner as you pass
+const WallOpening = ({ position, colorProps, width = 6, openingW = 4.8, height = 17, openingH = 9, isWindow = false }) => (
   <group position={position}>
     <mesh position={[-(openingW + (width - openingW) / 2) / 2, height / 2, 0]} castShadow receiveShadow>
       <boxGeometry args={[(width - openingW) / 2, height, 2]} /><meshStandardMaterial {...colorProps} />
@@ -180,20 +187,20 @@ export default function Scene({ currentView }) {
 
   useFrame((state, delta) => {
     const isHome = currentView === "home";
-    const LERP_SPEED = isHome ? 0.04 : 0.025; // Slightly slower glide for the exit journey
+    const LERP_SPEED = isHome ? 0.04 : 0.025; // Slower glide for the exit journey
 
-    // THE JOURNEY PATHS
-    // Home: Your specific low/left sweet spot
+    // HOME POSITION: Low, left sweet spot (z: 28)
     const homePos = isMobile ? new THREE.Vector3(-40, 10, 75) : new THREE.Vector3(-22, 3.5, 28);
     
-    // Collection: Glide over water, through the main doorway, past hills to open water
-    const collectionPos = new THREE.Vector3(-22, 3.5, -450); 
+    // JOURNEY PATH: Modified to align exactly with the doorway opening at x:-24
+    const doorwayX = -24.5;
+    const collectionPos = new THREE.Vector3(doorwayX, 3.5, -450); 
     
     const targetPos = isHome ? homePos : collectionPos;
 
     // TARGET LOOK:
-    const homeLook = new THREE.Vector3(5, 1.5, 0);
-    const collectionLook = new THREE.Vector3(-22, 1, -1000); // Look far, far ahead out the door
+    const homeLook = new THREE.Vector3(-2, 1.5, 0); // Pointing towards the doorway/corner area
+    const collectionLook = new THREE.Vector3(doorwayX, 1.5, -1000); // Look far, far ahead through the separated hills
     
     const targetLook = isHome ? homeLook : collectionLook;
 
@@ -212,7 +219,6 @@ export default function Scene({ currentView }) {
 
   return (
     <>
-      {/* RESTORED SKY & DIRECTIONAL SUN (NO SPHERE) */}
       <Sky distance={450000} sunPosition={[-20, 8, -100]} inclination={0.6} azimuth={0.25} turbidity={10} rayleigh={5} />
       <Environment preset="sunset" />
       <fog attach="fog" args={["#f8e1ff", 10, 400]} />
@@ -222,7 +228,6 @@ export default function Scene({ currentView }) {
       <hemisphereLight intensity={1.2} color="#ffffff" groundColor="#b066ff" />
       <directionalLight position={[-15, 30, 10]} intensity={0.5} castShadow />
 
-      {/* RESTORED COMPLEX CLOUD SYSTEM */}
       <group ref={cloudGroupRef}>
         <Cloud position={[0, 80, -450]} speed={0.2} opacity={0.3} segments={60} bounds={[1000, 100, 50]} volume={150} color="#ffd1dc" />
         <Cloud position={[-100, 100, -420]} speed={0.1} opacity={0.25} segments={50} bounds={[800, 80, 40]} volume={120} color="#ffffff" />
@@ -240,6 +245,7 @@ export default function Scene({ currentView }) {
         </mesh>
         <Staircase position={[5.0, 1.5, 1.0]} rotation={[0, -Math.PI / 2, 0]} width={20} texture={pinkStoneTex} />
         
+        {/* Wall Group Left (Doorway-Path centered near x:-24) */}
         <group position={[-16, -1, 0]}>
           <mesh position={[1, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...pinkProps} /></mesh>
           <WallOpening position={[6, 0, 0]} colorProps={pinkProps} />
