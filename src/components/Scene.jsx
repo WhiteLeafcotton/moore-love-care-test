@@ -6,15 +6,14 @@ import * as THREE from "three";
 
 extend({ Water });
 
-/* SOLARIUM SANCTUARY: LUSH CARPET SYSTEM
-  Uses alpha-mapped planes to create the "shag carpet" mossy look from the reference.
+/* SOLARIUM SANCTUARY: LUSH CARPET SYSTEM 
+  Uses crossed-planes and alpha-mapping for that "mossy" dense look.
 */
-const GrassyHills = () => {
+const GrassyHills = ({ grassTexture }) => {
   const meshRef = useRef();
-  // Using 80k clump-planes creates the look of millions of blades
+  // Using 80k clump-planes mimics millions of blades for that "thick" look
   const COUNT = 80000; 
   
-  // SHARED HEIGHT LOGIC: Ensures grass is pinned to the rolling hills
   const getHillHeight = (x, z) => {
     const dist = Math.sqrt(x * x + z * z);
     const flatZone = 40;
@@ -26,7 +25,6 @@ const GrassyHills = () => {
     return (Math.sin(x * 0.05) * Math.cos(z * 0.05) * 12 + Math.sin(x * 0.1) * 4) * influence;
   };
 
-  // The Hill Geometry
   const hillGeom = useMemo(() => {
     const g = new THREE.PlaneGeometry(500, 500, 150, 150);
     g.rotateX(-Math.PI / 2);
@@ -38,7 +36,6 @@ const GrassyHills = () => {
     return g;
   }, []);
 
-  // Populate the grass clumps
   const dummy = new THREE.Object3D();
   useEffect(() => {
     for (let i = 0; i < COUNT; i++) {
@@ -46,10 +43,11 @@ const GrassyHills = () => {
       const z = (Math.random() - 0.5) * 500;
       const y = getHillHeight(x, z);
       
-      dummy.position.set(x, y + 0.5, z); // Offset slightly so clumps sit on surface
+      // Pivot set to bottom so they sit ON the hill
+      dummy.position.set(x, y, z);
       dummy.rotation.set(0, Math.random() * Math.PI, 0);
       
-      // Scale variations for that "overgrown" organic feel
+      // Scaling for organic "overgrown" depth
       const s = 0.8 + Math.random() * 1.5;
       dummy.scale.set(s, s, s);
       
@@ -61,22 +59,22 @@ const GrassyHills = () => {
 
   return (
     <group position={[0, -4, -40]}>
-      {/* The base ground - Dark forest green to hide gaps */}
+      {/* Dark ground to hide gaps and provide depth */}
       <mesh geometry={hillGeom}>
         <meshStandardMaterial color="#1a2609" roughness={1} />
       </mesh>
       
-      {/* The Grass Clumps */}
+      {/* Lush Grass Clumps */}
       <instancedMesh ref={meshRef} args={[null, null, COUNT]}>
-        {/* A simple double-sided plane will carry the grass texture */}
-        <planeGeometry args={[1.5, 1.5]} /> 
+        <planeGeometry args={[1.5, 1.5]} />
         <meshStandardMaterial 
-          color="#a8c66c" 
-          emissive="#2d3d1d"
-          emissiveIntensity={0.5}
-          side={THREE.DoubleSide}
-          alphaTest={0.5} // This makes the "empty space" in the texture invisible
+          map={grassTexture}
+          alphaTest={0.5} 
           transparent
+          side={THREE.DoubleSide}
+          color="#97b560" 
+          emissive="#2d3d1d" 
+          emissiveIntensity={0.4}
         />
       </instancedMesh>
     </group>
@@ -90,9 +88,8 @@ export default function Scene({ currentView }) {
   const baseUrl = import.meta.env.BASE_URL || "/";
   const isMobile = size.width < 768;
 
-  // Load the crucial grass texture
-  // NOTE: Use a texture that looks like a small clump of grass blades with a transparent background
-  const grassTexture = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/terrain/grasslight-big.jpg");
+  // Load the crucial grass texture - using a clump map for density
+  const grassClumpTex = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/terrain/grasslight-big.jpg");
   const pinkStoneTex = useLoader(THREE.TextureLoader, `${baseUrl}textures/stone_pillar.jpg`);
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
 
@@ -105,24 +102,21 @@ export default function Scene({ currentView }) {
     camera.position.lerp(isHome ? targetPos : exitPos, LERP_SPEED);
     camera.lookAt(lookAtTarget.current);
 
-    if (waterRef.current) {
-      waterRef.current.material.uniforms["time"].value += delta * 0.15;
-    }
+    if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.15;
   });
 
   return (
     <>
-      <Sky distance={450000} sunPosition={[-10, 5, -100]} turbidity={10} rayleigh={3} />
+      <Sky sunPosition={[-10, 5, -100]} turbidity={10} rayleigh={3} />
       
-      {/* Passing the texture to the grass component */}
-      <GrassyHills />
+      <GrassyHills grassTexture={grassClumpTex} />
       
       <Environment preset="sunset" />
       <fog attach="fog" args={["#ffc0e6", 10, 400]} />
 
       <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#ffc0e6" />
+      <directionalLight position={[-15, 30, 10]} intensity={0.4} castShadow />
 
-      {/* Main Architecture */}
       <group position={[0, 0, 0]}>
         <mesh castShadow receiveShadow position={[12, -2.0, 15]}>
           <boxGeometry args={[14, 8.0, 28]} />
