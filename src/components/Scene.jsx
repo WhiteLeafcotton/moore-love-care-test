@@ -159,6 +159,27 @@ const WallOpening = ({ position, colorProps, width = 6, openingW = 4.8, height =
   </group>
 );
 
+const SimpleHumanoid = ({ scale = 1, materialProps, stance = 'walking', armUp = false }) => (
+  <group scale={scale} rotation={[stance === 'walking' ? 0.05 : 0, 0, 0]}>
+    <mesh position={[0, 1.7, 0]} castShadow receiveShadow>
+      <sphereGeometry args={[0.2, 32, 32]} />
+      <meshStandardMaterial {...materialProps} />
+    </mesh>
+    <mesh position={[0, 0.8, 0]} castShadow receiveShadow>
+      <cylinderGeometry args={[0.18, 0.1, 1.3, 32, 1]} />
+      <meshStandardMaterial {...materialProps} />
+    </mesh>
+    <group position={[0, 1.3, 0]}>
+      <mesh position={[-0.2, -0.4, 0.1]} castShadow receiveShadow rotation={[0.2, 0, -0.1]}>
+        <cylinderGeometry args={[0.04, 0.03, 0.8]} /><meshStandardMaterial {...materialProps} />
+      </mesh>
+      <mesh position={[0.2, armUp ? 0 : -0.4, armUp ? 0.4 : -0.1]} castShadow receiveShadow rotation={[armUp ? -0.8 : 0.2, 0, 0.1]}>
+        <cylinderGeometry args={[0.04, 0.03, 0.8]} /><meshStandardMaterial {...materialProps} />
+      </mesh>
+    </group>
+  </group>
+);
+
 export default function Scene({ currentView }) {
   const { camera, size } = useThree();
   const waterRef = useRef();
@@ -174,11 +195,7 @@ export default function Scene({ currentView }) {
   useFrame((state, delta) => {
     const isHome = currentView === "home";
     const LERP_SPEED = isHome ? 0.04 : 0.018; 
-    
-    const homePos = isMobile 
-      ? new THREE.Vector3(-18, 12, 32) 
-      : new THREE.Vector3(-14, 3.2, 24); 
-    
+    const homePos = isMobile ? new THREE.Vector3(-18, 12, 32) : new THREE.Vector3(-14, 3.2, 24); 
     const targetPos = isHome ? homePos : new THREE.Vector3(-24.5, 3.5, -450);
     const homeLook = new THREE.Vector3(20, 1.2, -2); 
     const targetLook = isHome ? homeLook : new THREE.Vector3(-24.5, 1.5, -1000);
@@ -235,6 +252,18 @@ export default function Scene({ currentView }) {
           <WallOpening position={[17, 0, 0]} isWindow={true} colorProps={butterProps} />
           <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
+        
+        <group position={[14, 1.9, 10]} rotation={[0, -Math.PI * 0.7, 0]}>
+          <group position={[-0.4, 0, 0]} rotation={[0, 0.2, 0]}>
+            <SimpleHumanoid scale={1.05} materialProps={butterProps} stance="walking" />
+            <mesh position={[0.2, 0.45, 0.35]} castShadow receiveShadow>
+                <cylinderGeometry args={[0.015, 0.015, 0.9]} /><meshStandardMaterial color="#fcd7d7" roughness={0.4} />
+            </mesh>
+          </group>
+          <group position={[0.4, 0, -0.1]} rotation={[0, -0.15, 0]}>
+            <SimpleHumanoid scale={0.9} materialProps={butterProps} stance="walking" armUp={true} />
+          </group>
+        </group>
       </group>
 
       <water
@@ -243,9 +272,9 @@ export default function Scene({ currentView }) {
           waterNormals,
           sunDirection: new THREE.Vector3(-10, 10, -100).normalize(),
           sunColor: 0xffffff,
-          waterColor: 0x21162e, // Deepened for high-end "ink" look
-          distortionScale: 1.0, // Smoother, larger wave motion
-          alpha: 0.95, // Higher opacity for better surface reflections
+          waterColor: 0x21162e, 
+          distortionScale: 1.0,
+          alpha: 0.95,
         }]}
         rotation={[-Math.PI / 2, 0, 0]}
         position={[0, -1.45, 0]}
