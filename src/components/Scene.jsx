@@ -91,8 +91,14 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
   return (
     <group scale={scale} position={position} rotation={rotation}>
       <group ref={torsoRef}>
-        <mesh ref={headRef} position={[0, 1.4, 0]} castShadow><sphereGeometry args={[0.22, 32, 32]} /><meshStandardMaterial {...materialProps} /></mesh>
-        <mesh position={[0, 0.3, 0]} castShadow><primitive object={torsoGeo} /><meshStandardMaterial {...materialProps} /></mesh>
+        <mesh ref={headRef} position={[0, 1.4, 0]} castShadow>
+          <sphereGeometry args={[0.22, 32, 32]} />
+          <meshStandardMaterial {...materialProps} />
+        </mesh>
+        <mesh position={[0, 0.3, 0]} castShadow>
+          <primitive object={torsoGeo} />
+          <meshStandardMaterial {...materialProps} />
+        </mesh>
         <group position={[0, 1.2, 0]}>
           <group ref={leftArmRef} position={[-0.22, 0, 0]} rotation={leftArmRotation}>
             <mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
@@ -107,7 +113,7 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
       </group>
       <group position={[0, 0.4, 0]}>
         <group ref={leftLegRef} position={[-0.12, 0, 0]} rotation={leftLegRotation}>
-          <mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></group>
+          <mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
         </group>
         <group ref={rightLegRef} position={[0.12, 0, 0]} rotation={rightLegRotation}>
           <mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
@@ -272,7 +278,6 @@ const WallOpening = ({ position, colorProps, width = 6, openingW = 4.8, height =
 );
 
 // --- ANIMATED CHAPTERS ---
-
 const WheelchairChapter = ({ butterProps }) => {
   const groupRef = useRef();
   const wheelRef = useRef();
@@ -328,7 +333,7 @@ const WalkingToConversationChapter = ({ butterProps }) => {
     const progress = THREE.MathUtils.smoothstep(t, 0, 1);
     
     if (phase === "walking") {
-      groupRef.current.position.z = START_Z + (END_Z - START_Z) * progress;
+      if (groupRef.current) groupRef.current.position.z = START_Z + (END_Z - START_Z) * progress;
       if (t >= 1) setPhase("talking");
     }
   });
@@ -409,12 +414,13 @@ export default function Scene({ currentView }) {
 
       <group position={[0, 0, 0]}>
         <mesh position={[15.5, -2.1, 15.0]} castShadow receiveShadow>
-          <boxGeometry args={[20, 8.0, 30]} /><meshStandardMaterial {...butterProps} />
+          <boxGeometry args={[20, 8.0, 30]} />
+          <meshStandardMaterial {...butterProps} />
         </mesh>
         
         <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={butterProps} />
         
-        {/* PLATFORM - Positioned on the right side of stairs */}
+        {/* HEXAGON PLATFORM - Shifted to the right side of the stairs */}
         <mesh position={[18, -1.38, 10]} castShadow receiveShadow>
           <cylinderGeometry args={[2, 2, 0.1, 6]} />
           <meshStandardMaterial {...butterProps} />
