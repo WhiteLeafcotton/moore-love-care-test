@@ -279,7 +279,7 @@ export default function Scene({ currentView }) {
         <group>
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <Bench materialProps={butterProps} />
-            {/* Couple D: Moved back to original right-hand side placement */}
+            {/* Couple D: Locked in correct spot with fixed "Reach for Walker" arm pose */}
             <group position={[2.2, 0, 0.8]} rotation={[0, -0.4, 0]}>
                <BlockHumanoid 
                 scale={0.92} 
@@ -287,8 +287,8 @@ export default function Scene({ currentView }) {
                 poseProps={{ 
                   walker: true, 
                   torsoRotationX: 0.35, 
-                  leftArmRotation: [1.1, 0, 0.4], // Arms forward to grip handles
-                  rightArmRotation: [1.1, 0, -0.4], 
+                  leftArmRotation: [1.2, 0, 0.3], // Rotated FORWARD and DOWN
+                  rightArmRotation: [1.2, 0, -0.3], // Rotated FORWARD and DOWN
                   headRotationY: -0.2
                 }} 
                />
@@ -298,7 +298,8 @@ export default function Scene({ currentView }) {
                 poseProps={{ 
                   position: [-0.6, 0, 0.1], 
                   rotation: [0, 0.4, 0], 
-                  headRotationY: -0.3 
+                  headRotationY: -0.3,
+                  leftArmRotation: [0.4, 0, -0.2] // Arm subtly reaching forward toward them
                 }} 
                />
             </group>
