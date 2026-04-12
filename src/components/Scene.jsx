@@ -120,27 +120,6 @@ const GrassySassyHills = () => {
   );
 };
 
-// --- ARCHITECTURE ---
-const Staircase = ({ position, width, rotation, materialProps }) => {
-  const stepHeight = 0.5; const stepDepth = 0.8; const numSteps = 16;
-  return (
-    <group position={position} rotation={rotation}>
-      {Array.from({ length: numSteps }).map((_, i) => (
-        <group key={i} position={[0, -i * stepHeight, i * stepDepth]}>
-          <mesh castShadow receiveShadow>
-            <boxGeometry args={[width, stepHeight, stepDepth]} />
-            <meshStandardMaterial {...materialProps} />
-          </mesh>
-          <mesh position={[0, -2.5, 0]} castShadow receiveShadow>
-            <boxGeometry args={[width, 5, stepDepth]} />
-            <meshStandardMaterial {...materialProps} />
-          </mesh>
-        </group>
-      ))}
-    </group>
-  );
-};
-
 // --- CHARACTERS ---
 const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
   const { 
@@ -189,8 +168,8 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
       if (leftArmRef.current) leftArmRef.current.rotation.x = -swing * 0.5;
       if (rightArmRef.current) rightArmRef.current.rotation.x = swing * 0.5;
     } else {
-      if (leftLegRef.current) leftLegRef.current.rotation.x = THREE.MathUtils.lerp(leftLegRef.current.rotation.x, leftLegRotation[0], 0.1);
-      if (rightLegRef.current) rightLegRef.current.rotation.x = THREE.MathUtils.lerp(rightLegRef.current.rotation.x, rightLegRotation[0], 0.1);
+      if (leftLegRef.current) leftLegRef.current.rotation.x = leftLegRotation[0];
+      if (rightLegRef.current) rightLegRef.current.rotation.x = rightLegRotation[0];
     }
   });
 
@@ -230,16 +209,15 @@ const WheelchairChapter = ({ butterProps }) => {
   const wheelRef = useRef();
 
   useFrame((state) => {
-    // Limited range: 8 to 16 stays nicely within the window frames
-    const t = state.clock.elapsedTime * 0.12;
+    // Limited range to stay in camera view (between x=10 and x=25 roughly)
+    const t = state.clock.elapsedTime * 0.1;
     const movement = Math.sin(t) * 4; 
-    groupRef.current.position.z = 12 + movement; 
-    if (wheelRef.current) wheelRef.current.rotation.x = t * 5;
+    groupRef.current.position.z = 12 + movement; // Centered in the window view
+    if (wheelRef.current) wheelRef.current.rotation.x = t * 4;
   });
 
   return (
     <group ref={groupRef} position={[14.5, 1.9, 12]} rotation={[0, Math.PI, 0]}>
-        {/* Wheelchair Mesh */}
         <mesh position={[0, 0.55, 0]} castShadow><boxGeometry args={[0.6, 0.08, 0.6]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
         <mesh position={[0, 0.9, -0.25]} rotation={[0.1, 0, 0]} castShadow><boxGeometry args={[0.55, 0.7, 0.08]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
         <mesh position={[0, 1.2, -0.3]} castShadow><boxGeometry args={[0.6, 0.05, 0.05]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
@@ -247,13 +225,11 @@ const WheelchairChapter = ({ butterProps }) => {
           <mesh position={[-0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]}><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
           <mesh position={[0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]}><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
         </group>
-      {/* Seated Resident */}
       <group position={[0, 0.2, 0]}>
         <BlockHumanoid scale={0.85} materialProps={butterProps} poseProps={{ rotation: [0, Math.PI, 0], leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], leftArmRotation: [0.7, 0, 0], rightArmRotation: [0.7, 0, 0]}} />
       </group>
-      {/* Helper Pushing */}
       <group position={[0, 0, -0.75]}>
-        <BlockHumanoid scale={0.95} materialProps={butterProps} poseProps={{ isWalking: true, walkSpeed: 3.5, leftArmRotation: [-1.2, 0, 0.1], rightArmRotation: [-1.2, 0, -0.1] }} />
+        <BlockHumanoid scale={0.95} materialProps={butterProps} poseProps={{ isWalking: true, walkSpeed: 3, leftArmRotation: [-1.2, 0, 0.1], rightArmRotation: [-1.2, 0, -0.1] }} />
       </group>
     </group>
   );
@@ -264,27 +240,25 @@ const WalkingConversationChapter = ({ butterProps }) => {
   const [talkProgress, setTalkProgress] = useState(0);
 
   useFrame((state, delta) => {
-    const t = state.clock.elapsedTime * 0.18; // Slow stroll
-    const startZ = 2.0; // Near bench
-    const endZ = 9.0;  // Toward steps
+    const t = state.clock.elapsedTime * 0.2; // Slow pace
+    const startZ = 2.0; // Start at the bench
+    const endZ = 8.5;  // Walk to the steps
     
-    // Controlled loop
-    const cycle = (Math.sin(t) + 1) / 2;
+    const cycle = (Math.sin(t * 0.5) + 1) / 2;
     const currentZ = startZ + (endZ - startZ) * cycle;
     groupRef.current.position.z = currentZ;
 
-    // Detect when they reach the end of the walk to trigger the "turn and talk"
-    const isAtEnd = cycle > 0.9;
-    if (isAtEnd) {
+    const distToStop = Math.abs(currentZ - endZ);
+    if (distToStop < 0.8) {
         setTalkProgress(THREE.MathUtils.lerp(talkProgress, 1, delta * 2));
     } else {
-        setTalkProgress(THREE.MathUtils.lerp(talkProgress, 0, delta * 3));
+        setTalkProgress(THREE.MathUtils.lerp(talkProgress, 0, delta * 2));
     }
   });
 
-  // Calculate rotations: face forward (PI/2) then face each other
-  const rotA = (Math.PI / 2) + (talkProgress * 0.7);
-  const rotB = (Math.PI / 2) - (talkProgress * 0.7);
+  // At 0 they face forward, at 1 they face each other
+  const rotationA = (Math.PI / 2) + (talkProgress * 0.8);
+  const rotationB = (Math.PI / 2) - (talkProgress * 0.8);
 
   return (
     <group ref={groupRef} position={[7.5, 1.9, 0]}>
@@ -293,8 +267,8 @@ const WalkingConversationChapter = ({ butterProps }) => {
           materialProps={butterProps} 
           poseProps={{ 
             isWalking: talkProgress < 0.5, 
-            walkSpeed: 3,
-            rotation: [0, rotA, 0],
+            walkSpeed: 4,
+            rotation: [0, rotationA, 0],
             cane: true,
             position: [-0.4, 0, 0],
             isLeaning: talkProgress > 0.8
@@ -305,10 +279,10 @@ const WalkingConversationChapter = ({ butterProps }) => {
           materialProps={butterProps} 
           poseProps={{ 
             isWalking: talkProgress < 0.5, 
-            walkSpeed: 3,
-            rotation: [0, rotB, 0],
+            walkSpeed: 4,
+            rotation: [0, rotationB, 0],
             position: [0.4, 0, 0],
-            headLean: talkProgress * 0.05 
+            headLean: talkProgress * 0.05
           }} 
         />
     </group>
@@ -359,13 +333,10 @@ export default function Scene({ currentView }) {
       </group>
 
       <group position={[0, 0, 0]}>
-        {/* Floor */}
+        {/* Main Floor Plinth */}
         <mesh position={[15.5, -2.1, 15.0]} castShadow receiveShadow>
           <boxGeometry args={[20, 8.0, 30]} /><meshStandardMaterial {...butterProps} />
         </mesh>
-        
-        {/* Stairs */}
-        <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={butterProps} />
         
         {/* Architecture */}
         <group position={[-16, -1.6, 0]}>
@@ -376,22 +347,22 @@ export default function Scene({ currentView }) {
         </group>
 
         <group>
-          {/* Bench */}
+          {/* Static Elements */}
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <mesh position={[0, 0.45, 0]} castShadow><boxGeometry args={[3, 0.1, 1.2]} /><meshStandardMaterial {...butterProps} /></mesh>
             <mesh position={[0, 1, -0.55]} rotation={[-0.1, 0, 0]}><boxGeometry args={[3, 1, 0.1]} /><meshStandardMaterial {...butterProps} /></mesh>
           </group>
 
-          {/* Couple A (Seated at Edge) */}
-          <group position={[6.0, 1.6, 11.5]} rotation={[0, Math.PI / 2, 0]}>
+          {/* Couple A (Seated Static) */}
+          <group position={[6.0, 1.6, 11.0]} rotation={[0, Math.PI / 2, 0]}>
             <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
             <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
           </group>
 
-          {/* Couple B (Conversation Stroll) */}
+          {/* New Walking-to-Conversation Couple B */}
           <WalkingConversationChapter butterProps={butterProps} />
 
-          {/* Wheelchair Stroll (Stay in frame) */}
+          {/* Frame-Locked Wheelchair Stroll */}
           <WheelchairChapter butterProps={butterProps} />
         </group>
       </group>
