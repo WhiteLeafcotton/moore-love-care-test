@@ -179,7 +179,7 @@ const WallOpening = ({ position, colorProps, width = 6, openingW = 4.8, height =
   </group>
 );
 
-// --- RESTORED CHARACTERS ---
+// --- CHARACTERS ---
 const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
   const { 
     leftLegRotation = [0, 0, 0], 
@@ -188,9 +188,11 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
     rightArmRotation = [0.2, 0, 0.1], 
     position = [0,0,0], 
     rotation = [0,0,0], 
-    cane = false 
+    cane = false,
+    isLeaning = false // Added for the leaning effect
   } = poseProps;
   
+  const torsoRef = useRef();
   const limbGeo = useMemo(() => {
     const pts = [new THREE.Vector2(0, 0), new THREE.Vector2(0.08, 0.05), new THREE.Vector2(0.08, 0.75), new THREE.Vector2(0, 0.8)];
     const g = new THREE.LatheGeometry(pts, 32);
@@ -203,10 +205,26 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
     return new THREE.LatheGeometry(pts, 32);
   }, []);
 
+  useFrame((state) => {
+    if (isLeaning && torsoRef.current) {
+      // Gentle lean back and forth
+      torsoRef.current.rotation.z = Math.sin(state.clock.elapsedTime * 0.5) * 0.15;
+    }
+  });
+
   return (
     <group scale={scale} position={position} rotation={rotation}>
-      <mesh position={[0, 1.4, 0]} castShadow><sphereGeometry args={[0.22, 32, 32]} /><meshStandardMaterial {...materialProps} /></mesh>
-      <mesh position={[0, 0.3, 0]} castShadow><primitive object={torsoGeo} /><meshStandardMaterial {...materialProps} /></mesh>
+      <group ref={torsoRef}>
+        <mesh position={[0, 1.4, 0]} castShadow><sphereGeometry args={[0.22, 32, 32]} /><meshStandardMaterial {...materialProps} /></mesh>
+        <mesh position={[0, 0.3, 0]} castShadow><primitive object={torsoGeo} /><meshStandardMaterial {...materialProps} /></mesh>
+        <group position={[0, 1.2, 0]}>
+          <mesh position={[-0.22, 0, 0]} rotation={leftArmRotation} castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
+          <mesh position={[0.22, 0, 0]} rotation={rightArmRotation} castShadow>
+            <primitive object={limbGeo} /><meshStandardMaterial {...materialProps} />
+            {cane && <mesh position={[0, -0.7, 0.1]}><cylinderGeometry args={[0.015, 0.015, 1.1]} /><meshStandardMaterial color="#fcd7d7" /></mesh>}
+          </mesh>
+        </group>
+      </group>
       
       <group position={[0, 0.4, 0]}>
         <group position={[-0.12, 0, 0]} rotation={leftLegRotation}>
@@ -216,30 +234,64 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
           <mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
         </group>
       </group>
-
-      <group position={[0, 1.2, 0]}>
-        <mesh position={[-0.22, 0, 0]} rotation={leftArmRotation} castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
-        <mesh position={[0.22, 0, 0]} rotation={rightArmRotation} castShadow>
-          <primitive object={limbGeo} /><meshStandardMaterial {...materialProps} />
-          {cane && <mesh position={[0, -0.7, 0.1]}><cylinderGeometry args={[0.015, 0.015, 1.1]} /><meshStandardMaterial color="#fcd7d7" /></mesh>}
-        </mesh>
-      </group>
     </group>
   );
 };
 
-const SimpleWheelchair = ({ materialProps }) => (
+const SimpleWheelchair = ({ materialProps, wheelRef }) => (
   <group>
-    {/* Updated material for main body parts, referencing darker colorProps */}
     <mesh position={[0, 0.55, 0]} castShadow><boxGeometry args={[0.6, 0.08, 0.6]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
     <mesh position={[0, 0.9, -0.25]} rotation={[0.1, 0, 0]} castShadow><boxGeometry args={[0.55, 0.7, 0.08]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
-    <group position={[0, 0.45, -0.05]}>
-      {/* Updated material for wheels, referencing same darker colorProps */}
+    <group position={[0, 0.45, -0.05]} ref={wheelRef}>
       <mesh position={[-0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]}><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
       <mesh position={[0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]}><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
     </group>
   </group>
 );
+
+// --- ANIMATED CHAPTERS ---
+
+const WheelchairChapter = ({ butterProps }) => {
+  const groupRef = useRef();
+  const wheelRef = useRef();
+
+  useFrame((state) => {
+    const t = state.clock.elapsedTime * 0.2;
+    // Moves slowly forward and back
+    const movement = Math.sin(t) * 2;
+    groupRef.current.position.z = 17.5 + movement;
+    // Rotate wheels based on movement
+    if (wheelRef.current) wheelRef.current.rotation.x = t * 5;
+  });
+
+  return (
+    <group ref={groupRef} position={[14.5, 1.9, 17.5]} rotation={[0, Math.PI, 0]}>
+      <SimpleWheelchair materialProps={butterProps} wheelRef={wheelRef} />
+      <group position={[0, 0.2, 0]}>
+        <BlockHumanoid scale={0.85} materialProps={butterProps} poseProps={{ rotation: [0, Math.PI, 0], leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], leftArmRotation: [0.7, 0, 0], rightArmRotation: [0.7, 0, 0]}} />
+      </group>
+      <group position={[0, 0, -0.7]}>
+        <BlockHumanoid scale={0.95} materialProps={butterProps} poseProps={{ leftArmRotation: [-1.1, 0, 0], rightArmRotation: [-1.1, 0, 0]}} />
+      </group>
+    </group>
+  );
+};
+
+const WalkingChapter = ({ butterProps }) => {
+  const groupRef = useRef();
+  useFrame((state) => {
+    const t = state.clock.elapsedTime * 0.3;
+    groupRef.current.position.z = 12 + Math.sin(t) * 3;
+    groupRef.current.position.y = 1.9 + Math.abs(Math.sin(t * 10)) * 0.05; // Tiny bobbing
+  });
+
+  return (
+    <group ref={groupRef} position={[14, 1.9, 12]} rotation={[0, -Math.PI * 0.7, 0]}>
+      <BlockHumanoid scale={1} materialProps={butterProps} poseProps={{ cane: true, leftLegRotation: [0.3, 0, 0], rightLegRotation: [-0.3, 0, 0], position: [-0.3, 0, 0]}} />
+      <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ leftLegRotation: [-0.3, 0, 0], rightLegRotation: [0.3, 0, 0], position: [0.4, 0, -0.1]}} />
+    </group>
+  );
+};
 
 // --- MAIN SCENE ---
 export default function Scene({ currentView }) {
@@ -270,8 +322,6 @@ export default function Scene({ currentView }) {
   });
 
   const butterProps = { color: "#fce4e4", roughness: 0.9, metalness: 0.02 };
-  
-  // New prop for bench and wheelchair - slightly darker pink (#fcd7d7)
   const darkerProps = { color: "#fcd7d7", roughness: 0.9, metalness: 0.02 };
 
   return (
@@ -309,35 +359,23 @@ export default function Scene({ currentView }) {
           <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
 
-        {/* RESTORED COMMUNITY PLACEMENT */}
         <group>
-          {/* Sitting on Bench - Updated with darker materialProps */}
+          {/* Sitting on Bench */}
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <Bench materialProps={darkerProps} />
           </group>
 
-          {/* Walking Pair */}
-          <group position={[14, 1.9, 12]} rotation={[0, -Math.PI * 0.7, 0]}>
-            <BlockHumanoid scale={1} materialProps={butterProps} poseProps={{ cane: true, leftLegRotation: [0.3, 0, 0], rightLegRotation: [-0.3, 0, 0], position: [-0.3, 0, 0]}} />
-            <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ leftLegRotation: [-0.3, 0, 0], rightLegRotation: [0.3, 0, 0], position: [0.4, 0, -0.1]}} />
-          </group>
+          {/* Animated Walking Pair */}
+          <WalkingChapter butterProps={butterProps} />
 
-          {/* Seated Pair on Edge */}
+          {/* Seated Pair on Edge - One now leans in */}
           <group position={[6.0, 1.6, 11.5]} rotation={[0, Math.PI / 2, 0]}>
-            <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
+            <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
             <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
           </group>
 
-          {/* Wheelchair Group - wheelchair itself now is a shade darker pink */}
-          <group position={[14.5, 1.9, 17.5]} rotation={[0, Math.PI, 0]}>
-            <SimpleWheelchair materialProps={butterProps} />
-            <group position={[0, 0.2, 0]}>
-              <BlockHumanoid scale={0.85} materialProps={butterProps} poseProps={{ rotation: [0, Math.PI, 0], leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], leftArmRotation: [0.7, 0, 0], rightArmRotation: [0.7, 0, 0]}} />
-            </group>
-            <group position={[0, 0, -0.7]}>
-              <BlockHumanoid scale={0.95} materialProps={butterProps} poseProps={{ leftArmRotation: [-1.1, 0, 0], rightArmRotation: [-1.1, 0, 0]}} />
-            </group>
-          </group>
+          {/* Animated Wheelchair Group */}
+          <WheelchairChapter butterProps={butterProps} />
         </group>
       </group>
 
