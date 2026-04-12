@@ -7,8 +7,7 @@ import * as THREE from "three";
 extend({ Water });
 
 const GRASS_COUNT = 400000;
-const TITLE_PURPLE = "#21162e"; // Very dark, title text/water only
-// FIX: A darker pink that is two shades darker than the wall pink
+const TITLE_PURPLE = "#21162e"; 
 const DARKER_PINK_THEME = "#bf9fb3"; 
 
 const getHillHeight = (x, z) => {
@@ -324,9 +323,9 @@ export default function Scene({ currentView }) {
                 poseProps={{ 
                   walker: true, 
                   torsoRotationX: 0.1, 
-                  // ARM FIX: Adjusted arms to be naturally down by her side as requested
-                  leftArmRotation: [0.1, 0, -0.1], 
-                  rightArmRotation: [0.1, 0, 0.1], 
+                  // REACH ANIMATION: Hands forward and up to handles
+                  leftArmRotation: [-1.1, 0, -0.1], 
+                  rightArmRotation: [-1.1, 0, 0.1], 
                   leftLegRotation: [0.15, 0, 0],   
                   rightLegRotation: [-0.1, 0, 0],  
                   headRotationY: -0.2
@@ -349,7 +348,8 @@ export default function Scene({ currentView }) {
           {!isMobile && <WalkingToConversationChapter butterProps={butterProps} />}
 
           <group position={[6.0, 1.6, 10.0]} rotation={[0, Math.PI / 2, 0]}>
-            <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
+            {/* HELPER ON STEPS: Added isHelper tag and adjusted rotation so badge is visible */}
+            <BlockHumanoid isHelper scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0], rotation: [0, -0.4, 0]}} />
             <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
           </group>
 
