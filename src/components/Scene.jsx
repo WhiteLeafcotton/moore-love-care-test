@@ -379,16 +379,16 @@ export default function Scene({ currentView }) {
     const isHome = currentView === "home";
     const LERP_SPEED = isHome ? 0.04 : 0.018; 
 
-    // --- MOBILE CAMERA: TIGHT ON SITTING COUPLE ---
-    // Pulled much closer (Z: 25) and low (Y: 1.2) to cut wall tops
-    const mobileHomePos = new THREE.Vector3(-42, 1.2, 25); 
+    // --- MOBILE CAMERA: LOWER & TIGHTER ---
+    // Lowered Y to 1.1 and moved X to -30 to keep the walls in view but top out of frame
+    const mobileHomePos = new THREE.Vector3(-30, 1.1, 15); 
     const desktopHomePos = new THREE.Vector3(-14, 3.2, 24);
     
     const homePos = isMobile ? mobileHomePos : desktopHomePos;
     const targetPos = isHome ? homePos : new THREE.Vector3(-24.5, 3.5, -450);
     
-    // LookAt centered on the couple's position (X: 6, Z: 10)
-    const mobileLookAt = new THREE.Vector3(6, 2.2, 10); 
+    // tilted lookAt higher (Y: 2.8) to force the top of the structure off-screen
+    const mobileLookAt = new THREE.Vector3(10, 2.8, 8); 
     const desktopLookAt = new THREE.Vector3(20, 1.2, -2);
 
     camera.position.lerp(targetPos, LERP_SPEED);
