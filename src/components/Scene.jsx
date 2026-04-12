@@ -84,7 +84,7 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
         if (leftLegRef.current) leftLegRef.current.rotation.x = leftLegRotation[0];
         if (rightLegRef.current) rightLegRef.current.rotation.x = rightLegRotation[0];
         if (leftArmRef.current) leftArmRef.current.rotation.x = leftArmRotation[0];
-        if (rightArmRef.current) rightArmRef.current.rotation.x = rightArmRotation[0];
+        if (rightArmRotation && rightArmRef.current) rightArmRef.current.rotation.x = rightArmRotation[0];
     }
   });
 
@@ -373,21 +373,21 @@ export default function Scene({ currentView }) {
   const isMobile = size.width < 768;
 
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
-  useEffect(() => { waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping; }, [waterNormals]);
+  useEffect(() => { if (waterNormals) waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping; }, [waterNormals]);
 
   useFrame((state, delta) => {
     const isHome = currentView === "home";
     const LERP_SPEED = isHome ? 0.04 : 0.018; 
 
-    // --- ULTRA CINEMATIC MOBILE CAMERA ---
-    // homePos: X: -32 (Heavy Left Shift) and Z: 42 (Back enough to see the scale)
-    const mobileHomePos = new THREE.Vector3(-32, 3.5, 42); 
+    // --- REFINED CENTIMATIC MOBILE CAMERA ---
+    // Moved closer to the door (X from -32 to -18) 
+    const mobileHomePos = new THREE.Vector3(-18, 3.5, 32); 
     const desktopHomePos = new THREE.Vector3(-14, 3.2, 24);
     
     const homePos = isMobile ? mobileHomePos : desktopHomePos;
     const targetPos = isHome ? homePos : new THREE.Vector3(-24.5, 3.5, -450);
     
-    // mobileLookAt: Height 3.5 keeps the shot perfectly level with the camera
+    // mobileLookAt: Keeps Y at 3.5 to maintain a level cinematic horizon
     const mobileLookAt = new THREE.Vector3(12, 3.5, 8); 
     const desktopLookAt = new THREE.Vector3(20, 1.2, -2);
 
