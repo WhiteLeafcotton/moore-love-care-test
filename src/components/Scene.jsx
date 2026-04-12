@@ -227,11 +227,12 @@ export default function Scene({ currentView }) {
   useFrame((state, delta) => {
     const isHome = currentView === "home";
     
-    // SYMMETRICAL ALIGNMENT:
-    // X moved to -1.5 (this sits perfectly between the door frame meshes to avoid clipping)
-    // Distance (Z: -2) and Height (Y: 4.2) remain exactly as you liked.
-    const targetPos = isHome ? (isMobile ? new THREE.Vector3(-1.5, 4.2, -2) : new THREE.Vector3(-14, 3.2, 24)) : new THREE.Vector3(-24.5, 3.5, -450);
-    const targetLook = isHome ? (isMobile ? new THREE.Vector3(14, 3.0, 12) : new THREE.Vector3(20, 1.2, -2)) : new THREE.Vector3(-24.5, 1.5, -1000);
+    // FRAMING FIX:
+    // X shifted to 4 (perfectly clear of the doorway pillar, centering on the seated couple)
+    // Distance (Z: -2) and Height (Y: 4.2) remain locked as requested.
+    const targetPos = isHome ? (isMobile ? new THREE.Vector3(4, 4.2, -2) : new THREE.Vector3(-14, 3.2, 24)) : new THREE.Vector3(-24.5, 3.5, -450);
+    // Adjusted LookAt to focus specifically on the Couple A interaction area
+    const targetLook = isHome ? (isMobile ? new THREE.Vector3(7, 2.5, 10) : new THREE.Vector3(20, 1.2, -2)) : new THREE.Vector3(-24.5, 1.5, -1000);
     
     camera.position.lerp(targetPos, 0.04); 
     camera.lookAt(targetLook);
@@ -269,6 +270,7 @@ export default function Scene({ currentView }) {
 
         <group>
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}><Bench materialProps={butterProps} /></group>
+          {/* Couple A is here at position [6, 1.6, 10] */}
           <group position={[6.0, 1.6, 10.0]} rotation={[0, Math.PI / 2, 0]}>
             <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
             <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
