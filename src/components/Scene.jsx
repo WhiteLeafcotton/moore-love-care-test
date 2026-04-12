@@ -62,7 +62,8 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {}, isHelper = fa
     walkSpeed = 8,
     torsoRotationZ = 0,
     torsoRotationX = 0,
-    headRotationY = 0
+    headRotationY = 0,
+    animateArmsTo = null // New prop for smooth arm reach
   } = poseProps;
   
   const torsoRef = useRef();
@@ -92,12 +93,26 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {}, isHelper = fa
         if (isLeaning) torsoRef.current.rotation.z += Math.sin(t * 0.5) * 0.15;
     }
     if (headRef.current) headRef.current.rotation.y = headRotationY;
+    
     if (isWalking) {
       const swing = Math.sin(t * walkSpeed) * 0.4;
       if (leftLegRef.current) leftLegRef.current.rotation.x = swing;
       if (rightLegRef.current) rightLegRef.current.rotation.x = -swing;
       if (leftArmRef.current) leftArmRef.current.rotation.x = -swing * 0.5;
       if (rightArmRef.current) rightArmRef.current.rotation.x = swing * 0.5;
+    } else if (animateArmsTo) {
+      // ANIMATION LOGIC: Reaching arms slowly from sides to walker handles
+      const reachProgress = THREE.MathUtils.smoothstep(t, 0.5, 3.5); // Starts at 0.5s, ends at 3.5s
+      if (leftArmRef.current) {
+        leftArmRef.current.rotation.x = THREE.MathUtils.lerp(leftArmRotation[0], animateArmsTo[0], reachProgress);
+        leftArmRef.current.rotation.z = THREE.MathUtils.lerp(leftArmRotation[2], animateArmsTo[2], reachProgress);
+      }
+      if (rightArmRef.current) {
+        rightArmRef.current.rotation.x = THREE.MathUtils.lerp(rightArmRotation[0], animateArmsTo[0], reachProgress);
+        rightArmRef.current.rotation.z = THREE.MathUtils.lerp(rightArmRotation[2], -animateArmsTo[2], reachProgress);
+      }
+      if (leftLegRef.current) leftLegRef.current.rotation.set(...leftLegRotation);
+      if (rightLegRef.current) rightLegRef.current.rotation.set(...rightLegRotation);
     } else {
         if (leftArmRef.current) leftArmRef.current.rotation.set(...leftArmRotation);
         if (rightArmRef.current) rightArmRef.current.rotation.set(...rightArmRotation);
@@ -323,9 +338,10 @@ export default function Scene({ currentView }) {
                 poseProps={{ 
                   walker: true, 
                   torsoRotationX: 0.1, 
-                  // REACH ANIMATION: Hands forward and up to handles
-                  leftArmRotation: [-1.1, 0, -0.1], 
-                  rightArmRotation: [-1.1, 0, 0.1], 
+                  // ANIMATION: Hands start at side, reach handles over time
+                  leftArmRotation: [0.1, 0, -0.1], 
+                  rightArmRotation: [0.1, 0, 0.1], 
+                  animateArmsTo: [-1.1, 0, -0.1], 
                   leftLegRotation: [0.15, 0, 0],   
                   rightLegRotation: [-0.1, 0, 0],  
                   headRotationY: -0.2
@@ -348,7 +364,7 @@ export default function Scene({ currentView }) {
           {!isMobile && <WalkingToConversationChapter butterProps={butterProps} />}
 
           <group position={[6.0, 1.6, 10.0]} rotation={[0, Math.PI / 2, 0]}>
-            {/* HELPER ON STEPS: Added isHelper tag and adjusted rotation so badge is visible */}
+            {/* HEART BADGE VISIBILITY: Rotation set to ensure visibility of the badge */}
             <BlockHumanoid isHelper scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0], rotation: [0, -0.4, 0]}} />
             <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
           </group>
