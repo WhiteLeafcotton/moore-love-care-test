@@ -28,14 +28,11 @@ const getHillHeight = (x, z) => {
 // --- PROPS ---
 const Walker = ({ position, rotation, materialProps }) => (
   <group position={position} rotation={rotation}>
-    {/* Frame */}
     <mesh position={[-0.25, 0.45, 0]} castShadow><cylinderGeometry args={[0.02, 0.02, 0.9]} /><meshStandardMaterial {...materialProps} /></mesh>
     <mesh position={[0.25, 0.45, 0]} castShadow><cylinderGeometry args={[0.02, 0.02, 0.9]} /><meshStandardMaterial {...materialProps} /></mesh>
     <mesh position={[0, 0.85, 0]} rotation={[0, 0, Math.PI / 2]} castShadow><cylinderGeometry args={[0.02, 0.02, 0.5]} /><meshStandardMaterial {...materialProps} /></mesh>
-    {/* Handles */}
     <mesh position={[-0.25, 0.9, 0.1]} rotation={[Math.PI / 2, 0, 0]} castShadow><cylinderGeometry args={[0.02, 0.02, 0.2]} /><meshStandardMaterial {...materialProps} /></mesh>
     <mesh position={[0.25, 0.9, 0.1]} rotation={[Math.PI / 2, 0, 0]} castShadow><cylinderGeometry args={[0.02, 0.02, 0.2]} /><meshStandardMaterial {...materialProps} /></mesh>
-    {/* Front Bar */}
     <mesh position={[0, 0.6, -0.1]} rotation={[0, 0, Math.PI / 2]} castShadow><cylinderGeometry args={[0.02, 0.02, 0.5]} /><meshStandardMaterial {...materialProps} /></mesh>
   </group>
 );
@@ -329,32 +326,60 @@ const WheelchairChapter = ({ butterProps }) => {
 
 const WalkingToConversationChapter = ({ butterProps, darkerProps }) => {
   const groupRef = useRef();
-  const walkerRef = useRef();
-  const [phase, setPhase] = useState("walking"); // walking, talking, fetchWalker, returning
+  const caregiverRef = useRef();
+  const walkerGroupRef = useRef();
+  const [phase, setPhase] = useState("walking"); // walking, talking, fetch, returning
+
+  // Animation constants
+  const WALK_END_Z = 12.0;
+  const WALKER_PARKED_X = 6.5; 
+  const WALKER_PARKED_Z = 10.0;
 
   useFrame((state) => {
     const t = state.clock.elapsedTime;
     
     if (phase === "walking") {
       const progress = Math.min(t * 0.03, 1);
-      groupRef.current.position.z = 4.0 + (12.0 - 4.0) * progress;
+      groupRef.current.position.z = 4.0 + (WALK_END_Z - 4.0) * progress;
       if (progress >= 1) setPhase("talking");
     }
 
-    if (phase === "talking" && t > 40) { // Wait a few seconds
-      setPhase("fetchWalker");
+    // Sequence timing
+    if (phase === "talking" && t > 38) setPhase("fetch");
+    
+    if (phase === "fetch") {
+      // Caregiver moves toward the walker on the right
+      const fetchTime = (t - 38) * 0.2;
+      const progress = Math.min(fetchTime, 1);
+      
+      caregiverRef.current.position.x = 0.4 + (WALKER_PARKED_X * progress);
+      caregiverRef.current.position.z = 0 + (WALKER_PARKED_Z * progress);
+      caregiverRef.current.rotation.y = -Math.PI / 2 - (Math.PI / 4 * progress);
+
+      if (progress >= 1) setPhase("returning");
+    }
+
+    if (phase === "returning") {
+      // Caregiver returns with the walker
+      const returnTime = (t - 43) * 0.2;
+      const progress = Math.min(returnTime, 1);
+      
+      const currentX = (0.4 + WALKER_PARKED_X) - (WALKER_PARKED_X * progress);
+      const currentZ = WALKER_PARKED_Z - (WALKER_PARKED_Z * progress);
+      
+      caregiverRef.current.position.x = currentX;
+      caregiverRef.current.position.z = currentZ;
+      caregiverRef.current.rotation.y = Math.PI / 2;
+
+      // Attach walker to caregiver
+      walkerGroupRef.current.position.set(currentX, 0, currentZ + 0.6);
+      walkerGroupRef.current.rotation.y = Math.PI / 2;
     }
   });
 
-  // Calculate Sub-animations for the Caregiver Partner
-  const caregiverPos = [0.4, 0, 0];
-  const caregiverRot = [0, 0, 0];
-  const walkerPos = [0.4, 0, 2];
-  let isCaregiverWalking = phase === "walking";
-
   return (
     <group ref={groupRef} position={[7.5, 1.9, 4]} rotation={[0, Math.PI / 2, 0]}>
-        {/* Stationary Partner */}
+        {/* Partner with Cane */}
         <BlockHumanoid 
           scale={1} 
           materialProps={butterProps} 
@@ -368,23 +393,24 @@ const WalkingToConversationChapter = ({ butterProps, darkerProps }) => {
           }} 
         />
 
-        {/* Caregiver Partner - Eventually walks to get the walker */}
-        <group>
+        {/* Caregiver Partner */}
+        <group ref={caregiverRef} position={[0.4, 0, 0]}>
           <BlockHumanoid 
             scale={0.9} 
             materialProps={butterProps} 
             poseProps={{ 
-              isWalking: isCaregiverWalking, 
+              isWalking: phase !== "talking", 
               walkSpeed: 1.5,
-              rotation: [0, phase !== "walking" ? -0.6 : 0, 0],
-              position: caregiverPos,
-              headRotationY: phase !== "walking" ? 0.4 : 0
+              rotation: [0, phase === "talking" ? -0.6 : 0, 0],
+              headRotationY: phase === "talking" ? 0.4 : 0
             }} 
           />
         </group>
 
-        {/* The Walker - Parked ahead */}
-        <Walker position={[0.1, 0, 4]} rotation={[0, Math.PI, 0]} materialProps={darkerProps} />
+        {/* The Walker - Parked on the right edge of platform */}
+        <group ref={walkerGroupRef} position={[7.0, 0, 10]} rotation={[0, 0, 0]}>
+          <Walker materialProps={darkerProps} />
+        </group>
     </group>
   );
 };
