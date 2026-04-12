@@ -298,16 +298,16 @@ export default function Scene({ currentView }) {
         </group>
 
         <group>
-          {/* Bench: Positioned in front of the wall (inside the corner) and rotated toward water */}
-          <group position={[14, 1.9, 4]} rotation={[0, Math.PI / 2, 0]}>
+          {/* Bench: Turned 180 degrees (rotated -Math.PI / 2) */}
+          <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <Bench materialProps={butterProps} />
-            {/* Parent Sitting, facing water (rotation: Math.PI / 2) */}
+            {/* Parent Sitting, now facing away from water (rotation: -Math.PI / 2) */}
             <BlockHumanoid 
               scale={0.95} 
               materialProps={butterProps} 
               poseProps={{ 
                 position: [0.3, 0.45, 0.1],
-                rotation: [0, Math.PI / 2, 0],
+                rotation: [0, -Math.PI / 2, 0],
                 leftLegRotation: [1.6, 0, 0.1], 
                 rightLegRotation: [1.6, 0, -0.1],
                 leftArmRotation: [0.8, 0, 0.4],
@@ -316,19 +316,7 @@ export default function Scene({ currentView }) {
             />
           </group>
 
-          {/* Toddler playing on the platform floor */}
-          <group position={[11, 1.9, 5]} rotation={[0, Math.PI, 0]}>
-             <BlockHumanoid 
-              scale={0.4} 
-              materialProps={butterProps} 
-              poseProps={{ 
-                leftLegRotation: [0.4, 0, 0.2], 
-                rightLegRotation: [-0.2, 0, -0.2],
-                leftArmRotation: [-1.2, 0, 0.5],
-                rightArmRotation: [-0.8, 0, -0.5]
-              }} 
-            />
-          </group>
+          {/* Toddler group is completely deleted */}
 
           <group position={[14, 1.9, 12]} rotation={[0, -Math.PI * 0.7, 0]}>
             <BlockHumanoid scale={1} materialProps={butterProps} poseProps={{ cane: true, leftLegRotation: [0.3, 0, 0], rightLegRotation: [-0.3, 0, 0], position: [-0.3, 0, 0]}} />
