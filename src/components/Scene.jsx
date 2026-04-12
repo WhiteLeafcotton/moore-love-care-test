@@ -25,8 +25,8 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
-// --- UPDATED CHIBI CHARACTER ---
-const ChibiHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
+// --- PEBBLE-STYLE HUMAN CHARACTER (IMAGE_0.PNG Aesthetic) ---
+const PebbleHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
   const { 
     leftLegRotation = [0, 0, 0], 
     rightLegRotation = [0, 0, 0], 
@@ -38,23 +38,54 @@ const ChibiHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
     isLeaning = false,
     isWalking = false,
     walkSpeed = 8,
+    torsoRotationZ = 0,
+    torsoRotationX = 0,
     headRotationY = 0
   } = poseProps;
   
   const torsoRef = useRef();
-  const headRef = useRef();
-  const leftArmRef = useRef();
-  const rightArmRef = useRef();
   const leftLegRef = useRef();
   const rightLegRef = useRef();
+  const leftArmRef = useRef();
+  const rightArmRef = useRef();
+  const headRef = useRef();
+
+  // Create highly smoothed, non-blocky, tapered "pebble" limb geometry.
+  // It starts rounded and wide, then tapers smoothly to a point.
+  const limbGeo = useMemo(() => {
+    const geo = new THREE.CylinderGeometry(0.12, 0.01, 1.2, 32, 12, true);
+    geo.translate(0, -0.6, 0); // Position pivot at top
+    // Slight bending for organic feel
+    const vertices = geo.attributes.position;
+    for (let i = 0; i < vertices.count; i++) {
+        const y = vertices.getY(i);
+        if (y < 0) {
+            vertices.setX(i, vertices.getX(i) + Math.sin(y * -1.5) * 0.03);
+            vertices.setZ(i, vertices.getZ(i) + Math.sin(y * -1.5) * 0.02);
+        }
+    }
+    geo.computeVertexNormals();
+    return geo;
+  }, []);
+
+  // Soft, organic, wide-tapered "pebble" torso. Not blocky. Wide shoulders, narrow base.
+  const torsoGeo = useMemo(() => {
+    const geo = new THREE.CylinderGeometry(0.24, 0.08, 1.0, 32, 12);
+    geo.computeVertexNormals();
+    return geo;
+  }, []);
 
   useFrame((state) => {
     const t = state.clock.elapsedTime;
+    
     if (torsoRef.current) {
-        torsoRef.current.rotation.x = Math.sin(t * 0.4) * 0.02; 
-        if (isLeaning) torsoRef.current.rotation.z = Math.sin(t * 0.3) * 0.1;
+        torsoRef.current.rotation.z = torsoRotationZ;
+        torsoRef.current.rotation.x = torsoRotationX;
+        if (isLeaning) {
+          torsoRef.current.rotation.z += Math.sin(t * 0.5) * 0.15;
+        }
     }
-    if (headRef.current) headRef.current.rotation.y = headRotationY + Math.sin(t * 0.2) * 0.06;
+    if (headRef.current) headRef.current.rotation.y = headRotationY;
 
     if (isWalking) {
       const swing = Math.sin(t * walkSpeed) * 0.4;
@@ -63,67 +94,44 @@ const ChibiHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
       if (leftArmRef.current) leftArmRef.current.rotation.x = -swing * 0.5;
       if (rightArmRef.current) rightArmRef.current.rotation.x = swing * 0.5;
     } else {
-      if (leftLegRef.current) leftLegRef.current.rotation.x = leftLegRotation[0];
-      if (rightLegRef.current) rightLegRef.current.rotation.x = rightLegRotation[0];
-      if (leftArmRef.current) leftArmRef.current.rotation.x = leftArmRotation[0];
-      if (rightArmRef.current) rightArmRef.current.rotation.x = rightArmRotation[0];
+        if (leftLegRef.current) leftLegRef.current.rotation.x = leftLegRotation[0];
+        if (rightLegRef.current) rightLegRef.current.rotation.x = rightLegRotation[0];
+        if (leftArmRef.current) leftArmRef.current.rotation.x = leftArmRotation[0];
+        if (rightArmRef.current) rightArmRef.current.rotation.x = rightArmRotation[0];
     }
   });
 
   return (
     <group scale={scale} position={position} rotation={rotation}>
-      {/* Large Round Chibi Head */}
-      <mesh ref={headRef} position={[0, 1.4, 0]} castShadow>
-        <sphereGeometry args={[0.38, 32, 32]} />
-        <meshStandardMaterial {...materialProps} roughness={0.1} metalness={0.1} />
-      </mesh>
-
-      {/* Pear-Shaped Torso */}
-      <mesh ref={torsoRef} position={[0, 0.85, 0]} castShadow>
-        <sphereGeometry args={[0.22, 32, 32]} />
-        <mesh ref={el => el && el.scale.set(1.1, 1.4, 0.9)} />
-        <meshStandardMaterial {...materialProps} />
-      </mesh>
-
-      {/* Tapered Soft Arms */}
-      <group position={[0, 1.05, 0]}>
-        <group ref={leftArmRef} position={[-0.22, 0, 0]} rotation={leftArmRotation}>
-          <mesh position={[0, -0.25, 0]} castShadow>
-            <sphereGeometry args={[0.07, 24, 24]} />
-            <mesh ref={el => el && el.scale.set(0.9, 4, 0.9)} />
-            <meshStandardMaterial {...materialProps} />
-          </mesh>
-        </group>
-        <group ref={rightArmRef} position={[0.22, 0, 0]} rotation={rightArmRotation}>
-          <mesh position={[0, -0.25, 0]} castShadow>
-            <sphereGeometry args={[0.07, 24, 24]} />
-            <mesh ref={el => el && el.scale.set(0.9, 4, 0.9)} />
-            <meshStandardMaterial {...materialProps} />
-          </mesh>
-          {cane && (
-            <mesh position={[0.08, -0.5, 0.2]} rotation={[0.05, 0, 0]}>
-              <cylinderGeometry args={[0.015, 0.015, 1.0, 8]} />
-              <meshStandardMaterial color="#ffffff" />
+      <group ref={torsoRef}>
+        {/* head remains perfect sphere */}
+        <mesh ref={headRef} position={[0, 1.4, 0]} castShadow><sphereGeometry args={[0.22, 32, 32]} /><meshStandardMaterial {...materialProps} /></mesh>
+        
+        {/* organic pebble torso */}
+        <mesh position={[0, 0.3, 0]} castShadow><primitive object={torsoGeo} /><meshStandardMaterial {...materialProps} /></mesh>
+        
+        <group position={[0, 1.2, 0]}>
+          <group ref={leftArmRef} position={[-0.22, 0, 0]} rotation={leftArmRotation}>
+            {/* smooth tapered arm */}
+            <mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
+          </group>
+          <group ref={rightArmRef} position={[0.22, 0, 0]} rotation={rightArmRotation}>
+            {/* smooth tapered arm */}
+            <mesh castShadow>
+                <primitive object={limbGeo} /><meshStandardMaterial {...materialProps} />
+                {cane && <mesh position={[0, -0.7, 0.1]}><cylinderGeometry args={[0.015, 0.015, 1.1]} /><meshStandardMaterial color="#fcd7d7" /></mesh>}
             </mesh>
-          )}
+          </group>
         </group>
       </group>
-
-      {/* Soft Tapered Legs */}
-      <group position={[0, 0.5, 0]}>
+      <group position={[0, 0.4, 0]}>
         <group ref={leftLegRef} position={[-0.12, 0, 0]} rotation={leftLegRotation}>
-          <mesh position={[0, -0.3, 0]} castShadow>
-            <sphereGeometry args={[0.09, 24, 24]} />
-            <mesh ref={el => el && el.scale.set(1, 4.2, 1)} />
-            <meshStandardMaterial {...materialProps} />
-          </mesh>
+          {/* smooth tapered leg */}
+          <mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
         </group>
         <group ref={rightLegRef} position={[0.12, 0, 0]} rotation={rightLegRotation}>
-          <mesh position={[0, -0.3, 0]} castShadow>
-            <sphereGeometry args={[0.09, 24, 24]} />
-            <mesh ref={el => el && el.scale.set(1, 4.2, 1)} />
-            <meshStandardMaterial {...materialProps} />
-          </mesh>
+          {/* smooth tapered leg */}
+          <mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
         </group>
       </group>
     </group>
@@ -315,11 +323,11 @@ const WheelchairChapter = ({ butterProps }) => {
           <mesh position={[-0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]}><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
           <mesh position={[0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]}><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
         </group>
-      <group position={[0, 0.15, 0]}>
-        <ChibiHumanoid scale={0.85} materialProps={butterProps} poseProps={{ rotation: [0, Math.PI, 0], leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], leftArmRotation: [0.7, 0, 0], rightArmRotation: [0.7, 0, 0]}} />
+      <group position={[0, 0.2, 0]}>
+        <PebbleHumanoid scale={0.85} materialProps={butterProps} poseProps={{ rotation: [0, Math.PI, 0], leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], leftArmRotation: [0.7, 0, 0], rightArmRotation: [0.7, 0, 0]}} />
       </group>
-      <group position={[0, -0.05, -0.75]}>
-        <ChibiHumanoid scale={0.95} materialProps={butterProps} poseProps={{ isWalking: isMoving, walkSpeed: 1.2, leftArmRotation: [-1.2, 0, 0.1], rightArmRotation: [-1.2, 0, -0.1] }} />
+      <group position={[0, 0, -0.75]}>
+        <PebbleHumanoid scale={0.95} materialProps={butterProps} poseProps={{ isWalking: isMoving, walkSpeed: 1.2, leftArmRotation: [-1.2, 0, 0.1], rightArmRotation: [-1.2, 0, -0.1] }} />
       </group>
     </group>
   );
@@ -344,7 +352,7 @@ const WalkingToConversationChapter = ({ butterProps }) => {
 
   return (
     <group ref={groupRef} position={[7.5, 1.9, START_Z]} rotation={[0, Math.PI / 2, 0]}>
-        <ChibiHumanoid 
+        <PebbleHumanoid 
           scale={0.95} 
           materialProps={butterProps} 
           poseProps={{ 
@@ -356,8 +364,8 @@ const WalkingToConversationChapter = ({ butterProps }) => {
             headRotationY: phase !== "walking" ? -0.4 : 0
           }} 
         />
-        <group position={[0.6, 0, 0]}>
-          <ChibiHumanoid 
+        <group position={[0.4, 0, 0]}>
+          <PebbleHumanoid 
             scale={0.95} 
             materialProps={butterProps} 
             poseProps={{ 
@@ -400,8 +408,8 @@ export default function Scene({ currentView }) {
     }
   });
 
-  const butterProps = { color: "#fce4e4", roughness: 0.8, metalness: 0.02 };
-  const darkerProps = { color: "#fcd7d7", roughness: 0.8, metalness: 0.02 };
+  const butterProps = { color: "#fce4e4", roughness: 0.9, metalness: 0.02 };
+  const darkerProps = { color: "#fcd7d7", roughness: 0.9, metalness: 0.02 };
 
   return (
     <>
@@ -417,6 +425,7 @@ export default function Scene({ currentView }) {
       </group>
 
       <group position={[0, 0, 0]}>
+        {/* Main Platform */}
         <mesh position={[15.5, -2.1, 15.0]} castShadow receiveShadow>
           <boxGeometry args={[20, 8.0, 30]} /><meshStandardMaterial {...butterProps} />
         </mesh>
@@ -444,8 +453,8 @@ export default function Scene({ currentView }) {
           </group>
 
           <group position={[6.0, 1.6, 10.0]} rotation={[0, Math.PI / 2, 0]}>
-            <ChibiHumanoid scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
-            <ChibiHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
+            <PebbleHumanoid scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
+            <PebbleHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
           </group>
 
           <WalkingToConversationChapter butterProps={butterProps} />
