@@ -227,14 +227,13 @@ export default function Scene({ currentView }) {
   useFrame((state, delta) => {
     const isHome = currentView === "home";
     
-    // THE "CENTERED COMMUNITY" SHOT:
-    // X at 10.0: Centers the camera on the building's 90-degree corner.
-    // Y at 2.1: Very low camera to ensure structure tops are cropped out.
-    // Z at 10.0: Framed to include the community interactions (seated couple + walking group).
-    const targetPos = isHome ? (isMobile ? new THREE.Vector3(10.0, 2.1, 10.0) : new THREE.Vector3(-14, 3.2, 24)) : new THREE.Vector3(-24.5, 3.5, -450);
+    // WEB MATCH FIX:
+    // Mobile position now matches the Web's X and Z perspective (-14, 24).
+    // Y at 3.5: Keeps the camera at the same relative height while cropping structure tops.
+    const targetPos = isHome ? (isMobile ? new THREE.Vector3(-14, 3.5, 24) : new THREE.Vector3(-14, 3.2, 24)) : new THREE.Vector3(-24.5, 3.5, -450);
     
-    // LookAt centered on the interaction zone, slightly down to avoid ceiling.
-    const targetLook = isHome ? (isMobile ? new THREE.Vector3(10, 1.8, 18) : new THREE.Vector3(20, 1.2, -2)) : new THREE.Vector3(-24.5, 1.5, -1000);
+    // LookAt matches the original Web focus point for community framing.
+    const targetLook = isHome ? (isMobile ? new THREE.Vector3(20, 1.2, -2) : new THREE.Vector3(20, 1.2, -2)) : new THREE.Vector3(-24.5, 1.5, -1000);
     
     camera.position.lerp(targetPos, 0.05); 
     camera.lookAt(targetLook);
