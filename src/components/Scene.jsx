@@ -100,12 +100,13 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
         </group>
       </group>
       {walker && (
-        <group position={[0, 0, 0.5]}>
+        <group position={[0, -0.2, 0.55]}>
           <mesh position={[0.3, 0.45, 0]}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
           <mesh position={[-0.3, 0.45, 0]}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
           <mesh position={[0, 0.85, 0]}><boxGeometry args={[0.65, 0.03, 0.03]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
           <mesh position={[0.3, 0.45, 0.3]}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
           <mesh position={[-0.3, 0.45, 0.3]}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
+          <mesh position={[0, 0.85, 0.3]}><boxGeometry args={[0.6, 0.03, 0.03]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
         </group>
       )}
       <group position={[0, 0.4, 0]}>
@@ -238,13 +239,8 @@ export default function Scene({ currentView }) {
 
   useFrame((state, delta) => {
     const isHome = currentView === "home";
-    
-    // Updated targetLook for mobile to capture more of the doorway/opening
-    const mobileLook = new THREE.Vector3(12, 1.2, -2);
-    const desktopLook = new THREE.Vector3(20, 1.2, -2);
-
     const targetPos = isHome ? (isMobile ? new THREE.Vector3(-18, 4.5, 38) : new THREE.Vector3(-13, 3.2, 28)) : new THREE.Vector3(-24.5, 3.5, -450);
-    const targetLook = isHome ? (isMobile ? mobileLook : desktopLook) : new THREE.Vector3(-24.5, 1.5, -1000);
+    const targetLook = isHome ? new THREE.Vector3(20, 1.2, -2) : new THREE.Vector3(-24.5, 1.5, -1000);
     
     camera.position.lerp(targetPos, 0.05); 
     camera.lookAt(targetLook);
@@ -283,22 +279,39 @@ export default function Scene({ currentView }) {
         <group>
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <Bench materialProps={butterProps} />
-            {/* Couple D: Moved to the other side of the bench */}
-            <group position={[2.2, 0, 0.8]} rotation={[0, -0.4, 0]}>
-               <BlockHumanoid scale={0.92} materialProps={butterProps} poseProps={{ walker: true, torsoRotationX: 0.25, leftArmRotation: [0.8, 0, 0.1], rightArmRotation: [0.8, 0, -0.1] }} />
-               <BlockHumanoid scale={0.95} materialProps={butterProps} poseProps={{ position: [-0.6, 0, 0.1], rotation: [0, 0.4, 0], headRotationY: -0.3 }} />
+            {/* Couple D: Back to the side near the stairs entrance, perfected pose */}
+            <group position={[-2.8, 0, 0.8]} rotation={[0, 0.4, 0]}>
+               <BlockHumanoid 
+                scale={0.92} 
+                materialProps={butterProps} 
+                poseProps={{ 
+                  walker: true, 
+                  torsoRotationX: 0.25, 
+                  leftArmRotation: [0.9, 0, 0.3], 
+                  rightArmRotation: [0.9, 0, -0.3],
+                  headRotationY: -0.2
+                }} 
+               />
+               {/* Supportive Help Standing Next to them */}
+               <BlockHumanoid 
+                scale={0.95} 
+                materialProps={butterProps} 
+                poseProps={{ 
+                  position: [0.3, 0, -0.4], 
+                  rotation: [0, -0.3, 0], 
+                  headRotationY: 0.3,
+                  leftArmRotation: [0.2, 0, -0.1]
+                }} 
+               />
             </group>
           </group>
 
-          {/* Couple B: Visible Everywhere */}
           <group position={[6.0, 1.6, 10.0]} rotation={[0, Math.PI / 2, 0]}>
             <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
             <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
           </group>
 
-          {/* Couple C: Hidden on Mobile */}
           {!isMobile && <WalkingToConversationChapter butterProps={butterProps} />}
-          
           <WheelchairChapter butterProps={butterProps} />
         </group>
       </group>
