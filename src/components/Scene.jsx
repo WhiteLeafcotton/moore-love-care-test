@@ -126,7 +126,6 @@ const BlockHumanoid = forwardRef(({ scale = 1, materialProps, poseProps = {}, is
         if (rightArmRef.current) rightArmRef.current.rotation.set(...rightArmRotation);
     }
     
-    // Maintain set rotations for legs if not walking
     if (!isWalking && leftLegRef.current) leftLegRef.current.rotation.set(...leftLegRotation);
     if (!isWalking && rightLegRef.current) rightLegRef.current.rotation.set(...rightLegRotation);
   });
@@ -408,7 +407,7 @@ export default function Scene({ currentView }) {
         </group>
 
         <group>
-          {/* SITTING COUPLE - RESTORED POSITIONS */}
+          {/* SITTING COUPLE - LOCKED IN */}
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <Bench materialProps={butterProps} />
             <group position={[0, 0, -0.2]} rotation={[0, 0, 0]}>
@@ -417,13 +416,13 @@ export default function Scene({ currentView }) {
                 materialProps={butterProps} 
                 poseProps={{ 
                   walker: true, 
-                  position: [0.5, 0, 0], // Restored X position
-                  rotation: [0, -0.5, 0], // Original angle
+                  position: [0.5, 0, 0],
+                  rotation: [0, -0.5, 0],
                   torsoRotationX: 0.1, 
                   leftArmRotation: [0.1, 0, -0.1], 
                   rightArmRotation: [0.1, 0, 0.1], 
                   animateArmsTo: [-1.1, 0, -0.1], 
-                  leftLegRotation: [Math.PI / 2, 0, 0],   // Restored sitting legs
+                  leftLegRotation: [Math.PI / 2, 0, 0],
                   rightLegRotation: [Math.PI / 2, 0, 0],  
                   headRotationY: -0.2
                 }} 
@@ -433,11 +432,11 @@ export default function Scene({ currentView }) {
                 scale={0.95} 
                 materialProps={butterProps} 
                 poseProps={{ 
-                  position: [-0.4, 0, 0], // Restored X position
+                  position: [-0.4, 0, 0],
                   rotation: [0, 0.65, 0], 
                   headRotationY: -0.4,
                   leftArmRotation: [-0.8, 0, -0.25],
-                  leftLegRotation: [Math.PI / 2, 0, 0], // Restored sitting legs
+                  leftLegRotation: [Math.PI / 2, 0, 0],
                   rightLegRotation: [Math.PI / 2, 0, 0]
                 }} 
                />
@@ -445,6 +444,38 @@ export default function Scene({ currentView }) {
           </group>
 
           <WalkingToConversationChapter butterProps={butterProps} />
+
+          {/* RESTORED ANIMATED WALKER COUPLE (BY THE STAIRS) */}
+          <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
+            {/* We offset them from the bench group so they are by the stairs as originally intended */}
+            <group position={[3.5, 0, -0.2]} rotation={[0, -0.5, 0]}>
+               <BlockHumanoid 
+                scale={0.84} 
+                materialProps={butterProps} 
+                poseProps={{ 
+                  walker: true, 
+                  torsoRotationX: 0.1, 
+                  leftArmRotation: [0.1, 0, -0.1], 
+                  rightArmRotation: [0.1, 0, 0.1], 
+                  animateArmsTo: [-1.1, 0, -0.1], 
+                  leftLegRotation: [0.15, 0, 0],   
+                  rightLegRotation: [-0.1, 0, 0],  
+                  headRotationY: -0.2
+                }} 
+               />
+               <BlockHumanoid 
+                isHelper
+                scale={0.95} 
+                materialProps={butterProps} 
+                poseProps={{ 
+                  position: [-0.95, 0, 0.35], 
+                  rotation: [0, 0.65, 0], 
+                  headRotationY: -0.4,
+                  leftArmRotation: [-0.8, 0, -0.25] 
+                }} 
+               />
+            </group>
+          </group>
 
           <group position={[6.0, 1.6, 10.0]} rotation={[0, Math.PI / 2, 0]}>
             <BlockHumanoid isHelper scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0], rotation: [0, -0.4, 0]}} />
