@@ -335,24 +335,20 @@ const WalkingToConversationChapter = ({ butterProps, darkerProps, walkerRef }) =
   useFrame((state) => {
     const t = state.clock.elapsedTime;
     
-    // 1. Initial Walk to 18.0
     if (phase === "walking") {
       const progress = Math.min(t * 0.03, 1);
       groupRef.current.position.z = START_Z + (END_Z - START_Z) * progress;
       if (progress >= 1) setPhase("talking");
     }
 
-    // 2. Pause to talk, then go fetch at T=42
     if (phase === "talking" && t > 42) setPhase("fetch");
     
     if (phase === "fetch") {
-      // Helper must walk toward the window (which is further "left" on the platform)
       const fetchTime = (t - 42) * 0.4;
       const progress = Math.min(fetchTime, 1);
-      
-      // We walk on X axis relative to the rotated group
-      caregiverRef.current.position.x = 0.4 + (8.0 * progress); 
-      caregiverRef.current.rotation.y = -Math.PI / 2; // Face the window
+      // Helper walks back along X to grab walker at the window
+      caregiverRef.current.position.x = 0.4 + (10.0 * progress); 
+      caregiverRef.current.rotation.y = -Math.PI / 2; 
 
       if (progress >= 1) setPhase("returning");
     }
@@ -361,14 +357,12 @@ const WalkingToConversationChapter = ({ butterProps, darkerProps, walkerRef }) =
       const returnTime = (t - 47) * 0.4;
       const progress = Math.min(returnTime, 1);
       
-      const currentXOffset = 8.4 - (8.0 * progress);
+      const currentXOffset = 10.4 - (10.0 * progress);
       caregiverRef.current.position.x = currentXOffset;
-      caregiverRef.current.rotation.y = Math.PI / 2; // Face back to the partner
+      caregiverRef.current.rotation.y = Math.PI / 2; 
 
-      // The walker follows in global space
       if (walkerRef.current) {
-        // Platform coordinate math to follow helper back
-        walkerRef.current.position.x = 15.5 + currentXOffset; 
+        walkerRef.current.position.x = 18.0 + (currentXOffset); 
       }
     }
   });
@@ -470,8 +464,8 @@ export default function Scene({ currentView }) {
           <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
 
-        {/* WALKER: Static by the window at initialization */}
-        <group ref={walkerRef} position={[24, 1.9, 11]} rotation={[0, Math.PI / 2, 0]}>
+        {/* WALKER: Positioned clearly by the first window on the platform */}
+        <group ref={walkerRef} position={[28.4, 1.9, 12]} rotation={[0, Math.PI / 2, 0]}>
           <Walker materialProps={darkerProps} />
         </group>
 
