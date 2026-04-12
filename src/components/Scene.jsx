@@ -190,7 +190,7 @@ const WallOpening = ({ position, colorProps, width = 6, openingW = 4.8, height =
 const WheelchairChapter = ({ butterProps }) => {
   const groupRef = useRef(); const wheelRef = useRef(); const [isMoving, setIsMoving] = useState(true);
   useFrame((state) => {
-    // UPDATED: Start at 12.5 (Screen edge) and move to 6.5
+    // UPDATED: Stroll from edge (12.5) to original final destination (6.5)
     const t = Math.min(state.clock.elapsedTime / 14, 1);
     const progress = THREE.MathUtils.smoothstep(t, 0, 1);
     if (groupRef.current) groupRef.current.position.z = 12.5 + (6.5 - 12.5) * progress;
@@ -207,6 +207,23 @@ const WheelchairChapter = ({ butterProps }) => {
         </group>
       <group position={[0, 0.2, 0]}><BlockHumanoid scale={0.85} materialProps={butterProps} poseProps={{ rotation: [0, Math.PI, 0], leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], leftArmRotation: [0.7, 0, 0], rightArmRotation: [0.7, 0, 0]}} /></group>
       <group position={[0, 0, -0.75]}><BlockHumanoid scale={0.95} materialProps={butterProps} poseProps={{ isWalking: isMoving, walkSpeed: 10, leftArmRotation: [-1.2, 0, 0.1], rightArmRotation: [-1.2, 0, -0.1] }} /></group>
+    </group>
+  );
+};
+
+const WalkingToConversationChapter = ({ butterProps }) => {
+  const groupRef = useRef(); const [phase, setPhase] = useState("walking");
+  useFrame((state) => {
+    const t = Math.min(state.clock.elapsedTime / 15, 1);
+    if (phase === "walking") {
+      groupRef.current.position.z = 4.0 + (18.0 - 4.0) * THREE.MathUtils.smoothstep(t, 0, 1);
+      if (t >= 1) setPhase("talking");
+    }
+  });
+  return (
+    <group ref={groupRef} position={[7.5, 1.9, 4.0]} rotation={[0, Math.PI / 2, 0]}>
+        <BlockHumanoid scale={0.95} materialProps={butterProps} poseProps={{ isWalking: phase === "walking", walkSpeed: 3.5, cane: true, rotation: [0, 0.6, 0], position: [-0.3, 0, 0], headRotationY: -1.2 }} />
+        <group position={[0.4, 0, 0]}><BlockHumanoid scale={0.95} materialProps={butterProps} poseProps={{ isWalking: phase === "walking", walkSpeed: 3.5, rotation: [0, -0.6, 0], headRotationY: phase === "walking" ? 0 : 0.4 }} /></group>
     </group>
   );
 };
@@ -265,26 +282,28 @@ export default function Scene({ currentView }) {
             
             {/* --- COUPLE D: LOCKED SPOT & WHOLESOME SCALE --- */}
             <group position={[3.5, 0, -0.2]} rotation={[0, -0.5, 0]}>
-               {/* Elder Character: Smaller scale, corrected upright anatomy */}
+               {/* Elder Character: Smaller scale, upright anatomy */}
                <BlockHumanoid 
                 scale={0.84} 
                 materialProps={butterProps} 
                 poseProps={{ 
                   walker: true, 
-                  torsoRotationX: 0, // Hunch removed for clean anatomy
-                  leftArmRotation: [-1.2, 0, -0.5], 
-                  rightArmRotation: [-1.5, 0, 0.45], 
+                  torsoRotationX: 0, // Hunch removed for clean humanoid proportions
+                  // Spread arms OUT to sides to reach rails
+                  leftArmRotation: [-1.4, 0, -0.4], 
+                  rightArmRotation: [-1.4, 0, 0.4], 
+                  // Humanoid anatomy legs
                   leftLegRotation: [0.15, 0, 0],   
                   rightLegRotation: [-0.1, 0, 0],  
                   headRotationY: -0.2
                 }} 
                />
-               {/* Helper Character: Helping the elder use her walker */}
+               {/* Helper Character: Wholesome positioning */}
                <BlockHumanoid 
                 scale={0.95} 
                 materialProps={butterProps} 
                 poseProps={{ 
-                  position: [-1.0, 0, 0.35], 
+                  position: [-1.1, 0, 0.35], 
                   rotation: [0, 0.65, 0], 
                   headRotationY: -0.4,
                   leftArmRotation: [-0.8, 0, -0.3] 
@@ -293,6 +312,7 @@ export default function Scene({ currentView }) {
             </group>
           </group>
 
+          {/* Couple B (Leaning) - VISIBLE on Web */}
           <group position={[6.0, 1.6, 10.0]} rotation={[0, Math.PI / 2, 0]}>
             <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
             <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
