@@ -35,6 +35,7 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
     position = [0,0,0], 
     rotation = [0,0,0], 
     cane = false,
+    walker = false,
     isLeaning = false,
     isWalking = false,
     walkSpeed = 8,
@@ -98,6 +99,15 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
           </group>
         </group>
       </group>
+      {walker && (
+        <group position={[0, 0, 0.5]}>
+          <mesh position={[0.3, 0.45, 0]}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
+          <mesh position={[-0.3, 0.45, 0]}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
+          <mesh position={[0, 0.85, 0]}><boxGeometry args={[0.65, 0.03, 0.03]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
+          <mesh position={[0.3, 0.45, 0.3]}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
+          <mesh position={[-0.3, 0.45, 0.3]}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
+        </group>
+      )}
       <group position={[0, 0.4, 0]}>
         <group ref={leftLegRef} position={[-0.12, 0, 0]} rotation={leftLegRotation}><mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh></group>
         <group ref={rightLegRef} position={[0.12, 0, 0]} rotation={rightLegRotation}><mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh></group>
@@ -221,18 +231,13 @@ export default function Scene({ currentView }) {
   const { camera, size } = useThree();
   const waterRef = useRef();
   const isMobile = size.width < 768;
+  const extraWallHeight = isMobile ? 30 : 0; // Infinite vibe for mobile
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
   useEffect(() => { if (waterNormals) waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping; }, [waterNormals]);
 
   useFrame((state, delta) => {
     const isHome = currentView === "home";
-    
-    // THE "WIDE SHOT" FIX FOR MOBILE WINDOWS:
-    // Mobile Z: 38 (Pushed way back from 28 to capture building face)
-    // Mobile X: -18 (Shifted left to keep building in frame on tall screens)
-    // Mobile Y: 4.5 (Lifted slightly to keep ground visible from distance)
     const targetPos = isHome ? (isMobile ? new THREE.Vector3(-18, 4.5, 38) : new THREE.Vector3(-13, 3.2, 28)) : new THREE.Vector3(-24.5, 3.5, -450);
-    
     const targetLook = isHome ? new THREE.Vector3(20, 1.2, -2) : new THREE.Vector3(-24.5, 1.5, -1000);
     
     camera.position.lerp(targetPos, 0.05); 
@@ -254,27 +259,38 @@ export default function Scene({ currentView }) {
         <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={butterProps} />
 
         <group position={[-16, -1.6, 0]}>
-          <mesh position={[1, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
+          <mesh position={[1, 8.5 + extraWallHeight/2, 0]} castShadow receiveShadow><boxGeometry args={[4, 17 + extraWallHeight, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
           <WallOpening position={[6, 0, 0]} colorProps={butterProps} /> 
           <WallOpening position={[12, 0, 0]} colorProps={butterProps} /> 
-          <mesh position={[24, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
-          <mesh position={[36, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[12, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
+          <mesh position={[24, 8.5 + extraWallHeight/2, 0]} castShadow receiveShadow><boxGeometry args={[18, 17 + extraWallHeight, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
+          <mesh position={[36, 8.5 + extraWallHeight/2, 0]} castShadow receiveShadow><boxGeometry args={[12, 17 + extraWallHeight, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
 
         <group position={[17, -1.6, 1]} rotation={[0, -Math.PI / 2, 0]}>
-          <mesh castShadow receiveShadow position={[0.5, 8.5, 0]}><boxGeometry args={[1, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
-          <mesh castShadow receiveShadow position={[4.5, 8.5, 0]}><boxGeometry args={[7, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
+          <mesh castShadow receiveShadow position={[0.5, 8.5 + extraWallHeight/2, 0]}><boxGeometry args={[1, 17 + extraWallHeight, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
+          <mesh castShadow receiveShadow position={[4.5, 8.5 + extraWallHeight/2, 0]}><boxGeometry args={[7, 17 + extraWallHeight, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
           <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={butterProps} />
           <WallOpening position={[17, 0, 0]} isWindow={true} colorProps={butterProps} />
-          <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
+          <mesh castShadow receiveShadow position={[24, 8.5 + extraWallHeight/2, 0]}><boxGeometry args={[8, 17 + extraWallHeight, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
 
         <group>
-          <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}><Bench materialProps={butterProps} /></group>
-          <group position={[6.0, 1.6, 10.0]} rotation={[0, Math.PI / 2, 0]}>
-            <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
-            <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
+          <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
+            <Bench materialProps={butterProps} />
+            {/* Couple D: Near the bench */}
+            <group position={[-2.5, 0, 0.8]} rotation={[0, 0.5, 0]}>
+               <BlockHumanoid scale={0.92} materialProps={butterProps} poseProps={{ walker: true, torsoRotationX: 0.25, leftArmRotation: [0.8, 0, 0.1], rightArmRotation: [0.8, 0, -0.1], position: [0, 0, 0] }} />
+               <BlockHumanoid scale={0.95} materialProps={butterProps} poseProps={{ position: [0.6, 0, 0.1], rotation: [0, -0.4, 0], headRotationY: 0.3 }} />
+            </group>
           </group>
+
+          {!isMobile && (
+            <group position={[6.0, 1.6, 10.0]} rotation={[0, Math.PI / 2, 0]}>
+              <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
+              <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
+            </group>
+          )}
+
           <WalkingToConversationChapter butterProps={butterProps} />
           <WheelchairChapter butterProps={butterProps} />
         </group>
