@@ -287,7 +287,7 @@ const WheelchairChapter = ({ butterProps }) => {
     const duration = 12; 
     const t = Math.min(state.clock.elapsedTime / duration, 1);
     const progress = THREE.MathUtils.smoothstep(t, 0, 1);
-    const startZ = 22;
+    const startZ = 32;
     const endZ = 12.5; 
     
     if (groupRef.current) {
@@ -302,7 +302,7 @@ const WheelchairChapter = ({ butterProps }) => {
   });
 
   return (
-    <group ref={groupRef} position={[14.5, 1.9, 22]} rotation={[0, Math.PI, 0]}>
+    <group ref={groupRef} position={[14.5, 1.9, 32]} rotation={[0, Math.PI, 0]}>
         <mesh position={[0, 0.55, 0]} castShadow><boxGeometry args={[0.6, 0.08, 0.6]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
         <mesh position={[0, 0.9, -0.25]} rotation={[0.1, 0, 0]} castShadow><boxGeometry args={[0.55, 0.7, 0.08]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
         <mesh position={[0, 1.2, -0.3]} castShadow><boxGeometry args={[0.6, 0.05, 0.05]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
@@ -420,8 +420,8 @@ export default function Scene({ currentView }) {
         
         <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={butterProps} />
         
-        {/* HEXAGON PLATFORM - Shifted to the right side of the stairs */}
-        <mesh position={[18, -1.38, 10]} castShadow receiveShadow>
+        {/* HEXAGON PLATFORM - Shifted in front and to the right of steps */}
+        <mesh position={[10.5, -1.38, 22]} castShadow receiveShadow>
           <cylinderGeometry args={[2, 2, 0.1, 6]} />
           <meshStandardMaterial {...butterProps} />
         </mesh>
