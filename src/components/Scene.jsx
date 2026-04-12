@@ -271,7 +271,7 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
           </group>
         </group>
       </group>
-      <group position={[0, 0.8, 0]}>
+      <group position={[0, 0.4, 0]}>
         <group ref={leftLegRef} position={[-0.12, 0, 0]} rotation={leftLegRotation}>
           <mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
         </group>
@@ -306,7 +306,7 @@ const WheelchairChapter = ({ butterProps }) => {
   });
 
   return (
-    <group ref={groupRef} position={[14.5, 1.95, 22]} rotation={[0, Math.PI, 0]}>
+    <group ref={groupRef} position={[14.5, 1.9, 22]} rotation={[0, Math.PI, 0]}>
         <mesh position={[0, 0.55, 0]} castShadow><boxGeometry args={[0.6, 0.08, 0.6]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
         <mesh position={[0, 0.9, -0.25]} rotation={[0.1, 0, 0]} castShadow><boxGeometry args={[0.55, 0.7, 0.08]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
         <mesh position={[0, 1.2, -0.3]} castShadow><boxGeometry args={[0.6, 0.05, 0.05]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
@@ -331,50 +331,47 @@ const WalkingToConversationChapter = ({ butterProps, darkerProps, walkerRef }) =
 
   const START_Z = 4.0;
   const END_Z = 18.0; 
-  const GROUND_Y = 1.95;
 
   useFrame((state) => {
     const t = state.clock.elapsedTime;
     
-    // 1. Initial Walk
+    // 1. Initial Walk to 18.0
     if (phase === "walking") {
       const progress = Math.min(t * 0.03, 1);
       groupRef.current.position.z = START_Z + (END_Z - START_Z) * progress;
       if (progress >= 1) setPhase("talking");
     }
 
-    // 2. Pause then Fetch
+    // 2. Short pause to talk, then go fetch at T=42
     if (phase === "talking" && t > 42) setPhase("fetch");
     
     if (phase === "fetch") {
       const fetchTime = (t - 42) * 0.2;
       const progress = Math.min(fetchTime, 1);
-      // Character walks from END_Z back to 11.5 (where walker is)
-      caregiverRef.current.position.z = 0 - (6.5 * progress);
-      caregiverRef.current.rotation.y = Math.PI;
+      
+      caregiverRef.current.position.z = 0 - (10.0 * progress); // Walk back to Z=8 area
+      caregiverRef.current.rotation.y = Math.PI; 
 
       if (progress >= 1) setPhase("returning");
     }
 
-    // 3. Return with Walker
     if (phase === "returning") {
       const returnTime = (t - 47) * 0.2;
       const progress = Math.min(returnTime, 1);
-      const currentZOffset = -6.5 + (6.5 * progress);
+      
+      const currentZOffset = -10.0 + (10.0 * progress);
       caregiverRef.current.position.z = currentZOffset;
       caregiverRef.current.rotation.y = 0; 
 
-      // Walker follows caregiver's world position
+      // NOW the walker (in global space) follows the group's global progression
       if (walkerRef.current) {
-        // We calculate world X/Z for the caregiver and offset the walker slightly in front
-        walkerRef.current.position.set(7.9, GROUND_Y, END_Z + currentZOffset + 0.6);
-        walkerRef.current.rotation.y = Math.PI / 2; // Face forward
+        walkerRef.current.position.z = groupRef.current.position.z + currentZOffset + 0.6;
       }
     }
   });
 
   return (
-    <group ref={groupRef} position={[7.5, GROUND_Y, START_Z]} rotation={[0, Math.PI / 2, 0]}>
+    <group ref={groupRef} position={[7.5, 1.9, START_Z]} rotation={[0, Math.PI / 2, 0]}>
         <BlockHumanoid 
           scale={1} 
           materialProps={butterProps} 
@@ -408,7 +405,7 @@ export default function Scene({ currentView }) {
   const { camera, size } = useThree();
   const waterRef = useRef();
   const cloudGroupRef = useRef();
-  const walkerRef = useRef();
+  const walkerRef = useRef(); // Ref for the global walker
   const lookAtTarget = useRef(new THREE.Vector3(12, 1.5, 0));
   const isMobile = size.width < 768;
 
@@ -449,6 +446,7 @@ export default function Scene({ currentView }) {
       </group>
 
       <group position={[0, 0, 0]}>
+        {/* Main Platform */}
         <mesh position={[15.5, -2.1, 15.0]} castShadow receiveShadow>
           <boxGeometry args={[20, 8.0, 30]} /><meshStandardMaterial {...butterProps} />
         </mesh>
@@ -470,14 +468,13 @@ export default function Scene({ currentView }) {
           <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
 
-        {/* --- COMPLETELY STATIC WALKER (World Space) --- */}
-        {/* Initialized at a fixed spot by the windows (Z=11.5) on the platform (Y=1.95) */}
-        <group ref={walkerRef} position={[7.9, 1.95, 11.5]} rotation={[0, Math.PI / 2, 0]}>
+        {/* --- GLOBAL WALKER: STATIC BY WINDOW UPON INITIALIZATION --- */}
+        <group ref={walkerRef} position={[7.9, 1.9, 8.0]} rotation={[0, Math.PI / 2, 0]}>
           <Walker materialProps={darkerProps} />
         </group>
 
         <group>
-          <group position={[14, 1.95, 4]} rotation={[0, -Math.PI / 2, 0]}>
+          <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <Bench materialProps={darkerProps} />
           </group>
 
