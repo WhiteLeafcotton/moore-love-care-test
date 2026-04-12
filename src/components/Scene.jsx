@@ -227,13 +227,12 @@ export default function Scene({ currentView }) {
   useFrame((state, delta) => {
     const isHome = currentView === "home";
     
-    // WINDOW INCLUSION ADJUSTMENT:
-    // Mobile position X shifted to 1.5. Distance (Z) lowered slightly to 19 to get alittle closer.
-    // Height (Y) maintained at 3.5 to keep structure tops out of frame while locking view.
-    const targetPos = isHome ? (isMobile ? new THREE.Vector3(1.5, 3.5, 19) : new THREE.Vector3(-14, 3.2, 24)) : new THREE.Vector3(-24.5, 3.5, -450);
+    // WINDOW INCLUSION + BACKED UP JUST A BIT:
+    // Mobile Z at 28: Pushes the camera back slightly from the original 24 to include windows.
+    // Mobile X at -12: Keeps the corner centered while accommodating the wider FOV.
+    const targetPos = isHome ? (isMobile ? new THREE.Vector3(-12, 3.5, 28) : new THREE.Vector3(-14, 3.2, 24)) : new THREE.Vector3(-24.5, 3.5, -450);
     
-    // Adjusted LookAt lower and centered to prevent tilting and keep focus locked on community+windows
-    const targetLook = isHome ? (isMobile ? new THREE.Vector3(10, 1.2, -2) : new THREE.Vector3(20, 1.2, -2)) : new THREE.Vector3(-24.5, 1.5, -1000);
+    const targetLook = isHome ? (isMobile ? new THREE.Vector3(20, 1.2, -2) : new THREE.Vector3(20, 1.2, -2)) : new THREE.Vector3(-24.5, 1.5, -1000);
     
     camera.position.lerp(targetPos, 0.05); 
     camera.lookAt(targetLook);
