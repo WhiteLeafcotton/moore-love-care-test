@@ -25,13 +25,13 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
-// --- ARCHITECTURAL SCULPTED CHARACTER ---
-const SculptedHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
+// --- RICE-SHAPED ORGANIC CHARACTER ---
+const RiceHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
   const { 
     leftLegRotation = [0, 0, 0], 
     rightLegRotation = [0, 0, 0], 
-    leftArmRotation = [0.15, 0, -0.1], 
-    rightArmRotation = [0.15, 0, 0.1], 
+    leftArmRotation = [0.2, 0, -0.15], 
+    rightArmRotation = [0.2, 0, 0.15], 
     position = [0,0,0], 
     rotation = [0,0,0], 
     cane = false,
@@ -51,10 +51,10 @@ const SculptedHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
   useFrame((state) => {
     const t = state.clock.elapsedTime;
     if (torsoRef.current) {
-        torsoRef.current.rotation.x = Math.sin(t * 0.4) * 0.015; 
-        if (isLeaning) torsoRef.current.rotation.z = Math.sin(t * 0.3) * 0.08;
+        torsoRef.current.rotation.x = Math.sin(t * 0.4) * 0.02; 
+        if (isLeaning) torsoRef.current.rotation.z = Math.sin(t * 0.3) * 0.1;
     }
-    if (headRef.current) headRef.current.rotation.y = headRotationY + Math.sin(t * 0.25) * 0.04;
+    if (headRef.current) headRef.current.rotation.y = headRotationY + Math.sin(t * 0.2) * 0.06;
 
     if (isWalking) {
       const swing = Math.sin(t * walkSpeed) * 0.4;
@@ -72,52 +72,57 @@ const SculptedHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
 
   return (
     <group scale={scale} position={position} rotation={rotation}>
-      {/* Faceted Torso */}
+      {/* Rice Grain Torso */}
       <mesh ref={torsoRef} position={[0, 0.9, 0]} castShadow>
-        <cylinderGeometry args={[0.25, 0.12, 0.8, 6]} /> 
-        <meshStandardMaterial {...materialProps} flatShading />
+        <sphereGeometry args={[0.22, 32, 32]} />
+        <mesh ref={el => el && el.scale.set(1, 1.8, 0.8)} />
+        <meshStandardMaterial {...materialProps} />
       </mesh>
 
-      {/* Gem-cut Head */}
+      {/* Gem-cut Head (Kept from previous as requested) */}
       <mesh ref={headRef} position={[0, 1.45, 0]} castShadow>
         <icosahedronGeometry args={[0.18, 1]} />
         <meshStandardMaterial {...materialProps} flatShading />
       </mesh>
 
-      {/* Tapered Arms */}
-      <group position={[0, 1.25, 0]}>
-        <group ref={leftArmRef} position={[-0.28, 0, 0]} rotation={leftArmRotation}>
-          <mesh position={[0, -0.35, 0]} castShadow>
-            <cylinderGeometry args={[0.04, 0.07, 0.7, 5]} rotation={[Math.PI, 0, 0]} />
-            <meshStandardMaterial {...materialProps} flatShading />
+      {/* Rice Grain Arms */}
+      <group position={[0, 1.2, 0]}>
+        <group ref={leftArmRef} position={[-0.26, 0, 0]} rotation={leftArmRotation}>
+          <mesh position={[0, -0.3, 0]} castShadow>
+            <sphereGeometry args={[0.07, 24, 24]} />
+            <mesh ref={el => el && el.scale.set(0.8, 5, 0.8)} />
+            <meshStandardMaterial {...materialProps} />
           </mesh>
         </group>
-        <group ref={rightArmRef} position={[0.28, 0, 0]} rotation={rightArmRotation}>
-          <mesh position={[0, -0.35, 0]} castShadow>
-            <cylinderGeometry args={[0.04, 0.07, 0.7, 5]} rotation={[Math.PI, 0, 0]} />
-            <meshStandardMaterial {...materialProps} flatShading />
+        <group ref={rightArmRef} position={[0.26, 0, 0]} rotation={rightArmRotation}>
+          <mesh position={[0, -0.3, 0]} castShadow>
+            <sphereGeometry args={[0.07, 24, 24]} />
+            <mesh ref={el => el && el.scale.set(0.8, 5, 0.8)} />
+            <meshStandardMaterial {...materialProps} />
           </mesh>
           {cane && (
             <mesh position={[0.08, -0.6, 0.2]} rotation={[0.05, 0, 0]}>
-              <cylinderGeometry args={[0.01, 0.01, 1.1, 6]} />
+              <cylinderGeometry args={[0.01, 0.01, 1.1, 8]} />
               <meshStandardMaterial color="#ffffff" />
             </mesh>
           )}
         </group>
       </group>
 
-      {/* Tapered Legs */}
-      <group position={[0, 0.5, 0]}>
-        <group ref={leftLegRef} position={[-0.14, 0, 0]} rotation={leftLegRotation}>
-          <mesh position={[0, -0.4, 0]} castShadow>
-            <cylinderGeometry args={[0.05, 0.09, 0.8, 5]} rotation={[Math.PI, 0, 0]} />
-            <meshStandardMaterial {...materialProps} flatShading />
+      {/* Rice Grain Legs */}
+      <group position={[0, 0.45, 0]}>
+        <group ref={leftLegRef} position={[-0.12, 0, 0]} rotation={leftLegRotation}>
+          <mesh position={[0, -0.35, 0]} castShadow>
+            <sphereGeometry args={[0.08, 24, 24]} />
+            <mesh ref={el => el && el.scale.set(1, 5, 1)} />
+            <meshStandardMaterial {...materialProps} />
           </mesh>
         </group>
-        <group ref={rightLegRef} position={[0.14, 0, 0]} rotation={rightLegRotation}>
-          <mesh position={[0, -0.4, 0]} castShadow>
-            <cylinderGeometry args={[0.05, 0.09, 0.8, 5]} rotation={[Math.PI, 0, 0]} />
-            <meshStandardMaterial {...materialProps} flatShading />
+        <group ref={rightLegRef} position={[0.12, 0, 0]} rotation={rightLegRotation}>
+          <mesh position={[0, -0.35, 0]} castShadow>
+            <sphereGeometry args={[0.08, 24, 24]} />
+            <mesh ref={el => el && el.scale.set(1, 5, 1)} />
+            <meshStandardMaterial {...materialProps} />
           </mesh>
         </group>
       </group>
@@ -311,10 +316,10 @@ const WheelchairChapter = ({ butterProps }) => {
           <mesh position={[0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]}><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
         </group>
       <group position={[0, 0.2, 0]}>
-        <SculptedHumanoid scale={0.85} materialProps={butterProps} poseProps={{ rotation: [0, Math.PI, 0], leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], leftArmRotation: [0.7, 0, 0], rightArmRotation: [0.7, 0, 0]}} />
+        <RiceHumanoid scale={0.85} materialProps={butterProps} poseProps={{ rotation: [0, Math.PI, 0], leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], leftArmRotation: [0.7, 0, 0], rightArmRotation: [0.7, 0, 0]}} />
       </group>
       <group position={[0, 0, -0.75]}>
-        <SculptedHumanoid scale={0.95} materialProps={butterProps} poseProps={{ isWalking: isMoving, walkSpeed: 1.2, leftArmRotation: [-1.2, 0, 0.1], rightArmRotation: [-1.2, 0, -0.1] }} />
+        <RiceHumanoid scale={0.95} materialProps={butterProps} poseProps={{ isWalking: isMoving, walkSpeed: 1.2, leftArmRotation: [-1.2, 0, 0.1], rightArmRotation: [-1.2, 0, -0.1] }} />
       </group>
     </group>
   );
@@ -339,7 +344,7 @@ const WalkingToConversationChapter = ({ butterProps }) => {
 
   return (
     <group ref={groupRef} position={[7.5, 1.9, START_Z]} rotation={[0, Math.PI / 2, 0]}>
-        <SculptedHumanoid 
+        <RiceHumanoid 
           scale={0.95} 
           materialProps={butterProps} 
           poseProps={{ 
@@ -352,7 +357,7 @@ const WalkingToConversationChapter = ({ butterProps }) => {
           }} 
         />
         <group position={[0.4, 0, 0]}>
-          <SculptedHumanoid 
+          <RiceHumanoid 
             scale={0.95} 
             materialProps={butterProps} 
             poseProps={{ 
@@ -439,8 +444,8 @@ export default function Scene({ currentView }) {
           </group>
 
           <group position={[6.0, 1.6, 10.0]} rotation={[0, Math.PI / 2, 0]}>
-            <SculptedHumanoid scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
-            <SculptedHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
+            <RiceHumanoid scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
+            <RiceHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
           </group>
 
           <WalkingToConversationChapter butterProps={butterProps} />
