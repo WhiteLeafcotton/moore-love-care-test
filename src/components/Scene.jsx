@@ -227,14 +227,14 @@ export default function Scene({ currentView }) {
   useFrame((state, delta) => {
     const isHome = currentView === "home";
     
-    // MOBILE SHOT OPTIMIZATION:
-    // X at 6.0: Perfectly centered on Couple A
-    // Y at 2.3: Lower height crops out the ceiling/structure tops
-    // Z at 4.5: Camera is now INSIDE the room, past the doorway (No more clipping!)
-    const targetPos = isHome ? (isMobile ? new THREE.Vector3(6.0, 2.3, 4.5) : new THREE.Vector3(-14, 3.2, 24)) : new THREE.Vector3(-24.5, 3.5, -450);
+    // THE "CENTERED COMMUNITY" SHOT:
+    // X at 10.0: Centers the camera on the building's 90-degree corner.
+    // Y at 2.1: Very low camera to ensure structure tops are cropped out.
+    // Z at 10.0: Framed to include the community interactions (seated couple + walking group).
+    const targetPos = isHome ? (isMobile ? new THREE.Vector3(10.0, 2.1, 10.0) : new THREE.Vector3(-14, 3.2, 24)) : new THREE.Vector3(-24.5, 3.5, -450);
     
-    // LookAt slightly lower (2.0) to keep the horizon line clean and ceiling out
-    const targetLook = isHome ? (isMobile ? new THREE.Vector3(6, 2.0, 10) : new THREE.Vector3(20, 1.2, -2)) : new THREE.Vector3(-24.5, 1.5, -1000);
+    // LookAt centered on the interaction zone, slightly down to avoid ceiling.
+    const targetLook = isHome ? (isMobile ? new THREE.Vector3(10, 1.8, 18) : new THREE.Vector3(20, 1.2, -2)) : new THREE.Vector3(-24.5, 1.5, -1000);
     
     camera.position.lerp(targetPos, 0.05); 
     camera.lookAt(targetLook);
@@ -272,7 +272,6 @@ export default function Scene({ currentView }) {
 
         <group>
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}><Bench materialProps={butterProps} /></group>
-          {/* Couple A positioned at [6, 1.6, 10] */}
           <group position={[6.0, 1.6, 10.0]} rotation={[0, Math.PI / 2, 0]}>
             <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
             <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
