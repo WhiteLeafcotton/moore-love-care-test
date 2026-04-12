@@ -141,44 +141,6 @@ const Staircase = ({ position, width, rotation, materialProps }) => {
   );
 };
 
-const Bench = ({ position, rotation, materialProps }) => (
-  <group position={position} rotation={rotation}>
-    <mesh position={[0, 0.45, 0]} castShadow receiveShadow>
-      <boxGeometry args={[3, 0.1, 1.2]} />
-      <meshStandardMaterial {...materialProps} />
-    </mesh>
-    <mesh position={[0, 1, -0.55]} rotation={[-0.1, 0, 0]} castShadow receiveShadow>
-      <boxGeometry args={[3, 1, 0.1]} />
-      <meshStandardMaterial {...materialProps} />
-    </mesh>
-    {[[-1.3, 0, 0.45], [1.3, 0, 0.45], [-1.3, 0, -0.45], [1.3, 0, -0.45]].map((pos, i) => (
-      <mesh key={i} position={[pos[0], 0.225, pos[2]]} castShadow receiveShadow>
-        <boxGeometry args={[0.1, 0.45, 0.1]} />
-        <meshStandardMaterial {...materialProps} />
-      </mesh>
-    ))}
-  </group>
-);
-
-const WallOpening = ({ position, colorProps, width = 6, openingW = 4.8, height = 17, openingH = 9, isWindow = false }) => (
-  <group position={position}>
-    <mesh position={[-(openingW + (width - openingW) / 2) / 2, height / 2, 0]} castShadow receiveShadow>
-      <boxGeometry args={[(width - openingW) / 2, height, 2]} /><meshStandardMaterial {...colorProps} />
-    </mesh>
-    <mesh position={[(openingW + (width - openingW) / 2) / 2, height / 2, 0]} castShadow receiveShadow>
-      <boxGeometry args={[(width - openingW) / 2, height, 2]} /><meshStandardMaterial {...colorProps} />
-    </mesh>
-    <mesh position={[0, height - (height - openingH - (isWindow ? 4 : 0)) / 2, 0]} castShadow receiveShadow>
-      <boxGeometry args={[openingW, height - openingH - (isWindow ? 4 : 0), 2]} /><meshStandardMaterial {...colorProps} />
-    </mesh>
-    {isWindow && (
-      <mesh position={[0, 2, 0]} castShadow receiveShadow>
-        <boxGeometry args={[openingW, 4, 2]} /><meshStandardMaterial {...colorProps} />
-      </mesh>
-    )}
-  </group>
-);
-
 // --- CHARACTERS ---
 const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
   const { 
@@ -223,7 +185,7 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
         torsoRef.current.rotation.z = torsoRotationZ;
         torsoRef.current.rotation.x = torsoRotationX;
         if (isLeaning) {
-          torsoRef.current.rotation.z += Math.sin(t * 0.5) * 0.15;
+            torsoRef.current.rotation.z += Math.sin(t * 0.5) * 0.15;
         }
     }
     if (headRef.current) headRef.current.rotation.y = headRotationY;
@@ -235,8 +197,11 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
       if (leftArmRef.current) leftArmRef.current.rotation.x = -swing * 0.5;
       if (rightArmRef.current) rightArmRef.current.rotation.x = swing * 0.5;
     } else {
+        // --- FIX 2: Plant feet immediately if not walking ---
         if (leftLegRef.current) leftLegRef.current.rotation.x = leftLegRotation[0];
         if (rightLegRef.current) rightLegRef.current.rotation.x = rightLegRotation[0];
+        if (leftArmRef.current) leftArmRef.current.rotation.x = leftArmRotation[0];
+        if (rightArmRef.current) rightArmRef.current.rotation.x = rightArmRotation[0];
     }
   });
 
@@ -269,6 +234,18 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
   );
 };
 
+const SimpleWheelchair = ({ wheelRef }) => (
+  <group>
+    <mesh position={[0, 0.55, 0]} castShadow><boxGeometry args={[0.6, 0.08, 0.6]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
+    <mesh position={[0, 0.9, -0.25]} rotation={[0.1, 0, 0]} castShadow><boxGeometry args={[0.55, 0.7, 0.08]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
+    <mesh position={[0, 1.2, -0.3]} castShadow><boxGeometry args={[0.6, 0.05, 0.05]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
+    <group position={[0, 0.45, -0.05]} ref={wheelRef}>
+      <mesh position={[-0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]}><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
+      <mesh position={[0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]}><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
+    </group>
+  </group>
+);
+
 // --- ANIMATED CHAPTERS ---
 
 const WheelchairChapter = ({ butterProps }) => {
@@ -276,26 +253,49 @@ const WheelchairChapter = ({ butterProps }) => {
   const wheelRef = useRef();
 
   useFrame((state) => {
-    const t = state.clock.elapsedTime * 0.1; 
-    const movement = Math.sin(t) * 7.5; // Expanded path
-    groupRef.current.position.z = 15 + movement;
-    if (wheelRef.current) wheelRef.current.rotation.x = t * 6;
+    // --- FIX 1: Linear, one-way push, then stop ---
+    const t = Math.min(state.clock.elapsedTime * 0.04, 1); // linear progress 0 to 1 over ~25sec
+    const startZ = 20;
+    const endZ = 12.5; // Final planted position in view
+    
+    // Lerp position
+    groupRef.current.position.z = startZ + (endZ - startZ) * t;
+
+    // wheels rotate only while t < 1
+    if (wheelRef.current) {
+        if (t < 1) {
+            wheelRef.current.rotation.x = state.clock.elapsedTime * 0.8;
+        } else {
+            // Wheels stay still at final rotation
+            wheelRef.current.rotation.x = wheelRef.current.rotation.x;
+        }
+    }
   });
 
+  // Helper is walking only if time is active and progress is < 1
+  const [isStillActive, setIsStillActive] = useState(true);
+  useEffect(() => {
+    const timer = setTimeout(() => setIsStillActive(false), 25000); // sync with lerp duration
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <group ref={groupRef} position={[14.5, 1.9, 15]} rotation={[0, Math.PI, 0]}>
-        <mesh position={[0, 0.55, 0]} castShadow><boxGeometry args={[0.6, 0.08, 0.6]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
-        <mesh position={[0, 0.9, -0.25]} rotation={[0.1, 0, 0]} castShadow><boxGeometry args={[0.55, 0.7, 0.08]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
-        <mesh position={[0, 1.2, -0.3]} castShadow><boxGeometry args={[0.6, 0.05, 0.05]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
-        <group position={[0, 0.45, -0.05]} ref={wheelRef}>
-          <mesh position={[-0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]}><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
-          <mesh position={[0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]}><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
-        </group>
+    <group ref={groupRef} position={[14.5, 1.9, 20]} rotation={[0, Math.PI, 0]}>
+      <SimpleWheelchair wheelRef={wheelRef} />
       <group position={[0, 0.2, 0]}>
         <BlockHumanoid scale={0.85} materialProps={butterProps} poseProps={{ rotation: [0, Math.PI, 0], leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], leftArmRotation: [0.7, 0, 0], rightArmRotation: [0.7, 0, 0]}} />
       </group>
       <group position={[0, 0, -0.75]}>
-        <BlockHumanoid scale={0.95} materialProps={butterProps} poseProps={{ isWalking: true, walkSpeed: 3, leftArmRotation: [-1.2, 0, 0.1], rightArmRotation: [-1.2, 0, -0.1] }} />
+        <BlockHumanoid 
+          scale={0.95} 
+          materialProps={butterProps} 
+          poseProps={{ 
+            isWalking: isStillActive, // Pushing while t < 1
+            walkSpeed: 3, 
+            leftArmRotation: [-1.2, 0, 0.1], 
+            rightArmRotation: [-1.2, 0, -0.1] 
+          }} 
+        />
       </group>
     </group>
   );
@@ -306,36 +306,48 @@ const WalkingToConversationChapter = ({ butterProps }) => {
   const [isTalking, setIsTalking] = useState(false);
 
   useFrame((state) => {
-    const t = state.clock.elapsedTime * 0.25;
-    const startZ = 4.0;
-    const endZ = 12.0; // Stop point
+    // --- FIX 3: Linear one-way stroll to steps, then stop for conversation ---
+    const strollDuration = 18; // seconds to walk
+    const t = Math.min(state.clock.elapsedTime / strollDuration, 1); // 0 to 1 progress
     
-    const cycle = (Math.sin(t * 0.5) + 1) / 2;
-    const currentZ = startZ + (endZ - startZ) * cycle;
+    const startZ = 4.0; // Start at bench
+    const endZ = 12.0;  // Stop point near steps
     
-    groupRef.current.position.z = currentZ;
-    setIsTalking(cycle > 0.85); // They talk when they reach the end of the walk
+    // Linear interpolation of position (no sine loop)
+    groupRef.current.position.z = startZ + (endZ - startZ) * t;
+    
+    // Talking phase activates once they reach t = 1
+    if (t === 1 && !isTalking) {
+        setIsTalking(true);
+    }
   });
 
+  // Calculate rotations: face forward (0) then face each other (0.6)
+  const conversationTurn = 0.6;
+  const rotA = THREE.MathUtils.lerp(0, conversationTurn, isTalking ? 1 : 0);
+  const rotB = THREE.MathUtils.lerp(0, -conversationTurn, isTalking ? 1 : 0);
+  const baseRotationY = Math.PI / 2; // Walking orientation
+
   return (
-    <group ref={groupRef} position={[7.5, 1.9, 4]} rotation={[0, Math.PI / 2, 0]}>
+    <group ref={groupRef} position={[7.5, 1.9, 4]} rotation={[0, baseRotationY, 0]}>
         <BlockHumanoid 
           scale={1} 
           materialProps={butterProps} 
           poseProps={{ 
-            isWalking: !isTalking, 
-            cane: true, 
-            rotation: [0, isTalking ? 0.6 : 0, 0],
+            isWalking: !isTalking, // stops walking when they reach the point
+            walkSpeed: 3,
+            rotation: [0, rotA, 0],
+            cane: true,
             position: [-0.3, 0, 0],
-            headRotationY: isTalking ? -0.4 : 0
+            headRotationY: isTalking ? -0.4 : 0 // subtle head turn
           }} 
         />
         <BlockHumanoid 
           scale={0.9} 
           materialProps={butterProps} 
           poseProps={{ 
-            isWalking: !isTalking, 
-            rotation: [0, isTalking ? -0.6 : 0, 0],
+            isWalking: !isTalking, // stops walking when they reach the point
+            rotation: [0, rotB, 0],
             position: [0.4, 0, 0],
             headRotationY: isTalking ? 0.4 : 0
           }} 
@@ -402,24 +414,19 @@ export default function Scene({ currentView }) {
           <mesh position={[24, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
 
-        <group position={[17, -1.6, 1]} rotation={[0, -Math.PI / 2, 0]}>
-          <mesh castShadow receiveShadow position={[0.5, 8.5, 0]}><boxGeometry args={[1, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
-          <mesh castShadow receiveShadow position={[4, 8.5, 0]}><boxGeometry args={[6, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
-          <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={butterProps} />
-          <WallOpening position={[17, 0, 0]} isWindow={true} colorProps={butterProps} />
-          <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
-        </group>
-
         <group>
+          {/* Bench (Static darker핑크) */}
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <Bench materialProps={darkerProps} />
           </group>
 
+          {/* Couple A (Seated at Edge, Static) */}
           <group position={[6.0, 1.6, 10.0]} rotation={[0, Math.PI / 2, 0]}>
             <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
             <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
           </group>
 
+          {/* New linear-only paths. No loops. */}
           <WalkingToConversationChapter butterProps={butterProps} />
           <WheelchairChapter butterProps={butterProps} />
         </group>
