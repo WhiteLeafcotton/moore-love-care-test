@@ -78,10 +78,14 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
       if (leftArmRef.current) leftArmRef.current.rotation.x = -swing * 0.5;
       if (rightArmRef.current) rightArmRef.current.rotation.x = swing * 0.5;
     } else {
+        if (leftLegRef.current) {
+          leftArmRef.current.rotation.set(...leftArmRotation);
+        }
+        if (rightArmRef.current) {
+          rightArmRef.current.rotation.set(...rightArmRotation);
+        }
         if (leftLegRef.current) leftLegRef.current.rotation.x = leftLegRotation[0];
         if (rightLegRef.current) rightLegRef.current.rotation.x = rightLegRotation[0];
-        if (leftArmRef.current) leftArmRef.current.rotation.x = leftArmRotation[0];
-        if (rightArmRef.current) rightArmRef.current.rotation.x = rightArmRotation[0];
     }
   });
 
@@ -91,8 +95,8 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
         <mesh ref={headRef} position={[0, 1.4, 0]} castShadow><sphereGeometry args={[0.22, 32, 32]} /><meshStandardMaterial {...materialProps} /></mesh>
         <mesh position={[0, 0.3, 0]} castShadow><primitive object={torsoGeo} /><meshStandardMaterial {...materialProps} /></mesh>
         <group position={[0, 1.2, 0]}>
-          <group ref={leftArmRef} position={[-0.22, 0, 0]} rotation={leftArmRotation}><mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh></group>
-          <group ref={rightArmRef} position={[0.22, 0, 0]} rotation={rightArmRotation}>
+          <group ref={leftArmRef} position={[-0.22, 0, 0]}><mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh></group>
+          <group ref={rightArmRef} position={[0.22, 0, 0]}>
             <mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} />
               {cane && <mesh position={[0, -0.7, 0.1]}><cylinderGeometry args={[0.015, 0.015, 1.1]} /><meshStandardMaterial color="#fcd7d7" /></mesh>}
             </mesh>
@@ -186,7 +190,7 @@ const WallOpening = ({ position, colorProps, width = 6, openingW = 4.8, height =
   </group>
 );
 
-// --- ANIMATED CHAPTERS ---
+// --- CHAPTERS ---
 const WheelchairChapter = ({ butterProps }) => {
   const groupRef = useRef(); const wheelRef = useRef(); const [isMoving, setIsMoving] = useState(true);
   useFrame((state) => {
@@ -279,27 +283,32 @@ export default function Scene({ currentView }) {
         <group>
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <Bench materialProps={butterProps} />
-            {/* Couple D: Positions LOCKED. Arms forced FORWARD and DOWN now. */}
+            
+            {/* --- COUPLE D: GRABBING RAILS FIX --- */}
             <group position={[2.2, 0, 0.8]} rotation={[0, -0.4, 0]}>
+               {/* Main Character with Walker */}
                <BlockHumanoid 
                 scale={0.92} 
                 materialProps={butterProps} 
                 poseProps={{ 
                   walker: true, 
                   torsoRotationX: 0.35, 
-                  leftArmRotation: [-1.4, 0, 0.3], // Switched to negative to swing forward!
-                  rightArmRotation: [-1.4, 0, -0.3], 
+                  // Spread arms OUT to sides [X, Y, Z] to reach rails
+                  leftArmRotation: [-1.4, 0, -0.4], 
+                  rightArmRotation: [-1.4, 0, 0.4], 
                   headRotationY: -0.2
                 }} 
                />
+               {/* Helper Character - Moved further back (x: -0.9) to prevent clipping and improve visibility */}
                <BlockHumanoid 
                 scale={0.95} 
                 materialProps={butterProps} 
                 poseProps={{ 
-                  position: [-0.6, 0, 0.1], 
-                  rotation: [0, 0.4, 0], 
-                  headRotationY: -0.3,
-                  leftArmRotation: [-0.5, 0, -0.2] // Helper's arm forward too
+                  position: [-0.9, 0, 0.2], 
+                  rotation: [0, 0.5, 0], 
+                  headRotationY: -0.4,
+                  // Reaching toward the elder character's elbow/side
+                  leftArmRotation: [-0.6, 0, -0.3] 
                 }} 
                />
             </group>
