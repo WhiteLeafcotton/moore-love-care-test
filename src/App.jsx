@@ -21,6 +21,20 @@ export default function App() {
     transition: "all 0.3s ease"
   };
 
+  // Raw SVG Icon Definitions (placeholder for library install)
+  const FacebookIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+  );
+  const InstagramIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+  );
+  const LinkedinIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+  );
+  const YoutubeIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-1.94C18.88 4 12 4 12 4s-6.88 0-8.6.48a2.78 2.78 0 0 0-1.94 1.94C1 8.14 1 12 1 12s0 3.86.48 5.58a2.78 2.78 0 0 0 1.94 1.94C5.12 20 12 20 12 20s6.88 0 8.6-.48a2.78 2.78 0 0 0 1.94-1.94C23 15.86 23 12 23 12s0-3.86-.48-5.58z"></path><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"></polygon></svg>
+  );
+
   return (
     <div style={{ width: "100vw", height: "100vh", background: "#f7ece8", position: "relative", overflow: "hidden" }}>
       
@@ -28,17 +42,22 @@ export default function App() {
       <div style={{
         position: "absolute", inset: 0, zIndex: 10, 
         display: "flex", flexDirection: "column", justifyContent: "space-between",
-        padding: "50px 80px", // Increased padding for a more spacious feel
+        padding: "50px 80px",
         pointerEvents: "none",
         transition: "opacity 0.8s ease-in-out, backdrop-filter 0.8s ease-in-out",
         opacity: isHome ? 1 : 0,
 
-        background: isHome 
-          ? "linear-gradient(to right, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.02) 100%)" 
-          : "transparent",
+        /* --- Updated FADE EFFECT: GLOBAL Baseline Blur and Directional Background Gradient --- */
+        /* Update: Baseline blur reduced for global lightness */
         backdropFilter: isHome ? "blur(5px) saturate(105%)" : "blur(0px)",
         WebkitBackdropFilter: isHome ? "blur(5px) saturate(105%)" : "blur(0px)",
         
+        /* Updated Background Gradient (lightttttttttled significantly) */
+        background: isHome 
+          ? "linear-gradient(to right, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.03) 50%, rgba(255, 255, 255, 0.01) 100%)" 
+          : "transparent",
+        
+        /* Mask ensured the blur itself fades to right, kept for effect consistency */
         WebkitMaskImage: "linear-gradient(to right, black 30%, rgba(0, 0, 0, 0.4) 100%)",
         maskImage: "linear-gradient(to right, black 30%, rgba(0, 0, 0, 0.4) 100%)"
       }}>
@@ -56,7 +75,7 @@ export default function App() {
           </button>
         </header>
 
-        {/* HERO SECTION - LARGER TITLE */}
+        {/* HERO SECTION */}
         <main style={{ textAlign: "left", maxWidth: "900px" }}>
           <div style={{ 
             fontSize: "11px", letterSpacing: "0.6em", textTransform: "uppercase", 
@@ -65,7 +84,6 @@ export default function App() {
             THE SOLARIUM SANCTUARY
           </div>
           <h1 style={{
-            /* Increased Title Scale */
             fontSize: "clamp(80px, 14vw, 160px)", 
             lineHeight: "0.8",
             color: "#2d1d3d", 
@@ -84,7 +102,7 @@ export default function App() {
           </button>
         </main>
 
-        {/* EXTENDED FOOTER - SOCIALS & INFO */}
+        {/* --- FOOTER UPDATED: Icons replace Text --- */}
         <footer style={{ 
           display: "grid", 
           gridTemplateColumns: "1fr 1fr 1fr", 
@@ -93,12 +111,15 @@ export default function App() {
           color: "#2d1d3d",
           textTransform: "uppercase",
           borderTop: "1px solid rgba(45, 29, 61, 0.1)",
-          paddingTop: "30px"
+          paddingTop: "30px",
+          alignItems: "center"
         }}>
-          <div style={{ display: "flex", gap: "25px" }}>
-            <a href="#" style={{ pointerEvents: "auto", textDecoration: "none", color: "inherit", opacity: 0.6 }}>Instagram</a>
-            <a href="#" style={{ pointerEvents: "auto", textDecoration: "none", color: "inherit", opacity: 0.6 }}>LinkedIn</a>
-            <a href="#" style={{ pointerEvents: "auto", textDecoration: "none", color: "inherit", opacity: 0.6 }}>Vimeo</a>
+          {/* Social Icons instead of Text */}
+          <div style={{ display: "flex", gap: "20px", pointerEvents: "auto", color: "rgba(45, 29, 61, 0.6)" }}>
+            <a href="#" style={{ textDecoration: "none", color: "inherit" }}><FacebookIcon /></a>
+            <a href="#" style={{ textDecoration: "none", color: "inherit" }}><InstagramIcon /></a>
+            <a href="#" style={{ textDecoration: "none", color: "inherit" }}><LinkedinIcon /></a>
+            <a href="#" style={{ textDecoration: "none", color: "inherit" }}><YoutubeIcon /></a>
           </div>
           
           <div style={{ textAlign: "center", opacity: 0.4 }}>
