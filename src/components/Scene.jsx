@@ -379,15 +379,15 @@ export default function Scene({ currentView }) {
     const isHome = currentView === "home";
     const LERP_SPEED = isHome ? 0.04 : 0.018; 
 
-    // --- CENTIMATIC MOBILE CAMERA (RIGHT & BACK) ---
-    // Moved to the right (X: 18) and pulled back (Z: 48)
-    const mobileHomePos = new THREE.Vector3(18, 3.5, 48); 
+    // --- HEAVY LEFT MOBILE CAMERA SHIFT ---
+    // Moved way out left (X: -45) and backed up (Z: 50)
+    const mobileHomePos = new THREE.Vector3(-45, 3.5, 50); 
     const desktopHomePos = new THREE.Vector3(-14, 3.2, 24);
     
     const homePos = isMobile ? mobileHomePos : desktopHomePos;
     const targetPos = isHome ? homePos : new THREE.Vector3(-24.5, 3.5, -450);
     
-    // mobileLookAt: Keeps Y at 3.5 to maintain a level cinematic horizon
+    // mobileLookAt: Focusing back on the characters (X: 12) for a nice side-angle depth
     const mobileLookAt = new THREE.Vector3(12, 3.5, 8); 
     const desktopLookAt = new THREE.Vector3(20, 1.2, -2);
 
