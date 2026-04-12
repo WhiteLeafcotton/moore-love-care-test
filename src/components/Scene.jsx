@@ -63,7 +63,7 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {}, isHelper = fa
     torsoRotationZ = 0,
     torsoRotationX = 0,
     headRotationY = 0,
-    animateArmsTo = null // New prop for smooth arm reach
+    animateArmsTo = null 
   } = poseProps;
   
   const torsoRef = useRef();
@@ -101,8 +101,7 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {}, isHelper = fa
       if (leftArmRef.current) leftArmRef.current.rotation.x = -swing * 0.5;
       if (rightArmRef.current) rightArmRef.current.rotation.x = swing * 0.5;
     } else if (animateArmsTo) {
-      // ANIMATION LOGIC: Reaching arms slowly from sides to walker handles
-      const reachProgress = THREE.MathUtils.smoothstep(t, 0.5, 3.5); // Starts at 0.5s, ends at 3.5s
+      const reachProgress = THREE.MathUtils.smoothstep(t, 0.5, 3.5); 
       if (leftArmRef.current) {
         leftArmRef.current.rotation.x = THREE.MathUtils.lerp(leftArmRotation[0], animateArmsTo[0], reachProgress);
         leftArmRef.current.rotation.z = THREE.MathUtils.lerp(leftArmRotation[2], animateArmsTo[2], reachProgress);
@@ -263,18 +262,52 @@ const WheelchairChapter = ({ butterProps, isMobile }) => {
 const WalkingToConversationChapter = ({ butterProps }) => {
   const groupRef = useRef(); 
   const [phase, setPhase] = useState("walking");
+  
+  // Adjusted: Further stop point (from 18.0 to 22.0)
+  const finalStopZ = 22.0;
+
   useFrame((state) => {
-    const t = Math.min(state.clock.elapsedTime / 15, 1);
+    const t = Math.min(state.clock.elapsedTime / 16, 1);
     const smoothProgress = THREE.MathUtils.smoothstep(t, 0, 1);
+    
     if (phase === "walking") {
-      groupRef.current.position.z = 4.0 + (18.0 - 4.0) * smoothProgress;
+      groupRef.current.position.z = 4.0 + (finalStopZ - 4.0) * smoothProgress;
       if (t >= 1) setPhase("talking");
     }
   });
+
+  // Calculate rotation for "Stop and Turn" effect
+  const turnFactor = phase === "talking" ? 1 : 0;
+  
   return (
     <group ref={groupRef} position={[7.5, 1.9, 4.0]} rotation={[0, Math.PI / 2, 0]}>
-        <BlockHumanoid scale={0.95} materialProps={butterProps} poseProps={{ isWalking: phase === "walking", walkSpeed: 3.5, cane: true, rotation: [0, 0.6, 0], position: [-0.3, 0, 0], headRotationY: -1.2 }} />
-        <group position={[0.4, 0, 0]}><BlockHumanoid isHelper scale={0.95} materialProps={butterProps} poseProps={{ isWalking: phase === "walking", walkSpeed: 3.5, rotation: [0, -0.6, 0], headRotationY: phase === "walking" ? 0 : 0.4 }} /></group>
+        {/* Person A: Walk side-by-side, then turn to B */}
+        <BlockHumanoid 
+          scale={0.95} 
+          materialProps={butterProps} 
+          poseProps={{ 
+            isWalking: phase === "walking", 
+            walkSpeed: 4.5, 
+            cane: true, 
+            rotation: [0, 0.6 * turnFactor, 0], 
+            position: [-0.4, 0, 0], 
+            headRotationY: -1.2 * turnFactor 
+          }} 
+        />
+        {/* Person B (Helper): Walk side-by-side, then turn to A */}
+        <group position={[0.4, 0, 0]}>
+          <BlockHumanoid 
+            isHelper 
+            scale={0.95} 
+            materialProps={butterProps} 
+            poseProps={{ 
+              isWalking: phase === "walking", 
+              walkSpeed: 4.5, 
+              rotation: [0, -0.6 * turnFactor, 0], 
+              headRotationY: phase === "walking" ? 0 : 0.4 
+            }} 
+          />
+        </group>
     </group>
   );
 };
@@ -338,7 +371,6 @@ export default function Scene({ currentView }) {
                 poseProps={{ 
                   walker: true, 
                   torsoRotationX: 0.1, 
-                  // ANIMATION: Hands start at side, reach handles over time
                   leftArmRotation: [0.1, 0, -0.1], 
                   rightArmRotation: [0.1, 0, 0.1], 
                   animateArmsTo: [-1.1, 0, -0.1], 
@@ -364,7 +396,6 @@ export default function Scene({ currentView }) {
           {!isMobile && <WalkingToConversationChapter butterProps={butterProps} />}
 
           <group position={[6.0, 1.6, 10.0]} rotation={[0, Math.PI / 2, 0]}>
-            {/* HEART BADGE VISIBILITY: Rotation set to ensure visibility of the badge */}
             <BlockHumanoid isHelper scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0], rotation: [0, -0.4, 0]}} />
             <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
           </group>
