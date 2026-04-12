@@ -379,15 +379,15 @@ export default function Scene({ currentView }) {
     const isHome = currentView === "home";
     const LERP_SPEED = isHome ? 0.04 : 0.018; 
 
-    // --- ULTRA-LEFT MOBILE CAMERA: X: -85 ---
-    const mobileHomePos = new THREE.Vector3(-85, 2.8, 28); 
+    // --- ULTRA-EXTREME MOBILE CAMERA: X: -110, Z: 18 ---
+    const mobileHomePos = new THREE.Vector3(-110, 2.8, 18); 
     const desktopHomePos = new THREE.Vector3(-14, 3.2, 24);
     
     const homePos = isMobile ? mobileHomePos : desktopHomePos;
     const targetPos = isHome ? homePos : new THREE.Vector3(-24.5, 3.5, -450);
     
-    // Focused slightly further right to create a massive lead-in from the left
-    const mobileLookAt = new THREE.Vector3(15, 2.8, 12); 
+    // Adjusted LookAt to focus on the character cluster at the doorway
+    const mobileLookAt = new THREE.Vector3(18, 2.8, 12); 
     const desktopLookAt = new THREE.Vector3(20, 1.2, -2);
 
     camera.position.lerp(targetPos, LERP_SPEED);
