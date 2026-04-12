@@ -279,10 +279,8 @@ const WheelchairChapter = ({ butterProps }) => {
   const [isMoving, setIsMoving] = useState(true);
 
   useFrame((state) => {
-    const duration = 12; // Time to complete movement
+    const duration = 12; 
     const t = Math.min(state.clock.elapsedTime / duration, 1);
-    
-    // Smoothstop logic: accel/decel smoothly
     const progress = THREE.MathUtils.smoothstep(t, 0, 1);
     
     const startZ = 22;
@@ -293,7 +291,7 @@ const WheelchairChapter = ({ butterProps }) => {
     }
 
     if (t < 1) {
-        if (wheelRef.current) wheelRef.current.rotation.x = state.clock.elapsedTime * 2.5; // Spun up wheel speed
+        if (wheelRef.current) wheelRef.current.rotation.x = state.clock.elapsedTime * 2.5; 
     } else if (isMoving) {
         setIsMoving(false);
     }
@@ -343,7 +341,7 @@ const WalkingToConversationChapter = ({ butterProps }) => {
           materialProps={butterProps} 
           poseProps={{ 
             isWalking: phase === "walking", 
-            walkSpeed: 3.5, // Sped up walk speed
+            walkSpeed: 3.5, 
             cane: true, 
             rotation: [0, phase !== "walking" ? 0.6 : 0, 0],
             position: [-0.3, 0, 0],
@@ -381,17 +379,20 @@ export default function Scene({ currentView }) {
     const isHome = currentView === "home";
     const LERP_SPEED = isHome ? 0.04 : 0.018; 
 
-    // --- MOBILE SWEET SPOT SETTINGS ---
-    // Lowered Y to 3.5 (eye-level) and tightened X to -8 for an intimate feel
-    const homePos = isMobile ? new THREE.Vector3(-8, 3.5, 24) : new THREE.Vector3(-14, 3.2, 24); 
+    // --- UPDATED MOBILE POSITION ---
+    // homePos: Moved Z from 24 to 35 to "back up" and see more of the landscape
+    const mobileHomePos = new THREE.Vector3(-8, 3.5, 35); 
+    const desktopHomePos = new THREE.Vector3(-14, 3.2, 24);
+    
+    const homePos = isMobile ? mobileHomePos : desktopHomePos;
     const targetPos = isHome ? homePos : new THREE.Vector3(-24.5, 3.5, -450);
     
-    // LookAt for mobile is raised to 3.5 to keep the horizon cinematic and level
-    const homeLookAt = isMobile ? new THREE.Vector3(12, 3.5, 8) : new THREE.Vector3(20, 1.2, -2);
-    const targetLookAt = isHome ? homeLookAt : new THREE.Vector3(-24.5, 1.5, -1000);
+    // mobileLookAt: Keeps Y at 3.5 to match camera height (level/cinematic)
+    const mobileLookAt = new THREE.Vector3(12, 3.5, 8); 
+    const desktopLookAt = new THREE.Vector3(20, 1.2, -2);
 
     camera.position.lerp(targetPos, LERP_SPEED);
-    lookAtTarget.current.lerp(targetLookAt, LERP_SPEED);
+    lookAtTarget.current.lerp(isHome ? (isMobile ? mobileLookAt : desktopLookAt) : new THREE.Vector3(-24.5, 1.5, -1000), LERP_SPEED);
     camera.lookAt(lookAtTarget.current);
 
     if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.08;
@@ -424,7 +425,6 @@ export default function Scene({ currentView }) {
         
         <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={butterProps} />
         
-        {/* SMALL HEXAGON PLATFORM */}
         <mesh position={[-4.5, -1.38, 12]} castShadow receiveShadow>
           <cylinderGeometry args={[2, 2, 0.1, 6]} />
           <meshStandardMaterial {...butterProps} />
