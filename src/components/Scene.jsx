@@ -270,22 +270,20 @@ export default function Scene({ currentView }) {
       <fog attach="fog" args={["#f8e1ff", 10, 400]} />
       <GrassySassyHills />
       <hemisphereLight intensity={1.4} color="#ffffff" groundColor="#b066ff" />
-      <directionalLight position={[-15, 30, 10]} intensity={0.6} castShadow />
+      {/* Light intensity increased to improve shadows */}
+      <directionalLight position={[-15, 30, 10]} intensity={1.2} castShadow />
 
       <group ref={cloudGroupRef}>
         <Cloud position={[0, 80, -450]} speed={0.2} opacity={0.3} segments={40} bounds={[1000, 100, 50]} volume={150} color="#ffd1dc" />
       </group>
 
       <group position={[0, 0, 0]}>
-        {/* Main large internal corner box */}
         <mesh position={[15.5, -2.1, 15.0]} castShadow receiveShadow>
           <boxGeometry args={[20, 8.0, 30]} /><meshStandardMaterial {...butterProps} />
         </mesh>
         
-        {/* Main staircase, facing water */}
         <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={butterProps} />
         
-        {/* Left facade structure */}
         <group position={[-16, -1.6, 0]}>
           <mesh position={[1, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
           <WallOpening position={[6, 0, 0]} colorProps={butterProps} />
@@ -293,37 +291,30 @@ export default function Scene({ currentView }) {
           <mesh position={[24, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
 
-        {/* Right facade structure (perpendicular to mainbox internal face) */}
         <group position={[17, -1.6, 1]} rotation={[0, -Math.PI / 2, 0]}>
-          {/* Main wall section forming the perpendicular internal face of the corner */}
           <mesh castShadow receiveShadow position={[4, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
-          
-          {/* --- NEW SECTION: Large internal corner shadowed opening --- */}
-          {/* This opening is designed to create a deeply shadowed area right in the main 90 corner.
-              It uses the same 'opening inside vertial edge shadowed' principle. */}
           <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={butterProps} />
-          {/* Existing openings, also creating shadowed edges */}
           <WallOpening position={[17, 0, 0]} isWindow={true} colorProps={butterProps} />
-          
-          {/* Final far right section */}
           <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
 
-        {/* --- Characters --- */}
         <group>
-          {/* Senior Couple A: locked poseProps */}
+          {/* Bench: Positioned and turned 180 degrees */}
+          <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
+            <Bench materialProps={butterProps} />
+            {/* Person Sitting removed */}
+          </group>
+
           <group position={[14, 1.9, 12]} rotation={[0, -Math.PI * 0.7, 0]}>
             <BlockHumanoid scale={1} materialProps={butterProps} poseProps={{ cane: true, leftLegRotation: [0.3, 0, 0], rightLegRotation: [-0.3, 0, 0], position: [-0.3, 0, 0]}} />
             <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ leftLegRotation: [-0.3, 0, 0], rightLegRotation: [0.3, 0, 0], position: [0.4, 0, -0.1]}} />
           </group>
 
-          {/* Couple B (closer to stairs): locked poseProps */}
           <group position={[6.0, 1.6, 11.5]} rotation={[0, Math.PI / 2, 0]}>
             <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
             <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
           </group>
 
-          {/* Couple C (near wheelchair): locked poseProps */}
           <group position={[14.5, 1.9, 17.5]} rotation={[0, Math.PI, 0]}>
             <SimpleWheelchair materialProps={butterProps} />
             <group position={[0, 0.2, 0]}>
