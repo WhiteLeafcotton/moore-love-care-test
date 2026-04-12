@@ -30,8 +30,9 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
   const { 
     leftLegRotation = [0, 0, 0], 
     rightLegRotation = [0, 0, 0], 
-    leftArmRotation = [0.1, 0, -0.05], 
-    rightArmRotation = [0.1, 0, 0.05], 
+    // FIXED: Default arm rotations brought forward and relaxed
+    leftArmRotation = [0.15, 0, -0.05], 
+    rightArmRotation = [0.15, 0, 0.05], 
     position = [0,0,0], 
     rotation = [0,0,0], 
     cane = false,
@@ -64,20 +65,29 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
   useFrame((state) => {
     const t = state.clock.elapsedTime;
     
-    // Gestures and Idle movement
+    // NEW: Candid Gesturing & Head Tilt
     if (isTalking) {
-      headRef.current.rotation.y = headRotationY + Math.sin(t * 1.5) * 0.1;
-      headRef.current.rotation.x = Math.cos(t * 2) * 0.05;
-      rightArmRef.current.rotation.x = 0.4 + Math.sin(t * 3) * 0.2; // Gesturing
-      leftArmRef.current.rotation.z = -0.1 + Math.sin(t * 1) * 0.05; // Relaxed
+      const gesture = Math.sin(t * 2) * 0.15;
+      const nod = Math.cos(t * 1.5) * 0.05;
+      if (headRef.current) {
+        headRef.current.rotation.y = headRotationY + gesture * 0.5;
+        headRef.current.rotation.x = nod;
+      }
+      if (rightArmRef.current) rightArmRef.current.rotation.x = 0.3 + gesture;
+      if (leftArmRef.current) leftArmRef.current.rotation.z = -0.1 + Math.sin(t) * 0.05;
     }
 
     if (isWalking) {
       const swing = Math.sin(t * walkSpeed) * 0.4;
-      leftLegRef.current.rotation.x = swing;
-      rightLegRef.current.rotation.x = -swing;
-      leftArmRef.current.rotation.x = -swing * 0.5;
-      rightArmRef.current.rotation.x = swing * 0.5;
+      if (leftLegRef.current) leftLegRef.current.rotation.x = swing;
+      if (rightLegRef.current) rightLegRef.current.rotation.x = -swing;
+      if (leftArmRef.current) leftArmRef.current.rotation.x = -swing * 0.5;
+      if (rightArmRef.current) rightArmRef.current.rotation.x = swing * 0.5;
+    } else if (!isTalking) {
+        if (leftLegRef.current) leftLegRef.current.rotation.x = leftLegRotation[0];
+        if (rightLegRef.current) rightLegRef.current.rotation.x = rightLegRotation[0];
+        if (leftArmRef.current) leftArmRef.current.rotation.x = leftArmRotation[0];
+        if (rightArmRef.current) rightArmRef.current.rotation.x = rightArmRotation[0];
     }
   });
 
@@ -110,7 +120,7 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
   );
 };
 
-// --- GRASS & ENVIRONMENT ---
+// --- ENVIRONMENT ---
 const GrassySassyHills = () => {
   const meshRef = useRef();
   const bladeGeo = useMemo(() => {
@@ -261,7 +271,7 @@ const WalkingToConversationChapter = ({ butterProps }) => {
             isTalking: phase === "talking",
             walkSpeed: 3.5, 
             cane: true, 
-            rotation: [0, 0.4, 0],
+            rotation: [0, 0.45, 0], // Inward turn
             position: [-0.3, 0, 0],
             headRotationY: -0.8
           }} 
@@ -274,7 +284,7 @@ const WalkingToConversationChapter = ({ butterProps }) => {
               isWalking: phase === "walking", 
               isTalking: phase === "talking",
               walkSpeed: 3.5,
-              rotation: [0, -0.4, 0],
+              rotation: [0, -0.45, 0], // Inward turn
               headRotationY: 0.8
             }} 
           />
@@ -294,18 +304,17 @@ export default function Scene({ currentView }) {
 
   useFrame((state, delta) => {
     const isHome = currentView === "home";
-    // MOBILE ZOOM: Changed Z from 10 to 8 to get even closer.
+    // MOBILE ZOOM FIXED: Moved from Z: 10 to Z: 6.5 for "in your face" framing
     const targetPos = isHome 
-        ? (isMobile ? new THREE.Vector3(-30, 1.1, 8) : new THREE.Vector3(-14, 3.2, 24)) 
+        ? (isMobile ? new THREE.Vector3(-30, 1.1, 6.5) : new THREE.Vector3(-14, 3.2, 24)) 
         : new THREE.Vector3(-24.5, 3.5, -450);
     
+    // Tilted camera up more on mobile to frame the massive architecture
     const targetLookAt = isHome 
-        ? (isMobile ? new THREE.Vector3(10, 2.8, 8) : new THREE.Vector3(20, 1.2, -2)) 
+        ? (isMobile ? new THREE.Vector3(10, 3.2, 6.5) : new THREE.Vector3(20, 1.2, -2)) 
         : new THREE.Vector3(-24.5, 1.5, -1000);
 
     camera.position.lerp(targetPos, 0.04);
-    const currentLook = new THREE.Vector3();
-    camera.getWorldDirection(currentLook);
     camera.lookAt(targetLookAt);
 
     if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.08;
@@ -327,21 +336,21 @@ export default function Scene({ currentView }) {
         
         <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={butterProps} />
 
-        {/* RESTORED FULL STRUCTURE WALLS */}
+        {/* RESTORED & EXTENDED STRUCTURE: No more mobile clipping */}
         <group position={[-16, -1.6, 0]}>
           <mesh position={[1, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
           <WallOpening position={[6, 0, 0]} colorProps={butterProps} />
           <WallOpening position={[12, 0, 0]} colorProps={butterProps} />
           <mesh position={[24, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
-          {/* Extension for Mobile clipping fix */}
-          <mesh position={[40, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[14, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
+          {/* Extension wall to ensure mobile screen is always filled */}
+          <mesh position={[45, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[24, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
 
         <group position={[17, -1.6, 1]} rotation={[0, -Math.PI / 2, 0]}>
           <mesh castShadow receiveShadow position={[0.5, 8.5, 0]}><boxGeometry args={[1, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
           <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={butterProps} />
           <WallOpening position={[17, 0, 0]} isWindow={true} colorProps={butterProps} />
-          <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
+          <mesh castShadow receiveShadow position={[30, 8.5, 0]}><boxGeometry args={[20, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
 
         <WalkingToConversationChapter butterProps={butterProps} />
