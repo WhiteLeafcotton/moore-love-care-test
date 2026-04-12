@@ -409,7 +409,7 @@ const WalkingToConversationChapter = ({ butterProps, darkerProps }) => {
   );
 };
 
-// --- MAIN SCENE ---
+// --- MAIN SCENJE ---
 export default function Scene({ currentView }) {
   const { camera, size } = useThree();
   const waterRef = useRef();
