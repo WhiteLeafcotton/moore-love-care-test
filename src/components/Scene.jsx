@@ -64,10 +64,13 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
 
   useFrame((state) => {
     const t = state.clock.elapsedTime;
+    
     if (torsoRef.current) {
         torsoRef.current.rotation.z = torsoRotationZ;
         torsoRef.current.rotation.x = torsoRotationX;
-        if (isLeaning) torsoRef.current.rotation.z += Math.sin(t * 0.5) * 0.15;
+        if (isLeaning) {
+          torsoRef.current.rotation.z += Math.sin(t * 0.5) * 0.15;
+        }
     }
     if (headRef.current) headRef.current.rotation.y = headRotationY;
 
@@ -269,22 +272,28 @@ const WallOpening = ({ position, colorProps, width = 6, openingW = 4.8, height =
 );
 
 // --- ANIMATED CHAPTERS ---
+
 const WheelchairChapter = ({ butterProps }) => {
   const groupRef = useRef();
   const wheelRef = useRef();
   const [isMoving, setIsMoving] = useState(true);
 
   useFrame((state) => {
-    const duration = 12; 
+    const duration = 12; // Time to complete movement
     const t = Math.min(state.clock.elapsedTime / duration, 1);
+    
+    // Smoothstop logic: accel/decel smoothly
     const progress = THREE.MathUtils.smoothstep(t, 0, 1);
+    
     const startZ = 22;
     const endZ = 12.5; 
+    
     if (groupRef.current) {
         groupRef.current.position.z = startZ + (endZ - startZ) * progress;
     }
+
     if (t < 1) {
-        if (wheelRef.current) wheelRef.current.rotation.x = state.clock.elapsedTime * 2.5;
+        if (wheelRef.current) wheelRef.current.rotation.x = state.clock.elapsedTime * 2.5; // Spun up wheel speed
     } else if (isMoving) {
         setIsMoving(false);
     }
@@ -312,6 +321,7 @@ const WheelchairChapter = ({ butterProps }) => {
 const WalkingToConversationChapter = ({ butterProps }) => {
   const groupRef = useRef();
   const [phase, setPhase] = useState("walking");
+
   const START_Z = 4.0;
   const END_Z = 18.0; 
 
@@ -319,6 +329,7 @@ const WalkingToConversationChapter = ({ butterProps }) => {
     const duration = 15;
     const t = Math.min(state.clock.elapsedTime / duration, 1);
     const progress = THREE.MathUtils.smoothstep(t, 0, 1);
+    
     if (phase === "walking") {
       groupRef.current.position.z = START_Z + (END_Z - START_Z) * progress;
       if (t >= 1) setPhase("talking");
@@ -332,7 +343,7 @@ const WalkingToConversationChapter = ({ butterProps }) => {
           materialProps={butterProps} 
           poseProps={{ 
             isWalking: phase === "walking", 
-            walkSpeed: 3.5, 
+            walkSpeed: 3.5, // Sped up walk speed
             cane: true, 
             rotation: [0, phase !== "walking" ? 0.6 : 0, 0],
             position: [-0.3, 0, 0],
@@ -406,9 +417,9 @@ export default function Scene({ currentView }) {
         
         <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={butterProps} />
         
-        {/* --- PREMIUM CIRCULAR PLATFORM (VISIBLE ON THE RIGHT) --- */}
-        <mesh position={[16, -1.38, 12]} castShadow receiveShadow>
-          <cylinderGeometry args={[3.5, 3.5, 0.2, 32]} />
+        {/* SMALL HEXAGON PLATFORM - Moved to be visible in the nook by the stairs */}
+        <mesh position={[-4.5, -1.38, 12]} castShadow receiveShadow>
+          <cylinderGeometry args={[2, 2, 0.1, 6]} />
           <meshStandardMaterial {...butterProps} />
         </mesh>
 
@@ -431,10 +442,12 @@ export default function Scene({ currentView }) {
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <Bench materialProps={darkerProps} />
           </group>
+
           <group position={[6.0, 1.6, 10.0]} rotation={[0, Math.PI / 2, 0]}>
             <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
             <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
           </group>
+
           <WalkingToConversationChapter butterProps={butterProps} />
           <WheelchairChapter butterProps={butterProps} />
         </group>
