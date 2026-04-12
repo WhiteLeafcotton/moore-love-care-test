@@ -7,6 +7,7 @@ import * as THREE from "three";
 extend({ Water });
 
 const GRASS_COUNT = 400000;
+const THEME_PURPLE = "#21162e"; // Consistent Dark Purple
 
 const getHillHeight = (x, z) => {
   const dist = Math.sqrt(x * x + z * z);
@@ -25,8 +26,27 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
-// --- CHARACTERS ---
-const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
+// --- COMPONENTS ---
+const HeartBadge = () => {
+  const shape = useMemo(() => {
+    const s = new THREE.Shape();
+    s.moveTo(0, 0);
+    s.bezierCurveTo(0, 0.05, 0.1, 0.1, 0.1, 0);
+    s.bezierCurveTo(0.1, -0.05, 0, -0.1, 0, -0.15);
+    s.bezierCurveTo(0, -0.1, -0.1, -0.05, -0.1, 0);
+    s.bezierCurveTo(-0.1, 0.1, 0, 0.05, 0, 0);
+    return s;
+  }, []);
+
+  return (
+    <mesh position={[0.12, 1.0, 0.19]} rotation={[0, 0, Math.PI]}>
+      <shapeGeometry args={[shape]} />
+      <meshStandardMaterial color={THEME_PURPLE} emissive={THEME_PURPLE} emissiveIntensity={0.5} />
+    </mesh>
+  );
+};
+
+const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {}, isHelper = false }) => {
   const { 
     leftLegRotation = [0, 0, 0], 
     rightLegRotation = [0, 0, 0], 
@@ -90,23 +110,24 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
       <group ref={torsoRef}>
         <mesh ref={headRef} position={[0, 1.4, 0]} castShadow><sphereGeometry args={[0.22, 32, 32]} /><meshStandardMaterial {...materialProps} /></mesh>
         <mesh position={[0, 0.3, 0]} castShadow><primitive object={torsoGeo} /><meshStandardMaterial {...materialProps} /></mesh>
+        {isHelper && <HeartBadge />}
         <group position={[0, 1.2, 0]}>
           <group ref={leftArmRef} position={[-0.22, 0, 0]}><mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh></group>
           <group ref={rightArmRef} position={[0.22, 0, 0]}>
             <mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} />
-              {cane && <mesh position={[0, -0.7, 0.1]}><cylinderGeometry args={[0.015, 0.015, 1.1]} /><meshStandardMaterial color="#fcd7d7" /></mesh>}
+              {cane && <mesh position={[0, -0.7, 0.1]}><cylinderGeometry args={[0.015, 0.015, 1.1]} /><meshStandardMaterial color={THEME_PURPLE} /></mesh>}
             </mesh>
           </group>
         </group>
       </group>
       {walker && (
         <group position={[0, -0.2, 0.35]}>
-          <mesh position={[0.3, 0.45, 0]}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
-          <mesh position={[-0.3, 0.45, 0]}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
-          <mesh position={[0, 0.85, 0]}><boxGeometry args={[0.65, 0.03, 0.03]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
-          <mesh position={[0.3, 0.45, 0.3]}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
-          <mesh position={[-0.3, 0.45, 0.3]}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
-          <mesh position={[0, 0.85, 0.3]}><boxGeometry args={[0.6, 0.03, 0.03]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
+          <mesh position={[0.3, 0.45, 0]}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color={THEME_PURPLE} /></mesh>
+          <mesh position={[-0.3, 0.45, 0]}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color={THEME_PURPLE} /></mesh>
+          <mesh position={[0, 0.85, 0]}><boxGeometry args={[0.65, 0.03, 0.03]} /><meshStandardMaterial color={THEME_PURPLE} /></mesh>
+          <mesh position={[0.3, 0.45, 0.3]}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color={THEME_PURPLE} /></mesh>
+          <mesh position={[-0.3, 0.45, 0.3]}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color={THEME_PURPLE} /></mesh>
+          <mesh position={[0, 0.85, 0.3]}><boxGeometry args={[0.6, 0.03, 0.03]} /><meshStandardMaterial color={THEME_PURPLE} /></mesh>
         </group>
       )}
       <group position={[0, 0.4, 0]}>
@@ -169,10 +190,10 @@ const Staircase = ({ position, width, rotation, materialProps }) => (
 
 const Bench = ({ position, rotation, materialProps }) => (
   <group position={position} rotation={rotation}>
-    <mesh position={[0, 0.45, 0]} castShadow receiveShadow><boxGeometry args={[3, 0.1, 1.2]} /><meshStandardMaterial {...materialProps} /></mesh>
-    <mesh position={[0, 1, -0.55]} rotation={[-0.1, 0, 0]} castShadow receiveShadow><boxGeometry args={[3, 1, 0.1]} /><meshStandardMaterial {...materialProps} /></mesh>
+    <mesh position={[0, 0.45, 0]} castShadow receiveShadow><boxGeometry args={[3, 0.1, 1.2]} /><meshStandardMaterial color={THEME_PURPLE} /></mesh>
+    <mesh position={[0, 1, -0.55]} rotation={[-0.1, 0, 0]} castShadow receiveShadow><boxGeometry args={[3, 1, 0.1]} /><meshStandardMaterial color={THEME_PURPLE} /></mesh>
     {[[-1.3, 0, 0.45], [1.3, 0, 0.45], [-1.3, 0, -0.45], [1.3, 0, -0.45]].map((pos, i) => (
-      <mesh key={i} position={[pos[0], 0.225, pos[2]]} castShadow receiveShadow><boxGeometry args={[0.1, 0.45, 0.1]} /><meshStandardMaterial {...materialProps} /></mesh>
+      <mesh key={i} position={[pos[0], 0.225, pos[2]]} castShadow receiveShadow><boxGeometry args={[0.1, 0.45, 0.1]} /><meshStandardMaterial color={THEME_PURPLE} /></mesh>
     ))}
   </group>
 );
@@ -196,14 +217,12 @@ const WheelchairChapter = ({ butterProps, isMobile }) => {
   const finalStopZ = 12.5; 
 
   useFrame((state) => {
-    // Smooth deceleration logic
     const t = Math.min(state.clock.elapsedTime / 14, 1);
     const smoothProgress = THREE.MathUtils.smoothstep(t, 0, 1);
     const currentZ = startZ + (finalStopZ - startZ) * smoothProgress;
     
     if (groupRef.current) groupRef.current.position.z = currentZ;
 
-    // Stop walking and spinning precisely when the ease finishes
     if (t >= 1) {
       if (isMoving) setIsMoving(false);
     } else {
@@ -213,14 +232,14 @@ const WheelchairChapter = ({ butterProps, isMobile }) => {
 
   return (
     <group ref={groupRef} position={[14.5, 1.9, startZ]} rotation={[0, Math.PI, 0]}>
-        <mesh position={[0, 0.55, 0]} castShadow><boxGeometry args={[0.6, 0.08, 0.6]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
-        <mesh position={[0, 0.9, -0.25]} rotation={[0.1, 0, 0]} castShadow><boxGeometry args={[0.55, 0.7, 0.08]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
+        <mesh position={[0, 0.55, 0]} castShadow><boxGeometry args={[0.6, 0.08, 0.6]} /><meshStandardMaterial color={THEME_PURPLE} /></mesh>
+        <mesh position={[0, 0.9, -0.25]} rotation={[0.1, 0, 0]} castShadow><boxGeometry args={[0.55, 0.7, 0.08]} /><meshStandardMaterial color={THEME_PURPLE} /></mesh>
         <group position={[0, 0.45, -0.05]} ref={wheelRef}>
-          <mesh position={[-0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]}><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
-          <mesh position={[0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]}><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
+          <mesh position={[-0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]}><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color={THEME_PURPLE} /></mesh>
+          <mesh position={[0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]}><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color={THEME_PURPLE} /></mesh>
         </group>
       <group position={[0, 0.2, 0]}><BlockHumanoid scale={0.85} materialProps={butterProps} poseProps={{ rotation: [0, Math.PI, 0], leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], leftArmRotation: [0.7, 0, 0], rightArmRotation: [0.7, 0, 0]}} /></group>
-      <group position={[0, 0, -0.75]}><BlockHumanoid scale={0.95} materialProps={butterProps} poseProps={{ isWalking: isMoving, walkSpeed: 10, leftArmRotation: [-1.2, 0, 0.1], rightArmRotation: [-1.2, 0, -0.1] }} /></group>
+      <group position={[0, 0, -0.75]}><BlockHumanoid isHelper scale={0.95} materialProps={butterProps} poseProps={{ isWalking: isMoving, walkSpeed: 10, leftArmRotation: [-1.2, 0, 0.1], rightArmRotation: [-1.2, 0, -0.1] }} /></group>
     </group>
   );
 };
@@ -239,7 +258,7 @@ const WalkingToConversationChapter = ({ butterProps }) => {
   return (
     <group ref={groupRef} position={[7.5, 1.9, 4.0]} rotation={[0, Math.PI / 2, 0]}>
         <BlockHumanoid scale={0.95} materialProps={butterProps} poseProps={{ isWalking: phase === "walking", walkSpeed: 3.5, cane: true, rotation: [0, 0.6, 0], position: [-0.3, 0, 0], headRotationY: -1.2 }} />
-        <group position={[0.4, 0, 0]}><BlockHumanoid scale={0.95} materialProps={butterProps} poseProps={{ isWalking: phase === "walking", walkSpeed: 3.5, rotation: [0, -0.6, 0], headRotationY: phase === "walking" ? 0 : 0.4 }} /></group>
+        <group position={[0.4, 0, 0]}><BlockHumanoid isHelper scale={0.95} materialProps={butterProps} poseProps={{ isWalking: phase === "walking", walkSpeed: 3.5, rotation: [0, -0.6, 0], headRotationY: phase === "walking" ? 0 : 0.4 }} /></group>
     </group>
   );
 };
@@ -302,16 +321,17 @@ export default function Scene({ currentView }) {
                 materialProps={butterProps} 
                 poseProps={{ 
                   walker: true, 
-                  torsoRotationX: 0.15, 
-                  // CHICKEN ARM FIX: Elbows tucked, wrists angled to walker bars
-                  leftArmRotation: [1.0, 0, 0.05], 
-                  rightArmRotation: [1.0, 0, -0.05], 
+                  torsoRotationX: 0.1, 
+                  // ARM FIX: Hands down at side with a slight forward tilt to clear frame
+                  leftArmRotation: [0.3, 0, -0.1], 
+                  rightArmRotation: [0.3, 0, 0.1], 
                   leftLegRotation: [0.15, 0, 0],   
                   rightLegRotation: [-0.1, 0, 0],  
                   headRotationY: -0.2
                 }} 
                />
                <BlockHumanoid 
+                isHelper
                 scale={0.95} 
                 materialProps={butterProps} 
                 poseProps={{ 
