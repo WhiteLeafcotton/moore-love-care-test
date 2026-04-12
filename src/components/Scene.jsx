@@ -107,7 +107,7 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
       </group>
       <group position={[0, 0.4, 0]}>
         <group ref={leftLegRef} position={[-0.12, 0, 0]} rotation={leftLegRotation}>
-          <mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
+          <mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></group>
         </group>
         <group ref={rightLegRef} position={[0.12, 0, 0]} rotation={rightLegRotation}>
           <mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
@@ -279,12 +279,9 @@ const WheelchairChapter = ({ butterProps }) => {
   const [isMoving, setIsMoving] = useState(true);
 
   useFrame((state) => {
-    const duration = 12; // Time to complete movement
+    const duration = 12; 
     const t = Math.min(state.clock.elapsedTime / duration, 1);
-    
-    // Smoothstop logic: accel/decel smoothly
     const progress = THREE.MathUtils.smoothstep(t, 0, 1);
-    
     const startZ = 22;
     const endZ = 12.5; 
     
@@ -293,7 +290,7 @@ const WheelchairChapter = ({ butterProps }) => {
     }
 
     if (t < 1) {
-        if (wheelRef.current) wheelRef.current.rotation.x = state.clock.elapsedTime * 2.5; // Spun up wheel speed
+        if (wheelRef.current) wheelRef.current.rotation.x = state.clock.elapsedTime * 2.5;
     } else if (isMoving) {
         setIsMoving(false);
     }
@@ -343,7 +340,7 @@ const WalkingToConversationChapter = ({ butterProps }) => {
           materialProps={butterProps} 
           poseProps={{ 
             isWalking: phase === "walking", 
-            walkSpeed: 3.5, // Sped up walk speed
+            walkSpeed: 3.5, 
             cane: true, 
             rotation: [0, phase !== "walking" ? 0.6 : 0, 0],
             position: [-0.3, 0, 0],
@@ -417,8 +414,8 @@ export default function Scene({ currentView }) {
         
         <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={butterProps} />
         
-        {/* SMALL HEXAGON PLATFORM - Moved to be visible in the nook by the stairs */}
-        <mesh position={[-4.5, -1.38, 12]} castShadow receiveShadow>
+        {/* PLATFORM - Positioned on the right side of stairs */}
+        <mesh position={[18, -1.38, 10]} castShadow receiveShadow>
           <cylinderGeometry args={[2, 2, 0.1, 6]} />
           <meshStandardMaterial {...butterProps} />
         </mesh>
