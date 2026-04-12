@@ -445,10 +445,8 @@ export default function Scene({ currentView }) {
 
           <WalkingToConversationChapter butterProps={butterProps} />
 
-          {/* RESTORED ANIMATED WALKER COUPLE (BY THE STAIRS) */}
-          <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
-            {/* We offset them from the bench group so they are by the stairs as originally intended */}
-            <group position={[3.5, 0, -0.2]} rotation={[0, -0.5, 0]}>
+          {/* ANIMATED WALKER COUPLE (BY THE STAIRS) - REMOVED DUPLICATE BENCH WRAPPER */}
+          <group position={[17.5, 1.9, 3.8]} rotation={[0, -Math.PI / 2, 0]}>
                <BlockHumanoid 
                 scale={0.84} 
                 materialProps={butterProps} 
@@ -474,7 +472,6 @@ export default function Scene({ currentView }) {
                   leftArmRotation: [-0.8, 0, -0.25] 
                 }} 
                />
-            </group>
           </group>
 
           <group position={[6.0, 1.6, 10.0]} rotation={[0, Math.PI / 2, 0]}>
