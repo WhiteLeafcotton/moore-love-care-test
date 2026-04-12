@@ -270,8 +270,7 @@ export default function Scene({ currentView }) {
       <fog attach="fog" args={["#f8e1ff", 10, 400]} />
       <GrassySassyHills />
       <hemisphereLight intensity={1.4} color="#ffffff" groundColor="#b066ff" />
-      {/* Light intensity increased to improve shadows */}
-      <directionalLight position={[-15, 30, 10]} intensity={1.2} castShadow />
+      <directionalLight position={[-15, 30, 10]} intensity={1.6} castShadow shadow-mapSize={[2048, 2048]} />
 
       <group ref={cloudGroupRef}>
         <Cloud position={[0, 80, -450]} speed={0.2} opacity={0.3} segments={40} bounds={[1000, 100, 50]} volume={150} color="#ffd1dc" />
@@ -291,30 +290,31 @@ export default function Scene({ currentView }) {
           <mesh position={[24, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
 
+        {/* Right Wall with Enhanced Corner Shadowing Pillar */}
         <group position={[17, -1.6, 1]} rotation={[0, -Math.PI / 2, 0]}>
-          <mesh castShadow receiveShadow position={[4, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
+          {/* Shadow Pillar at the 90-degree junction */}
+          <mesh castShadow receiveShadow position={[0.5, 8.5, 0]}>
+            <boxGeometry args={[1, 17, 2]} />
+            <meshStandardMaterial {...butterProps} />
+          </mesh>
+          <mesh castShadow receiveShadow position={[4, 8.5, 0]}><boxGeometry args={[6, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
           <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={butterProps} />
           <WallOpening position={[17, 0, 0]} isWindow={true} colorProps={butterProps} />
           <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
 
         <group>
-          {/* Bench: Positioned and turned 180 degrees */}
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <Bench materialProps={butterProps} />
-            {/* Person Sitting removed */}
           </group>
-
           <group position={[14, 1.9, 12]} rotation={[0, -Math.PI * 0.7, 0]}>
             <BlockHumanoid scale={1} materialProps={butterProps} poseProps={{ cane: true, leftLegRotation: [0.3, 0, 0], rightLegRotation: [-0.3, 0, 0], position: [-0.3, 0, 0]}} />
             <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ leftLegRotation: [-0.3, 0, 0], rightLegRotation: [0.3, 0, 0], position: [0.4, 0, -0.1]}} />
           </group>
-
           <group position={[6.0, 1.6, 11.5]} rotation={[0, Math.PI / 2, 0]}>
             <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
             <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
           </group>
-
           <group position={[14.5, 1.9, 17.5]} rotation={[0, Math.PI, 0]}>
             <SimpleWheelchair materialProps={butterProps} />
             <group position={[0, 0.2, 0]}>
