@@ -380,11 +380,18 @@ export default function Scene({ currentView }) {
   useFrame((state, delta) => {
     const isHome = currentView === "home";
     const LERP_SPEED = isHome ? 0.04 : 0.018; 
-    const homePos = isMobile ? new THREE.Vector3(-18, 12, 32) : new THREE.Vector3(-14, 3.2, 24); 
+
+    // --- MOBILE SWEET SPOT SETTINGS ---
+    // Lowered Y to 3.5 (eye-level) and tightened X to -8 for an intimate feel
+    const homePos = isMobile ? new THREE.Vector3(-8, 3.5, 24) : new THREE.Vector3(-14, 3.2, 24); 
     const targetPos = isHome ? homePos : new THREE.Vector3(-24.5, 3.5, -450);
     
+    // LookAt for mobile is raised to 3.5 to keep the horizon cinematic and level
+    const homeLookAt = isMobile ? new THREE.Vector3(12, 3.5, 8) : new THREE.Vector3(20, 1.2, -2);
+    const targetLookAt = isHome ? homeLookAt : new THREE.Vector3(-24.5, 1.5, -1000);
+
     camera.position.lerp(targetPos, LERP_SPEED);
-    lookAtTarget.current.lerp(isHome ? new THREE.Vector3(20, 1.2, -2) : new THREE.Vector3(-24.5, 1.5, -1000), LERP_SPEED);
+    lookAtTarget.current.lerp(targetLookAt, LERP_SPEED);
     camera.lookAt(lookAtTarget.current);
 
     if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.08;
@@ -417,7 +424,7 @@ export default function Scene({ currentView }) {
         
         <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={butterProps} />
         
-        {/* SMALL HEXAGON PLATFORM - Moved to be visible in the nook by the stairs */}
+        {/* SMALL HEXAGON PLATFORM */}
         <mesh position={[-4.5, -1.38, 12]} castShadow receiveShadow>
           <cylinderGeometry args={[2, 2, 0.1, 6]} />
           <meshStandardMaterial {...butterProps} />
