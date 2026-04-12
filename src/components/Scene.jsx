@@ -327,53 +327,53 @@ const WheelchairChapter = ({ butterProps }) => {
 const WalkingToConversationChapter = ({ butterProps, darkerProps }) => {
   const groupRef = useRef();
   const caregiverRef = useRef();
-  const walkerGroupRef = useRef();
+  const walkerRef = useRef();
   const [phase, setPhase] = useState("walking");
 
-  // STAGING POINTS
   const START_Z = 4.0;
-  const END_Z = 18.0; // Pushed further down
-  const WALKER_ORIGINAL_STOP_Z = 12.0; // The "Old" stop point where walker sits
+  const END_Z = 18.0; 
+  const WALKER_FIXED_Z = 12.0; // The absolute spot where it sits on the platform
 
   useFrame((state) => {
     const t = state.clock.elapsedTime;
     
+    // 1. Initial Walk to 18.0
     if (phase === "walking") {
       const progress = Math.min(t * 0.03, 1);
       groupRef.current.position.z = START_Z + (END_Z - START_Z) * progress;
       if (progress >= 1) setPhase("talking");
     }
 
+    // 2. Short pause to talk, then go fetch at T=42
     if (phase === "talking" && t > 42) setPhase("fetch");
     
     if (phase === "fetch") {
-      // Caregiver turns and walks BACK to the original spot (12.0 relative to group 0, but since group is at 18, they walk -6 units)
+      // Relative offset: We are at 18.0, walker is at 12.0. Need to walk -6 units back.
       const fetchTime = (t - 42) * 0.2;
       const progress = Math.min(fetchTime, 1);
       
       caregiverRef.current.position.z = 0 - (6.0 * progress);
-      caregiverRef.current.rotation.y = Math.PI; // Face backwards to walk
+      caregiverRef.current.rotation.y = Math.PI; // Face backwards
 
       if (progress >= 1) setPhase("returning");
     }
 
     if (phase === "returning") {
-      // Caregiver returns from 12.0 back to 18.0
       const returnTime = (t - 47) * 0.2;
       const progress = Math.min(returnTime, 1);
       
       const currentZOffset = -6.0 + (6.0 * progress);
       caregiverRef.current.position.z = currentZOffset;
-      caregiverRef.current.rotation.y = 0; // Face forward again
+      caregiverRef.current.rotation.y = 0; // Face forward
 
-      // Walker follows
-      walkerGroupRef.current.position.set(0.4, 0, currentZOffset + 0.6);
+      // NOW the walker follows (it's "picked up")
+      walkerRef.current.position.z = currentZOffset + 0.6;
     }
   });
 
   return (
     <group ref={groupRef} position={[7.5, 1.9, START_Z]} rotation={[0, Math.PI / 2, 0]}>
-        {/* Stationary Partner at END_Z */}
+        {/* Stationary Partner */}
         <BlockHumanoid 
           scale={1} 
           materialProps={butterProps} 
@@ -401,15 +401,15 @@ const WalkingToConversationChapter = ({ butterProps, darkerProps }) => {
           />
         </group>
 
-        {/* The Walker - Parked at the OLD stop spot (relative -6 from the new stop at 18) */}
-        <group ref={walkerGroupRef} position={[0.4, 0, -6]} rotation={[0, 0, 0]}>
+        {/* The Walker - Stays at -6 relative to current group pos until fetched */}
+        <group ref={walkerRef} position={[0.4, 0, -6]} rotation={[0, 0, 0]}>
           <Walker materialProps={darkerProps} />
         </group>
     </group>
   );
 };
 
-// --- MAIN SCENJE ---
+// --- MAIN SCENE ---
 export default function Scene({ currentView }) {
   const { camera, size } = useThree();
   const waterRef = useRef();
@@ -454,6 +454,7 @@ export default function Scene({ currentView }) {
       </group>
 
       <group position={[0, 0, 0]}>
+        {/* Main Platform */}
         <mesh position={[15.5, -2.1, 15.0]} castShadow receiveShadow>
           <boxGeometry args={[20, 8.0, 30]} /><meshStandardMaterial {...butterProps} />
         </mesh>
