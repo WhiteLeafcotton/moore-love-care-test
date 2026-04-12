@@ -325,9 +325,10 @@ export default function Scene({ currentView }) {
         
         <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={butterProps} />
         
-        {/* --- THE HEXAGON PLATFORM (VISIBLE ZONE) --- */}
-        <mesh position={[12, -1.38, 15]} castShadow receiveShadow>
-          <cylinderGeometry args={[4, 4, 0.2, 6]} />
+        {/* --- THE VISIBLE PLATFORM --- */}
+        {/* Circular landing placed exactly on the right side of the entrance area */}
+        <mesh position={[16, -1.38, 10]} castShadow receiveShadow>
+          <cylinderGeometry args={[4, 4, 0.2, 32]} />
           <meshStandardMaterial {...butterProps} />
         </mesh>
 
