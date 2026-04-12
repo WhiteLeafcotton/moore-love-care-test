@@ -78,14 +78,10 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
       if (leftArmRef.current) leftArmRef.current.rotation.x = -swing * 0.5;
       if (rightArmRef.current) rightArmRef.current.rotation.x = swing * 0.5;
     } else {
-        if (leftLegRef.current) {
-          leftArmRef.current.rotation.set(...leftArmRotation);
-        }
-        if (rightArmRef.current) {
-          rightArmRef.current.rotation.set(...rightArmRotation);
-        }
-        if (leftLegRef.current) leftLegRef.current.rotation.x = leftLegRotation[0];
-        if (rightLegRef.current) rightLegRef.current.rotation.x = rightLegRotation[0];
+        if (leftArmRef.current) leftArmRef.current.rotation.set(...leftArmRotation);
+        if (rightArmRef.current) rightArmRef.current.rotation.set(...rightArmRotation);
+        if (leftLegRef.current) leftLegRef.current.rotation.set(...leftLegRotation);
+        if (rightLegRef.current) rightLegRef.current.rotation.set(...rightLegRotation);
     }
   });
 
@@ -114,8 +110,8 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
         </group>
       )}
       <group position={[0, 0.4, 0]}>
-        <group ref={leftLegRef} position={[-0.12, 0, 0]} rotation={leftLegRotation}><mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh></group>
-        <group ref={rightLegRef} position={[0.12, 0, 0]} rotation={rightLegRotation}><mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh></group>
+        <group ref={leftLegRef} position={[-0.12, 0, 0]}><mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh></group>
+        <group ref={rightLegRef} position={[0.12, 0, 0]}><mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh></group>
       </group>
     </group>
   );
@@ -190,7 +186,7 @@ const WallOpening = ({ position, colorProps, width = 6, openingW = 4.8, height =
   </group>
 );
 
-// --- CHAPTERS ---
+// --- ANIMATED CHAPTERS ---
 const WheelchairChapter = ({ butterProps }) => {
   const groupRef = useRef(); const wheelRef = useRef(); const [isMoving, setIsMoving] = useState(true);
   useFrame((state) => {
@@ -284,31 +280,33 @@ export default function Scene({ currentView }) {
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <Bench materialProps={butterProps} />
             
-            {/* --- COUPLE D: GRABBING RAILS FIX --- */}
-            <group position={[2.2, 0, 0.8]} rotation={[0, -0.4, 0]}>
-               {/* Main Character with Walker */}
+            {/* --- COUPLE D: FINAL POLISH --- */}
+            {/* Moved further back (z: -0.2) toward the wall and refined poses */}
+            <group position={[2.2, 0, -0.2]} rotation={[0, -0.4, 0]}>
+               {/* Main Character: Arms separated, legs staggered for stability */}
                <BlockHumanoid 
                 scale={0.92} 
                 materialProps={butterProps} 
                 poseProps={{ 
                   walker: true, 
                   torsoRotationX: 0.35, 
-                  // Spread arms OUT to sides [X, Y, Z] to reach rails
-                  leftArmRotation: [-1.4, 0, -0.4], 
-                  rightArmRotation: [-1.4, 0, 0.4], 
+                  // Left arm dropped lower and angled wider to avoid the right arm
+                  leftArmRotation: [-1.2, 0, -0.5], 
+                  rightArmRotation: [-1.5, 0, 0.45], 
+                  leftLegRotation: [0.3, 0, 0],   // Staggered leg 1
+                  rightLegRotation: [-0.2, 0, 0],  // Staggered leg 2
                   headRotationY: -0.2
                 }} 
                />
-               {/* Helper Character - Moved further back (x: -0.9) to prevent clipping and improve visibility */}
+               {/* Helper Character: Visibility spacing preserved */}
                <BlockHumanoid 
                 scale={0.95} 
                 materialProps={butterProps} 
                 poseProps={{ 
-                  position: [-0.9, 0, 0.2], 
+                  position: [-1.0, 0, 0.25], 
                   rotation: [0, 0.5, 0], 
                   headRotationY: -0.4,
-                  // Reaching toward the elder character's elbow/side
-                  leftArmRotation: [-0.6, 0, -0.3] 
+                  leftArmRotation: [-0.7, 0, -0.3] 
                 }} 
                />
             </group>
