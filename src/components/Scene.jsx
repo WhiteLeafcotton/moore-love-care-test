@@ -1,6 +1,6 @@
 import { useRef, useMemo, useEffect, useState } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
-import { Environment, Sky, Cloud } from "@react-three/drei";
+import { Environment, Sky } from "@react-three/drei";
 import { Water } from "three-stdlib";
 import * as THREE from "three";
 
@@ -100,7 +100,7 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
         </group>
       </group>
       {walker && (
-        <group position={[0, -0.2, 0.55]}>
+        <group position={[0, -0.2, 0.35]}> {/* Walker brought closer to body */}
           <mesh position={[0.3, 0.45, 0]}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
           <mesh position={[-0.3, 0.45, 0]}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
           <mesh position={[0, 0.85, 0]}><boxGeometry args={[0.65, 0.03, 0.03]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
@@ -187,18 +187,25 @@ const WallOpening = ({ position, colorProps, width = 6, openingW = 4.8, height =
 );
 
 // --- ANIMATED CHAPTERS ---
-const WheelchairChapter = ({ butterProps }) => {
-  const groupRef = useRef(); const wheelRef = useRef(); const [isMoving, setIsMoving] = useState(true);
+const WheelchairChapter = ({ butterProps, isMobile }) => {
+  const groupRef = useRef(); 
+  const wheelRef = useRef(); 
+  const [isMoving, setIsMoving] = useState(true);
+  
+  // Starting point based on screen edge
+  const startZ = isMobile ? 35 : 22;
+  const finalStopZ = 12.5; // Restored original stop location
+
   useFrame((state) => {
-    // UPDATED: Stroll from edge (12.5) to original final destination (6.5)
     const t = Math.min(state.clock.elapsedTime / 14, 1);
     const progress = THREE.MathUtils.smoothstep(t, 0, 1);
-    if (groupRef.current) groupRef.current.position.z = 12.5 + (6.5 - 12.5) * progress;
+    if (groupRef.current) groupRef.current.position.z = startZ + (finalStopZ - startZ) * progress;
     if (t < 1 && wheelRef.current) wheelRef.current.rotation.x = state.clock.elapsedTime * 2.5;
     else if (isMoving) setIsMoving(false);
   });
+
   return (
-    <group ref={groupRef} position={[14.5, 1.9, 12.5]} rotation={[0, Math.PI, 0]}>
+    <group ref={groupRef} position={[14.5, 1.9, startZ]} rotation={[0, Math.PI, 0]}>
         <mesh position={[0, 0.55, 0]} castShadow><boxGeometry args={[0.6, 0.08, 0.6]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
         <mesh position={[0, 0.9, -0.25]} rotation={[0.1, 0, 0]} castShadow><boxGeometry args={[0.55, 0.7, 0.08]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
         <group position={[0, 0.45, -0.05]} ref={wheelRef}>
@@ -211,8 +218,10 @@ const WheelchairChapter = ({ butterProps }) => {
   );
 };
 
+// --- COUPLE B: WALKING/TALKING RESTORED ---
 const WalkingToConversationChapter = ({ butterProps }) => {
-  const groupRef = useRef(); const [phase, setPhase] = useState("walking");
+  const groupRef = useRef(); 
+  const [phase, setPhase] = useState("walking");
   useFrame((state) => {
     const t = Math.min(state.clock.elapsedTime / 15, 1);
     if (phase === "walking") {
@@ -280,30 +289,26 @@ export default function Scene({ currentView }) {
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <Bench materialProps={butterProps} />
             
-            {/* --- COUPLE D: LOCKED SPOT & WHOLESOME SCALE --- */}
+            {/* --- COUPLE D: GRIPPING ARMS & CLOSER WALKER --- */}
             <group position={[3.5, 0, -0.2]} rotation={[0, -0.5, 0]}>
-               {/* Elder Character: Smaller scale, upright anatomy */}
                <BlockHumanoid 
                 scale={0.84} 
                 materialProps={butterProps} 
                 poseProps={{ 
                   walker: true, 
-                  torsoRotationX: 0, // Hunch removed for clean humanoid proportions
-                  // Spread arms OUT to sides to reach rails
-                  leftArmRotation: [-1.4, 0, -0.4], 
-                  rightArmRotation: [-1.4, 0, 0.4], 
-                  // Humanoid anatomy legs
+                  torsoRotationX: 0.1, 
+                  leftArmRotation: [-1.2, 0, -0.3], // Angled to grip rail
+                  rightArmRotation: [-1.2, 0, 0.3], // Angled to grip rail
                   leftLegRotation: [0.15, 0, 0],   
                   rightLegRotation: [-0.1, 0, 0],  
                   headRotationY: -0.2
                 }} 
                />
-               {/* Helper Character: Wholesome positioning */}
                <BlockHumanoid 
                 scale={0.95} 
                 materialProps={butterProps} 
                 poseProps={{ 
-                  position: [-1.1, 0, 0.35], 
+                  position: [-1.0, 0, 0.35], 
                   rotation: [0, 0.65, 0], 
                   headRotationY: -0.4,
                   leftArmRotation: [-0.8, 0, -0.3] 
@@ -312,13 +317,16 @@ export default function Scene({ currentView }) {
             </group>
           </group>
 
-          {/* Couple B (Leaning) - VISIBLE on Web */}
+          {/* Couple B: RESTORED FOR ALL VIEWS */}
+          <WalkingToConversationChapter butterProps={butterProps} />
+
+          {/* Couple on the stairs */}
           <group position={[6.0, 1.6, 10.0]} rotation={[0, Math.PI / 2, 0]}>
             <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
             <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
           </group>
 
-          <WheelchairChapter butterProps={butterProps} />
+          <WheelchairChapter butterProps={butterProps} isMobile={isMobile} />
         </group>
       </group>
 
