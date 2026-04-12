@@ -9,7 +9,7 @@ export default function App() {
   return (
     <div style={{ width: "100vw", height: "100vh", background: "#f7ece8", position: "relative", overflow: "hidden" }}>
       
-      {/* UI OVERLAY - Localized Frost on the Left */}
+      {/* UI OVERLAY */}
       <div style={{
         position: "absolute", inset: 0, zIndex: 10, 
         display: "flex", flexDirection: "column", justifyContent: "space-between",
@@ -18,19 +18,25 @@ export default function App() {
         transition: "opacity 0.8s ease-in-out, backdrop-filter 0.8s ease-in-out",
         opacity: isHome ? 1 : 0,
 
-        /* Fades frost from left (visible) to right (clear) */
-        background: isHome 
-          ? "linear-gradient(to right, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.02) 30%, transparent 60%)" 
-          : "transparent",
-        backdropFilter: isHome ? "blur(10px)" : "blur(0px)",
-        WebkitBackdropFilter: isHome ? "blur(10px)" : "blur(0px)",
+        /* --- THE NEW FADE EFFECT --- */
+        /* Updated Gradient: Heavy frost on left (reduced blur), light frost on right (baseline blur) */
         
-        /* Mask ensures the blur itself actually disappears on the right side */
-        WebkitMaskImage: "linear-gradient(to right, black 20%, transparent 50%)",
-        maskImage: "linear-gradient(to right, black 20%, transparent 50%)"
+        // Background Gradient:
+        background: isHome 
+          ? "linear-gradient(to right, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.02) 100%)" 
+          : "transparent",
+        
+        // Global baseline blur reduced from 8px to 5px for lightness.
+        backdropFilter: isHome ? "blur(5px) saturate(105%)" : "blur(0px)",
+        WebkitBackdropFilter: isHome ? "blur(5px) saturate(105%)" : "blur(0px)",
+        
+        // Mask Gradient: Restored to ensure full coverage while maintaining gradient fade.
+        // It now goes from 100% opacity to 40% opacity, providing a baseline blur on the right.
+        WebkitMaskImage: "linear-gradient(to right, black 30%, rgba(0, 0, 0, 0.4) 100%)",
+        maskImage: "linear-gradient(to right, black 30%, rgba(0, 0, 0, 0.4) 100%)"
       }}>
         
-        {/* HEADER: Nav & Business Name */}
+        {/* HEADER */}
         <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ 
             fontWeight: 700, letterSpacing: "0.25em", textTransform: "uppercase", 
@@ -49,8 +55,8 @@ export default function App() {
           </button>
         </header>
 
-        {/* HERO SECTION: Stacked Title */}
-        <main style={{ textAlign: "left", maxWidth: "700px" }}>
+        {/* STACKED LEFT-ALIGNED HERO */}
+        <main style={{ textAlign: "left", maxWidth: "600px" }}>
           <div style={{ 
             fontSize: "11px", letterSpacing: "0.5em", textTransform: "uppercase", 
             marginBottom: "15px", color: "rgba(45, 29, 61, 0.7)" 
@@ -60,7 +66,7 @@ export default function App() {
           <h1 style={{
             fontSize: "clamp(60px, 10vw, 110px)", lineHeight: "0.85",
             color: "#2d1d3d", fontWeight: 400, margin: "0 0 40px 0", 
-            fontFamily: "'Playfair Display', serif" // Substitute for Jaguar Elegant Serif
+            fontFamily: "'Playfair Display', serif" 
           }}>
             Moore Love <br /> & Care.
           </h1>
@@ -87,7 +93,6 @@ export default function App() {
         </footer>
       </div>
 
-      {/* BACK BUTTON: Visible only at second location */}
       {!isHome && (
         <button 
           onClick={() => setCurrentView("home")}
@@ -107,6 +112,7 @@ export default function App() {
         camera={{ position: [-14, 3.2, 24], fov: 35 }}
       >
         <Suspense fallback={null}>
+          {/* Plant component added inside the scene group, same as before */}
           <Scene currentView={currentView} />
         </Suspense>
       </Canvas>
