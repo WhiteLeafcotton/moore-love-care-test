@@ -7,6 +7,7 @@ import * as THREE from "three";
 extend({ Water });
 
 const GRASS_COUNT = 400000;
+const GROUND_Y = 1.91; // The precise surface of the platform
 
 const getHillHeight = (x, z) => {
   const dist = Math.sqrt(x * x + z * z);
@@ -132,65 +133,6 @@ const GrassySassyHills = () => {
   );
 };
 
-// --- ARCHITECTURE ---
-const Staircase = ({ position, width, rotation, materialProps }) => {
-  const stepHeight = 0.5; const stepDepth = 0.8; const numSteps = 16;
-  return (
-    <group position={position} rotation={rotation}>
-      {Array.from({ length: numSteps }).map((_, i) => (
-        <group key={i} position={[0, -i * stepHeight, i * stepDepth]}>
-          <mesh castShadow receiveShadow>
-            <boxGeometry args={[width, stepHeight, stepDepth]} />
-            <meshStandardMaterial {...materialProps} />
-          </mesh>
-          <mesh position={[0, -2.5, 0]} castShadow receiveShadow>
-            <boxGeometry args={[width, 5, stepDepth]} />
-            <meshStandardMaterial {...materialProps} />
-          </mesh>
-        </group>
-      ))}
-    </group>
-  );
-};
-
-const Bench = ({ position, rotation, materialProps }) => (
-  <group position={position} rotation={rotation}>
-    <mesh position={[0, 0.45, 0]} castShadow receiveShadow>
-      <boxGeometry args={[3, 0.1, 1.2]} />
-      <meshStandardMaterial {...materialProps} />
-    </mesh>
-    <mesh position={[0, 1, -0.55]} rotation={[-0.1, 0, 0]} castShadow receiveShadow>
-      <boxGeometry args={[3, 1, 0.1]} />
-      <meshStandardMaterial {...materialProps} />
-    </mesh>
-    {[[-1.3, 0, 0.45], [1.3, 0, 0.45], [-1.3, 0, -0.45], [1.3, 0, -0.45]].map((pos, i) => (
-      <mesh key={i} position={[pos[0], 0.225, pos[2]]} castShadow receiveShadow>
-        <boxGeometry args={[0.1, 0.45, 0.1]} />
-        <meshStandardMaterial {...materialProps} />
-      </mesh>
-    ))}
-  </group>
-);
-
-const WallOpening = ({ position, colorProps, width = 6, openingW = 4.8, height = 17, openingH = 9, isWindow = false }) => (
-  <group position={position}>
-    <mesh position={[-(openingW + (width - openingW) / 2) / 2, height / 2, 0]} castShadow receiveShadow>
-      <boxGeometry args={[(width - openingW) / 2, height, 2]} /><meshStandardMaterial {...colorProps} />
-    </mesh>
-    <mesh position={[(openingW + (width - openingW) / 2) / 2, height / 2, 0]} castShadow receiveShadow>
-      <boxGeometry args={[(width - openingW) / 2, height, 2]} /><meshStandardMaterial {...colorProps} />
-    </mesh>
-    <mesh position={[0, height - (height - openingH - (isWindow ? 4 : 0)) / 2, 0]} castShadow receiveShadow>
-      <boxGeometry args={[openingW, height - openingH - (isWindow ? 4 : 0), 2]} /><meshStandardMaterial {...colorProps} />
-    </mesh>
-    {isWindow && (
-      <mesh position={[0, 2, 0]} castShadow receiveShadow>
-        <boxGeometry args={[openingW, 4, 2]} /><meshStandardMaterial {...colorProps} />
-      </mesh>
-    )}
-  </group>
-);
-
 // --- CHARACTERS ---
 const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
   const { 
@@ -219,7 +161,8 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
   const limbGeo = useMemo(() => {
     const pts = [new THREE.Vector2(0, 0), new THREE.Vector2(0.08, 0.05), new THREE.Vector2(0.08, 0.75), new THREE.Vector2(0, 0.8)];
     const g = new THREE.LatheGeometry(pts, 32);
-    g.translate(0, -0.8, 0); 
+    // CRITICAL: Offset adjusted so foot pivot is actually at the bottom
+    g.translate(0, 0.8, 0); 
     return g;
   }, []);
 
@@ -261,153 +204,162 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
         <mesh position={[0, 0.3, 0]} castShadow><primitive object={torsoGeo} /><meshStandardMaterial {...materialProps} /></mesh>
         <group position={[0, 1.2, 0]}>
           <group ref={leftArmRef} position={[-0.22, 0, 0]} rotation={leftArmRotation}>
-            <mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
+            <mesh rotation={[Math.PI, 0, 0]} castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
           </group>
           <group ref={rightArmRef} position={[0.22, 0, 0]} rotation={rightArmRotation}>
-            <mesh castShadow>
+            <mesh rotation={[Math.PI, 0, 0]} castShadow>
                 <primitive object={limbGeo} /><meshStandardMaterial {...materialProps} />
-                {cane && <mesh position={[0, -0.7, 0.1]}><cylinderGeometry args={[0.015, 0.015, 1.1]} /><meshStandardMaterial color="#fcd7d7" /></mesh>}
+                {cane && <mesh position={[0, 0.7, 0.1]}><cylinderGeometry args={[0.015, 0.015, 1.1]} /><meshStandardMaterial color="#fcd7d7" /></mesh>}
             </mesh>
           </group>
         </group>
       </group>
-      <group position={[0, 0.4, 0]}>
-        <group ref={leftLegRef} position={[-0.12, 0, 0]} rotation={leftLegRotation}>
-          <mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
+      {/* Legs sit flat on the local Y=0 floor */}
+      <group position={[0, 0, 0]}>
+        <group ref={leftLegRef} position={[-0.12, 0.8, 0]} rotation={leftLegRotation}>
+          <mesh rotation={[Math.PI, 0, 0]} castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
         </group>
-        <group ref={rightLegRef} position={[0.12, 0, 0]} rotation={rightLegRotation}>
-          <mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
+        <group ref={rightLegRef} position={[0.12, 0.8, 0]} rotation={rightLegRotation}>
+          <mesh rotation={[Math.PI, 0, 0]} castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
         </group>
       </group>
     </group>
   );
 };
 
-// --- ANIMATED CHAPTERS ---
+// --- MAIN ANIMATION LOGIC ---
 
-const WheelchairChapter = ({ butterProps }) => {
-  const groupRef = useRef();
-  const wheelRef = useRef();
-  const [isMoving, setIsMoving] = useState(true);
-
-  useFrame((state) => {
-    const speed = 0.02;
-    const t = Math.min(state.clock.elapsedTime * speed, 1); 
-    const startZ = 22;
-    const endZ = 12.5; 
-    
-    groupRef.current.position.z = startZ + (endZ - startZ) * t;
-
-    if (t < 1) {
-        if (wheelRef.current) wheelRef.current.rotation.x = state.clock.elapsedTime * 1.5;
-    } else if (isMoving) {
-        setIsMoving(false);
-    }
-  });
-
-  return (
-    <group ref={groupRef} position={[14.5, 1.9, 22]} rotation={[0, Math.PI, 0]}>
-        <mesh position={[0, 0.55, 0]} castShadow><boxGeometry args={[0.6, 0.08, 0.6]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
-        <mesh position={[0, 0.9, -0.25]} rotation={[0.1, 0, 0]} castShadow><boxGeometry args={[0.55, 0.7, 0.08]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
-        <mesh position={[0, 1.2, -0.3]} castShadow><boxGeometry args={[0.6, 0.05, 0.05]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
-        <group position={[0, 0.45, -0.05]} ref={wheelRef}>
-          <mesh position={[-0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]}><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
-          <mesh position={[0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]}><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
-        </group>
-      <group position={[0, 0.2, 0]}>
-        <BlockHumanoid scale={0.85} materialProps={butterProps} poseProps={{ rotation: [0, Math.PI, 0], leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], leftArmRotation: [0.7, 0, 0], rightArmRotation: [0.7, 0, 0]}} />
-      </group>
-      <group position={[0, 0, -0.75]}>
-        <BlockHumanoid scale={0.95} materialProps={butterProps} poseProps={{ isWalking: isMoving, walkSpeed: 1.2, leftArmRotation: [-1.2, 0, 0.1], rightArmRotation: [-1.2, 0, -0.1] }} />
-      </group>
-    </group>
-  );
-};
-
-const WalkingToConversationChapter = ({ butterProps, darkerProps }) => {
-  const groupRef = useRef();
+const StagingManager = ({ butterProps, darkerProps }) => {
+  const coupleRef = useRef();
   const caregiverRef = useRef();
   const walkerRef = useRef();
   const [phase, setPhase] = useState("walking");
 
+  // These are GLOBAL Z coordinates on the platform
   const START_Z = 4.0;
   const END_Z = 18.0; 
-  const WALKER_FIXED_Z = 12.0; // The absolute spot where it sits on the platform
+  const WALKER_FIXED_Z = 6.0; // The fixed location by the windows/wall
 
   useFrame((state) => {
     const t = state.clock.elapsedTime;
     
-    // 1. Initial Walk to 18.0
+    // PHASE 1: Initial Walk. Couple moves, Walker sits still.
     if (phase === "walking") {
       const progress = Math.min(t * 0.03, 1);
-      groupRef.current.position.z = START_Z + (END_Z - START_Z) * progress;
+      coupleRef.current.position.z = START_Z + (END_Z - START_Z) * progress;
       if (progress >= 1) setPhase("talking");
     }
 
-    // 2. Short pause to talk, then go fetch at T=42
+    // PHASE 2: Talking pause
     if (phase === "talking" && t > 42) setPhase("fetch");
     
+    // PHASE 3: Fetch. Caregiver walks back to the STATIC walker.
     if (phase === "fetch") {
-      // Relative offset: We are at 18.0, walker is at 12.0. Need to walk -6 units back.
       const fetchTime = (t - 42) * 0.2;
       const progress = Math.min(fetchTime, 1);
       
-      caregiverRef.current.position.z = 0 - (6.0 * progress);
-      caregiverRef.current.rotation.y = Math.PI; // Face backwards
+      // We are at END_Z (18). Walker is at 6. Distance = -12.
+      caregiverRef.current.position.z = - (12.0 * progress);
+      caregiverRef.current.rotation.y = Math.PI; 
 
       if (progress >= 1) setPhase("returning");
     }
 
+    // PHASE 4: Returning. Caregiver brings walker back to partner.
     if (phase === "returning") {
       const returnTime = (t - 47) * 0.2;
       const progress = Math.min(returnTime, 1);
       
-      const currentZOffset = -6.0 + (6.0 * progress);
+      const currentZOffset = -12.0 + (12.0 * progress);
       caregiverRef.current.position.z = currentZOffset;
-      caregiverRef.current.rotation.y = 0; // Face forward
+      caregiverRef.current.rotation.y = 0; 
 
-      // NOW the walker follows (it's "picked up")
-      walkerRef.current.position.z = currentZOffset + 0.6;
+      // WALKER MOVES ONLY NOW
+      walkerRef.current.position.z = WALKER_FIXED_Z + (12.0 * progress);
     }
   });
 
   return (
-    <group ref={groupRef} position={[7.5, 1.9, START_Z]} rotation={[0, Math.PI / 2, 0]}>
-        {/* Stationary Partner */}
-        <BlockHumanoid 
-          scale={1} 
-          materialProps={butterProps} 
-          poseProps={{ 
-            isWalking: phase === "walking", 
-            walkSpeed: 1.5,
-            cane: true, 
-            rotation: [0, phase !== "walking" ? 0.6 : 0, 0],
-            position: [-0.3, 0, 0],
-            headRotationY: phase !== "walking" ? -0.4 : 0
-          }} 
-        />
+    <>
+      {/* 1. THE WALKER (COMPLETELY OUTSIDE THE COUPLE GROUP) */}
+      <group ref={walkerRef} position={[7.9, GROUND_Y, WALKER_FIXED_Z]}>
+        <Walker materialProps={darkerProps} />
+      </group>
 
-        {/* Caregiver Partner */}
-        <group ref={caregiverRef} position={[0.4, 0, 0]}>
+      {/* 2. THE COUPLE */}
+      <group ref={coupleRef} position={[7.5, GROUND_Y, START_Z]} rotation={[0, Math.PI / 2, 0]}>
+          {/* Stationary Partner */}
           <BlockHumanoid 
-            scale={0.9} 
+            scale={1} 
             materialProps={butterProps} 
             poseProps={{ 
-              isWalking: phase !== "talking", 
+              isWalking: phase === "walking", 
               walkSpeed: 1.5,
-              rotation: [0, phase === "talking" ? -0.6 : 0, 0],
-              headRotationY: phase === "talking" ? 0.4 : 0
+              cane: true, 
+              rotation: [0, phase !== "walking" ? 0.6 : 0, 0],
+              position: [-0.3, 0, 0],
+              headRotationY: phase !== "walking" ? -0.4 : 0
             }} 
           />
-        </group>
 
-        {/* The Walker - Stays at -6 relative to current group pos until fetched */}
-        <group ref={walkerRef} position={[0.4, 0, -6]} rotation={[0, 0, 0]}>
-          <Walker materialProps={darkerProps} />
-        </group>
-    </group>
+          {/* Caregiver Partner */}
+          <group ref={caregiverRef} position={[0.4, 0, 0]}>
+            <BlockHumanoid 
+              scale={0.9} 
+              materialProps={butterProps} 
+              poseProps={{ 
+                isWalking: phase !== "talking", 
+                walkSpeed: 1.5,
+                rotation: [0, phase === "talking" ? -0.6 : 0, 0],
+                headRotationY: phase === "talking" ? 0.4 : 0
+              }} 
+            />
+          </group>
+      </group>
+    </>
   );
 };
+
+// --- SCENE COMPONENTS ---
+
+const Staircase = ({ position, width, rotation, materialProps }) => {
+    const stepHeight = 0.5; const stepDepth = 0.8; const numSteps = 16;
+    return (
+      <group position={position} rotation={rotation}>
+        {Array.from({ length: numSteps }).map((_, i) => (
+          <group key={i} position={[0, -i * stepHeight, i * stepDepth]}>
+            <mesh castShadow receiveShadow>
+              <boxGeometry args={[width, stepHeight, stepDepth]} />
+              <meshStandardMaterial {...materialProps} />
+            </mesh>
+            <mesh position={[0, -2.5, 0]} castShadow receiveShadow>
+              <boxGeometry args={[width, 5, stepDepth]} />
+              <meshStandardMaterial {...materialProps} />
+            </mesh>
+          </group>
+        ))}
+      </group>
+    );
+};
+
+const WallOpening = ({ position, colorProps, width = 6, openingW = 4.8, height = 17, openingH = 9, isWindow = false }) => (
+    <group position={position}>
+      <mesh position={[-(openingW + (width - openingW) / 2) / 2, height / 2, 0]} castShadow receiveShadow>
+        <boxGeometry args={[(width - openingW) / 2, height, 2]} /><meshStandardMaterial {...colorProps} />
+      </mesh>
+      <mesh position={[(openingW + (width - openingW) / 2) / 2, height / 2, 0]} castShadow receiveShadow>
+        <boxGeometry args={[(width - openingW) / 2, height, 2]} /><meshStandardMaterial {...colorProps} />
+      </mesh>
+      <mesh position={[0, height - (height - openingH - (isWindow ? 4 : 0)) / 2, 0]} castShadow receiveShadow>
+        <boxGeometry args={[openingW, height - openingH - (isWindow ? 4 : 0), 2]} /><meshStandardMaterial {...colorProps} />
+      </mesh>
+      {isWindow && (
+        <mesh position={[0, 2, 0]} castShadow receiveShadow>
+          <boxGeometry args={[openingW, 4, 2]} /><meshStandardMaterial {...colorProps} />
+        </mesh>
+      )}
+    </group>
+);
 
 // --- MAIN SCENE ---
 export default function Scene({ currentView }) {
@@ -476,19 +428,7 @@ export default function Scene({ currentView }) {
           <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
 
-        <group>
-          <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
-            <Bench materialProps={darkerProps} />
-          </group>
-
-          <group position={[6.0, 1.6, 10.0]} rotation={[0, Math.PI / 2, 0]}>
-            <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
-            <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
-          </group>
-
-          <WalkingToConversationChapter butterProps={butterProps} darkerProps={darkerProps} />
-          <WheelchairChapter butterProps={butterProps} />
-        </group>
+        <StagingManager butterProps={butterProps} darkerProps={darkerProps} />
       </group>
 
       <water
