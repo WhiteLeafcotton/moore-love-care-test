@@ -227,8 +227,8 @@ export default function Scene({ currentView }) {
   useFrame((state, delta) => {
     const isHome = currentView === "home";
     
-    // Nudged Mobile Z from 10 to 8 to pull the camera slightly closer
-    const targetPos = isHome ? (isMobile ? new THREE.Vector3(-30, 1.1, 8) : new THREE.Vector3(-14, 3.2, 24)) : new THREE.Vector3(-24.5, 3.5, -450);
+    // Closer on mobile: Increased Y to 3.5 (hiding the top edge) and decreased Z to 5 (getting tighter on the scene)
+    const targetPos = isHome ? (isMobile ? new THREE.Vector3(-30, 3.5, 5) : new THREE.Vector3(-14, 3.2, 24)) : new THREE.Vector3(-24.5, 3.5, -450);
     const targetLook = isHome ? (isMobile ? new THREE.Vector3(10, 2.8, 8) : new THREE.Vector3(20, 1.2, -2)) : new THREE.Vector3(-24.5, 1.5, -1000);
     
     camera.position.lerp(targetPos, 0.04); 
