@@ -100,7 +100,7 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
         </group>
       </group>
       {walker && (
-        <group position={[0, -0.2, 0.35]}> {/* Walker brought closer to body */}
+        <group position={[0, -0.2, 0.35]}>
           <mesh position={[0.3, 0.45, 0]}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
           <mesh position={[-0.3, 0.45, 0]}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
           <mesh position={[0, 0.85, 0]}><boxGeometry args={[0.65, 0.03, 0.03]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
@@ -192,9 +192,9 @@ const WheelchairChapter = ({ butterProps, isMobile }) => {
   const wheelRef = useRef(); 
   const [isMoving, setIsMoving] = useState(true);
   
-  // Starting point based on screen edge
-  const startZ = isMobile ? 35 : 22;
-  const finalStopZ = 12.5; // Restored original stop location
+  // startZ pushed much further for mobile to ensure edge-of-screen entrance
+  const startZ = isMobile ? 45 : 22; 
+  const finalStopZ = 12.5; 
 
   useFrame((state) => {
     const t = Math.min(state.clock.elapsedTime / 14, 1);
@@ -218,7 +218,6 @@ const WheelchairChapter = ({ butterProps, isMobile }) => {
   );
 };
 
-// --- COUPLE B: WALKING/TALKING RESTORED ---
 const WalkingToConversationChapter = ({ butterProps }) => {
   const groupRef = useRef(); 
   const [phase, setPhase] = useState("walking");
@@ -289,7 +288,6 @@ export default function Scene({ currentView }) {
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <Bench materialProps={butterProps} />
             
-            {/* --- COUPLE D: GRIPPING ARMS & CLOSER WALKER --- */}
             <group position={[3.5, 0, -0.2]} rotation={[0, -0.5, 0]}>
                <BlockHumanoid 
                 scale={0.84} 
@@ -297,8 +295,8 @@ export default function Scene({ currentView }) {
                 poseProps={{ 
                   walker: true, 
                   torsoRotationX: 0.1, 
-                  leftArmRotation: [-1.2, 0, -0.3], // Angled to grip rail
-                  rightArmRotation: [-1.2, 0, 0.3], // Angled to grip rail
+                  leftArmRotation: [-1.2, 0, -0.3], 
+                  rightArmRotation: [-1.2, 0, 0.3], 
                   leftLegRotation: [0.15, 0, 0],   
                   rightLegRotation: [-0.1, 0, 0],  
                   headRotationY: -0.2
@@ -317,10 +315,10 @@ export default function Scene({ currentView }) {
             </group>
           </group>
 
-          {/* Couple B: RESTORED FOR ALL VIEWS */}
-          <WalkingToConversationChapter butterProps={butterProps} />
+          {/* Couple B: ONLY VISIBLE ON DESKTOP */}
+          {!isMobile && <WalkingToConversationChapter butterProps={butterProps} />}
 
-          {/* Couple on the stairs */}
+          {/* Leaning Couple on stairs */}
           <group position={[6.0, 1.6, 10.0]} rotation={[0, Math.PI / 2, 0]}>
             <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
             <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
