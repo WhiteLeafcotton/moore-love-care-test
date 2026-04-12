@@ -77,7 +77,7 @@ const GrassySassyHills = () => {
       uniform vec3 uColorTips;
       void main() {
         float ao = pow(vHeight, 0.4); 
-        vec3 color = mix(uColorRoots, uColorTips, vHeight);
+        vec3 color = mix(uColorRoots, uColorRoots, vHeight);
         gl_FragColor = vec4(color * ao, 1.0);
       }
     `,
@@ -139,20 +139,17 @@ const Staircase = ({ position, width, rotation, materialProps }) => {
   );
 };
 
-const Bench = ({ position, width = 3, depth = 1.2, height = 1, rotation, materialProps }) => (
+const Bench = ({ position, rotation, materialProps }) => (
   <group position={position} rotation={rotation}>
-    {/* Seat */}
     <mesh position={[0, 0.45, 0]} castShadow receiveShadow>
-      <boxGeometry args={[width, 0.1, depth]} />
+      <boxGeometry args={[3, 0.1, 1.2]} />
       <meshStandardMaterial {...materialProps} />
     </mesh>
-    {/* Backrest */}
-    <mesh position={[0, 1, -(depth / 2 - 0.05)]} rotation={[-0.1, 0, 0]} castShadow receiveShadow>
-      <boxGeometry args={[width, height, 0.1]} />
+    <mesh position={[0, 1, -0.55]} rotation={[-0.1, 0, 0]} castShadow receiveShadow>
+      <boxGeometry args={[3, 1, 0.1]} />
       <meshStandardMaterial {...materialProps} />
     </mesh>
-    {/* Legs */}
-    {[[-(width / 2 - 0.2), 0, depth / 2 - 0.15], [width / 2 - 0.2, 0, depth / 2 - 0.15], [-(width / 2 - 0.2), 0, -(depth / 2 - 0.15)], [width / 2 - 0.2, 0, -(depth / 2 - 0.15)]].map((pos, i) => (
+    {[[-1.3, 0, 0.45], [1.3, 0, 0.45], [-1.3, 0, -0.45], [1.3, 0, -0.45]].map((pos, i) => (
       <mesh key={i} position={[pos[0], 0.225, pos[2]]} castShadow receiveShadow>
         <boxGeometry args={[0.1, 0.45, 0.1]} />
         <meshStandardMaterial {...materialProps} />
@@ -301,45 +298,34 @@ export default function Scene({ currentView }) {
         </group>
 
         <group>
-          {/* Couple B: LOCKED Senior Couple */}
+          {/* Bench: Locked in position */}
+          <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
+            <Bench materialProps={butterProps} />
+            {/* Person Sitting: FIXED - butt touching seat, facing same way as bench */}
+            <BlockHumanoid 
+              scale={0.95} 
+              materialProps={butterProps} 
+              poseProps={{ 
+                position: [0, 0.25, 0.1], // Lowered Y to touch seat, centered X
+                rotation: [0, 0, 0],       // Facing forward (bench direction)
+                leftLegRotation: [1.8, 0, 0.1], // Deep bend for sitting
+                rightLegRotation: [1.8, 0, -0.1],
+                leftArmRotation: [0.8, 0, 0.4],
+                rightArmRotation: [0.8, 0, -0.4]
+              }} 
+            />
+          </group>
+
           <group position={[14, 1.9, 12]} rotation={[0, -Math.PI * 0.7, 0]}>
             <BlockHumanoid scale={1} materialProps={butterProps} poseProps={{ cane: true, leftLegRotation: [0.3, 0, 0], rightLegRotation: [-0.3, 0, 0], position: [-0.3, 0, 0]}} />
             <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ leftLegRotation: [-0.3, 0, 0], rightLegRotation: [0.3, 0, 0], position: [0.4, 0, -0.1]}} />
           </group>
 
-          {/* NEW Couple A: Facing water (LOCKED), Bench Added */}
-          <group position={[6.0, 1.6, 11.5]}>
-            <Bench materialProps={butterProps} rotation={[0, -Math.PI / 2, 0]} />
-            
-            {/* Person A1 (Male): FIXED POSTURE - Sitting with legs bent, facing same way as THE BENCH (Forward) */}
-            <BlockHumanoid 
-              scale={0.9} 
-              materialProps={butterProps} 
-              poseProps={{ 
-                leftLegRotation: [1.7, 0, 0], 
-                rightLegRotation: [1.7, 0, 0], 
-                leftArmRotation: [0.5, 0, 0],
-                rightArmRotation: [0.5, 0, 0],
-                position: [-0.3, 0.45, 0], // Adjusted position to seat height, forward facing
-                rotation: [0, -Math.PI / 2, 0] // Turned to match bench direction
-              }} 
-            />
-            {/* Person A2 (Female): FIXED POSTURE - Sitting with legs bent, facing same way as THE BENCH (Forward) */}
-            <BlockHumanoid 
-              scale={0.88} 
-              materialProps={butterProps} 
-              poseProps={{ 
-                leftLegRotation: [1.7, 0, 0], 
-                rightLegRotation: [1.7, 0, 0], 
-                leftArmRotation: [0.5, 0, 0],
-                rightArmRotation: [0.5, 0, 0],
-                position: [0.5, 0.45, 0], // Adjusted position to seat height, forward facing
-                rotation: [0, -Math.PI / 2, 0] // Turned to match bench direction
-              }} 
-            />
+          <group position={[6.0, 1.6, 11.5]} rotation={[0, Math.PI / 2, 0]}>
+            <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
+            <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
           </group>
 
-          {/* Couple C: LOCKED Wheelchair Couple */}
           <group position={[14.5, 1.9, 17.5]} rotation={[0, Math.PI, 0]}>
             <SimpleWheelchair materialProps={butterProps} />
             <group position={[0, 0.2, 0]}>
