@@ -35,16 +35,12 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
     position = [0,0,0], 
     rotation = [0,0,0], 
     cane = false,
-    isLeaning = false,
     isWalking = false,
     isTalking = false,
     walkSpeed = 8,
-    torsoRotationZ = 0,
-    torsoRotationX = 0,
     headRotationY = 0
   } = poseProps;
   
-  const torsoRef = useRef();
   const leftLegRef = useRef();
   const rightLegRef = useRef();
   const leftArmRef = useRef();
@@ -65,58 +61,33 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
 
   useFrame((state) => {
     const t = state.clock.elapsedTime;
-    
-    if (torsoRef.current) {
-        torsoRef.current.rotation.z = torsoRotationZ;
-        torsoRef.current.rotation.x = torsoRotationX;
-        if (isLeaning) torsoRef.current.rotation.z += Math.sin(t * 0.5) * 0.15;
-    }
-
     if (isTalking) {
-      // Natural head movements and arm gesturing
-      headRef.current.rotation.y = headRotationY + Math.sin(t * 1.2) * 0.15;
-      headRef.current.rotation.x = Math.cos(t * 1.5) * 0.08;
-      rightArmRef.current.rotation.x = 0.3 + Math.sin(t * 2.5) * 0.25; 
-      leftArmRef.current.rotation.x = 0.2 + Math.cos(t * 2) * 0.1;
+      headRef.current.rotation.y = headRotationY + Math.sin(t * 1.5) * 0.15;
+      rightArmRef.current.rotation.x = 0.4 + Math.sin(t * 3) * 0.3; 
+      leftArmRef.current.rotation.x = 0.1 + Math.cos(t * 2) * 0.1;
     } else if (isWalking) {
       const swing = Math.sin(t * walkSpeed) * 0.4;
       leftLegRef.current.rotation.x = swing;
       rightLegRef.current.rotation.x = -swing;
       leftArmRef.current.rotation.x = -swing * 0.5;
       rightArmRef.current.rotation.x = swing * 0.5;
-    } else {
-      headRef.current.rotation.y = headRotationY;
-      leftLegRef.current.rotation.x = leftLegRotation[0];
-      rightLegRef.current.rotation.x = rightLegRotation[0];
-      leftArmRef.current.rotation.x = leftArmRotation[0];
-      rightArmRef.current.rotation.x = rightArmRotation[0];
     }
   });
 
   return (
     <group scale={scale} position={position} rotation={rotation}>
-      <group ref={torsoRef}>
-        <mesh ref={headRef} position={[0, 1.4, 0]} castShadow><sphereGeometry args={[0.22, 32, 32]} /><meshStandardMaterial {...materialProps} /></mesh>
-        <mesh position={[0, 0.3, 0]} castShadow><primitive object={torsoGeo} /><meshStandardMaterial {...materialProps} /></mesh>
-        <group position={[0, 1.2, 0]}>
-          <group ref={leftArmRef} position={[-0.22, 0, 0]} rotation={leftArmRotation}>
-            <mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
-          </group>
-          <group ref={rightArmRef} position={[0.22, 0, 0]} rotation={rightArmRotation}>
-            <mesh castShadow>
-                <primitive object={limbGeo} /><meshStandardMaterial {...materialProps} />
-                {cane && <mesh position={[0, -0.7, 0.1]}><cylinderGeometry args={[0.015, 0.015, 1.1]} /><meshStandardMaterial color="#fcd7d7" /></mesh>}
-            </mesh>
-          </group>
+      <mesh ref={headRef} position={[0, 1.4, 0]} castShadow><sphereGeometry args={[0.22, 32, 32]} /><meshStandardMaterial {...materialProps} /></mesh>
+      <mesh position={[0, 0.3, 0]} castShadow><primitive object={torsoGeo} /><meshStandardMaterial {...materialProps} /></mesh>
+      <group position={[0, 1.2, 0]}>
+        <group ref={leftArmRef} position={[-0.22, 0, 0]} rotation={leftArmRotation}><mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh></group>
+        <group ref={rightArmRef} position={[0.22, 0, 0]} rotation={rightArmRotation}>
+          <mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} />
+          {cane && <mesh position={[0, -0.7, 0.1]}><cylinderGeometry args={[0.015, 0.015, 1.1]} /><meshStandardMaterial color="#fcd7d7" /></mesh>}</mesh>
         </group>
       </group>
       <group position={[0, 0.4, 0]}>
-        <group ref={leftLegRef} position={[-0.12, 0, 0]} rotation={leftLegRotation}>
-          <mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
-        </group>
-        <group ref={rightLegRef} position={[0.12, 0, 0]} rotation={rightLegRotation}>
-          <mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
-        </group>
+        <group ref={leftLegRef} position={[-0.12, 0, 0]} rotation={leftLegRotation}><mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh></group>
+        <group ref={rightLegRef} position={[0.12, 0, 0]} rotation={rightLegRotation}><mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh></group>
       </group>
     </group>
   );
@@ -129,201 +100,70 @@ const GrassySassyHills = () => {
     const g = new THREE.PlaneGeometry(0.05, 1.2, 1, 4);
     g.translate(0, 0.6, 0);
     const pos = g.attributes.position.array;
-    for (let i = 0; i < pos.length; i += 3) {
-      const h = pos[i + 1] / 1.2;
-      pos[i] += Math.pow(h, 2) * 0.15; 
-    }
-    g.computeVertexNormals();
-    return g;
+    for (let i = 0; i < pos.length; i += 3) { pos[i] += Math.pow(pos[i + 1] / 1.2, 2) * 0.15; }
+    g.computeVertexNormals(); return g;
   }, []);
-
   const terrainGeo = useMemo(() => {
     const g = new THREE.PlaneGeometry(400, 400, 100, 100);
     g.rotateX(-Math.PI / 2);
     const pos = g.attributes.position.array;
-    for (let i = 0; i < pos.length; i += 3) {
-      pos[i + 1] = getHillHeight(pos[i], pos[i + 2]);
-    }
-    g.computeVertexNormals();
-    return g;
+    for (let i = 0; i < pos.length; i += 3) { pos[i + 1] = getHillHeight(pos[i], pos[i + 2]); }
+    g.computeVertexNormals(); return g;
   }, []);
-
   const grassMaterial = useMemo(() => new THREE.ShaderMaterial({
     uniforms: { uTime: { value: 0 }, uColorRoots: { value: new THREE.Color("#13051a") }, uColorTips: { value: new THREE.Color("#c292f5") } },
-    vertexShader: `
-      varying float vHeight;
-      uniform float uTime;
-      void main() {
-        vHeight = position.y / 1.2;
-        vec3 worldPos = (instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
-        float swell = sin(uTime * 0.5 + worldPos.x * 0.05 + worldPos.z * 0.05) * 0.3;
-        float gust = sin(uTime * 2.0 + worldPos.x * 0.2) * 0.15;
-        float totalWind = (swell + gust) * vHeight;
-        vec3 pos = position;
-        pos.x += totalWind;
-        pos.z += totalWind * 0.3;
-        gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(pos, 1.0);
-      }
-    `,
-    fragmentShader: `
-      varying float vHeight;
-      uniform vec3 uColorRoots;
-      uniform vec3 uColorTips;
-      void main() {
-        float ao = pow(vHeight, 0.4); 
-        vec3 color = mix(uColorRoots, uColorTips, vHeight);
-        gl_FragColor = vec4(color * ao, 1.0);
-      }
-    `,
+    vertexShader: `varying float vHeight; uniform float uTime; void main() { vHeight = position.y / 1.2; vec3 worldPos = (instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz; float wind = sin(uTime * 1.5 + worldPos.x * 0.1) * 0.2 * vHeight; vec3 pos = position; pos.x += wind; gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(pos, 1.0); }`,
+    fragmentShader: `varying float vHeight; uniform vec3 uColorRoots; uniform vec3 uColorTips; void main() { gl_FragColor = vec4(mix(uColorRoots, uColorTips, vHeight) * pow(vHeight, 0.4), 1.0); }`,
     side: THREE.DoubleSide
   }), []);
-
   useFrame((state) => {
     grassMaterial.uniforms.uTime.value = state.clock.getElapsedTime();
     if (meshRef.current && !meshRef.current._init) {
       const dummy = new THREE.Object3D();
       for (let i = 0; i < GRASS_COUNT; i++) {
-        const x = (Math.random() - 0.5) * 400;
-        const z = (Math.random() - 0.5) * 400;
-        const y = getHillHeight(x, z);
-        if (y > 0.05) {
-          dummy.position.set(x, y - 0.05, z);
-          dummy.rotation.y = Math.random() * Math.PI;
-          dummy.scale.setScalar(0.6 + Math.random() * 0.8);
-          dummy.updateMatrix();
-          meshRef.current.setMatrixAt(i, dummy.matrix);
-        } else {
-          dummy.scale.setScalar(0);
-          dummy.updateMatrix();
-          meshRef.current.setMatrixAt(i, dummy.matrix);
-        }
+        const x = (Math.random() - 0.5) * 400; const z = (Math.random() - 0.5) * 400; const y = getHillHeight(x, z);
+        if (y > 0.05) { dummy.position.set(x, y - 0.05, z); dummy.rotation.y = Math.random() * Math.PI; dummy.scale.setScalar(0.6 + Math.random() * 0.8); dummy.updateMatrix(); meshRef.current.setMatrixAt(i, dummy.matrix); }
+        else { dummy.scale.setScalar(0); dummy.updateMatrix(); meshRef.current.setMatrixAt(i, dummy.matrix); }
       }
-      meshRef.current.instanceMatrix.needsUpdate = true;
-      meshRef.current._init = true;
+      meshRef.current.instanceMatrix.needsUpdate = true; meshRef.current._init = true;
     }
   });
-
-  return (
-    <group position={[0, -3.5, -40]}>
-      <mesh geometry={terrainGeo} receiveShadow>
-        <meshStandardMaterial color="#0c020f" roughness={1} />
-      </mesh>
-      <instancedMesh ref={meshRef} args={[bladeGeo, grassMaterial, GRASS_COUNT]} castShadow />
-    </group>
-  );
+  return <group position={[0, -3.5, -40]}><mesh geometry={terrainGeo} receiveShadow><meshStandardMaterial color="#0c020f" roughness={1} /></mesh><instancedMesh ref={meshRef} args={[bladeGeo, grassMaterial, GRASS_COUNT]} castShadow /></group>;
 };
 
 // --- ARCHITECTURE ---
-const Staircase = ({ position, width, rotation, materialProps }) => {
-  const stepHeight = 0.5; const stepDepth = 0.8; const numSteps = 16;
-  return (
-    <group position={position} rotation={rotation}>
-      {Array.from({ length: numSteps }).map((_, i) => (
-        <group key={i} position={[0, -i * stepHeight, i * stepDepth]}>
-          <mesh castShadow receiveShadow>
-            <boxGeometry args={[width, stepHeight, stepDepth]} /><meshStandardMaterial {...materialProps} />
-          </mesh>
-          <mesh position={[0, -2.5, 0]} castShadow receiveShadow>
-            <boxGeometry args={[width, 5, stepDepth]} /><meshStandardMaterial {...materialProps} />
-          </mesh>
-        </group>
-      ))}
-    </group>
-  );
-};
+const Staircase = ({ position, width, rotation, materialProps }) => (
+  <group position={position} rotation={rotation}>
+    {Array.from({ length: 16 }).map((_, i) => (
+      <group key={i} position={[0, -i * 0.5, i * 0.8]}>
+        <mesh castShadow receiveShadow><boxGeometry args={[width, 0.5, 0.8]} /><meshStandardMaterial {...materialProps} /></mesh>
+        <mesh position={[0, -2.5, 0]} castShadow receiveShadow><boxGeometry args={[width, 5, 0.8]} /><meshStandardMaterial {...materialProps} /></mesh>
+      </group>
+    ))}
+  </group>
+);
 
 const WallOpening = ({ position, colorProps, width = 6, openingW = 4.8, height = 17, openingH = 9, isWindow = false }) => (
   <group position={position}>
-    <mesh position={[-(openingW + (width - openingW) / 2) / 2, height / 2, 0]} castShadow receiveShadow>
-      <boxGeometry args={[(width - openingW) / 2, height, 2]} /><meshStandardMaterial {...colorProps} />
-    </mesh>
-    <mesh position={[(openingW + (width - openingW) / 2) / 2, height / 2, 0]} castShadow receiveShadow>
-      <boxGeometry args={[(width - openingW) / 2, height, 2]} /><meshStandardMaterial {...colorProps} />
-    </mesh>
-    <mesh position={[0, height - (height - openingH - (isWindow ? 4 : 0)) / 2, 0]} castShadow receiveShadow>
-      <boxGeometry args={[openingW, height - openingH - (isWindow ? 4 : 0), 2]} /><meshStandardMaterial {...colorProps} />
-    </mesh>
-    {isWindow && (
-      <mesh position={[0, 2, 0]} castShadow receiveShadow>
-        <boxGeometry args={[openingW, 4, 2]} /><meshStandardMaterial {...colorProps} />
-      </mesh>
-    )}
+    <mesh position={[-(openingW + (width - openingW) / 2) / 2, height / 2, 0]} castShadow receiveShadow><boxGeometry args={[(width - openingW) / 2, height, 2]} /><meshStandardMaterial {...colorProps} /></mesh>
+    <mesh position={[(openingW + (width - openingW) / 2) / 2, height / 2, 0]} castShadow receiveShadow><boxGeometry args={[(width - openingW) / 2, height, 2]} /><meshStandardMaterial {...colorProps} /></mesh>
+    <mesh position={[0, height - (height - openingH - (isWindow ? 4 : 0)) / 2, 0]} castShadow receiveShadow><boxGeometry args={[openingW, height - openingH - (isWindow ? 4 : 0), 2]} /><meshStandardMaterial {...colorProps} /></mesh>
+    {isWindow && <mesh position={[0, 2, 0]} castShadow receiveShadow><boxGeometry args={[openingW, 4, 2]} /><meshStandardMaterial {...colorProps} /></mesh>}
   </group>
 );
 
 // --- ANIMATED CHAPTERS ---
-const WheelchairChapter = ({ butterProps }) => {
-  const groupRef = useRef();
-  const wheelRef = useRef();
-  const [isMoving, setIsMoving] = useState(true);
-
-  useFrame((state) => {
-    const t = Math.min(state.clock.elapsedTime / 12, 1);
-    const progress = THREE.MathUtils.smoothstep(t, 0, 1);
-    if (groupRef.current) groupRef.current.position.z = 22 + (12.5 - 22) * progress;
-    if (t < 1 && wheelRef.current) wheelRef.current.rotation.x = state.clock.elapsedTime * 2.5;
-    else if (isMoving) setIsMoving(false);
-  });
-
-  return (
-    <group ref={groupRef} position={[14.5, 1.9, 22]} rotation={[0, Math.PI, 0]}>
-        <mesh position={[0, 0.55, 0]}><boxGeometry args={[0.6, 0.08, 0.6]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
-        <mesh position={[0, 0.9, -0.25]} rotation={[0.1, 0, 0]}><boxGeometry args={[0.55, 0.7, 0.08]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
-        <group position={[0, 0.45, -0.05]} ref={wheelRef}>
-          <mesh position={[-0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]}><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
-          <mesh position={[0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]}><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
-        </group>
-      <group position={[0, 0.2, 0]}>
-        <BlockHumanoid scale={0.85} materialProps={butterProps} poseProps={{ rotation: [0, Math.PI, 0], leftLegRotation: [Math.PI/2, 0, 0], rightLegRotation: [Math.PI/2, 0, 0] }} />
-      </group>
-      <group position={[0, 0, -0.75]}>
-        <BlockHumanoid scale={0.95} materialProps={butterProps} poseProps={{ isWalking: isMoving, walkSpeed: 10 }} />
-      </group>
-    </group>
-  );
-};
-
 const WalkingToConversationChapter = ({ butterProps }) => {
   const groupRef = useRef();
   const [phase, setPhase] = useState("walking");
-
   useFrame((state) => {
     const t = Math.min(state.clock.elapsedTime / 15, 1);
-    const progress = THREE.MathUtils.smoothstep(t, 0, 1);
-    if (phase === "walking") {
-      groupRef.current.position.z = 4.0 + (18.0 - 4.0) * progress;
-      if (t >= 1) setPhase("talking");
-    }
+    if (phase === "walking") { groupRef.current.position.z = 4.0 + (18.0 - 4.0) * THREE.MathUtils.smoothstep(t, 0, 1); if (t >= 1) setPhase("talking"); }
   });
-
   return (
     <group ref={groupRef} position={[7.5, 1.9, 4.0]} rotation={[0, Math.PI / 2, 0]}>
-        <BlockHumanoid 
-          scale={0.95} 
-          materialProps={butterProps} 
-          poseProps={{ 
-            isWalking: phase === "walking", 
-            isTalking: phase === "talking",
-            walkSpeed: 3.5, 
-            cane: true, 
-            rotation: [0, 0.45, 0],
-            position: [-0.35, 0, 0],
-            headRotationY: -0.7
-          }} 
-        />
-        <group position={[0.45, 0, 0]}>
-          <BlockHumanoid 
-            scale={0.95} 
-            materialProps={butterProps} 
-            poseProps={{ 
-              isWalking: phase === "walking", 
-              isTalking: phase === "talking",
-              walkSpeed: 3.5,
-              rotation: [0, -0.45, 0],
-              headRotationY: 0.7
-            }} 
-          />
-        </group>
+        <BlockHumanoid scale={0.95} materialProps={butterProps} poseProps={{ isWalking: phase === "walking", isTalking: phase === "talking", walkSpeed: 3.5, cane: true, rotation: [0, 0.45, 0], position: [-0.35, 0, 0], headRotationY: -0.7 }} />
+        <group position={[0.45, 0, 0]}><BlockHumanoid scale={0.95} materialProps={butterProps} poseProps={{ isWalking: phase === "walking", isTalking: phase === "talking", walkSpeed: 3.5, rotation: [0, -0.45, 0], headRotationY: 0.7 }} /></group>
     </group>
   );
 };
@@ -332,93 +172,55 @@ const WalkingToConversationChapter = ({ butterProps }) => {
 export default function Scene({ currentView }) {
   const { camera, size } = useThree();
   const waterRef = useRef();
-  const cloudGroupRef = useRef();
-  const lookAtTarget = useRef(new THREE.Vector3(12, 1.5, 0));
   const isMobile = size.width < 768;
-
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
   useEffect(() => { if (waterNormals) waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping; }, [waterNormals]);
 
   useFrame((state, delta) => {
     const isHome = currentView === "home";
-    const LERP_SPEED = isHome ? 0.04 : 0.018; 
-
-    // --- ZOOMED-IN LOCKED MOBILE POSITION: Z: 6 (MUCH CLOSER) ---
-    const mobileHomePos = new THREE.Vector3(-30, 1.1, 6); 
-    const desktopHomePos = new THREE.Vector3(-14, 3.2, 24);
-    
-    const homePos = isMobile ? mobileHomePos : desktopHomePos;
-    const targetPos = isHome ? homePos : new THREE.Vector3(-24.5, 3.5, -450);
-    
-    const mobileLookAt = new THREE.Vector3(10, 2.8, 8); 
-    const desktopLookAt = new THREE.Vector3(20, 1.2, -2);
-
-    camera.position.lerp(targetPos, LERP_SPEED);
-    lookAtTarget.current.lerp(isHome ? (isMobile ? mobileLookAt : desktopLookAt) : new THREE.Vector3(-24.5, 1.5, -1000), LERP_SPEED);
-    camera.lookAt(lookAtTarget.current);
-
+    const targetPos = isHome ? (isMobile ? new THREE.Vector3(-30, 1.1, 6) : new THREE.Vector3(-14, 3.2, 24)) : new THREE.Vector3(-24.5, 3.5, -450);
+    const targetLook = isHome ? (isMobile ? new THREE.Vector3(10, 2.8, 8) : new THREE.Vector3(20, 1.2, -2)) : new THREE.Vector3(-24.5, 1.5, -1000);
+    camera.position.lerp(targetPos, 0.04); camera.lookAt(targetLook);
     if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.08;
-    if (cloudGroupRef.current) {
-      cloudGroupRef.current.position.x += delta * 0.3;
-      if (cloudGroupRef.current.position.x > 500) cloudGroupRef.current.position.x = -500;
-    }
   });
 
   const butterProps = { color: "#fce4e4", roughness: 0.9, metalness: 0.02 };
 
   return (
     <>
-      <Sky distance={450000} sunPosition={[-20, 8, -100]} inclination={0.6} azimuth={0.25} turbidity={8} rayleigh={6} />
+      <Sky distance={450000} sunPosition={[-20, 8, -100]} inclination={0.6} azimuth={0.25} />
       <Environment preset="sunset" />
       <GrassySassyHills />
-      <hemisphereLight intensity={1.4} color="#ffffff" groundColor="#b066ff" />
       <directionalLight position={[-15, 30, 10]} intensity={1.6} castShadow />
 
-      <group ref={cloudGroupRef}>
-        <Cloud position={[0, 80, -450]} speed={0.2} opacity={0.3} segments={40} bounds={[1000, 100, 50]} volume={150} color="#ffd1dc" />
-      </group>
-
       <group position={[0, 0, 0]}>
-        <mesh position={[15.5, -2.1, 15.0]} castShadow receiveShadow>
-          <boxGeometry args={[20, 8.0, 30]} /><meshStandardMaterial {...butterProps} />
-        </mesh>
-        
+        <mesh position={[15.5, -2.1, 15.0]} castShadow receiveShadow><boxGeometry args={[20, 8.0, 30]} /><meshStandardMaterial {...butterProps} /></mesh>
         <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={butterProps} />
 
-        {/* --- RESTORED BACK WALLS (IDENTICAL TO WEB) --- */}
+        {/* --- MAIN BACK WALL --- */}
         <group position={[-16, -1.6, 0]}>
           <mesh position={[1, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
           <WallOpening position={[6, 0, 0]} colorProps={butterProps} />
           <WallOpening position={[12, 0, 0]} colorProps={butterProps} />
           <mesh position={[24, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
-          {/* Fills the gap to ensure no background shows through on any device */}
           <mesh position={[40, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[14, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
 
+        {/* --- WINDOW SIDE WALL WITH RE-ADDED CORNER PILLAR --- */}
         <group position={[17, -1.6, 1]} rotation={[0, -Math.PI / 2, 0]}>
+          {/* THE MISSING CORNER PILLAR: This creates the extra 90-degree structural return seen on web */}
+          <mesh position={[1, 8.5, 1.5]} castShadow receiveShadow><boxGeometry args={[2.5, 17, 3]} /><meshStandardMaterial {...butterProps} /></mesh>
+          
           <mesh castShadow receiveShadow position={[0.5, 8.5, 0]}><boxGeometry args={[1, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
-          <mesh castShadow receiveShadow position={[4, 8.5, 0]}><boxGeometry args={[6, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
           <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={butterProps} />
           <WallOpening position={[17, 0, 0]} isWindow={true} colorProps={butterProps} />
           <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
 
-        <group>
-          <group position={[6.0, 1.6, 10.0]} rotation={[0, Math.PI / 2, 0]}>
-            <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI/2, 0, 0], rightLegRotation: [Math.PI/2, 0, 0], position: [-0.2, 0, 0]}} />
-            <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI/2, 0, 0], rightLegRotation: [Math.PI/2, 0, 0], position: [0.5, 0, 0]}} />
-          </group>
-          <WalkingToConversationChapter butterProps={butterProps} />
-          <WheelchairChapter butterProps={butterProps} />
-        </group>
+        <WalkingToConversationChapter butterProps={butterProps} />
       </group>
 
-      <water
-        ref={waterRef}
-        args={[new THREE.PlaneGeometry(2000, 2000), { waterNormals, sunDirection: new THREE.Vector3(-10, 10, -100).normalize(), sunColor: 0xffffff, waterColor: 0x21162e, distortionScale: 1.0, alpha: 0.95 }]}
-        rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, -1.45, 0]}
-      />
+      <water ref={waterRef} args={[new THREE.PlaneGeometry(2000, 2000), { waterNormals, sunDirection: new THREE.Vector3(-10, 10, -100).normalize(), sunColor: 0xffffff, waterColor: 0x21162e, distortionScale: 1.0, alpha: 0.95 }]} rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.45, 0]} />
     </>
   );
 }
