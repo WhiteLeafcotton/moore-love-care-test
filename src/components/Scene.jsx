@@ -328,58 +328,52 @@ const WalkingToConversationChapter = ({ butterProps, darkerProps }) => {
   const groupRef = useRef();
   const caregiverRef = useRef();
   const walkerGroupRef = useRef();
-  const [phase, setPhase] = useState("walking"); // walking, talking, fetch, returning
+  const [phase, setPhase] = useState("walking");
 
-  // Animation constants
-  const WALK_END_Z = 12.0;
-  const WALKER_PARKED_X = 6.5; 
-  const WALKER_PARKED_Z = 10.0;
+  // STAGING POINTS
+  const START_Z = 4.0;
+  const END_Z = 18.0; // Pushed further down
+  const WALKER_ORIGINAL_STOP_Z = 12.0; // The "Old" stop point where walker sits
 
   useFrame((state) => {
     const t = state.clock.elapsedTime;
     
     if (phase === "walking") {
       const progress = Math.min(t * 0.03, 1);
-      groupRef.current.position.z = 4.0 + (WALK_END_Z - 4.0) * progress;
+      groupRef.current.position.z = START_Z + (END_Z - START_Z) * progress;
       if (progress >= 1) setPhase("talking");
     }
 
-    // Sequence timing
-    if (phase === "talking" && t > 38) setPhase("fetch");
+    if (phase === "talking" && t > 42) setPhase("fetch");
     
     if (phase === "fetch") {
-      // Caregiver moves toward the walker on the right
-      const fetchTime = (t - 38) * 0.2;
+      // Caregiver turns and walks BACK to the original spot (12.0 relative to group 0, but since group is at 18, they walk -6 units)
+      const fetchTime = (t - 42) * 0.2;
       const progress = Math.min(fetchTime, 1);
       
-      caregiverRef.current.position.x = 0.4 + (WALKER_PARKED_X * progress);
-      caregiverRef.current.position.z = 0 + (WALKER_PARKED_Z * progress);
-      caregiverRef.current.rotation.y = -Math.PI / 2 - (Math.PI / 4 * progress);
+      caregiverRef.current.position.z = 0 - (6.0 * progress);
+      caregiverRef.current.rotation.y = Math.PI; // Face backwards to walk
 
       if (progress >= 1) setPhase("returning");
     }
 
     if (phase === "returning") {
-      // Caregiver returns with the walker
-      const returnTime = (t - 43) * 0.2;
+      // Caregiver returns from 12.0 back to 18.0
+      const returnTime = (t - 47) * 0.2;
       const progress = Math.min(returnTime, 1);
       
-      const currentX = (0.4 + WALKER_PARKED_X) - (WALKER_PARKED_X * progress);
-      const currentZ = WALKER_PARKED_Z - (WALKER_PARKED_Z * progress);
-      
-      caregiverRef.current.position.x = currentX;
-      caregiverRef.current.position.z = currentZ;
-      caregiverRef.current.rotation.y = Math.PI / 2;
+      const currentZOffset = -6.0 + (6.0 * progress);
+      caregiverRef.current.position.z = currentZOffset;
+      caregiverRef.current.rotation.y = 0; // Face forward again
 
-      // Attach walker to caregiver
-      walkerGroupRef.current.position.set(currentX, 0, currentZ + 0.6);
-      walkerGroupRef.current.rotation.y = Math.PI / 2;
+      // Walker follows
+      walkerGroupRef.current.position.set(0.4, 0, currentZOffset + 0.6);
     }
   });
 
   return (
-    <group ref={groupRef} position={[7.5, 1.9, 4]} rotation={[0, Math.PI / 2, 0]}>
-        {/* Partner with Cane */}
+    <group ref={groupRef} position={[7.5, 1.9, START_Z]} rotation={[0, Math.PI / 2, 0]}>
+        {/* Stationary Partner at END_Z */}
         <BlockHumanoid 
           scale={1} 
           materialProps={butterProps} 
@@ -407,8 +401,8 @@ const WalkingToConversationChapter = ({ butterProps, darkerProps }) => {
           />
         </group>
 
-        {/* The Walker - Parked on the right edge of platform */}
-        <group ref={walkerGroupRef} position={[7.0, 0, 10]} rotation={[0, 0, 0]}>
+        {/* The Walker - Parked at the OLD stop spot (relative -6 from the new stop at 18) */}
+        <group ref={walkerGroupRef} position={[0.4, 0, -6]} rotation={[0, 0, 0]}>
           <Walker materialProps={darkerProps} />
         </group>
     </group>
