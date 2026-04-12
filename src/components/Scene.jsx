@@ -2,7 +2,7 @@ import { useRef, useMemo, useEffect, useState } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
 import { Environment, Sky, Cloud } from "@react-three/drei";
 import { Water } from "three-stdlib";
-import * as THREE from "this";
+import * as THREE from "three";
 
 extend({ Water });
 
@@ -379,16 +379,15 @@ export default function Scene({ currentView }) {
     const isHome = currentView === "home";
     const LERP_SPEED = isHome ? 0.04 : 0.018; 
 
-    // --- AGGRESSIVE LEFT & CLOSE MOBILE CAMERA ---
-    // Far left (X: -60) and physically closer to the door (Z: 28)
-    const mobileHomePos = new THREE.Vector3(-60, 2.8, 28); 
+    // --- ULTRA-LEFT MOBILE CAMERA: X: -85 ---
+    const mobileHomePos = new THREE.Vector3(-85, 2.8, 28); 
     const desktopHomePos = new THREE.Vector3(-14, 3.2, 24);
     
     const homePos = isMobile ? mobileHomePos : desktopHomePos;
     const targetPos = isHome ? homePos : new THREE.Vector3(-24.5, 3.5, -450);
     
-    // mobileLookAt: Keeps focus on the architecture and characters (X: 12)
-    const mobileLookAt = new THREE.Vector3(12, 2.8, 12); 
+    // Focused slightly further right to create a massive lead-in from the left
+    const mobileLookAt = new THREE.Vector3(15, 2.8, 12); 
     const desktopLookAt = new THREE.Vector3(20, 1.2, -2);
 
     camera.position.lerp(targetPos, LERP_SPEED);
