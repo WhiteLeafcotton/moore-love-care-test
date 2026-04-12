@@ -407,7 +407,7 @@ export default function Scene({ currentView }) {
         </group>
 
         <group>
-          {/* BENCH COUPLE RESTORED */}
+          {/* SITTING COUPLE - ONLY ONES ON THE BENCH */}
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <Bench materialProps={butterProps} />
             <group position={[0, 0, -0.2]} rotation={[0, 0, 0]}>
@@ -415,13 +415,8 @@ export default function Scene({ currentView }) {
                 scale={0.84} 
                 materialProps={butterProps} 
                 poseProps={{ 
-                  walker: true, 
                   position: [0.5, 0, 0],
                   rotation: [0, -0.5, 0],
-                  torsoRotationX: 0.1, 
-                  leftArmRotation: [0.1, 0, -0.1], 
-                  rightArmRotation: [0.1, 0, 0.1], 
-                  animateArmsTo: [-1.1, 0, -0.1], 
                   leftLegRotation: [Math.PI / 2, 0, 0],
                   rightLegRotation: [Math.PI / 2, 0, 0],  
                   headRotationY: -0.2
@@ -445,7 +440,35 @@ export default function Scene({ currentView }) {
 
           <WalkingToConversationChapter butterProps={butterProps} />
 
-          {/* STANDING HELPERS (BY THE WALL) */}
+          {/* THE ONLY WALKER COUPLE (BY THE STAIRS) */}
+          <group position={[17.5, 1.9, 3.8]} rotation={[0, -Math.PI / 2, 0]}>
+               <BlockHumanoid 
+                scale={0.84} 
+                materialProps={butterProps} 
+                poseProps={{ 
+                  walker: true, 
+                  torsoRotationX: 0.1, 
+                  leftArmRotation: [0.1, 0, -0.1], 
+                  rightArmRotation: [0.1, 0, 0.1], 
+                  animateArmsTo: [-1.1, 0, -0.1], 
+                  leftLegRotation: [0.15, 0, 0],   
+                  rightLegRotation: [-0.1, 0, 0],  
+                  headRotationY: -0.2
+                }} 
+               />
+               <BlockHumanoid 
+                isHelper
+                scale={0.95} 
+                materialProps={butterProps} 
+                poseProps={{ 
+                  position: [-0.95, 0, 0.35], 
+                  rotation: [0, 0.65, 0], 
+                  headRotationY: -0.4,
+                  leftArmRotation: [-0.8, 0, -0.25] 
+                }} 
+               />
+          </group>
+
           <group position={[6.0, 1.6, 10.0]} rotation={[0, Math.PI / 2, 0]}>
             <BlockHumanoid isHelper scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0], rotation: [0, -0.4, 0]}} />
             <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
