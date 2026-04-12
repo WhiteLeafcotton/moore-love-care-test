@@ -287,7 +287,7 @@ const WheelchairChapter = ({ butterProps }) => {
     const duration = 12; 
     const t = Math.min(state.clock.elapsedTime / duration, 1);
     const progress = THREE.MathUtils.smoothstep(t, 0, 1);
-    const startZ = 42; // Pushed back further to avoid clip
+    const startZ = 42; 
     const endZ = 12.5; 
     
     if (groupRef.current) {
@@ -420,9 +420,9 @@ export default function Scene({ currentView }) {
         
         <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={butterProps} />
         
-        {/* HEXAGON PLATFORM - Foreground right of steps */}
-        <mesh position={[3.5, -1.38, 26]} castShadow receiveShadow>
-          <cylinderGeometry args={[2, 2, 0.1, 6]} />
+        {/* HEXAGON PLATFORM - Shifted to exact mouse spot in foreground */}
+        <mesh position={[18, -1.38, 28]} castShadow receiveShadow>
+          <cylinderGeometry args={[2.5, 2.5, 0.1, 6]} />
           <meshStandardMaterial {...butterProps} />
         </mesh>
 
