@@ -1,4 +1,4 @@
-import { useRef, useMemo, useEffect } from "react";
+import { useRef, useMemo, useEffect, useState } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
 import { Environment, Sky, Cloud } from "@react-three/drei";
 import { Water } from "three-stdlib";
@@ -190,7 +190,8 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
     rotation = [0,0,0], 
     cane = false,
     isLeaning = false,
-    isWalking = false // New prop to enable gait animation
+    isWalking = false,
+    walkSpeed = 8
   } = poseProps;
   
   const torsoRef = useRef();
@@ -219,7 +220,7 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
     }
 
     if (isWalking) {
-      const swing = Math.sin(t * 8) * 0.4; // Speed and amplitude of stride
+      const swing = Math.sin(t * walkSpeed) * 0.4;
       if (leftLegRef.current) leftLegRef.current.rotation.x = swing;
       if (rightLegRef.current) rightLegRef.current.rotation.x = -swing;
       if (leftArmRef.current) leftArmRef.current.rotation.x = -swing * 0.5;
@@ -257,10 +258,12 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
   );
 };
 
-const SimpleWheelchair = ({ materialProps, wheelRef }) => (
+const SimpleWheelchair = ({ wheelRef }) => (
   <group>
     <mesh position={[0, 0.55, 0]} castShadow><boxGeometry args={[0.6, 0.08, 0.6]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
     <mesh position={[0, 0.9, -0.25]} rotation={[0.1, 0, 0]} castShadow><boxGeometry args={[0.55, 0.7, 0.08]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
+    {/* Handlebar for the helper to grab */}
+    <mesh position={[0, 1.2, -0.3]} castShadow><boxGeometry args={[0.6, 0.05, 0.05]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
     <group position={[0, 0.45, -0.05]} ref={wheelRef}>
       <mesh position={[-0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]}><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
       <mesh position={[0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]}><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
@@ -275,37 +278,88 @@ const WheelchairChapter = ({ butterProps }) => {
   const wheelRef = useRef();
 
   useFrame((state) => {
-    const t = state.clock.elapsedTime * 0.2;
-    const movement = Math.sin(t) * 2;
+    const t = state.clock.elapsedTime * 0.15; // Very slow push
+    const movement = Math.sin(t) * 2.5;
     groupRef.current.position.z = 17.5 + movement;
-    if (wheelRef.current) wheelRef.current.rotation.x = t * 5;
+    if (wheelRef.current) wheelRef.current.rotation.x = t * 4;
   });
 
   return (
     <group ref={groupRef} position={[14.5, 1.9, 17.5]} rotation={[0, Math.PI, 0]}>
-      <SimpleWheelchair materialProps={butterProps} wheelRef={wheelRef} />
+      <SimpleWheelchair wheelRef={wheelRef} />
       <group position={[0, 0.2, 0]}>
         <BlockHumanoid scale={0.85} materialProps={butterProps} poseProps={{ rotation: [0, Math.PI, 0], leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], leftArmRotation: [0.7, 0, 0], rightArmRotation: [0.7, 0, 0]}} />
       </group>
-      <group position={[0, 0, -0.7]}>
-        <BlockHumanoid scale={0.95} materialProps={butterProps} poseProps={{ isWalking: true, leftArmRotation: [-1.1, 0, 0], rightArmRotation: [-1.1, 0, 0]}} />
+      {/* The Helper grabbing the chair */}
+      <group position={[0, 0, -0.75]}>
+        <BlockHumanoid 
+          scale={0.95} 
+          materialProps={butterProps} 
+          poseProps={{ 
+            isWalking: true, 
+            walkSpeed: 4, // Slower walk to match push
+            leftArmRotation: [-1.2, 0, 0.1], // Reaching forward
+            rightArmRotation: [-1.2, 0, -0.1] 
+          }} 
+        />
       </group>
     </group>
   );
 };
 
-const WalkingChapter = ({ butterProps }) => {
+const WalkingToSittingChapter = ({ butterProps }) => {
   const groupRef = useRef();
-  useFrame((state) => {
-    const t = state.clock.elapsedTime * 0.3;
-    groupRef.current.position.z = 12 + Math.sin(t) * 3;
-    groupRef.current.position.y = 1.9 + Math.abs(Math.sin(t * 8)) * 0.05; 
+  const [sittingProgress, setSittingProgress] = useState(0);
+
+  useFrame((state, delta) => {
+    const t = state.clock.elapsedTime * 0.4;
+    const startZ = 25;
+    const endZ = 12.5; // Next to Couple A
+    
+    // Cycle walk toward the edge
+    const cycle = (Math.sin(t * 0.5) + 1) / 2;
+    const currentZ = startZ + (endZ - startZ) * cycle;
+    
+    groupRef.current.position.z = currentZ;
+    
+    // Check if we are "at the bench"
+    const distToTarget = Math.abs(currentZ - endZ);
+    if (distToTarget < 0.5) {
+      setSittingProgress(prev => Math.min(prev + delta * 2, 1));
+    } else {
+      setSittingProgress(prev => Math.max(prev - delta * 2, 0));
+    }
   });
 
+  // Calculate pose based on sitting progress
+  const legPose = (Math.PI / 2) * sittingProgress;
+  const heightOffset = -0.3 * sittingProgress;
+
   return (
-    <group ref={groupRef} position={[14, 1.9, 12]} rotation={[0, -Math.PI * 0.7, 0]}>
-      <BlockHumanoid scale={1} materialProps={butterProps} poseProps={{ isWalking: true, cane: true, position: [-0.3, 0, 0]}} />
-      <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ isWalking: true, position: [0.4, 0, -0.1]}} />
+    <group ref={groupRef} position={[7.5, 1.9, 15]} rotation={[0, Math.PI / 2, 0]}>
+      <group position={[0, heightOffset, 0]}>
+        <BlockHumanoid 
+          scale={1} 
+          materialProps={butterProps} 
+          poseProps={{ 
+            isWalking: sittingProgress < 0.5, 
+            cane: true, 
+            leftLegRotation: [legPose, 0, 0], 
+            rightLegRotation: [legPose, 0, 0],
+            position: [-0.3, 0, 0] 
+          }} 
+        />
+        <BlockHumanoid 
+          scale={0.9} 
+          materialProps={butterProps} 
+          poseProps={{ 
+            isWalking: sittingProgress < 0.5, 
+            leftLegRotation: [legPose, 0, 0], 
+            rightLegRotation: [legPose, 0, 0],
+            position: [0.4, 0, -0.1] 
+          }} 
+        />
+      </group>
     </group>
   );
 };
@@ -382,16 +436,16 @@ export default function Scene({ currentView }) {
             <Bench materialProps={darkerProps} />
           </group>
 
-          {/* Animated Walking Pair */}
-          <WalkingChapter butterProps={butterProps} />
-
-          {/* Seated Pair on Edge */}
+          {/* Seated Pair on Edge (Couple A) */}
           <group position={[6.0, 1.6, 11.5]} rotation={[0, Math.PI / 2, 0]}>
             <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
             <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
           </group>
 
-          {/* Animated Wheelchair Group */}
+          {/* Animated Walking-to-Sitting Couple (Couple B) */}
+          <WalkingToSittingChapter butterProps={butterProps} />
+
+          {/* Animated Wheelchair Group with Grab Logic */}
           <WheelchairChapter butterProps={butterProps} />
         </group>
       </group>
