@@ -233,6 +233,7 @@ const SimpleWheelchair = ({ materialProps }) => (
     <mesh position={[0, 0.55, 0]} castShadow><boxGeometry args={[0.6, 0.08, 0.6]} /><meshStandardMaterial color="#fce4e4" /></mesh>
     <mesh position={[0, 0.9, -0.25]} rotation={[0.1, 0, 0]} castShadow><boxGeometry args={[0.55, 0.7, 0.08]} /><meshStandardMaterial color="#fce4e4" /></mesh>
     <group position={[0, 0.45, -0.05]}>
+      {/* Wheels updated to use darker colorProps (#2d1d3d) */}
       <mesh position={[-0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]}><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color="#2d1d3d" /></mesh>
       <mesh position={[0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]}><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color="#2d1d3d" /></mesh>
     </group>
@@ -268,6 +269,9 @@ export default function Scene({ currentView }) {
   });
 
   const butterProps = { color: "#fce4e4", roughness: 0.9, metalness: 0.02 };
+  
+  // New props for the darker bench color (#2d1d3d)
+  const benchProps = { color: "#2d1d3d", roughness: 0.9, metalness: 0.02 };
 
   return (
     <>
@@ -306,9 +310,9 @@ export default function Scene({ currentView }) {
 
         {/* RESTORED COMMUNITY PLACEMENT */}
         <group>
-          {/* Siting on Bench */}
+          {/* Sitting on Bench - Updated to use benchProps (darker) */}
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
-            <Bench materialProps={butterProps} />
+            <Bench materialProps={benchProps} />
           </group>
 
           {/* Walking Pair */}
