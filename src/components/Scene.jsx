@@ -342,30 +342,33 @@ const WalkingToConversationChapter = ({ butterProps, darkerProps, walkerRef }) =
       if (progress >= 1) setPhase("talking");
     }
 
-    // 2. Short pause to talk, then go fetch at T=42
+    // 2. Pause to talk, then go fetch at T=42
     if (phase === "talking" && t > 42) setPhase("fetch");
     
     if (phase === "fetch") {
-      const fetchTime = (t - 42) * 0.2;
+      // Helper must walk toward the window (which is further "left" on the platform)
+      const fetchTime = (t - 42) * 0.4;
       const progress = Math.min(fetchTime, 1);
       
-      caregiverRef.current.position.z = 0 - (10.0 * progress); // Walk back to Z=8 area
-      caregiverRef.current.rotation.y = Math.PI; 
+      // We walk on X axis relative to the rotated group
+      caregiverRef.current.position.x = 0.4 + (8.0 * progress); 
+      caregiverRef.current.rotation.y = -Math.PI / 2; // Face the window
 
       if (progress >= 1) setPhase("returning");
     }
 
     if (phase === "returning") {
-      const returnTime = (t - 47) * 0.2;
+      const returnTime = (t - 47) * 0.4;
       const progress = Math.min(returnTime, 1);
       
-      const currentZOffset = -10.0 + (10.0 * progress);
-      caregiverRef.current.position.z = currentZOffset;
-      caregiverRef.current.rotation.y = 0; 
+      const currentXOffset = 8.4 - (8.0 * progress);
+      caregiverRef.current.position.x = currentXOffset;
+      caregiverRef.current.rotation.y = Math.PI / 2; // Face back to the partner
 
-      // NOW the walker (in global space) follows the group's global progression
+      // The walker follows in global space
       if (walkerRef.current) {
-        walkerRef.current.position.z = groupRef.current.position.z + currentZOffset + 0.6;
+        // Platform coordinate math to follow helper back
+        walkerRef.current.position.x = 15.5 + currentXOffset; 
       }
     }
   });
@@ -405,7 +408,7 @@ export default function Scene({ currentView }) {
   const { camera, size } = useThree();
   const waterRef = useRef();
   const cloudGroupRef = useRef();
-  const walkerRef = useRef(); // Ref for the global walker
+  const walkerRef = useRef();
   const lookAtTarget = useRef(new THREE.Vector3(12, 1.5, 0));
   const isMobile = size.width < 768;
 
@@ -446,7 +449,6 @@ export default function Scene({ currentView }) {
       </group>
 
       <group position={[0, 0, 0]}>
-        {/* Main Platform */}
         <mesh position={[15.5, -2.1, 15.0]} castShadow receiveShadow>
           <boxGeometry args={[20, 8.0, 30]} /><meshStandardMaterial {...butterProps} />
         </mesh>
@@ -468,8 +470,8 @@ export default function Scene({ currentView }) {
           <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
 
-        {/* --- GLOBAL WALKER: STATIC BY WINDOW UPON INITIALIZATION --- */}
-        <group ref={walkerRef} position={[7.9, 1.9, 8.0]} rotation={[0, Math.PI / 2, 0]}>
+        {/* WALKER: Static by the window at initialization */}
+        <group ref={walkerRef} position={[24, 1.9, 11]} rotation={[0, Math.PI / 2, 0]}>
           <Walker materialProps={darkerProps} />
         </group>
 
