@@ -346,7 +346,7 @@ const WalkingToConversationChapter = ({ butterProps, darkerProps, walkerRef }) =
     if (phase === "fetch") {
       const fetchTime = (t - 42) * 0.4;
       const progress = Math.min(fetchTime, 1);
-      // Helper walks back along X to grab walker at the window
+      // Walks towards window at [18, 1.9, 12]
       caregiverRef.current.position.x = 0.4 + (10.0 * progress); 
       caregiverRef.current.rotation.y = -Math.PI / 2; 
 
@@ -362,7 +362,9 @@ const WalkingToConversationChapter = ({ butterProps, darkerProps, walkerRef }) =
       caregiverRef.current.rotation.y = Math.PI / 2; 
 
       if (walkerRef.current) {
-        walkerRef.current.position.x = 18.0 + (currentXOffset); 
+        // Walker sticks to helper
+        walkerRef.current.position.x = 7.5 + (caregiverRef.current.position.x + 0.3); 
+        walkerRef.current.position.z = groupRef.current.position.z;
       }
     }
   });
@@ -464,8 +466,8 @@ export default function Scene({ currentView }) {
           <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
 
-        {/* WALKER: Positioned clearly by the first window on the platform */}
-        <group ref={walkerRef} position={[28.4, 1.9, 12]} rotation={[0, Math.PI / 2, 0]}>
+        {/* WALKER: Visible right in front of the window */}
+        <group ref={walkerRef} position={[18, 1.9, 12]} rotation={[0, Math.PI / 2, 0]}>
           <Walker materialProps={darkerProps} />
         </group>
 
