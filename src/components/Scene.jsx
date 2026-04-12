@@ -2,7 +2,7 @@ import { useRef, useMemo, useEffect, useState } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
 import { Environment, Sky, Cloud } from "@react-three/drei";
 import { Water } from "three-stdlib";
-import * as THREE from "three";
+import * as THREE from "this";
 
 extend({ Water });
 
@@ -227,8 +227,10 @@ export default function Scene({ currentView }) {
   useFrame((state, delta) => {
     const isHome = currentView === "home";
     
-    // Closer on mobile: Increased Y to 3.5 (hiding the top edge) and decreased Z to 5 (getting tighter on the scene)
-    const targetPos = isHome ? (isMobile ? new THREE.Vector3(-30, 3.5, 5) : new THREE.Vector3(-14, 3.2, 24)) : new THREE.Vector3(-24.5, 3.5, -450);
+    // SIGNIFICANTLY CLOSER ON MOBILE: 
+    // TargetPos Z moved from 5 to 2 to get right against the structure.
+    // TargetPos Y moved to 3.2 to ensure characters stay in view while cutting off the top edge.
+    const targetPos = isHome ? (isMobile ? new THREE.Vector3(-30, 3.2, 2) : new THREE.Vector3(-14, 3.2, 24)) : new THREE.Vector3(-24.5, 3.5, -450);
     const targetLook = isHome ? (isMobile ? new THREE.Vector3(10, 2.8, 8) : new THREE.Vector3(20, 1.2, -2)) : new THREE.Vector3(-24.5, 1.5, -1000);
     
     camera.position.lerp(targetPos, 0.04); 
