@@ -1,4 +1,4 @@
-import { useRef, useMemo, useEffect, useState } from "react";
+import { useRef, useMemo, useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
 import { Environment, Sky } from "@react-three/drei";
 import { Water } from "three-stdlib";
@@ -47,7 +47,8 @@ const HeartBadge = () => {
   );
 };
 
-const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {}, isHelper = false }) => {
+// Updated BlockHumanoid to allow external control of legs for the desync effect
+const BlockHumanoid = forwardRef(({ scale = 1, materialProps, poseProps = {}, isHelper = false }, ref) => {
   const { 
     leftLegRotation = [0, 0, 0], 
     rightLegRotation = [0, 0, 0], 
@@ -72,6 +73,15 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {}, isHelper = fa
   const leftArmRef = useRef();
   const rightArmRef = useRef();
   const headRef = useRef();
+  const innerGroupRef = useRef();
+
+  // Expose internals to parents for manual animation
+  useImperativeHandle(ref, () => ({
+    leftLeg: leftLegRef.current,
+    rightLeg: rightLegRef.current,
+    torso: torsoRef.current,
+    group: innerGroupRef.current
+  }));
 
   const limbGeo = useMemo(() => {
     const pts = [new THREE.Vector2(0, 0), new THREE.Vector2(0.08, 0.05), new THREE.Vector2(0.08, 0.75), new THREE.Vector2(0, 0.8)];
@@ -95,7 +105,6 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {}, isHelper = fa
     if (headRef.current) headRef.current.rotation.y = headRotationY;
     
     if (isWalking) {
-      // Synchronized smooth walk gait
       const swing = Math.sin(t * walkSpeed) * 0.4;
       if (leftLegRef.current) leftLegRef.current.rotation.x = swing;
       if (rightLegRef.current) rightLegRef.current.rotation.x = -swing;
@@ -111,18 +120,15 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {}, isHelper = fa
         rightArmRef.current.rotation.x = THREE.MathUtils.lerp(rightArmRotation[0], animateArmsTo[0], reachProgress);
         rightArmRef.current.rotation.z = THREE.MathUtils.lerp(rightArmRotation[2], -animateArmsTo[2], reachProgress);
       }
-      if (leftLegRef.current) leftLegRef.current.rotation.set(...leftLegRotation);
-      if (rightLegRef.current) rightLegRef.current.rotation.set(...rightLegRotation);
     } else {
+        // Default static pose if no walk or manual control active
         if (leftArmRef.current) leftArmRef.current.rotation.set(...leftArmRotation);
         if (rightArmRef.current) rightArmRef.current.rotation.set(...rightArmRotation);
-        if (leftLegRef.current) leftLegRef.current.rotation.set(...leftLegRotation);
-        if (rightLegRef.current) rightLegRef.current.rotation.set(...rightLegRotation);
     }
   });
 
   return (
-    <group scale={scale} position={position} rotation={rotation}>
+    <group scale={scale} position={position} rotation={rotation} ref={innerGroupRef}>
       <group ref={torsoRef}>
         <mesh ref={headRef} position={[0, 1.4, 0]} castShadow><sphereGeometry args={[0.22, 32, 32]} /><meshStandardMaterial {...materialProps} /></mesh>
         <mesh position={[0, 0.3, 0]} castShadow><primitive object={torsoGeo} /><meshStandardMaterial {...materialProps} /></mesh>
@@ -152,7 +158,7 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {}, isHelper = fa
       </group>
     </group>
   );
-};
+});
 
 // --- GRASS ---
 const GrassySassyHills = () => {
@@ -262,80 +268,77 @@ const WheelchairChapter = ({ butterProps, isMobile }) => {
 
 const WalkingToConversationChapter = ({ butterProps }) => {
   const groupRef = useRef(); 
-  const personRef1 = useRef();
-  const personRef2 = useRef();
+  const p1Ref = useRef(); // Ref for Person A
+  const p2Ref = useRef(); // Ref for Person B
   const [phase, setPhase] = useState("walking");
   const finalStopZ = 22.0;
 
   useFrame((state) => {
-    const t = Math.min(state.clock.elapsedTime / 16, 1);
+    const et = state.clock.elapsedTime;
+    const t = Math.min(et / 16, 1);
     const smoothProgress = THREE.MathUtils.smoothstep(t, 0, 1);
     
-    // Natural walk difference: Person A slightly faster, different desync
-    if (personRef1.current) {
-        const offsetT = Math.max(0, state.clock.elapsedTime - 0.5); // Desync 0.5s
-        const swing = Math.sin(offsetT * 10.5) * 0.4;
-        personRef1.current.leftLeg.rotation.x = swing;
-        personRef1.current.rightLeg.rotation.x = -swing;
-        // Person A's cane reach/swing also desync
-        personRef1.current.rightArm.rotation.x = -Math.sin((state.clock.elapsedTime - 1.0) * 8) * 0.3 - 0.5;
-    }
-    
-    // Person B: Slightly slower, desync
-    if (personRef2.current) {
-        const offsetT = Math.max(0, state.clock.elapsedTime - 1.2); // Desync 1.2s
-        const swing = Math.sin(offsetT * 9.8) * 0.35;
-        personRef2.current.leftLeg.rotation.x = swing;
-        personRef2.current.rightLeg.rotation.x = -swing;
-    }
-
     if (phase === "walking") {
       groupRef.current.position.z = 4.0 + (finalStopZ - 4.0) * smoothProgress;
+
+      // PERSON A: Manually animating legs with specific speed/offset
+      if (p1Ref.current) {
+        const swingA = Math.sin(et * 10.5) * 0.45;
+        p1Ref.current.leftLeg.rotation.x = swingA;
+        p1Ref.current.rightLeg.rotation.x = -swingA;
+        p1Ref.current.group.position.y = Math.abs(swingA) * 0.06; // The Bob
+      }
+
+      // PERSON B: Slower rhythm, offset time to prevent "military" sync
+      if (p2Ref.current) {
+        const swingB = Math.sin((et - 0.5) * 9.2) * 0.35;
+        p2Ref.current.leftLeg.rotation.x = swingB;
+        p2Ref.current.rightLeg.rotation.x = -swingB;
+        p2Ref.current.group.position.y = Math.abs(swingB) * 0.04; // The Bob
+      }
+
       if (t >= 1) {
           setPhase("talking");
-          // Reset legs when stop walking
-          [personRef1, personRef2].forEach(p => {
-              p.current.leftLeg.rotation.x = 0;
-              p.current.rightLeg.rotation.x = 0;
+          // Reset legs to neutral on stop
+          [p1Ref, p2Ref].forEach(p => {
+              if (p.current) {
+                p.current.leftLeg.rotation.x = 0;
+                p.current.rightLeg.rotation.x = 0;
+                p.current.group.position.y = 0;
+              }
           });
       }
     }
   });
 
-  // Calculate rotation for "Stop and Turn" effect
   const turnFactor = phase === "talking" ? 1 : 0;
   
   return (
-    // FIX: characters now face direction they are walking [PI]
     <group ref={groupRef} position={[7.5, 1.9, 4.0]} rotation={[0, Math.PI, 0]}>
-        {/* Person A: Walk forward (Z-), turn left to conversation (Y-) */}
+        {/* Person A: Walking forward (facing direction) then turns to chat */}
         <BlockHumanoid 
+          ref={p1Ref}
           scale={0.95} 
           materialProps={butterProps} 
-          // Ref for custom leg/arm desync
-          ref={personRef1} 
           poseProps={{ 
-            isWalking: false, // Disabling default walk for custom desync logic
+            isWalking: false, 
             cane: true, 
-            // Turning effect
             rotation: [0, -0.6 * turnFactor, 0], 
             position: [-0.4, 0, 0], 
             headRotationY: 1.2 * turnFactor,
-            // Custom ref handles leg swing manually
           }} 
         />
-        {/* Person B (Helper): Walk forward (Z-), turn right to conversation (Y+) */}
+        {/* Person B (Helper) */}
         <group position={[0.4, 0, 0]}>
           <BlockHumanoid 
+            ref={p2Ref}
             isHelper 
             scale={0.95} 
             materialProps={butterProps} 
-            ref={personRef2} 
             poseProps={{ 
-              isWalking: false, // Disabling default walk for custom desync logic
+              isWalking: false, 
               rotation: [0, 0.6 * turnFactor, 0], 
               headRotationY: phase === "walking" ? 0 : -0.4 
-              // Custom ref handles leg swing manually
             }} 
           />
         </group>
@@ -373,9 +376,11 @@ export default function Scene({ currentView }) {
       <directionalLight position={[-15, 30, 10]} intensity={1.6} castShadow />
 
       <group position={[0, 0, 0]}>
+        {/* Platform & Stairs */}
         <mesh position={[15.5, -2.1, 15.0]} castShadow receiveShadow><boxGeometry args={[20, 8.0, 30]} /><meshStandardMaterial {...butterProps} /></mesh>
         <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={butterProps} />
 
+        {/* Walls */}
         <group position={[-16, -1.6, 0]}>
           <mesh position={[1, 8.5 + extraWallHeight/2, 0]} castShadow receiveShadow><boxGeometry args={[4, 17 + extraWallHeight, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
           <WallOpening position={[6, 0, 0]} colorProps={butterProps} /> 
@@ -391,10 +396,11 @@ export default function Scene({ currentView }) {
           <mesh castShadow receiveShadow position={[24, 8.5 + extraWallHeight/2, 0]}><boxGeometry args={[8, 17 + extraWallHeight, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
 
+        {/* Chapters */}
         <group>
+          {/* Bench Scene */}
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <Bench materialProps={butterProps} />
-            
             <group position={[3.5, 0, -0.2]} rotation={[0, -0.5, 0]}>
                <BlockHumanoid 
                 scale={0.84} 
