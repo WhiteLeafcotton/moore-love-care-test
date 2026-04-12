@@ -192,8 +192,9 @@ const WheelchairChapter = ({ butterProps, isMobile }) => {
   const wheelRef = useRef(); 
   const [isMoving, setIsMoving] = useState(true);
   
-  // FIX: Starting point for mobile pulled much closer to start in view immediately
-  const startZ = isMobile ? 18 : 22; 
+  // FIX: Starting point for mobile moved much closer (13) to final stop (12.5)
+  // This ensures they are on screen immediately upon load.
+  const startZ = isMobile ? 13 : 22; 
   const finalStopZ = 12.5; 
 
   useFrame((state) => {
@@ -295,9 +296,9 @@ export default function Scene({ currentView }) {
                 poseProps={{ 
                   walker: true, 
                   torsoRotationX: 0.1, 
-                  // FIX: Reduced the outward swing and relaxed the arm angle to connect with the walker naturally
-                  leftArmRotation: [0.65, 0, -0.15], 
-                  rightArmRotation: [0.65, 0, 0.15], 
+                  // FIX: Set Y rotation to 0 to stop "chicken wings" and lowered X to reach walker bars
+                  leftArmRotation: [0.85, 0, 0], 
+                  rightArmRotation: [0.85, 0, 0], 
                   leftLegRotation: [0.15, 0, 0],   
                   rightLegRotation: [-0.1, 0, 0],  
                   headRotationY: -0.2
