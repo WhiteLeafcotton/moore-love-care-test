@@ -47,7 +47,6 @@ const HeartBadge = () => {
   );
 };
 
-// Updated BlockHumanoid to allow external control of legs for the desync effect
 const BlockHumanoid = forwardRef(({ scale = 1, materialProps, poseProps = {}, isHelper = false }, ref) => {
   const { 
     leftLegRotation = [0, 0, 0], 
@@ -75,10 +74,12 @@ const BlockHumanoid = forwardRef(({ scale = 1, materialProps, poseProps = {}, is
   const headRef = useRef();
   const innerGroupRef = useRef();
 
-  // Expose internals to parents for manual animation
   useImperativeHandle(ref, () => ({
     leftLeg: leftLegRef.current,
     rightLeg: rightLegRef.current,
+    leftArm: leftArmRef.current,
+    rightArm: rightArmRef.current,
+    head: headRef.current,
     torso: torsoRef.current,
     group: innerGroupRef.current
   }));
@@ -121,10 +122,13 @@ const BlockHumanoid = forwardRef(({ scale = 1, materialProps, poseProps = {}, is
         rightArmRef.current.rotation.z = THREE.MathUtils.lerp(rightArmRotation[2], -animateArmsTo[2], reachProgress);
       }
     } else {
-        // Default static pose if no walk or manual control active
         if (leftArmRef.current) leftArmRef.current.rotation.set(...leftArmRotation);
         if (rightArmRef.current) rightArmRef.current.rotation.set(...rightArmRotation);
     }
+    
+    // Maintain set rotations for legs if not walking
+    if (!isWalking && leftLegRef.current) leftLegRef.current.rotation.set(...leftLegRotation);
+    if (!isWalking && rightLegRef.current) rightLegRef.current.rotation.set(...rightLegRotation);
   });
 
   return (
@@ -268,8 +272,8 @@ const WheelchairChapter = ({ butterProps, isMobile }) => {
 
 const WalkingToConversationChapter = ({ butterProps }) => {
   const groupRef = useRef(); 
-  const p1Ref = useRef(); // Ref for Person A
-  const p2Ref = useRef(); // Ref for Person B
+  const p1Ref = useRef(); 
+  const p2Ref = useRef(); 
   const [phase, setPhase] = useState("walking");
   const finalStopZ = 22.0;
 
@@ -281,32 +285,43 @@ const WalkingToConversationChapter = ({ butterProps }) => {
     if (phase === "walking") {
       groupRef.current.position.z = 4.0 + (finalStopZ - 4.0) * smoothProgress;
 
-      // PERSON A: Manually animating legs with specific speed/offset
       if (p1Ref.current) {
         const swingA = Math.sin(et * 10.5) * 0.45;
         p1Ref.current.leftLeg.rotation.x = swingA;
         p1Ref.current.rightLeg.rotation.x = -swingA;
-        p1Ref.current.group.position.y = Math.abs(swingA) * 0.06; // The Bob
+        p1Ref.current.leftArm.rotation.x = -swingA * 0.6;
+        p1Ref.current.group.position.y = Math.abs(swingA) * 0.06;
       }
 
-      // PERSON B: Slower rhythm, offset time to prevent "military" sync
       if (p2Ref.current) {
         const swingB = Math.sin((et - 0.5) * 9.2) * 0.35;
         p2Ref.current.leftLeg.rotation.x = swingB;
         p2Ref.current.rightLeg.rotation.x = -swingB;
-        p2Ref.current.group.position.y = Math.abs(swingB) * 0.04; // The Bob
+        p2Ref.current.leftArm.rotation.x = -swingB * 0.6;
+        p2Ref.current.rightArm.rotation.x = swingB * 0.6;
+        p2Ref.current.group.position.y = Math.abs(swingB) * 0.04;
       }
 
       if (t >= 1) {
           setPhase("talking");
-          // Reset legs to neutral on stop
           [p1Ref, p2Ref].forEach(p => {
               if (p.current) {
                 p.current.leftLeg.rotation.x = 0;
                 p.current.rightLeg.rotation.x = 0;
+                p.current.leftArm.rotation.x = 0.2;
+                p.current.rightArm.rotation.x = 0.2;
                 p.current.group.position.y = 0;
               }
           });
+      }
+    } else {
+      if (p1Ref.current) {
+        p1Ref.current.head.rotation.x = Math.sin(et * 1.5) * 0.1;
+        p1Ref.current.head.rotation.z = Math.cos(et * 0.8) * 0.05;
+      }
+      if (p2Ref.current) {
+        p2Ref.current.head.rotation.x = Math.sin(et * 2.2 + 0.5) * 0.12;
+        p2Ref.current.head.rotation.y = -0.4 + Math.sin(et * 1.2) * 0.1;
       }
     }
   });
@@ -315,7 +330,6 @@ const WalkingToConversationChapter = ({ butterProps }) => {
   
   return (
     <group ref={groupRef} position={[7.5, 1.9, 4.0]} rotation={[0, Math.PI, 0]}>
-        {/* Person A: Walking forward (facing direction) then turns to chat */}
         <BlockHumanoid 
           ref={p1Ref}
           scale={0.95} 
@@ -328,7 +342,6 @@ const WalkingToConversationChapter = ({ butterProps }) => {
             headRotationY: 1.2 * turnFactor,
           }} 
         />
-        {/* Person B (Helper) */}
         <group position={[0.4, 0, 0]}>
           <BlockHumanoid 
             ref={p2Ref}
@@ -376,11 +389,9 @@ export default function Scene({ currentView }) {
       <directionalLight position={[-15, 30, 10]} intensity={1.6} castShadow />
 
       <group position={[0, 0, 0]}>
-        {/* Platform & Stairs */}
         <mesh position={[15.5, -2.1, 15.0]} castShadow receiveShadow><boxGeometry args={[20, 8.0, 30]} /><meshStandardMaterial {...butterProps} /></mesh>
         <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={butterProps} />
 
-        {/* Walls */}
         <group position={[-16, -1.6, 0]}>
           <mesh position={[1, 8.5 + extraWallHeight/2, 0]} castShadow receiveShadow><boxGeometry args={[4, 17 + extraWallHeight, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
           <WallOpening position={[6, 0, 0]} colorProps={butterProps} /> 
@@ -396,23 +407,24 @@ export default function Scene({ currentView }) {
           <mesh castShadow receiveShadow position={[24, 8.5 + extraWallHeight/2, 0]}><boxGeometry args={[8, 17 + extraWallHeight, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
 
-        {/* Chapters */}
         <group>
-          {/* Bench Scene */}
+          {/* SITTING COUPLE - RESTORED POSITIONS */}
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <Bench materialProps={butterProps} />
-            <group position={[3.5, 0, -0.2]} rotation={[0, -0.5, 0]}>
+            <group position={[0, 0, -0.2]} rotation={[0, 0, 0]}>
                <BlockHumanoid 
                 scale={0.84} 
                 materialProps={butterProps} 
                 poseProps={{ 
                   walker: true, 
+                  position: [0.5, 0, 0], // Restored X position
+                  rotation: [0, -0.5, 0], // Original angle
                   torsoRotationX: 0.1, 
                   leftArmRotation: [0.1, 0, -0.1], 
                   rightArmRotation: [0.1, 0, 0.1], 
                   animateArmsTo: [-1.1, 0, -0.1], 
-                  leftLegRotation: [0.15, 0, 0],   
-                  rightLegRotation: [-0.1, 0, 0],  
+                  leftLegRotation: [Math.PI / 2, 0, 0],   // Restored sitting legs
+                  rightLegRotation: [Math.PI / 2, 0, 0],  
                   headRotationY: -0.2
                 }} 
                />
@@ -421,10 +433,12 @@ export default function Scene({ currentView }) {
                 scale={0.95} 
                 materialProps={butterProps} 
                 poseProps={{ 
-                  position: [-0.95, 0, 0.35], 
+                  position: [-0.4, 0, 0], // Restored X position
                   rotation: [0, 0.65, 0], 
                   headRotationY: -0.4,
-                  leftArmRotation: [-0.8, 0, -0.25] 
+                  leftArmRotation: [-0.8, 0, -0.25],
+                  leftLegRotation: [Math.PI / 2, 0, 0], // Restored sitting legs
+                  rightLegRotation: [Math.PI / 2, 0, 0]
                 }} 
                />
             </group>
