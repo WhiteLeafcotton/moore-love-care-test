@@ -262,6 +262,8 @@ const WheelchairChapter = ({ butterProps, isMobile }) => {
 
 const WalkingToConversationChapter = ({ butterProps }) => {
   const groupRef = useRef(); 
+  const personRef1 = useRef();
+  const personRef2 = useRef();
   const [phase, setPhase] = useState("walking");
   const finalStopZ = 22.0;
 
@@ -269,38 +271,71 @@ const WalkingToConversationChapter = ({ butterProps }) => {
     const t = Math.min(state.clock.elapsedTime / 16, 1);
     const smoothProgress = THREE.MathUtils.smoothstep(t, 0, 1);
     
+    // Natural walk difference: Person A slightly faster, different desync
+    if (personRef1.current) {
+        const offsetT = Math.max(0, state.clock.elapsedTime - 0.5); // Desync 0.5s
+        const swing = Math.sin(offsetT * 10.5) * 0.4;
+        personRef1.current.leftLeg.rotation.x = swing;
+        personRef1.current.rightLeg.rotation.x = -swing;
+        // Person A's cane reach/swing also desync
+        personRef1.current.rightArm.rotation.x = -Math.sin((state.clock.elapsedTime - 1.0) * 8) * 0.3 - 0.5;
+    }
+    
+    // Person B: Slightly slower, desync
+    if (personRef2.current) {
+        const offsetT = Math.max(0, state.clock.elapsedTime - 1.2); // Desync 1.2s
+        const swing = Math.sin(offsetT * 9.8) * 0.35;
+        personRef2.current.leftLeg.rotation.x = swing;
+        personRef2.current.rightLeg.rotation.x = -swing;
+    }
+
     if (phase === "walking") {
       groupRef.current.position.z = 4.0 + (finalStopZ - 4.0) * smoothProgress;
-      if (t >= 1) setPhase("talking");
+      if (t >= 1) {
+          setPhase("talking");
+          // Reset legs when stop walking
+          [personRef1, personRef2].forEach(p => {
+              p.current.leftLeg.rotation.x = 0;
+              p.current.rightLeg.rotation.x = 0;
+          });
+      }
     }
   });
 
+  // Calculate rotation for "Stop and Turn" effect
   const turnFactor = phase === "talking" ? 1 : 0;
   
   return (
-    <group ref={groupRef} position={[7.5, 1.9, 4.0]} rotation={[0, Math.PI / 2, 0]}>
+    // FIX: characters now face direction they are walking [PI]
+    <group ref={groupRef} position={[7.5, 1.9, 4.0]} rotation={[0, Math.PI, 0]}>
+        {/* Person A: Walk forward (Z-), turn left to conversation (Y-) */}
         <BlockHumanoid 
           scale={0.95} 
           materialProps={butterProps} 
+          // Ref for custom leg/arm desync
+          ref={personRef1} 
           poseProps={{ 
-            isWalking: phase === "walking", 
-            walkSpeed: 10, // Matching Wheelchair Helper's fluid walk speed
+            isWalking: false, // Disabling default walk for custom desync logic
             cane: true, 
-            rotation: [0, 0.6 * turnFactor, 0], 
+            // Turning effect
+            rotation: [0, -0.6 * turnFactor, 0], 
             position: [-0.4, 0, 0], 
-            headRotationY: -1.2 * turnFactor 
+            headRotationY: 1.2 * turnFactor,
+            // Custom ref handles leg swing manually
           }} 
         />
+        {/* Person B (Helper): Walk forward (Z-), turn right to conversation (Y+) */}
         <group position={[0.4, 0, 0]}>
           <BlockHumanoid 
             isHelper 
             scale={0.95} 
             materialProps={butterProps} 
+            ref={personRef2} 
             poseProps={{ 
-              isWalking: phase === "walking", 
-              walkSpeed: 10, // Matching Wheelchair Helper's fluid walk speed
-              rotation: [0, -0.6 * turnFactor, 0], 
-              headRotationY: phase === "walking" ? 0 : 0.4 
+              isWalking: false, // Disabling default walk for custom desync logic
+              rotation: [0, 0.6 * turnFactor, 0], 
+              headRotationY: phase === "walking" ? 0 : -0.4 
+              // Custom ref handles leg swing manually
             }} 
           />
         </group>
