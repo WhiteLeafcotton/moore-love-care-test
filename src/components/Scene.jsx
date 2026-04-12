@@ -125,7 +125,7 @@ const GrassySassyHills = () => {
   }, []);
   const grassMaterial = useMemo(() => new THREE.ShaderMaterial({
     uniforms: { uTime: { value: 0 }, uColorRoots: { value: new THREE.Color("#13051a") }, uColorTips: { value: new THREE.Color("#c292f5") } },
-    vertexShader: `varying float vHeight; uniform float uTime; void main() { vHeight = position.y / 1.2; vec3 worldPos = (instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz; float totalWind = (sin(uTime * 0.5 + worldPos.x * 0.05) + sin(uTime * 2.0 + worldPos.x * 0.2)) * vHeight; vec3 pos = position; pos.x += totalWind; gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(pos, 1.0); }`,
+    vertexShader: `varying float vHeight; uniform float uTime; void main() { vHeight = position.y / 1.2; vec3 worldPos = (instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz; float totalWind = (sin(uTime * 0.5 + worldPos.x * 0.05) + sin(uTime * 2.0 + worldPos.x * 0.2)) * vHeight; vec3 pos = position; gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(pos, 1.0); }`,
     fragmentShader: `varying float vHeight; uniform vec3 uColorRoots; uniform vec3 uColorTips; void main() { gl_FragColor = vec4(mix(uColorRoots, uColorTips, vHeight) * pow(vHeight, 0.4), 1.0); }`,
     side: THREE.DoubleSide
   }), []);
@@ -227,16 +227,16 @@ export default function Scene({ currentView }) {
   useFrame((state, delta) => {
     const isHome = currentView === "home";
     
-    // CROP CEILING FIX:
-    // X at 6.5 (Still clear of doorway)
-    // Y at 2.5 (Lowered to crop out the structure top)
-    // Z at -2 (Maintaining the distance you liked)
-    const targetPos = isHome ? (isMobile ? new THREE.Vector3(6.5, 2.5, -2) : new THREE.Vector3(-14, 3.2, 24)) : new THREE.Vector3(-24.5, 3.5, -450);
+    // MOBILE SHOT OPTIMIZATION:
+    // X at 6.0: Perfectly centered on Couple A
+    // Y at 2.3: Lower height crops out the ceiling/structure tops
+    // Z at 4.5: Camera is now INSIDE the room, past the doorway (No more clipping!)
+    const targetPos = isHome ? (isMobile ? new THREE.Vector3(6.0, 2.3, 4.5) : new THREE.Vector3(-14, 3.2, 24)) : new THREE.Vector3(-24.5, 3.5, -450);
     
-    // LookAt focusing lower (2.2) to prevent the camera from tilting up
-    const targetLook = isHome ? (isMobile ? new THREE.Vector3(6, 2.2, 10) : new THREE.Vector3(20, 1.2, -2)) : new THREE.Vector3(-24.5, 1.5, -1000);
+    // LookAt slightly lower (2.0) to keep the horizon line clean and ceiling out
+    const targetLook = isHome ? (isMobile ? new THREE.Vector3(6, 2.0, 10) : new THREE.Vector3(20, 1.2, -2)) : new THREE.Vector3(-24.5, 1.5, -1000);
     
-    camera.position.lerp(targetPos, 0.04); 
+    camera.position.lerp(targetPos, 0.05); 
     camera.lookAt(targetLook);
     if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.08;
   });
@@ -272,6 +272,7 @@ export default function Scene({ currentView }) {
 
         <group>
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}><Bench materialProps={butterProps} /></group>
+          {/* Couple A positioned at [6, 1.6, 10] */}
           <group position={[6.0, 1.6, 10.0]} rotation={[0, Math.PI / 2, 0]}>
             <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
             <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
