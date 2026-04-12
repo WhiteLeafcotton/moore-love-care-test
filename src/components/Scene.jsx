@@ -192,17 +192,23 @@ const WheelchairChapter = ({ butterProps, isMobile }) => {
   const wheelRef = useRef(); 
   const [isMoving, setIsMoving] = useState(true);
   
-  // FIX: Starting point for mobile moved much closer (13) to final stop (12.5)
-  // This ensures they are on screen immediately upon load.
   const startZ = isMobile ? 13 : 22; 
   const finalStopZ = 12.5; 
 
   useFrame((state) => {
+    // Smooth deceleration logic
     const t = Math.min(state.clock.elapsedTime / 14, 1);
-    const progress = THREE.MathUtils.smoothstep(t, 0, 1);
-    if (groupRef.current) groupRef.current.position.z = startZ + (finalStopZ - startZ) * progress;
-    if (t < 1 && wheelRef.current) wheelRef.current.rotation.x = state.clock.elapsedTime * 2.5;
-    else if (isMoving) setIsMoving(false);
+    const smoothProgress = THREE.MathUtils.smoothstep(t, 0, 1);
+    const currentZ = startZ + (finalStopZ - startZ) * smoothProgress;
+    
+    if (groupRef.current) groupRef.current.position.z = currentZ;
+
+    // Stop walking and spinning precisely when the ease finishes
+    if (t >= 1) {
+      if (isMoving) setIsMoving(false);
+    } else {
+      if (wheelRef.current) wheelRef.current.rotation.x = state.clock.elapsedTime * 2.5;
+    }
   });
 
   return (
@@ -224,8 +230,9 @@ const WalkingToConversationChapter = ({ butterProps }) => {
   const [phase, setPhase] = useState("walking");
   useFrame((state) => {
     const t = Math.min(state.clock.elapsedTime / 15, 1);
+    const smoothProgress = THREE.MathUtils.smoothstep(t, 0, 1);
     if (phase === "walking") {
-      groupRef.current.position.z = 4.0 + (18.0 - 4.0) * THREE.MathUtils.smoothstep(t, 0, 1);
+      groupRef.current.position.z = 4.0 + (18.0 - 4.0) * smoothProgress;
       if (t >= 1) setPhase("talking");
     }
   });
@@ -295,10 +302,10 @@ export default function Scene({ currentView }) {
                 materialProps={butterProps} 
                 poseProps={{ 
                   walker: true, 
-                  torsoRotationX: 0.1, 
-                  // FIX: Set Y rotation to 0 to stop "chicken wings" and lowered X to reach walker bars
-                  leftArmRotation: [0.85, 0, 0], 
-                  rightArmRotation: [0.85, 0, 0], 
+                  torsoRotationX: 0.15, 
+                  // CHICKEN ARM FIX: Elbows tucked, wrists angled to walker bars
+                  leftArmRotation: [1.0, 0, 0.05], 
+                  rightArmRotation: [1.0, 0, -0.05], 
                   leftLegRotation: [0.15, 0, 0],   
                   rightLegRotation: [-0.1, 0, 0],  
                   headRotationY: -0.2
@@ -308,19 +315,17 @@ export default function Scene({ currentView }) {
                 scale={0.95} 
                 materialProps={butterProps} 
                 poseProps={{ 
-                  position: [-1.0, 0, 0.35], 
+                  position: [-0.95, 0, 0.35], 
                   rotation: [0, 0.65, 0], 
                   headRotationY: -0.4,
-                  leftArmRotation: [-0.8, 0, -0.3] 
+                  leftArmRotation: [-0.8, 0, -0.25] 
                 }} 
                />
             </group>
           </group>
 
-          {/* Couple B: ONLY VISIBLE ON DESKTOP */}
           {!isMobile && <WalkingToConversationChapter butterProps={butterProps} />}
 
-          {/* Leaning Couple on stairs */}
           <group position={[6.0, 1.6, 10.0]} rotation={[0, Math.PI / 2, 0]}>
             <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
             <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
