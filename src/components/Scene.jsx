@@ -231,14 +231,20 @@ export default function Scene({ currentView }) {
   const { camera, size } = useThree();
   const waterRef = useRef();
   const isMobile = size.width < 768;
-  const extraWallHeight = isMobile ? 30 : 0; // Infinite vibe for mobile
+  const extraWallHeight = isMobile ? 30 : 0; 
+
   const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
   useEffect(() => { if (waterNormals) waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping; }, [waterNormals]);
 
   useFrame((state, delta) => {
     const isHome = currentView === "home";
+    
+    // Updated targetLook for mobile to capture more of the doorway/opening
+    const mobileLook = new THREE.Vector3(12, 1.2, -2);
+    const desktopLook = new THREE.Vector3(20, 1.2, -2);
+
     const targetPos = isHome ? (isMobile ? new THREE.Vector3(-18, 4.5, 38) : new THREE.Vector3(-13, 3.2, 28)) : new THREE.Vector3(-24.5, 3.5, -450);
-    const targetLook = isHome ? new THREE.Vector3(20, 1.2, -2) : new THREE.Vector3(-24.5, 1.5, -1000);
+    const targetLook = isHome ? (isMobile ? mobileLook : desktopLook) : new THREE.Vector3(-24.5, 1.5, -1000);
     
     camera.position.lerp(targetPos, 0.05); 
     camera.lookAt(targetLook);
@@ -277,21 +283,22 @@ export default function Scene({ currentView }) {
         <group>
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <Bench materialProps={butterProps} />
-            {/* Couple D: Near the bench */}
-            <group position={[-2.5, 0, 0.8]} rotation={[0, 0.5, 0]}>
-               <BlockHumanoid scale={0.92} materialProps={butterProps} poseProps={{ walker: true, torsoRotationX: 0.25, leftArmRotation: [0.8, 0, 0.1], rightArmRotation: [0.8, 0, -0.1], position: [0, 0, 0] }} />
-               <BlockHumanoid scale={0.95} materialProps={butterProps} poseProps={{ position: [0.6, 0, 0.1], rotation: [0, -0.4, 0], headRotationY: 0.3 }} />
+            {/* Couple D: Moved to the other side of the bench */}
+            <group position={[2.2, 0, 0.8]} rotation={[0, -0.4, 0]}>
+               <BlockHumanoid scale={0.92} materialProps={butterProps} poseProps={{ walker: true, torsoRotationX: 0.25, leftArmRotation: [0.8, 0, 0.1], rightArmRotation: [0.8, 0, -0.1] }} />
+               <BlockHumanoid scale={0.95} materialProps={butterProps} poseProps={{ position: [-0.6, 0, 0.1], rotation: [0, 0.4, 0], headRotationY: -0.3 }} />
             </group>
           </group>
 
-          {!isMobile && (
-            <group position={[6.0, 1.6, 10.0]} rotation={[0, Math.PI / 2, 0]}>
-              <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
-              <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
-            </group>
-          )}
+          {/* Couple B: Visible Everywhere */}
+          <group position={[6.0, 1.6, 10.0]} rotation={[0, Math.PI / 2, 0]}>
+            <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
+            <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
+          </group>
 
-          <WalkingToConversationChapter butterProps={butterProps} />
+          {/* Couple C: Hidden on Mobile */}
+          {!isMobile && <WalkingToConversationChapter butterProps={butterProps} />}
+          
           <WheelchairChapter butterProps={butterProps} />
         </group>
       </group>
