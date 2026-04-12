@@ -95,6 +95,7 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {}, isHelper = fa
     if (headRef.current) headRef.current.rotation.y = headRotationY;
     
     if (isWalking) {
+      // Synchronized smooth walk gait
       const swing = Math.sin(t * walkSpeed) * 0.4;
       if (leftLegRef.current) leftLegRef.current.rotation.x = swing;
       if (rightLegRef.current) rightLegRef.current.rotation.x = -swing;
@@ -262,8 +263,6 @@ const WheelchairChapter = ({ butterProps, isMobile }) => {
 const WalkingToConversationChapter = ({ butterProps }) => {
   const groupRef = useRef(); 
   const [phase, setPhase] = useState("walking");
-  
-  // Adjusted: Further stop point (from 18.0 to 22.0)
   const finalStopZ = 22.0;
 
   useFrame((state) => {
@@ -276,25 +275,22 @@ const WalkingToConversationChapter = ({ butterProps }) => {
     }
   });
 
-  // Calculate rotation for "Stop and Turn" effect
   const turnFactor = phase === "talking" ? 1 : 0;
   
   return (
     <group ref={groupRef} position={[7.5, 1.9, 4.0]} rotation={[0, Math.PI / 2, 0]}>
-        {/* Person A: Walk side-by-side, then turn to B */}
         <BlockHumanoid 
           scale={0.95} 
           materialProps={butterProps} 
           poseProps={{ 
             isWalking: phase === "walking", 
-            walkSpeed: 4.5, 
+            walkSpeed: 10, // Matching Wheelchair Helper's fluid walk speed
             cane: true, 
             rotation: [0, 0.6 * turnFactor, 0], 
             position: [-0.4, 0, 0], 
             headRotationY: -1.2 * turnFactor 
           }} 
         />
-        {/* Person B (Helper): Walk side-by-side, then turn to A */}
         <group position={[0.4, 0, 0]}>
           <BlockHumanoid 
             isHelper 
@@ -302,7 +298,7 @@ const WalkingToConversationChapter = ({ butterProps }) => {
             materialProps={butterProps} 
             poseProps={{ 
               isWalking: phase === "walking", 
-              walkSpeed: 4.5, 
+              walkSpeed: 10, // Matching Wheelchair Helper's fluid walk speed
               rotation: [0, -0.6 * turnFactor, 0], 
               headRotationY: phase === "walking" ? 0 : 0.4 
             }} 
@@ -393,7 +389,7 @@ export default function Scene({ currentView }) {
             </group>
           </group>
 
-          {!isMobile && <WalkingToConversationChapter butterProps={butterProps} />}
+          <WalkingToConversationChapter butterProps={butterProps} />
 
           <group position={[6.0, 1.6, 10.0]} rotation={[0, Math.PI / 2, 0]}>
             <BlockHumanoid isHelper scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0], rotation: [0, -0.4, 0]}} />
