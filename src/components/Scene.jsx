@@ -141,17 +141,14 @@ const Staircase = ({ position, width, rotation, materialProps }) => {
 
 const Bench = ({ position, rotation, materialProps }) => (
   <group position={position} rotation={rotation}>
-    {/* Seat */}
     <mesh position={[0, 0.45, 0]} castShadow receiveShadow>
       <boxGeometry args={[3, 0.1, 1.2]} />
       <meshStandardMaterial {...materialProps} />
     </mesh>
-    {/* Backrest */}
     <mesh position={[0, 1, -0.55]} rotation={[-0.1, 0, 0]} castShadow receiveShadow>
       <boxGeometry args={[3, 1, 0.1]} />
       <meshStandardMaterial {...materialProps} />
     </mesh>
-    {/* Legs */}
     {[[-1.3, 0, 0.45], [1.3, 0, 0.45], [-1.3, 0, -0.45], [1.3, 0, -0.45]].map((pos, i) => (
       <mesh key={i} position={[pos[0], 0.225, pos[2]]} castShadow receiveShadow>
         <boxGeometry args={[0.1, 0.45, 0.1]} />
@@ -301,16 +298,16 @@ export default function Scene({ currentView }) {
         </group>
 
         <group>
-          {/* Bench and New Characters */}
-          <group position={[22, 1.9, 2]} rotation={[0, -Math.PI / 4, 0]}>
+          {/* Bench: Positioned in front of the wall (inside the corner) and rotated toward water */}
+          <group position={[14, 1.9, 4]} rotation={[0, Math.PI / 2, 0]}>
             <Bench materialProps={butterProps} />
-            {/* Relaxing Parent Sitting */}
+            {/* Parent Sitting, facing water (rotation: Math.PI / 2) */}
             <BlockHumanoid 
               scale={0.95} 
               materialProps={butterProps} 
               poseProps={{ 
                 position: [0.3, 0.45, 0.1],
-                rotation: [0, -0.3, 0],
+                rotation: [0, Math.PI / 2, 0],
                 leftLegRotation: [1.6, 0, 0.1], 
                 rightLegRotation: [1.6, 0, -0.1],
                 leftArmRotation: [0.8, 0, 0.4],
@@ -319,8 +316,8 @@ export default function Scene({ currentView }) {
             />
           </group>
 
-          {/* Toddler Playing Nearby */}
-          <group position={[18, 1.9, 6]} rotation={[0, Math.PI, 0]}>
+          {/* Toddler playing on the platform floor */}
+          <group position={[11, 1.9, 5]} rotation={[0, Math.PI, 0]}>
              <BlockHumanoid 
               scale={0.4} 
               materialProps={butterProps} 
@@ -333,19 +330,16 @@ export default function Scene({ currentView }) {
             />
           </group>
 
-          {/* Couple B: LOCKED Senior Couple */}
           <group position={[14, 1.9, 12]} rotation={[0, -Math.PI * 0.7, 0]}>
             <BlockHumanoid scale={1} materialProps={butterProps} poseProps={{ cane: true, leftLegRotation: [0.3, 0, 0], rightLegRotation: [-0.3, 0, 0], position: [-0.3, 0, 0]}} />
             <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ leftLegRotation: [-0.3, 0, 0], rightLegRotation: [0.3, 0, 0], position: [0.4, 0, -0.1]}} />
           </group>
 
-          {/* NEW Couple A: Facing water (LOCKED) */}
           <group position={[6.0, 1.6, 11.5]} rotation={[0, Math.PI / 2, 0]}>
             <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
             <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
           </group>
 
-          {/* Couple C: LOCKED Wheelchair Couple */}
           <group position={[14.5, 1.9, 17.5]} rotation={[0, Math.PI, 0]}>
             <SimpleWheelchair materialProps={butterProps} />
             <group position={[0, 0.2, 0]}>
