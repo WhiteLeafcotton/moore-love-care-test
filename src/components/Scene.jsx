@@ -227,13 +227,13 @@ export default function Scene({ currentView }) {
   useFrame((state, delta) => {
     const isHome = currentView === "home";
     
-    // WEB MATCH FIX:
-    // Mobile position now matches the Web's X and Z perspective (-14, 24).
-    // Y at 3.5: Keeps the camera at the same relative height while cropping structure tops.
-    const targetPos = isHome ? (isMobile ? new THREE.Vector3(-14, 3.5, 24) : new THREE.Vector3(-14, 3.2, 24)) : new THREE.Vector3(-24.5, 3.5, -450);
+    // WINDOW INCLUSION ADJUSTMENT:
+    // Mobile position X shifted to 1.5. Distance (Z) lowered slightly to 19 to get alittle closer.
+    // Height (Y) maintained at 3.5 to keep structure tops out of frame while locking view.
+    const targetPos = isHome ? (isMobile ? new THREE.Vector3(1.5, 3.5, 19) : new THREE.Vector3(-14, 3.2, 24)) : new THREE.Vector3(-24.5, 3.5, -450);
     
-    // LookAt matches the original Web focus point for community framing.
-    const targetLook = isHome ? (isMobile ? new THREE.Vector3(20, 1.2, -2) : new THREE.Vector3(20, 1.2, -2)) : new THREE.Vector3(-24.5, 1.5, -1000);
+    // Adjusted LookAt lower and centered to prevent tilting and keep focus locked on community+windows
+    const targetLook = isHome ? (isMobile ? new THREE.Vector3(10, 1.2, -2) : new THREE.Vector3(20, 1.2, -2)) : new THREE.Vector3(-24.5, 1.5, -1000);
     
     camera.position.lerp(targetPos, 0.05); 
     camera.lookAt(targetLook);
