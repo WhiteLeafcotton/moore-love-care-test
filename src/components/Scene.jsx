@@ -207,7 +207,6 @@ const Staircase = ({ position, width, rotation, materialProps }) => (
     {Array.from({ length: 16 }).map((_, i) => (
       <group key={i} position={[0, -i * 0.5, i * 0.8]}>
         <mesh castShadow receiveShadow><boxGeometry args={[width, 0.5, 0.8]} /><meshStandardMaterial {...materialProps} /></mesh>
-        {/* SOLID STRINGER FILL */}
         <mesh position={[0, -2.5, 0]} castShadow receiveShadow><boxGeometry args={[width, 5, 0.8]} /><meshStandardMaterial {...materialProps} /></mesh>
       </group>
     ))}
@@ -393,11 +392,11 @@ export default function Scene({ currentView }) {
         <mesh position={[15.5, -2.1, 15.0]} castShadow receiveShadow><boxGeometry args={[20, 8.0, 30]} /><meshStandardMaterial {...butterProps} /></mesh>
         <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={butterProps} />
 
-        {/* --- THE FLOATING NOOK DISC --- */}
-        {/* Thin accent piece skimmed right over the water line in the nook of the staircase */}
-        <mesh position={[-4, -1.42, 12.5]} castShadow receiveShadow>
-          <cylinderGeometry args={[3.8, 3.8, 0.04, 64]} />
-          <meshStandardMaterial {...butterProps} transparent opacity={0.9} />
+        {/* --- REFINED MINI NOOK DISC --- */}
+        {/* Sitting specifically in the 90-degree internal corner of the stairs and platform */}
+        <mesh position={[6.2, -1.43, 17.1]} castShadow receiveShadow>
+          <cylinderGeometry args={[1.2, 1.2, 0.02, 64]} />
+          <meshStandardMaterial {...butterProps} transparent opacity={0.8} />
         </mesh>
 
         <group position={[-16, -1.6, 0]}>
