@@ -84,7 +84,7 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
         if (leftLegRef.current) leftLegRef.current.rotation.x = leftLegRotation[0];
         if (rightLegRef.current) rightLegRef.current.rotation.x = rightLegRotation[0];
         if (leftArmRef.current) leftArmRef.current.rotation.x = leftArmRotation[0];
-        if (rightArmRotation && rightArmRef.current) rightArmRef.current.rotation.x = rightArmRotation[0];
+        if (rightArmRef.current) rightArmRef.current.rotation.x = rightArmRotation[0];
     }
   });
 
@@ -379,9 +379,9 @@ export default function Scene({ currentView }) {
     const isHome = currentView === "home";
     const LERP_SPEED = isHome ? 0.04 : 0.018; 
 
-    // --- REFINED CENTIMATIC MOBILE CAMERA ---
-    // Moved closer to the door (X from -32 to -18) 
-    const mobileHomePos = new THREE.Vector3(-18, 3.5, 32); 
+    // --- CENTIMATIC MOBILE CAMERA (RIGHT & BACK) ---
+    // Moved to the right (X: 18) and pulled back (Z: 48)
+    const mobileHomePos = new THREE.Vector3(18, 3.5, 48); 
     const desktopHomePos = new THREE.Vector3(-14, 3.2, 24);
     
     const homePos = isMobile ? mobileHomePos : desktopHomePos;
