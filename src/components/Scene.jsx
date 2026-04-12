@@ -25,24 +25,6 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
-// --- NEW COMPONENT: Potted Plant ---
-const PottedPlant = ({ position }) => (
-  <group position={position}>
-    {/* Minimalist Dark Pot */}
-    <mesh castShadow position={[0, 0.25, 0]}>
-      <cylinderGeometry args={[0.35, 0.25, 0.6, 32]} />
-      <meshStandardMaterial color="#1a1124" roughness={0.4} />
-    </mesh>
-    {/* Stylized broad leaves */}
-    {[0, 1.2, 2.4, 3.6, 4.8].map((r, i) => (
-      <mesh key={i} position={[0, 0.8, 0]} rotation={[0.5, r, 0]} castShadow>
-        <boxGeometry args={[0.12, 1.0, 0.4]} />
-        <meshStandardMaterial color="#2d4233" roughness={0.8} />
-      </mesh>
-    ))}
-  </group>
-);
-
 const GrassySassyHills = () => {
   const meshRef = useRef();
   const bladeGeo = useMemo(() => {
@@ -299,9 +281,6 @@ export default function Scene({ currentView }) {
           <boxGeometry args={[20, 8.0, 30]} /><meshStandardMaterial {...butterProps} />
         </mesh>
         
-        {/* Potted Plant Added Here */}
-        <PottedPlant position={[11.5, 1.9, 1.5]} />
-
         <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={butterProps} />
         
         <group position={[-16, -1.6, 0]}>
