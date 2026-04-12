@@ -324,31 +324,36 @@ const WheelchairChapter = ({ butterProps }) => {
   );
 };
 
-const WalkingToConversationChapter = ({ butterProps, darkerProps, walkerRef }) => {
+const WalkingToConversationChapter = ({ butterProps, darkerProps }) => {
   const groupRef = useRef();
   const caregiverRef = useRef();
+  const walkerRef = useRef();
   const [phase, setPhase] = useState("walking");
 
   const START_Z = 4.0;
   const END_Z = 18.0; 
+  const FETCH_X_TARGET = 11.0; // The walker's local X relative to this group
 
   useFrame((state) => {
     const t = state.clock.elapsedTime;
     
+    // 1. Initial Walk on Platform
     if (phase === "walking") {
       const progress = Math.min(t * 0.03, 1);
       groupRef.current.position.z = START_Z + (END_Z - START_Z) * progress;
       if (progress >= 1) setPhase("talking");
     }
 
+    // 2. Pause to talk, then go fetch at T=42
     if (phase === "talking" && t > 42) setPhase("fetch");
     
     if (phase === "fetch") {
       const fetchTime = (t - 42) * 0.4;
       const progress = Math.min(fetchTime, 1);
-      // Walks towards window at [18, 1.9, 12]
-      caregiverRef.current.position.x = 0.4 + (10.0 * progress); 
-      caregiverRef.current.rotation.y = -Math.PI / 2; 
+      
+      // Helper moves to X=11 where walker is
+      caregiverRef.current.position.x = 0.4 + (FETCH_X_TARGET * progress); 
+      caregiverRef.current.rotation.y = -Math.PI / 2; // Face the window
 
       if (progress >= 1) setPhase("returning");
     }
@@ -357,20 +362,20 @@ const WalkingToConversationChapter = ({ butterProps, darkerProps, walkerRef }) =
       const returnTime = (t - 47) * 0.4;
       const progress = Math.min(returnTime, 1);
       
-      const currentXOffset = 10.4 - (10.0 * progress);
+      const currentXOffset = (FETCH_X_TARGET + 0.4) - (FETCH_X_TARGET * progress);
       caregiverRef.current.position.x = currentXOffset;
-      caregiverRef.current.rotation.y = Math.PI / 2; 
+      caregiverRef.current.rotation.y = Math.PI / 2; // Face back
 
+      // WALKER MOVEMENT: Locked to the helper during return
       if (walkerRef.current) {
-        // Walker sticks to helper
-        walkerRef.current.position.x = 7.5 + (caregiverRef.current.position.x + 0.3); 
-        walkerRef.current.position.z = groupRef.current.position.z;
+          walkerRef.current.position.x = currentXOffset + 0.4;
       }
     }
   });
 
   return (
     <group ref={groupRef} position={[7.5, 1.9, START_Z]} rotation={[0, Math.PI / 2, 0]}>
+        {/* THE STATIONARY PARTNER */}
         <BlockHumanoid 
           scale={1} 
           materialProps={butterProps} 
@@ -383,6 +388,8 @@ const WalkingToConversationChapter = ({ butterProps, darkerProps, walkerRef }) =
             headRotationY: phase !== "walking" ? -0.4 : 0
           }} 
         />
+        
+        {/* THE CAREGIVER */}
         <group ref={caregiverRef} position={[0.4, 0, 0]}>
           <BlockHumanoid 
             scale={0.9} 
@@ -395,6 +402,11 @@ const WalkingToConversationChapter = ({ butterProps, darkerProps, walkerRef }) =
             }} 
           />
         </group>
+
+        {/* THE WALKER: Placed locally so math is foolproof */}
+        <group ref={walkerRef} position={[FETCH_X_TARGET + 0.5, 0, 0]} rotation={[0, -Math.PI/2, 0]}>
+           <Walker materialProps={darkerProps} />
+        </group>
     </group>
   );
 };
@@ -404,7 +416,6 @@ export default function Scene({ currentView }) {
   const { camera, size } = useThree();
   const waterRef = useRef();
   const cloudGroupRef = useRef();
-  const walkerRef = useRef();
   const lookAtTarget = useRef(new THREE.Vector3(12, 1.5, 0));
   const isMobile = size.width < 768;
 
@@ -466,11 +477,6 @@ export default function Scene({ currentView }) {
           <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
 
-        {/* WALKER: Visible right in front of the window */}
-        <group ref={walkerRef} position={[18, 1.9, 12]} rotation={[0, Math.PI / 2, 0]}>
-          <Walker materialProps={darkerProps} />
-        </group>
-
         <group>
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <Bench materialProps={darkerProps} />
@@ -481,7 +487,7 @@ export default function Scene({ currentView }) {
             <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
           </group>
 
-          <WalkingToConversationChapter butterProps={butterProps} darkerProps={darkerProps} walkerRef={walkerRef} />
+          <WalkingToConversationChapter butterProps={butterProps} darkerProps={darkerProps} />
           <WheelchairChapter butterProps={butterProps} />
         </group>
       </group>
