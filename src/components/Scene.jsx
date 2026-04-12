@@ -227,12 +227,12 @@ export default function Scene({ currentView }) {
   useFrame((state, delta) => {
     const isHome = currentView === "home";
     
-    // BACKED UP PERSPECTIVE:
-    // Increased Z to 28 for both to pull back and show window frames
-    // Shifted X to -13 to maintain the corner balance at this wider distance
-    const targetPos = isHome ? (isMobile ? new THREE.Vector3(-13, 3.5, 28) : new THREE.Vector3(-13, 3.2, 28)) : new THREE.Vector3(-24.5, 3.5, -450);
+    // THE "WIDE SHOT" FIX FOR MOBILE WINDOWS:
+    // Mobile Z: 38 (Pushed way back from 28 to capture building face)
+    // Mobile X: -18 (Shifted left to keep building in frame on tall screens)
+    // Mobile Y: 4.5 (Lifted slightly to keep ground visible from distance)
+    const targetPos = isHome ? (isMobile ? new THREE.Vector3(-18, 4.5, 38) : new THREE.Vector3(-13, 3.2, 28)) : new THREE.Vector3(-24.5, 3.5, -450);
     
-    // LookAt remains focused on the social courtyard
     const targetLook = isHome ? new THREE.Vector3(20, 1.2, -2) : new THREE.Vector3(-24.5, 1.5, -1000);
     
     camera.position.lerp(targetPos, 0.05); 
