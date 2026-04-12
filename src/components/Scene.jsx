@@ -235,7 +235,6 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
       if (leftArmRef.current) leftArmRef.current.rotation.x = -swing * 0.5;
       if (rightArmRef.current) rightArmRef.current.rotation.x = swing * 0.5;
     } else {
-        // PLANTED FEET LOGIC
         if (leftLegRef.current) leftLegRef.current.rotation.x = leftLegRotation[0];
         if (rightLegRef.current) rightLegRef.current.rotation.x = rightLegRotation[0];
         if (leftArmRef.current) leftArmRef.current.rotation.x = leftArmRotation[0];
@@ -280,8 +279,7 @@ const WheelchairChapter = ({ butterProps }) => {
   const [isMoving, setIsMoving] = useState(true);
 
   useFrame((state) => {
-    // ONE WAY TRIP
-    const speed = 0.05;
+    const speed = 0.02; // SLOWER
     const t = Math.min(state.clock.elapsedTime * speed, 1); 
     const startZ = 22;
     const endZ = 12.5; 
@@ -289,7 +287,7 @@ const WheelchairChapter = ({ butterProps }) => {
     groupRef.current.position.z = startZ + (endZ - startZ) * t;
 
     if (t < 1) {
-        if (wheelRef.current) wheelRef.current.rotation.x = state.clock.elapsedTime * 4;
+        if (wheelRef.current) wheelRef.current.rotation.x = state.clock.elapsedTime * 1.5; // SLOWER WHEEL
     } else if (isMoving) {
         setIsMoving(false);
     }
@@ -308,7 +306,7 @@ const WheelchairChapter = ({ butterProps }) => {
         <BlockHumanoid scale={0.85} materialProps={butterProps} poseProps={{ rotation: [0, Math.PI, 0], leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], leftArmRotation: [0.7, 0, 0], rightArmRotation: [0.7, 0, 0]}} />
       </group>
       <group position={[0, 0, -0.75]}>
-        <BlockHumanoid scale={0.95} materialProps={butterProps} poseProps={{ isWalking: isMoving, walkSpeed: 3, leftArmRotation: [-1.2, 0, 0.1], rightArmRotation: [-1.2, 0, -0.1] }} />
+        <BlockHumanoid scale={0.95} materialProps={butterProps} poseProps={{ isWalking: isMoving, walkSpeed: 1.2, leftArmRotation: [-1.2, 0, 0.1], rightArmRotation: [-1.2, 0, -0.1] }} />
       </group>
     </group>
   );
@@ -319,8 +317,7 @@ const WalkingToConversationChapter = ({ butterProps }) => {
   const [isTalking, setIsTalking] = useState(false);
 
   useFrame((state) => {
-    // ONE WAY TRIP
-    const t = Math.min(state.clock.elapsedTime * 0.08, 1);
+    const t = Math.min(state.clock.elapsedTime * 0.03, 1); // SLOWER
     const startZ = 4.0;
     const endZ = 12.0; 
     
@@ -338,6 +335,7 @@ const WalkingToConversationChapter = ({ butterProps }) => {
           materialProps={butterProps} 
           poseProps={{ 
             isWalking: !isTalking, 
+            walkSpeed: 1.5,
             cane: true, 
             rotation: [0, isTalking ? 0.6 : 0, 0],
             position: [-0.3, 0, 0],
@@ -349,6 +347,7 @@ const WalkingToConversationChapter = ({ butterProps }) => {
           materialProps={butterProps} 
           poseProps={{ 
             isWalking: !isTalking, 
+            walkSpeed: 1.5,
             rotation: [0, isTalking ? -0.6 : 0, 0],
             position: [0.4, 0, 0],
             headRotationY: isTalking ? 0.4 : 0
@@ -403,14 +402,12 @@ export default function Scene({ currentView }) {
       </group>
 
       <group position={[0, 0, 0]}>
-        {/* Main Floor/Base */}
         <mesh position={[15.5, -2.1, 15.0]} castShadow receiveShadow>
           <boxGeometry args={[20, 8.0, 30]} /><meshStandardMaterial {...butterProps} />
         </mesh>
         
         <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={butterProps} />
         
-        {/* Left Side Wall with Arches */}
         <group position={[-16, -1.6, 0]}>
           <mesh position={[1, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
           <WallOpening position={[6, 0, 0]} colorProps={butterProps} />
@@ -418,7 +415,6 @@ export default function Scene({ currentView }) {
           <mesh position={[24, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
 
-        {/* Right Side Wall with Windows (The Solarium Windows) */}
         <group position={[17, -1.6, 1]} rotation={[0, -Math.PI / 2, 0]}>
           <mesh castShadow receiveShadow position={[0.5, 8.5, 0]}><boxGeometry args={[1, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
           <mesh castShadow receiveShadow position={[4, 8.5, 0]}><boxGeometry args={[6, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
@@ -428,18 +424,15 @@ export default function Scene({ currentView }) {
         </group>
 
         <group>
-          {/* Bench */}
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <Bench materialProps={darkerProps} />
           </group>
 
-          {/* Seated Couple on Edge */}
           <group position={[6.0, 1.6, 10.0]} rotation={[0, Math.PI / 2, 0]}>
             <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
             <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
           </group>
 
-          {/* Locked Animation Chapters */}
           <WalkingToConversationChapter butterProps={butterProps} />
           <WheelchairChapter butterProps={butterProps} />
         </group>
