@@ -172,7 +172,7 @@ const Bench = ({ position, rotation, materialProps }) => (
     <mesh position={[0, 0.45, 0]} castShadow receiveShadow><boxGeometry args={[3, 0.1, 1.2]} /><meshStandardMaterial {...materialProps} /></mesh>
     <mesh position={[0, 1, -0.55]} rotation={[-0.1, 0, 0]} castShadow receiveShadow><boxGeometry args={[3, 1, 0.1]} /><meshStandardMaterial {...materialProps} /></mesh>
     {[[-1.3, 0, 0.45], [1.3, 0, 0.45], [-1.3, 0, -0.45], [1.3, 0, -0.45]].map((pos, i) => (
-      <mesh key={i} position={[pos[0], 0.225, pos[2]]} castShadow receiveShadow><boxGeometry args={[0.1, 0.45, 0.1]} /><meshStandardMaterial {...materialProps} /></mesh>
+      <mesh key={i} position={[pos[0], 0.225, po[2]]} castShadow receiveShadow><boxGeometry args={[0.1, 0.45, 0.1]} /><meshStandardMaterial {...materialProps} /></mesh>
     ))}
   </group>
 );
@@ -192,8 +192,8 @@ const WheelchairChapter = ({ butterProps, isMobile }) => {
   const wheelRef = useRef(); 
   const [isMoving, setIsMoving] = useState(true);
   
-  // startZ for mobile tuned to the exact screen edge for immediate entry
-  const startZ = isMobile ? 24 : 22; 
+  // startZ for mobile: Pushed much closer to view edge for instant entry
+  const startZ = isMobile ? 18.5 : 22; 
   const finalStopZ = 12.5; 
 
   useFrame((state) => {
@@ -295,8 +295,9 @@ export default function Scene({ currentView }) {
                 poseProps={{ 
                   walker: true, 
                   torsoRotationX: 0.1, 
-                  leftArmRotation: [0.8, 0, -0.25], // Pushed down toward the walker
-                  rightArmRotation: [0.8, 0, 0.25], // Pushed down toward the walker
+                  // ARM FIX: Natural downward reach to grip the walker rail
+                  leftArmRotation: [-0.65, 0, -0.15], 
+                  rightArmRotation: [-0.65, 0, 0.15], 
                   leftLegRotation: [0.15, 0, 0],   
                   rightLegRotation: [-0.1, 0, 0],  
                   headRotationY: -0.2
