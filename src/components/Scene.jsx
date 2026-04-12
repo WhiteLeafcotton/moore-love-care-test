@@ -192,8 +192,8 @@ const WheelchairChapter = ({ butterProps, isMobile }) => {
   const wheelRef = useRef(); 
   const [isMoving, setIsMoving] = useState(true);
   
-  // startZ adjusted for mobile to enter exactly at screen view edge
-  const startZ = isMobile ? 32 : 22; 
+  // startZ for mobile tuned to the exact screen edge for immediate entry
+  const startZ = isMobile ? 24 : 22; 
   const finalStopZ = 12.5; 
 
   useFrame((state) => {
@@ -295,8 +295,8 @@ export default function Scene({ currentView }) {
                 poseProps={{ 
                   walker: true, 
                   torsoRotationX: 0.1, 
-                  leftArmRotation: [-1.4, 0, -0.25], // Arms moved down/in for grip
-                  rightArmRotation: [-1.4, 0, 0.25], 
+                  leftArmRotation: [0.8, 0, -0.25], // Pushed down toward the walker
+                  rightArmRotation: [0.8, 0, 0.25], // Pushed down toward the walker
                   leftLegRotation: [0.15, 0, 0],   
                   rightLegRotation: [-0.1, 0, 0],  
                   headRotationY: -0.2
