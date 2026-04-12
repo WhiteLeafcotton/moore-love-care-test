@@ -207,6 +207,7 @@ const Staircase = ({ position, width, rotation, materialProps }) => (
     {Array.from({ length: 16 }).map((_, i) => (
       <group key={i} position={[0, -i * 0.5, i * 0.8]}>
         <mesh castShadow receiveShadow><boxGeometry args={[width, 0.5, 0.8]} /><meshStandardMaterial {...materialProps} /></mesh>
+        {/* SOLID STRINGER FILL */}
         <mesh position={[0, -2.5, 0]} castShadow receiveShadow><boxGeometry args={[width, 5, 0.8]} /><meshStandardMaterial {...materialProps} /></mesh>
       </group>
     ))}
@@ -388,13 +389,15 @@ export default function Scene({ currentView }) {
       <directionalLight position={[-15, 30, 10]} intensity={1.6} castShadow />
 
       <group position={[0, 0, 0]}>
+        {/* MAIN BASE PLATFORM */}
         <mesh position={[15.5, -2.1, 15.0]} castShadow receiveShadow><boxGeometry args={[20, 8.0, 30]} /><meshStandardMaterial {...butterProps} /></mesh>
         <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={butterProps} />
 
-        {/* FLOATING CIRCULAR PLATFORM BY THE STRINGER */}
-        <mesh position={[-4, 1.4, 12]} castShadow receiveShadow>
-          <cylinderGeometry args={[4.5, 4.5, 0.2, 64]} />
-          <meshStandardMaterial {...butterProps} />
+        {/* --- THE FLOATING NOOK DISC --- */}
+        {/* Thin accent piece skimmed right over the water line in the nook of the staircase */}
+        <mesh position={[-4, -1.42, 12.5]} castShadow receiveShadow>
+          <cylinderGeometry args={[3.8, 3.8, 0.04, 64]} />
+          <meshStandardMaterial {...butterProps} transparent opacity={0.9} />
         </mesh>
 
         <group position={[-16, -1.6, 0]}>
@@ -413,14 +416,12 @@ export default function Scene({ currentView }) {
         </group>
 
         <group>
-          {/* SITTING AREA - BENCH ONLY */}
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <Bench materialProps={butterProps} />
           </group>
 
           <WalkingToConversationChapter butterProps={butterProps} />
 
-          {/* WALKER COUPLE BY THE STAIRS */}
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <group position={[3.5, 0, -0.2]} rotation={[0, -0.5, 0]}>
                <BlockHumanoid 
