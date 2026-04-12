@@ -219,7 +219,6 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
   const limbGeo = useMemo(() => {
     const pts = [new THREE.Vector2(0, 0), new THREE.Vector2(0.08, 0.05), new THREE.Vector2(0.08, 0.75), new THREE.Vector2(0, 0.8)];
     const g = new THREE.LatheGeometry(pts, 32);
-    // Move translation so pivot is at the "sole" of the foot
     g.translate(0, -0.8, 0); 
     return g;
   }, []);
@@ -272,7 +271,6 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
           </group>
         </group>
       </group>
-      {/* Positioned legs so feet hit local 0 */}
       <group position={[0, 0.8, 0]}>
         <group ref={leftLegRef} position={[-0.12, 0, 0]} rotation={leftLegRotation}>
           <mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
@@ -308,7 +306,7 @@ const WheelchairChapter = ({ butterProps }) => {
   });
 
   return (
-    <group ref={groupRef} position={[14.5, 1.98, 22]} rotation={[0, Math.PI, 0]}>
+    <group ref={groupRef} position={[14.5, 1.95, 22]} rotation={[0, Math.PI, 0]}>
         <mesh position={[0, 0.55, 0]} castShadow><boxGeometry args={[0.6, 0.08, 0.6]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
         <mesh position={[0, 0.9, -0.25]} rotation={[0.1, 0, 0]} castShadow><boxGeometry args={[0.55, 0.7, 0.08]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
         <mesh position={[0, 1.2, -0.3]} castShadow><boxGeometry args={[0.6, 0.05, 0.05]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
@@ -326,85 +324,82 @@ const WheelchairChapter = ({ butterProps }) => {
   );
 };
 
-const WalkingToConversationChapter = ({ butterProps, darkerProps }) => {
+const WalkingToConversationChapter = ({ butterProps, darkerProps, walkerRef }) => {
   const groupRef = useRef();
   const caregiverRef = useRef();
-  const walkerRef = useRef();
   const [phase, setPhase] = useState("walking");
 
   const START_Z = 4.0;
   const END_Z = 18.0; 
-  // Adjusted Y to ensure no sinking
-  const GROUND_Y = 1.98;
+  const GROUND_Y = 1.95;
 
   useFrame((state) => {
     const t = state.clock.elapsedTime;
     
+    // 1. Initial Walk
     if (phase === "walking") {
       const progress = Math.min(t * 0.03, 1);
       groupRef.current.position.z = START_Z + (END_Z - START_Z) * progress;
       if (progress >= 1) setPhase("talking");
     }
 
+    // 2. Pause then Fetch
     if (phase === "talking" && t > 42) setPhase("fetch");
     
     if (phase === "fetch") {
       const fetchTime = (t - 42) * 0.2;
       const progress = Math.min(fetchTime, 1);
-      // Move helper relative to the stopped group
-      caregiverRef.current.position.z = 0 - (10.0 * progress);
+      // Character walks from END_Z back to 11.5 (where walker is)
+      caregiverRef.current.position.z = 0 - (6.5 * progress);
       caregiverRef.current.rotation.y = Math.PI;
 
       if (progress >= 1) setPhase("returning");
     }
 
+    // 3. Return with Walker
     if (phase === "returning") {
       const returnTime = (t - 47) * 0.2;
       const progress = Math.min(returnTime, 1);
-      const currentZOffset = -10.0 + (10.0 * progress);
+      const currentZOffset = -6.5 + (6.5 * progress);
       caregiverRef.current.position.z = currentZOffset;
       caregiverRef.current.rotation.y = 0; 
 
-      // Only now does the walker start moving with the caregiver
-      walkerRef.current.position.z = currentZOffset + 0.6;
+      // Walker follows caregiver's world position
+      if (walkerRef.current) {
+        // We calculate world X/Z for the caregiver and offset the walker slightly in front
+        walkerRef.current.position.set(7.9, GROUND_Y, END_Z + currentZOffset + 0.6);
+        walkerRef.current.rotation.y = Math.PI / 2; // Face forward
+      }
     }
   });
 
   return (
-    <>
-      <group ref={groupRef} position={[7.5, GROUND_Y, START_Z]} rotation={[0, Math.PI / 2, 0]}>
+    <group ref={groupRef} position={[7.5, GROUND_Y, START_Z]} rotation={[0, Math.PI / 2, 0]}>
+        <BlockHumanoid 
+          scale={1} 
+          materialProps={butterProps} 
+          poseProps={{ 
+            isWalking: phase === "walking", 
+            walkSpeed: 1.5,
+            cane: true, 
+            rotation: [0, phase !== "walking" ? 0.6 : 0, 0],
+            position: [-0.3, 0, 0],
+            headRotationY: phase !== "walking" ? -0.4 : 0
+          }} 
+        />
+        <group ref={caregiverRef} position={[0.4, 0, 0]}>
           <BlockHumanoid 
-            scale={1} 
+            scale={0.9} 
             materialProps={butterProps} 
             poseProps={{ 
-              isWalking: phase === "walking", 
+              isWalking: phase !== "talking", 
               walkSpeed: 1.5,
-              cane: true, 
-              rotation: [0, phase !== "walking" ? 0.6 : 0, 0],
-              position: [-0.3, 0, 0],
-              headRotationY: phase !== "walking" ? -0.4 : 0
+              rotation: [0, phase === "talking" ? -0.6 : 0, 0],
+              headRotationY: phase === "talking" ? 0.4 : 0
             }} 
           />
-
-          <group ref={caregiverRef} position={[0.4, 0, 0]}>
-            <BlockHumanoid 
-              scale={0.9} 
-              materialProps={butterProps} 
-              poseProps={{ 
-                isWalking: phase !== "talking", 
-                walkSpeed: 1.5,
-                rotation: [0, phase === "talking" ? -0.6 : 0, 0],
-                headRotationY: phase === "talking" ? 0.4 : 0
-              }} 
-            />
-          </group>
-      </group>
-
-      {/* WALKER IS NOW COMPLETELY STATIC - NOT NESTED IN MOVING GROUP */}
-      <group ref={walkerRef} position={[17.5, GROUND_Y, 7.9]} rotation={[0, 0, 0]}>
-         <Walker materialProps={darkerProps} />
-      </group>
-    </>
+        </group>
+    </group>
   );
 };
 
@@ -413,6 +408,7 @@ export default function Scene({ currentView }) {
   const { camera, size } = useThree();
   const waterRef = useRef();
   const cloudGroupRef = useRef();
+  const walkerRef = useRef();
   const lookAtTarget = useRef(new THREE.Vector3(12, 1.5, 0));
   const isMobile = size.width < 768;
 
@@ -453,7 +449,6 @@ export default function Scene({ currentView }) {
       </group>
 
       <group position={[0, 0, 0]}>
-        {/* Main Platform */}
         <mesh position={[15.5, -2.1, 15.0]} castShadow receiveShadow>
           <boxGeometry args={[20, 8.0, 30]} /><meshStandardMaterial {...butterProps} />
         </mesh>
@@ -475,17 +470,23 @@ export default function Scene({ currentView }) {
           <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
 
+        {/* --- COMPLETELY STATIC WALKER (World Space) --- */}
+        {/* Initialized at a fixed spot by the windows (Z=11.5) on the platform (Y=1.95) */}
+        <group ref={walkerRef} position={[7.9, 1.95, 11.5]} rotation={[0, Math.PI / 2, 0]}>
+          <Walker materialProps={darkerProps} />
+        </group>
+
         <group>
-          <group position={[14, 1.98, 4]} rotation={[0, -Math.PI / 2, 0]}>
+          <group position={[14, 1.95, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <Bench materialProps={darkerProps} />
           </group>
 
           <group position={[6.0, 1.6, 10.0]} rotation={[0, Math.PI / 2, 0]}>
-            <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0.38]}} />
-            <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0.38]}} />
+            <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
+            <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
           </group>
 
-          <WalkingToConversationChapter butterProps={butterProps} darkerProps={darkerProps} />
+          <WalkingToConversationChapter butterProps={butterProps} darkerProps={darkerProps} walkerRef={walkerRef} />
           <WheelchairChapter butterProps={butterProps} />
         </group>
       </group>
