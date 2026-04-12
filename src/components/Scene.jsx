@@ -279,15 +279,21 @@ const WheelchairChapter = ({ butterProps }) => {
   const [isMoving, setIsMoving] = useState(true);
 
   useFrame((state) => {
-    const speed = 0.02;
-    const t = Math.min(state.clock.elapsedTime * speed, 1); 
+    const duration = 12; // Time to complete movement
+    const t = Math.min(state.clock.elapsedTime / duration, 1);
+    
+    // Smoothstop logic: accel/decel smoothly
+    const progress = THREE.MathUtils.smoothstep(t, 0, 1);
+    
     const startZ = 22;
     const endZ = 12.5; 
     
-    groupRef.current.position.z = startZ + (endZ - startZ) * t;
+    if (groupRef.current) {
+        groupRef.current.position.z = startZ + (endZ - startZ) * progress;
+    }
 
     if (t < 1) {
-        if (wheelRef.current) wheelRef.current.rotation.x = state.clock.elapsedTime * 1.5;
+        if (wheelRef.current) wheelRef.current.rotation.x = state.clock.elapsedTime * 2.5; // Spun up wheel speed
     } else if (isMoving) {
         setIsMoving(false);
     }
@@ -306,7 +312,7 @@ const WheelchairChapter = ({ butterProps }) => {
         <BlockHumanoid scale={0.85} materialProps={butterProps} poseProps={{ rotation: [0, Math.PI, 0], leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], leftArmRotation: [0.7, 0, 0], rightArmRotation: [0.7, 0, 0]}} />
       </group>
       <group position={[0, 0, -0.75]}>
-        <BlockHumanoid scale={0.95} materialProps={butterProps} poseProps={{ isWalking: isMoving, walkSpeed: 1.2, leftArmRotation: [-1.2, 0, 0.1], rightArmRotation: [-1.2, 0, -0.1] }} />
+        <BlockHumanoid scale={0.95} materialProps={butterProps} poseProps={{ isWalking: isMoving, walkSpeed: 10, leftArmRotation: [-1.2, 0, 0.1], rightArmRotation: [-1.2, 0, -0.1] }} />
       </group>
     </group>
   );
@@ -320,12 +326,13 @@ const WalkingToConversationChapter = ({ butterProps }) => {
   const END_Z = 18.0; 
 
   useFrame((state) => {
-    const t = state.clock.elapsedTime;
+    const duration = 15;
+    const t = Math.min(state.clock.elapsedTime / duration, 1);
+    const progress = THREE.MathUtils.smoothstep(t, 0, 1);
     
     if (phase === "walking") {
-      const progress = Math.min(t * 0.03, 1);
       groupRef.current.position.z = START_Z + (END_Z - START_Z) * progress;
-      if (progress >= 1) setPhase("talking");
+      if (t >= 1) setPhase("talking");
     }
   });
 
@@ -336,7 +343,7 @@ const WalkingToConversationChapter = ({ butterProps }) => {
           materialProps={butterProps} 
           poseProps={{ 
             isWalking: phase === "walking", 
-            walkSpeed: 1.5,
+            walkSpeed: 3.5, // Sped up walk speed
             cane: true, 
             rotation: [0, phase !== "walking" ? 0.6 : 0, 0],
             position: [-0.3, 0, 0],
@@ -349,7 +356,7 @@ const WalkingToConversationChapter = ({ butterProps }) => {
             materialProps={butterProps} 
             poseProps={{ 
               isWalking: phase === "walking", 
-              walkSpeed: 1.5,
+              walkSpeed: 3.5,
               rotation: [0, phase !== "walking" ? -0.6 : 0, 0],
               headRotationY: phase !== "walking" ? 0.4 : 0
             }} 
@@ -410,8 +417,8 @@ export default function Scene({ currentView }) {
         
         <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={butterProps} />
         
-        {/* NEW THIN HEXAGON PLATFORM FLOATING IN WATER */}
-        <mesh position={[14, -1.35, 27]} castShadow receiveShadow>
+        {/* SMALL HEXAGON PLATFORM - Moved to be visible in the nook by the stairs */}
+        <mesh position={[-4.5, -1.38, 12]} castShadow receiveShadow>
           <cylinderGeometry args={[2, 2, 0.1, 6]} />
           <meshStandardMaterial {...butterProps} />
         </mesh>
