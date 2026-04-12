@@ -7,7 +7,7 @@ import * as THREE from "three";
 extend({ Water });
 
 const GRASS_COUNT = 400000;
-const THEME_PURPLE = "#21162e"; // Consistent Dark Purple
+const LIGHT_PURPLE = "#d2c1e8"; // Lighter, gentle purple theme
 
 const getHillHeight = (x, z) => {
   const dist = Math.sqrt(x * x + z * z);
@@ -39,9 +39,10 @@ const HeartBadge = () => {
   }, []);
 
   return (
-    <mesh position={[0.12, 1.0, 0.19]} rotation={[0, 0, Math.PI]}>
+    // FIX: Rotated badge 180 degrees so it is upright
+    <mesh position={[0.12, 1.0, 0.19]} rotation={[0, 0, 0]}>
       <shapeGeometry args={[shape]} />
-      <meshStandardMaterial color={THEME_PURPLE} emissive={THEME_PURPLE} emissiveIntensity={0.5} />
+      <meshStandardMaterial color={LIGHT_PURPLE} emissive={LIGHT_PURPLE} emissiveIntensity={0.3} />
     </mesh>
   );
 };
@@ -115,19 +116,19 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {}, isHelper = fa
           <group ref={leftArmRef} position={[-0.22, 0, 0]}><mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh></group>
           <group ref={rightArmRef} position={[0.22, 0, 0]}>
             <mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} />
-              {cane && <mesh position={[0, -0.7, 0.1]}><cylinderGeometry args={[0.015, 0.015, 1.1]} /><meshStandardMaterial color={THEME_PURPLE} /></mesh>}
+              {cane && <mesh position={[0, -0.7, 0.1]}><cylinderGeometry args={[0.015, 0.015, 1.1]} /><meshStandardMaterial color={LIGHT_PURPLE} /></mesh>}
             </mesh>
           </group>
         </group>
       </group>
       {walker && (
         <group position={[0, -0.2, 0.35]}>
-          <mesh position={[0.3, 0.45, 0]}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color={THEME_PURPLE} /></mesh>
-          <mesh position={[-0.3, 0.45, 0]}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color={THEME_PURPLE} /></mesh>
-          <mesh position={[0, 0.85, 0]}><boxGeometry args={[0.65, 0.03, 0.03]} /><meshStandardMaterial color={THEME_PURPLE} /></mesh>
-          <mesh position={[0.3, 0.45, 0.3]}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color={THEME_PURPLE} /></mesh>
-          <mesh position={[-0.3, 0.45, 0.3]}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color={THEME_PURPLE} /></mesh>
-          <mesh position={[0, 0.85, 0.3]}><boxGeometry args={[0.6, 0.03, 0.03]} /><meshStandardMaterial color={THEME_PURPLE} /></mesh>
+          <mesh position={[0.3, 0.45, 0]}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color={LIGHT_PURPLE} /></mesh>
+          <mesh position={[-0.3, 0.45, 0]}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color={LIGHT_PURPLE} /></mesh>
+          <mesh position={[0, 0.85, 0]}><boxGeometry args={[0.65, 0.03, 0.03]} /><meshStandardMaterial color={LIGHT_PURPLE} /></mesh>
+          <mesh position={[0.3, 0.45, 0.3]}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color={LIGHT_PURPLE} /></mesh>
+          <mesh position={[-0.3, 0.45, 0.3]}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color={LIGHT_PURPLE} /></mesh>
+          <mesh position={[0, 0.85, 0.3]}><boxGeometry args={[0.6, 0.03, 0.03]} /><meshStandardMaterial color={LIGHT_PURPLE} /></mesh>
         </group>
       )}
       <group position={[0, 0.4, 0]}>
@@ -190,10 +191,10 @@ const Staircase = ({ position, width, rotation, materialProps }) => (
 
 const Bench = ({ position, rotation, materialProps }) => (
   <group position={position} rotation={rotation}>
-    <mesh position={[0, 0.45, 0]} castShadow receiveShadow><boxGeometry args={[3, 0.1, 1.2]} /><meshStandardMaterial color={THEME_PURPLE} /></mesh>
-    <mesh position={[0, 1, -0.55]} rotation={[-0.1, 0, 0]} castShadow receiveShadow><boxGeometry args={[3, 1, 0.1]} /><meshStandardMaterial color={THEME_PURPLE} /></mesh>
+    <mesh position={[0, 0.45, 0]} castShadow receiveShadow><boxGeometry args={[3, 0.1, 1.2]} /><meshStandardMaterial color={LIGHT_PURPLE} /></mesh>
+    <mesh position={[0, 1, -0.55]} rotation={[-0.1, 0, 0]} castShadow receiveShadow><boxGeometry args={[3, 1, 0.1]} /><meshStandardMaterial color={LIGHT_PURPLE} /></mesh>
     {[[-1.3, 0, 0.45], [1.3, 0, 0.45], [-1.3, 0, -0.45], [1.3, 0, -0.45]].map((pos, i) => (
-      <mesh key={i} position={[pos[0], 0.225, pos[2]]} castShadow receiveShadow><boxGeometry args={[0.1, 0.45, 0.1]} /><meshStandardMaterial color={THEME_PURPLE} /></mesh>
+      <mesh key={i} position={[pos[0], 0.225, pos[2]]} castShadow receiveShadow><boxGeometry args={[0.1, 0.45, 0.1]} /><meshStandardMaterial color={LIGHT_PURPLE} /></mesh>
     ))}
   </group>
 );
@@ -232,11 +233,11 @@ const WheelchairChapter = ({ butterProps, isMobile }) => {
 
   return (
     <group ref={groupRef} position={[14.5, 1.9, startZ]} rotation={[0, Math.PI, 0]}>
-        <mesh position={[0, 0.55, 0]} castShadow><boxGeometry args={[0.6, 0.08, 0.6]} /><meshStandardMaterial color={THEME_PURPLE} /></mesh>
-        <mesh position={[0, 0.9, -0.25]} rotation={[0.1, 0, 0]} castShadow><boxGeometry args={[0.55, 0.7, 0.08]} /><meshStandardMaterial color={THEME_PURPLE} /></mesh>
+        <mesh position={[0, 0.55, 0]} castShadow><boxGeometry args={[0.6, 0.08, 0.6]} /><meshStandardMaterial color={LIGHT_PURPLE} /></mesh>
+        <mesh position={[0, 0.9, -0.25]} rotation={[0.1, 0, 0]} castShadow><boxGeometry args={[0.55, 0.7, 0.08]} /><meshStandardMaterial color={LIGHT_PURPLE} /></mesh>
         <group position={[0, 0.45, -0.05]} ref={wheelRef}>
-          <mesh position={[-0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]}><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color={THEME_PURPLE} /></mesh>
-          <mesh position={[0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]}><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color={THEME_PURPLE} /></mesh>
+          <mesh position={[-0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]}><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color={LIGHT_PURPLE} /></mesh>
+          <mesh position={[0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]}><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color={LIGHT_PURPLE} /></mesh>
         </group>
       <group position={[0, 0.2, 0]}><BlockHumanoid scale={0.85} materialProps={butterProps} poseProps={{ rotation: [0, Math.PI, 0], leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], leftArmRotation: [0.7, 0, 0], rightArmRotation: [0.7, 0, 0]}} /></group>
       <group position={[0, 0, -0.75]}><BlockHumanoid isHelper scale={0.95} materialProps={butterProps} poseProps={{ isWalking: isMoving, walkSpeed: 10, leftArmRotation: [-1.2, 0, 0.1], rightArmRotation: [-1.2, 0, -0.1] }} /></group>
@@ -321,8 +322,7 @@ export default function Scene({ currentView }) {
                 materialProps={butterProps} 
                 poseProps={{ 
                   walker: true, 
-                  torsoRotationX: 0.1, 
-                  // ARM FIX: Hands down at side with a slight forward tilt to clear frame
+                  torsoRotationX: 0.15, 
                   leftArmRotation: [0.3, 0, -0.1], 
                   rightArmRotation: [0.3, 0, 0.1], 
                   leftLegRotation: [0.15, 0, 0],   
