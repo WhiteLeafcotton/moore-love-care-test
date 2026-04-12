@@ -210,23 +210,6 @@ const WheelchairChapter = ({ butterProps }) => {
   );
 };
 
-const WalkingToConversationChapter = ({ butterProps }) => {
-  const groupRef = useRef(); const [phase, setPhase] = useState("walking");
-  useFrame((state) => {
-    const t = Math.min(state.clock.elapsedTime / 15, 1);
-    if (phase === "walking") {
-      groupRef.current.position.z = 4.0 + (18.0 - 4.0) * THREE.MathUtils.smoothstep(t, 0, 1);
-      if (t >= 1) setPhase("talking");
-    }
-  });
-  return (
-    <group ref={groupRef} position={[7.5, 1.9, 4.0]} rotation={[0, Math.PI / 2, 0]}>
-        <BlockHumanoid scale={0.95} materialProps={butterProps} poseProps={{ isWalking: phase === "walking", walkSpeed: 3.5, cane: true, rotation: [0, 0.6, 0], position: [-0.3, 0, 0], headRotationY: -1.2 }} />
-        <group position={[0.4, 0, 0]}><BlockHumanoid scale={0.95} materialProps={butterProps} poseProps={{ isWalking: phase === "walking", walkSpeed: 3.5, rotation: [0, -0.6, 0], headRotationY: phase === "walking" ? 0 : 0.4 }} /></group>
-    </group>
-  );
-};
-
 // --- MAIN SCENE ---
 export default function Scene({ currentView }) {
   const { camera, size } = useThree();
@@ -265,7 +248,6 @@ export default function Scene({ currentView }) {
           <WallOpening position={[6, 0, 0]} colorProps={butterProps} /> 
           <WallOpening position={[12, 0, 0]} colorProps={butterProps} /> 
           <mesh position={[24, 8.5 + extraWallHeight/2, 0]} castShadow receiveShadow><boxGeometry args={[18, 17 + extraWallHeight, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
-          <mesh position={[36, 8.5 + extraWallHeight/2, 0]} castShadow receiveShadow><boxGeometry args={[12, 17 + extraWallHeight, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
 
         <group position={[17, -1.6, 1]} rotation={[0, -Math.PI / 2, 0]}>
@@ -280,31 +262,31 @@ export default function Scene({ currentView }) {
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <Bench materialProps={butterProps} />
             
-            {/* --- COUPLE D: FINAL POLISH --- */}
-            {/* Moved further back (z: -0.2) toward the wall and refined poses */}
-            <group position={[2.2, 0, -0.2]} rotation={[0, -0.4, 0]}>
-               {/* Main Character: Arms separated, legs staggered for stability */}
+            {/* --- WALKER COUPLE MOVED TO THE RIGHT FOR BETTER VISIBILITY --- */}
+            <group position={[3.5, 0, -0.2]} rotation={[0, -0.5, 0]}>
+               {/* Walker Character: Humanoid legs fixed and arms cleared */}
                <BlockHumanoid 
                 scale={0.92} 
                 materialProps={butterProps} 
                 poseProps={{ 
                   walker: true, 
-                  torsoRotationX: 0.35, 
-                  // Left arm dropped lower and angled wider to avoid the right arm
-                  leftArmRotation: [-1.2, 0, -0.5], 
-                  rightArmRotation: [-1.5, 0, 0.45], 
-                  leftLegRotation: [0.3, 0, 0],   // Staggered leg 1
-                  rightLegRotation: [-0.2, 0, 0],  // Staggered leg 2
+                  torsoRotationX: 0.38, 
+                  // Left arm dropped lower than right for asymmetry and clearance
+                  leftArmRotation: [-1.0, 0, -0.5], 
+                  rightArmRotation: [-1.45, 0, 0.45], 
+                  // Anatomy fix: Functional staggered humanoid legs
+                  leftLegRotation: [0.25, 0, 0],   
+                  rightLegRotation: [-0.15, 0, 0],  
                   headRotationY: -0.2
                 }} 
                />
-               {/* Helper Character: Visibility spacing preserved */}
+               {/* Helper Character: Shifted back slightly for better silhouette against wall */}
                <BlockHumanoid 
                 scale={0.95} 
                 materialProps={butterProps} 
                 poseProps={{ 
-                  position: [-1.0, 0, 0.25], 
-                  rotation: [0, 0.5, 0], 
+                  position: [-1.1, 0, 0.3], 
+                  rotation: [0, 0.6, 0], 
                   headRotationY: -0.4,
                   leftArmRotation: [-0.7, 0, -0.3] 
                 }} 
@@ -317,7 +299,6 @@ export default function Scene({ currentView }) {
             <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
           </group>
 
-          {!isMobile && <WalkingToConversationChapter butterProps={butterProps} />}
           <WheelchairChapter butterProps={butterProps} />
         </group>
       </group>
