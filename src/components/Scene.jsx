@@ -227,12 +227,14 @@ export default function Scene({ currentView }) {
   useFrame((state, delta) => {
     const isHome = currentView === "home";
     
-    // FINAL ALIGNMENT FIX:
-    // X moved to 6.5 (Centers perfectly between the first door frame pillars)
-    // Distance (Z: -2) and Height (Y: 4.2) are exactly where you wanted them.
-    const targetPos = isHome ? (isMobile ? new THREE.Vector3(6.5, 4.2, -2) : new THREE.Vector3(-14, 3.2, 24)) : new THREE.Vector3(-24.5, 3.5, -450);
-    // LookAt focuses directly on the couple sitting inside.
-    const targetLook = isHome ? (isMobile ? new THREE.Vector3(6, 2.5, 10) : new THREE.Vector3(20, 1.2, -2)) : new THREE.Vector3(-24.5, 1.5, -1000);
+    // CROP CEILING FIX:
+    // X at 6.5 (Still clear of doorway)
+    // Y at 2.5 (Lowered to crop out the structure top)
+    // Z at -2 (Maintaining the distance you liked)
+    const targetPos = isHome ? (isMobile ? new THREE.Vector3(6.5, 2.5, -2) : new THREE.Vector3(-14, 3.2, 24)) : new THREE.Vector3(-24.5, 3.5, -450);
+    
+    // LookAt focusing lower (2.2) to prevent the camera from tilting up
+    const targetLook = isHome ? (isMobile ? new THREE.Vector3(6, 2.2, 10) : new THREE.Vector3(20, 1.2, -2)) : new THREE.Vector3(-24.5, 1.5, -1000);
     
     camera.position.lerp(targetPos, 0.04); 
     camera.lookAt(targetLook);
