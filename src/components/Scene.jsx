@@ -77,7 +77,7 @@ const GrassySassyHills = () => {
       uniform vec3 uColorTips;
       void main() {
         float ao = pow(vHeight, 0.4); 
-        vec3 color = mix(uColorRoots, uColorRoots, vHeight);
+        vec3 color = mix(uColorRoots, uColorTips, vHeight);
         gl_FragColor = vec4(color * ao, 1.0);
       }
     `,
@@ -261,76 +261,67 @@ export default function Scene({ currentView }) {
     }
   });
 
-  // Updated structure color to pastel blue and kept butter smoothness
-  const structureProps = { color: "#b0c4de", roughness: 0.9, metalness: 0.02 };
-  const benchProps = { color: "#fce4e4", roughness: 0.9, metalness: 0.02 };
-  
-  // Character colors: light blue for residents, darker blue for helpers
-  const lightBlueCharacter = { color: "#ADD8E6", roughness: 0.9, metalness: 0.02 };
-  const darkBlueCharacter = { color: "#4169E1", roughness: 0.9, metalness: 0.02 };
+  const butterProps = { color: "#fce4e4", roughness: 0.9, metalness: 0.02 };
 
   return (
     <>
-      {/* Sky adjusted for blueish look with white clouds elevated and clearly in view */}
-      <Sky distance={450000} sunPosition={[-20, 8, -100]} inclination={0.6} azimuth={0.25} turbidity={2} rayleigh={6} />
+      <Sky distance={450000} sunPosition={[-20, 8, -100]} inclination={0.6} azimuth={0.25} turbidity={8} rayleigh={6} />
       <Environment preset="sunset" />
       <fog attach="fog" args={["#f8e1ff", 10, 400]} />
       <GrassySassyHills />
       <hemisphereLight intensity={1.4} color="#ffffff" groundColor="#b066ff" />
-      {/* Increased directional light intensity for stronger character shadows */}
+      {/* Light intensity increased to improve shadows */}
       <directionalLight position={[-15, 30, 10]} intensity={1.2} castShadow />
 
       <group ref={cloudGroupRef}>
-        {/* Elevated white clouds */}
-        <Cloud position={[0, 150, -450]} speed={0.2} opacity={0.6} segments={40} bounds={[1000, 100, 50]} volume={150} color="#ffffff" />
+        <Cloud position={[0, 80, -450]} speed={0.2} opacity={0.3} segments={40} bounds={[1000, 100, 50]} volume={150} color="#ffd1dc" />
       </group>
 
       <group position={[0, 0, 0]}>
         <mesh position={[15.5, -2.1, 15.0]} castShadow receiveShadow>
-          <boxGeometry args={[20, 8.0, 30]} /><meshStandardMaterial {...structureProps} />
+          <boxGeometry args={[20, 8.0, 30]} /><meshStandardMaterial {...butterProps} />
         </mesh>
         
-        <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={structureProps} />
+        <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={butterProps} />
         
         <group position={[-16, -1.6, 0]}>
-          <mesh position={[1, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...structureProps} /></mesh>
-          <WallOpening position={[6, 0, 0]} colorProps={structureProps} />
-          <WallOpening position={[12, 0, 0]} colorProps={structureProps} />
-          <mesh position={[24, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...structureProps} /></mesh>
+          <mesh position={[1, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
+          <WallOpening position={[6, 0, 0]} colorProps={butterProps} />
+          <WallOpening position={[12, 0, 0]} colorProps={butterProps} />
+          <mesh position={[24, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
 
         <group position={[17, -1.6, 1]} rotation={[0, -Math.PI / 2, 0]}>
-          <mesh castShadow receiveShadow position={[4, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...structureProps} /></mesh>
-          <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={structureProps} />
-          <WallOpening position={[17, 0, 0]} isWindow={true} colorProps={structureProps} />
-          <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...structureProps} /></mesh>
+          <mesh castShadow receiveShadow position={[4, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
+          <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={butterProps} />
+          <WallOpening position={[17, 0, 0]} isWindow={true} colorProps={butterProps} />
+          <mesh castShadow receiveShadow position={[24, 8.5, 0]}><boxGeometry args={[8, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
 
         <group>
           {/* Bench: Positioned and turned 180 degrees */}
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
-            <Bench materialProps={benchProps} />
-            {/* Person sitting removed */}
+            <Bench materialProps={butterProps} />
+            {/* Person Sitting removed */}
           </group>
 
           <group position={[14, 1.9, 12]} rotation={[0, -Math.PI * 0.7, 0]}>
-            <BlockHumanoid scale={1} materialProps={lightBlueCharacter} poseProps={{ cane: true, leftLegRotation: [0.3, 0, 0], rightLegRotation: [-0.3, 0, 0], position: [-0.3, 0, 0]}} />
-            <BlockHumanoid scale={0.9} materialProps={lightBlueCharacter} poseProps={{ leftLegRotation: [-0.3, 0, 0], rightLegRotation: [0.3, 0, 0], position: [0.4, 0, -0.1]}} />
+            <BlockHumanoid scale={1} materialProps={butterProps} poseProps={{ cane: true, leftLegRotation: [0.3, 0, 0], rightLegRotation: [-0.3, 0, 0], position: [-0.3, 0, 0]}} />
+            <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ leftLegRotation: [-0.3, 0, 0], rightLegRotation: [0.3, 0, 0], position: [0.4, 0, -0.1]}} />
           </group>
 
           <group position={[6.0, 1.6, 11.5]} rotation={[0, Math.PI / 2, 0]}>
-            <BlockHumanoid scale={0.9} materialProps={lightBlueCharacter} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
-            <BlockHumanoid scale={0.88} materialProps={lightBlueCharacter} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
+            <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
+            <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
           </group>
 
           <group position={[14.5, 1.9, 17.5]} rotation={[0, Math.PI, 0]}>
-            <SimpleWheelchair materialProps={lightBlueCharacter} />
+            <SimpleWheelchair materialProps={butterProps} />
             <group position={[0, 0.2, 0]}>
-              <BlockHumanoid scale={0.85} materialProps={lightBlueCharacter} poseProps={{ rotation: [0, Math.PI, 0], leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], leftArmRotation: [0.7, 0, 0], rightArmRotation: [0.7, 0, 0]}} />
+              <BlockHumanoid scale={0.85} materialProps={butterProps} poseProps={{ rotation: [0, Math.PI, 0], leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], leftArmRotation: [0.7, 0, 0], rightArmRotation: [0.7, 0, 0]}} />
             </group>
             <group position={[0, 0, -0.7]}>
-              {/* Helper set to dark blue */}
-              <BlockHumanoid scale={0.95} materialProps={darkBlueCharacter} poseProps={{ leftArmRotation: [-1.1, 0, 0], rightArmRotation: [-1.1, 0, 0]}} />
+              <BlockHumanoid scale={0.95} materialProps={butterProps} poseProps={{ leftArmRotation: [-1.1, 0, 0], rightArmRotation: [-1.1, 0, 0]}} />
             </group>
           </group>
         </group>
