@@ -318,6 +318,7 @@ const WheelchairChapter = ({ butterProps }) => {
 
 const WalkingToConversationChapter = ({ butterProps }) => {
   const groupRef = useRef();
+  const candidMomentRef = useRef(); 
   const [phase, setPhase] = useState("walking");
 
   const START_Z = 4.0;
@@ -332,10 +333,17 @@ const WalkingToConversationChapter = ({ butterProps }) => {
       groupRef.current.position.z = START_Z + (END_Z - START_Z) * progress;
       if (t >= 1) setPhase("talking");
     }
+
+    if (phase === "talking" && candidMomentRef.current) {
+        // Subtle inwards turn over 2 seconds once they stop to face each other
+        const inwardsTurn = Math.min((state.clock.elapsedTime - duration) / 2, 1);
+        candidMomentRef.current.rotation.y = inwardsTurn * 0.45; // Couple angled inward
+    }
   });
 
   return (
     <group ref={groupRef} position={[7.5, 1.9, START_Z]} rotation={[0, Math.PI / 2, 0]}>
+      <group ref={candidMomentRef}>
         <BlockHumanoid 
           scale={0.95} 
           materialProps={butterProps} 
@@ -343,9 +351,9 @@ const WalkingToConversationChapter = ({ butterProps }) => {
             isWalking: phase === "walking", 
             walkSpeed: 3.5, 
             cane: true, 
-            rotation: [0, phase !== "walking" ? 0.6 : 0, 0],
+            rotation: [0, 0.6, 0], // turned to face the other humanoid
             position: [-0.3, 0, 0],
-            headRotationY: phase !== "walking" ? -0.4 : 0
+            headRotationY: -1.2 // Sweet candid gaze at the other humanoid
           }} 
         />
         <group position={[0.4, 0, 0]}>
@@ -355,11 +363,12 @@ const WalkingToConversationChapter = ({ butterProps }) => {
             poseProps={{ 
               isWalking: phase === "walking", 
               walkSpeed: 3.5,
-              rotation: [0, phase !== "walking" ? -0.6 : 0, 0],
-              headRotationY: phase !== "walking" ? 0.4 : 0
+              rotation: [0, -0.6, 0], // turned inward
+              headRotationY: phase === "walking" ? 0 : 0.4 // subtle candid look back
             }} 
           />
         </group>
+      </group>
     </group>
   );
 };
@@ -379,9 +388,9 @@ export default function Scene({ currentView }) {
     const isHome = currentView === "home";
     const LERP_SPEED = isHome ? 0.04 : 0.018; 
 
-    // --- MOBILE CAMERA: LOWER & TIGHTER ---
-    // Lowered Y to 1.1 and moved X to -30 to keep the walls in view but top out of frame
-    const mobileHomePos = new THREE.Vector3(-30, 1.1, 15); 
+    // --- ZOOMED-IN LOCKED MOBILE POSITION: Z: 10 ---
+    // Lowered Y slightly (1.1) to create stronger towering effect for fixed back wall.
+    const mobileHomePos = new THREE.Vector3(-30, 1.1, 10); 
     const desktopHomePos = new THREE.Vector3(-14, 3.2, 24);
     
     const homePos = isMobile ? mobileHomePos : desktopHomePos;
@@ -430,11 +439,16 @@ export default function Scene({ currentView }) {
           <meshStandardMaterial {...butterProps} />
         </mesh>
 
+        {/* --- FIXED: RESTORED BACK WALLS --- */}
         <group position={[-16, -1.6, 0]}>
           <mesh position={[1, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
           <WallOpening position={[6, 0, 0]} colorProps={butterProps} />
           <WallOpening position={[12, 0, 0]} colorProps={butterProps} />
           <mesh position={[24, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
+          
+          {/* Extended Back Wall section along X to fix "missing" gap when zoomed */}
+          <WallOpening position={[30, 0, 0]} colorProps={butterProps} openingW={0.1} openingH={0.1} /> {/* solid extension */}
+          <mesh position={[36, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[12, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
 
         <group position={[17, -1.6, 1]} rotation={[0, -Math.PI / 2, 0]}>
