@@ -227,11 +227,11 @@ export default function Scene({ currentView }) {
   useFrame((state, delta) => {
     const isHome = currentView === "home";
     
-    // CINEMATIC ALIGNMENT ON MOBILE:
-    // X moved from -18 to -4 (now looking straight through the main opening)
-    // Y and Z maintained to keep your preferred zoom distance and top-edge cropping
-    const targetPos = isHome ? (isMobile ? new THREE.Vector3(-4, 4.2, -2) : new THREE.Vector3(-14, 3.2, 24)) : new THREE.Vector3(-24.5, 3.5, -450);
-    const targetLook = isHome ? (isMobile ? new THREE.Vector3(12, 3.0, 10) : new THREE.Vector3(20, 1.2, -2)) : new THREE.Vector3(-24.5, 1.5, -1000);
+    // SYMMETRICAL ALIGNMENT:
+    // X moved to -1.5 (this sits perfectly between the door frame meshes to avoid clipping)
+    // Distance (Z: -2) and Height (Y: 4.2) remain exactly as you liked.
+    const targetPos = isHome ? (isMobile ? new THREE.Vector3(-1.5, 4.2, -2) : new THREE.Vector3(-14, 3.2, 24)) : new THREE.Vector3(-24.5, 3.5, -450);
+    const targetLook = isHome ? (isMobile ? new THREE.Vector3(14, 3.0, 12) : new THREE.Vector3(20, 1.2, -2)) : new THREE.Vector3(-24.5, 1.5, -1000);
     
     camera.position.lerp(targetPos, 0.04); 
     camera.lookAt(targetLook);
