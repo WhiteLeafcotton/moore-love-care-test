@@ -179,7 +179,7 @@ const WallOpening = ({ position, colorProps, width = 6, openingW = 4.8, height =
   </group>
 );
 
-// --- RESTORED CHARACTERS ---
+// --- CHARACTERS ---
 const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
   const { 
     leftLegRotation = [0, 0, 0], 
@@ -230,11 +230,9 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
 
 const SimpleWheelchair = ({ materialProps }) => (
   <group>
-    {/* Updated material for main body parts, referencing darker colorProps */}
     <mesh position={[0, 0.55, 0]} castShadow><boxGeometry args={[0.6, 0.08, 0.6]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
     <mesh position={[0, 0.9, -0.25]} rotation={[0.1, 0, 0]} castShadow><boxGeometry args={[0.55, 0.7, 0.08]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
     <group position={[0, 0.45, -0.05]}>
-      {/* Updated material for wheels, referencing same darker colorProps */}
       <mesh position={[-0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]}><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
       <mesh position={[0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]}><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
     </group>
@@ -271,8 +269,10 @@ export default function Scene({ currentView }) {
 
   const butterProps = { color: "#fce4e4", roughness: 0.9, metalness: 0.02 };
   
-  // New prop for bench and wheelchair - slightly darker pink (#fcd7d7)
-  const darkerProps = { color: "#fcd7d7", roughness: 0.9, metalness: 0.02 };
+  // Define material props for the darker pink items
+  const darkerPinkProps = { color: "#fcd7d7", roughness: 0.9, metalness: 0.02 };
+  // Define a slightly darker pink than darkerPinkProps for the bench
+  const darkerBenchProps = { color: "#f9c4c4", roughness: 0.9, metalness: 0.02 };
 
   return (
     <>
@@ -311,9 +311,9 @@ export default function Scene({ currentView }) {
 
         {/* RESTORED COMMUNITY PLACEMENT */}
         <group>
-          {/* Sitting on Bench - Updated with darker materialProps */}
+          {/* Sitting on Bench - applying the slightly darker bench material */}
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
-            <Bench materialProps={darkerProps} />
+            <Bench materialProps={darkerBenchProps} />
           </group>
 
           {/* Walking Pair */}
@@ -328,7 +328,7 @@ export default function Scene({ currentView }) {
             <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
           </group>
 
-          {/* Wheelchair Group - wheelchair itself now is a shade darker pink */}
+          {/* Wheelchair Group - using the dark pink material established in SimpleWheelchair */}
           <group position={[14.5, 1.9, 17.5]} rotation={[0, Math.PI, 0]}>
             <SimpleWheelchair materialProps={butterProps} />
             <group position={[0, 0.2, 0]}>
