@@ -407,41 +407,16 @@ export default function Scene({ currentView }) {
         </group>
 
         <group>
-          {/* SITTING COUPLE - ONLY ONES ON THE BENCH */}
+          {/* SITTING AREA - COUPLE REMOVED FROM BENCH GROUP */}
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <Bench materialProps={butterProps} />
-            <group position={[0, 0, -0.2]} rotation={[0, 0, 0]}>
-               <BlockHumanoid 
-                scale={0.84} 
-                materialProps={butterProps} 
-                poseProps={{ 
-                  position: [0.5, 0, 0],
-                  rotation: [0, -0.5, 0],
-                  leftLegRotation: [Math.PI / 2, 0, 0],
-                  rightLegRotation: [Math.PI / 2, 0, 0],  
-                  headRotationY: -0.2
-                }} 
-               />
-               <BlockHumanoid 
-                isHelper
-                scale={0.95} 
-                materialProps={butterProps} 
-                poseProps={{ 
-                  position: [-0.4, 0, 0],
-                  rotation: [0, 0.65, 0], 
-                  headRotationY: -0.4,
-                  leftArmRotation: [-0.8, 0, -0.25],
-                  leftLegRotation: [Math.PI / 2, 0, 0],
-                  rightLegRotation: [Math.PI / 2, 0, 0]
-                }} 
-               />
-            </group>
           </group>
 
           <WalkingToConversationChapter butterProps={butterProps} />
 
-          {/* THE ONLY WALKER COUPLE (BY THE STAIRS) */}
-          <group position={[17.5, 1.9, 3.8]} rotation={[0, -Math.PI / 2, 0]}>
+          {/* RESTORED ANIMATED WALKER COUPLE (BY THE STAIRS) - REMAINING */}
+          <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
+            <group position={[3.5, 0, -0.2]} rotation={[0, -0.5, 0]}>
                <BlockHumanoid 
                 scale={0.84} 
                 materialProps={butterProps} 
@@ -467,6 +442,7 @@ export default function Scene({ currentView }) {
                   leftArmRotation: [-0.8, 0, -0.25] 
                 }} 
                />
+            </group>
           </group>
 
           <group position={[6.0, 1.6, 10.0]} rotation={[0, Math.PI / 2, 0]}>
