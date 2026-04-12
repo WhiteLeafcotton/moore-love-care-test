@@ -227,11 +227,10 @@ export default function Scene({ currentView }) {
   useFrame((state, delta) => {
     const isHome = currentView === "home";
     
-    // MOVED TO THE SECOND DOORWAY (THE CLOSER ONE):
-    // X moved from -30 to -18 (centering camera in the second doorway)
-    // Z is still -2 (pushed forward)
-    // Y is 4.2 (cropping the top edge perfectly)
-    const targetPos = isHome ? (isMobile ? new THREE.Vector3(-18, 4.2, -2) : new THREE.Vector3(-14, 3.2, 24)) : new THREE.Vector3(-24.5, 3.5, -450);
+    // CINEMATIC ALIGNMENT ON MOBILE:
+    // X moved from -18 to -4 (now looking straight through the main opening)
+    // Y and Z maintained to keep your preferred zoom distance and top-edge cropping
+    const targetPos = isHome ? (isMobile ? new THREE.Vector3(-4, 4.2, -2) : new THREE.Vector3(-14, 3.2, 24)) : new THREE.Vector3(-24.5, 3.5, -450);
     const targetLook = isHome ? (isMobile ? new THREE.Vector3(12, 3.0, 10) : new THREE.Vector3(20, 1.2, -2)) : new THREE.Vector3(-24.5, 1.5, -1000);
     
     camera.position.lerp(targetPos, 0.04); 
@@ -252,16 +251,14 @@ export default function Scene({ currentView }) {
         <mesh position={[15.5, -2.1, 15.0]} castShadow receiveShadow><boxGeometry args={[20, 8.0, 30]} /><meshStandardMaterial {...butterProps} /></mesh>
         <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={butterProps} />
 
-        {/* EXTERIOR WALLS */}
         <group position={[-16, -1.6, 0]}>
           <mesh position={[1, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
-          <WallOpening position={[6, 0, 0]} colorProps={butterProps} /> {/* FIRST DOORWAY */}
-          <WallOpening position={[12, 0, 0]} colorProps={butterProps} /> {/* SECOND DOORWAY - CAMERA IS HERE NOW */}
+          <WallOpening position={[6, 0, 0]} colorProps={butterProps} /> 
+          <WallOpening position={[12, 0, 0]} colorProps={butterProps} /> 
           <mesh position={[24, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
           <mesh position={[36, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[12, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
 
-        {/* SIDE WALL */}
         <group position={[17, -1.6, 1]} rotation={[0, -Math.PI / 2, 0]}>
           <mesh castShadow receiveShadow position={[0.5, 8.5, 0]}><boxGeometry args={[1, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
           <mesh castShadow receiveShadow position={[4.5, 8.5, 0]}><boxGeometry args={[7, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
