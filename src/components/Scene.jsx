@@ -190,14 +190,15 @@ const WallOpening = ({ position, colorProps, width = 6, openingW = 4.8, height =
 const WheelchairChapter = ({ butterProps }) => {
   const groupRef = useRef(); const wheelRef = useRef(); const [isMoving, setIsMoving] = useState(true);
   useFrame((state) => {
-    const t = Math.min(state.clock.elapsedTime / 12, 1);
+    // UPDATED: Start at 12.5 (Screen edge) and move to 6.5
+    const t = Math.min(state.clock.elapsedTime / 14, 1);
     const progress = THREE.MathUtils.smoothstep(t, 0, 1);
-    if (groupRef.current) groupRef.current.position.z = 22 + (12.5 - 22) * progress;
+    if (groupRef.current) groupRef.current.position.z = 12.5 + (6.5 - 12.5) * progress;
     if (t < 1 && wheelRef.current) wheelRef.current.rotation.x = state.clock.elapsedTime * 2.5;
     else if (isMoving) setIsMoving(false);
   });
   return (
-    <group ref={groupRef} position={[14.5, 1.9, 22]} rotation={[0, Math.PI, 0]}>
+    <group ref={groupRef} position={[14.5, 1.9, 12.5]} rotation={[0, Math.PI, 0]}>
         <mesh position={[0, 0.55, 0]} castShadow><boxGeometry args={[0.6, 0.08, 0.6]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
         <mesh position={[0, 0.9, -0.25]} rotation={[0.1, 0, 0]} castShadow><boxGeometry args={[0.55, 0.7, 0.08]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
         <group position={[0, 0.45, -0.05]} ref={wheelRef}>
@@ -262,33 +263,31 @@ export default function Scene({ currentView }) {
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <Bench materialProps={butterProps} />
             
-            {/* --- WALKER COUPLE MOVED TO THE RIGHT FOR BETTER VISIBILITY --- */}
+            {/* --- COUPLE D: LOCKED SPOT & WHOLESOME SCALE --- */}
             <group position={[3.5, 0, -0.2]} rotation={[0, -0.5, 0]}>
-               {/* Walker Character: Humanoid legs fixed and arms cleared */}
+               {/* Elder Character: Smaller scale, corrected upright anatomy */}
                <BlockHumanoid 
-                scale={0.92} 
+                scale={0.84} 
                 materialProps={butterProps} 
                 poseProps={{ 
                   walker: true, 
-                  torsoRotationX: 0.38, 
-                  // Left arm dropped lower than right for asymmetry and clearance
-                  leftArmRotation: [-1.0, 0, -0.5], 
-                  rightArmRotation: [-1.45, 0, 0.45], 
-                  // Anatomy fix: Functional staggered humanoid legs
-                  leftLegRotation: [0.25, 0, 0],   
-                  rightLegRotation: [-0.15, 0, 0],  
+                  torsoRotationX: 0, // Hunch removed for clean anatomy
+                  leftArmRotation: [-1.2, 0, -0.5], 
+                  rightArmRotation: [-1.5, 0, 0.45], 
+                  leftLegRotation: [0.15, 0, 0],   
+                  rightLegRotation: [-0.1, 0, 0],  
                   headRotationY: -0.2
                 }} 
                />
-               {/* Helper Character: Shifted back slightly for better silhouette against wall */}
+               {/* Helper Character: Helping the elder use her walker */}
                <BlockHumanoid 
                 scale={0.95} 
                 materialProps={butterProps} 
                 poseProps={{ 
-                  position: [-1.1, 0, 0.3], 
-                  rotation: [0, 0.6, 0], 
+                  position: [-1.0, 0, 0.35], 
+                  rotation: [0, 0.65, 0], 
                   headRotationY: -0.4,
-                  leftArmRotation: [-0.7, 0, -0.3] 
+                  leftArmRotation: [-0.8, 0, -0.3] 
                 }} 
                />
             </group>
