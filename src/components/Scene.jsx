@@ -25,92 +25,106 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
-// --- CHARACTERS ---
-const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
+// --- UPGRADED SLEEK CHARACTER ---
+const SleekHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
   const { 
     leftLegRotation = [0, 0, 0], 
     rightLegRotation = [0, 0, 0], 
-    leftArmRotation = [0.2, 0, -0.1], 
-    rightArmRotation = [0.2, 0, 0.1], 
+    leftArmRotation = [0.1, 0, -0.05], 
+    rightArmRotation = [0.1, 0, 0.05], 
     position = [0,0,0], 
     rotation = [0,0,0], 
     cane = false,
     isLeaning = false,
     isWalking = false,
     walkSpeed = 8,
-    torsoRotationZ = 0,
-    torsoRotationX = 0,
     headRotationY = 0
   } = poseProps;
   
+  const groupRef = useRef();
   const torsoRef = useRef();
-  const leftLegRef = useRef();
-  const rightLegRef = useRef();
+  const headRef = useRef();
   const leftArmRef = useRef();
   const rightArmRef = useRef();
-  const headRef = useRef();
-
-  const limbGeo = useMemo(() => {
-    const pts = [new THREE.Vector2(0, 0), new THREE.Vector2(0.08, 0.05), new THREE.Vector2(0.08, 0.75), new THREE.Vector2(0, 0.8)];
-    const g = new THREE.LatheGeometry(pts, 32);
-    g.translate(0, -0.8, 0); 
-    return g;
-  }, []);
-
-  const torsoGeo = useMemo(() => {
-    const pts = [new THREE.Vector2(0, 0), new THREE.Vector2(0.18, 0.1), new THREE.Vector2(0.18, 0.9), new THREE.Vector2(0, 1.0)];
-    return new THREE.LatheGeometry(pts, 32);
-  }, []);
+  const leftLegRef = useRef();
+  const rightLegRef = useRef();
 
   useFrame((state) => {
     const t = state.clock.elapsedTime;
     
+    // Subtle "Life" animation (Breathing/Swaying)
     if (torsoRef.current) {
-        torsoRef.current.rotation.z = torsoRotationZ;
-        torsoRef.current.rotation.x = torsoRotationX;
-        if (isLeaning) {
-          torsoRef.current.rotation.z += Math.sin(t * 0.5) * 0.15;
-        }
+        torsoRef.current.rotation.x = Math.sin(t * 0.5) * 0.02; 
+        if (isLeaning) torsoRef.current.rotation.z = Math.sin(t * 0.4) * 0.1;
     }
-    if (headRef.current) headRef.current.rotation.y = headRotationY;
+    
+    if (headRef.current) {
+        headRef.current.rotation.y = headRotationY + Math.sin(t * 0.3) * 0.05;
+    }
 
     if (isWalking) {
-      const swing = Math.sin(t * walkSpeed) * 0.4;
+      const swing = Math.sin(t * walkSpeed) * 0.45;
       if (leftLegRef.current) leftLegRef.current.rotation.x = swing;
       if (rightLegRef.current) rightLegRef.current.rotation.x = -swing;
-      if (leftArmRef.current) leftArmRef.current.rotation.x = -swing * 0.5;
-      if (rightArmRef.current) rightArmRef.current.rotation.x = swing * 0.5;
+      if (leftArmRef.current) leftArmRef.current.rotation.x = -swing * 0.6;
+      if (rightArmRef.current) rightArmRef.current.rotation.x = swing * 0.6;
     } else {
-        if (leftLegRef.current) leftLegRef.current.rotation.x = leftLegRotation[0];
-        if (rightLegRef.current) rightLegRef.current.rotation.x = rightLegRotation[0];
-        if (leftArmRef.current) leftArmRef.current.rotation.x = leftArmRotation[0];
-        if (rightArmRef.current) rightArmRef.current.rotation.x = rightArmRotation[0];
+      if (leftLegRef.current) leftLegRef.current.rotation.x = leftLegRotation[0];
+      if (rightLegRef.current) rightLegRef.current.rotation.x = rightLegRotation[0];
+      if (leftArmRef.current) leftArmRef.current.rotation.x = leftArmRotation[0];
+      if (rightArmRef.current) rightArmRef.current.rotation.x = rightArmRotation[0];
     }
   });
 
   return (
-    <group scale={scale} position={position} rotation={rotation}>
-      <group ref={torsoRef}>
-        <mesh ref={headRef} position={[0, 1.4, 0]} castShadow><sphereGeometry args={[0.22, 32, 32]} /><meshStandardMaterial {...materialProps} /></mesh>
-        <mesh position={[0, 0.3, 0]} castShadow><primitive object={torsoGeo} /><meshStandardMaterial {...materialProps} /></mesh>
-        <group position={[0, 1.2, 0]}>
-          <group ref={leftArmRef} position={[-0.22, 0, 0]} rotation={leftArmRotation}>
-            <mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
-          </group>
-          <group ref={rightArmRef} position={[0.22, 0, 0]} rotation={rightArmRotation}>
-            <mesh castShadow>
-                <primitive object={limbGeo} /><meshStandardMaterial {...materialProps} />
-                {cane && <mesh position={[0, -0.7, 0.1]}><cylinderGeometry args={[0.015, 0.015, 1.1]} /><meshStandardMaterial color="#fcd7d7" /></mesh>}
+    <group scale={scale} position={position} rotation={rotation} ref={groupRef}>
+      {/* Tapered Torso */}
+      <mesh ref={torsoRef} position={[0, 0.85, 0]} castShadow>
+        <cylinderGeometry args={[0.22, 0.14, 0.9, 32]} />
+        <meshStandardMaterial {...materialProps} />
+      </mesh>
+
+      {/* Refined Ovoid Head */}
+      <mesh ref={headRef} position={[0, 1.45, 0]} castShadow>
+        <sphereGeometry args={[0.18, 32, 32]} />
+        <meshStandardMaterial {...materialProps} />
+      </mesh>
+
+      {/* Sleek Arms */}
+      <group position={[0, 1.25, 0]}>
+        <group ref={leftArmRef} position={[-0.26, 0, 0]} rotation={leftArmRotation}>
+          <mesh position={[0, -0.35, 0]} castShadow>
+            <capsuleGeometry args={[0.06, 0.6, 4, 16]} />
+            <meshStandardMaterial {...materialProps} />
+          </mesh>
+        </group>
+        <group ref={rightArmRef} position={[0.26, 0, 0]} rotation={rightArmRotation}>
+          <mesh position={[0, -0.35, 0]} castShadow>
+            <capsuleGeometry args={[0.06, 0.6, 4, 16]} />
+            <meshStandardMaterial {...materialProps} />
+          </mesh>
+          {cane && (
+            <mesh position={[0.05, -0.65, 0.15]} rotation={[0.1, 0, 0]}>
+              <cylinderGeometry args={[0.012, 0.012, 1.1]} />
+              <meshStandardMaterial color="#fcd7d7" />
             </mesh>
-          </group>
+          )}
         </group>
       </group>
-      <group position={[0, 0.4, 0]}>
+
+      {/* Sleek Legs */}
+      <group position={[0, 0.45, 0]}>
         <group ref={leftLegRef} position={[-0.12, 0, 0]} rotation={leftLegRotation}>
-          <mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
+          <mesh position={[0, -0.4, 0]} castShadow>
+            <capsuleGeometry args={[0.08, 0.7, 4, 16]} />
+            <meshStandardMaterial {...materialProps} />
+          </mesh>
         </group>
         <group ref={rightLegRef} position={[0.12, 0, 0]} rotation={rightLegRotation}>
-          <mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh>
+          <mesh position={[0, -0.4, 0]} castShadow>
+            <capsuleGeometry args={[0.08, 0.7, 4, 16]} />
+            <meshStandardMaterial {...materialProps} />
+          </mesh>
         </group>
       </group>
     </group>
@@ -303,10 +317,10 @@ const WheelchairChapter = ({ butterProps }) => {
           <mesh position={[0.35, 0, 0]} rotation={[0, Math.PI / 2, 0]}><torusGeometry args={[0.4, 0.04, 16, 50]} /><meshStandardMaterial color="#fcd7d7" /></mesh>
         </group>
       <group position={[0, 0.2, 0]}>
-        <BlockHumanoid scale={0.85} materialProps={butterProps} poseProps={{ rotation: [0, Math.PI, 0], leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], leftArmRotation: [0.7, 0, 0], rightArmRotation: [0.7, 0, 0]}} />
+        <SleekHumanoid scale={0.85} materialProps={butterProps} poseProps={{ rotation: [0, Math.PI, 0], leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], leftArmRotation: [0.7, 0, 0], rightArmRotation: [0.7, 0, 0]}} />
       </group>
       <group position={[0, 0, -0.75]}>
-        <BlockHumanoid scale={0.95} materialProps={butterProps} poseProps={{ isWalking: isMoving, walkSpeed: 1.2, leftArmRotation: [-1.2, 0, 0.1], rightArmRotation: [-1.2, 0, -0.1] }} />
+        <SleekHumanoid scale={0.95} materialProps={butterProps} poseProps={{ isWalking: isMoving, walkSpeed: 1.2, leftArmRotation: [-1.2, 0, 0.1], rightArmRotation: [-1.2, 0, -0.1] }} />
       </group>
     </group>
   );
@@ -331,7 +345,7 @@ const WalkingToConversationChapter = ({ butterProps }) => {
 
   return (
     <group ref={groupRef} position={[7.5, 1.9, START_Z]} rotation={[0, Math.PI / 2, 0]}>
-        <BlockHumanoid 
+        <SleekHumanoid 
           scale={0.95} 
           materialProps={butterProps} 
           poseProps={{ 
@@ -344,7 +358,7 @@ const WalkingToConversationChapter = ({ butterProps }) => {
           }} 
         />
         <group position={[0.4, 0, 0]}>
-          <BlockHumanoid 
+          <SleekHumanoid 
             scale={0.95} 
             materialProps={butterProps} 
             poseProps={{ 
@@ -431,8 +445,8 @@ export default function Scene({ currentView }) {
           </group>
 
           <group position={[6.0, 1.6, 10.0]} rotation={[0, Math.PI / 2, 0]}>
-            <BlockHumanoid scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
-            <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
+            <SleekHumanoid scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0]}} />
+            <SleekHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
           </group>
 
           <WalkingToConversationChapter butterProps={butterProps} />
