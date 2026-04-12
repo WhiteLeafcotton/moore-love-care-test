@@ -92,7 +92,7 @@ const BlockHumanoid = ({ scale = 1, materialProps, poseProps = {} }) => {
         <mesh position={[0, 0.3, 0]} castShadow><primitive object={torsoGeo} /><meshStandardMaterial {...materialProps} /></mesh>
         <group position={[0, 1.2, 0]}>
           <group ref={leftArmRef} position={[-0.22, 0, 0]} rotation={leftArmRotation}><mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh></group>
-          <group ref={rightArmRef} position={0.22, 0, 0]} rotation={rightArmRotation}>
+          <group ref={rightArmRef} position={[0.22, 0, 0]} rotation={rightArmRotation}>
             <mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} />
               {cane && <mesh position={[0, -0.7, 0.1]}><cylinderGeometry args={[0.015, 0.015, 1.1]} /><meshStandardMaterial color="#fcd7d7" /></mesh>}
             </mesh>
@@ -279,16 +279,16 @@ export default function Scene({ currentView }) {
         <group>
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <Bench materialProps={butterProps} />
-            {/* Couple D: Locked on right side, moved closer to the wall (Verse), fixed arm grip */}
-            <group position={[2.5, 0, -0.6]} rotation={[0, -0.4, 0]}>
+            {/* Couple D: Moved back to original right-hand side placement */}
+            <group position={[2.2, 0, 0.8]} rotation={[0, -0.4, 0]}>
                <BlockHumanoid 
                 scale={0.92} 
                 materialProps={butterProps} 
                 poseProps={{ 
                   walker: true, 
-                  torsoRotationX: 0.25, 
-                  leftArmRotation: [0.8, 0, 0.2], 
-                  rightArmRotation: [0.8, 0, -0.2],
+                  torsoRotationX: 0.35, 
+                  leftArmRotation: [1.1, 0, 0.4], // Arms forward to grip handles
+                  rightArmRotation: [1.1, 0, -0.4], 
                   headRotationY: -0.2
                 }} 
                />
