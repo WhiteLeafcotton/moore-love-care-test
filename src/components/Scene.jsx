@@ -227,12 +227,13 @@ export default function Scene({ currentView }) {
   useFrame((state, delta) => {
     const isHome = currentView === "home";
     
-    // WINDOW INCLUSION + BACKED UP JUST A BIT:
-    // Mobile Z at 28: Pushes the camera back slightly from the original 24 to include windows.
-    // Mobile X at -12: Keeps the corner centered while accommodating the wider FOV.
-    const targetPos = isHome ? (isMobile ? new THREE.Vector3(-12, 3.5, 28) : new THREE.Vector3(-14, 3.2, 24)) : new THREE.Vector3(-24.5, 3.5, -450);
+    // BACKED UP PERSPECTIVE:
+    // Increased Z to 28 for both to pull back and show window frames
+    // Shifted X to -13 to maintain the corner balance at this wider distance
+    const targetPos = isHome ? (isMobile ? new THREE.Vector3(-13, 3.5, 28) : new THREE.Vector3(-13, 3.2, 28)) : new THREE.Vector3(-24.5, 3.5, -450);
     
-    const targetLook = isHome ? (isMobile ? new THREE.Vector3(20, 1.2, -2) : new THREE.Vector3(20, 1.2, -2)) : new THREE.Vector3(-24.5, 1.5, -1000);
+    // LookAt remains focused on the social courtyard
+    const targetLook = isHome ? new THREE.Vector3(20, 1.2, -2) : new THREE.Vector3(-24.5, 1.5, -1000);
     
     camera.position.lerp(targetPos, 0.05); 
     camera.lookAt(targetLook);
