@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400;1,700&display=swap');
 
 * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
 
@@ -20,20 +20,20 @@ body, html, #root, .app-viewport {
   flex-direction: column;
   pointer-events: none;
   transition: opacity 1.2s ease;
-  padding: 50px 80px;
+  padding: 60px 80px; /* RESTORED PADDING */
   
-  /* WEB FROST: LIGHT LEFT-TO-RIGHT FADE AS REQUESTED */
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  /* WEB FROST: LIGHT LEFT-TO-RIGHT FADE */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   background: linear-gradient(
     to right, 
-    rgba(247, 236, 232, 0.4) 0%, 
+    rgba(247, 236, 232, 0.45) 0%, 
     rgba(247, 236, 232, 0.1) 40%, 
     transparent 100%
   );
 }
 
-/* HEADER STYLES */
+/* HEADER */
 .main-header {
   display: flex;
   justify-content: space-between;
@@ -42,19 +42,14 @@ body, html, #root, .app-viewport {
   pointer-events: auto;
 }
 
-.logo { 
-  font-weight: 400; 
-  font-size: 11px; 
-  letter-spacing: 0.4em; 
-  text-transform: uppercase; 
-  opacity: 0.8;
-}
+.logo { font-size: 11px; letter-spacing: 0.4em; text-transform: uppercase; opacity: 0.8; }
+.nav-link { font-size: 9px; letter-spacing: 3px; opacity: 0.5; font-family: sans-serif; cursor: pointer; }
 
 .inquiry-button {
   background: none;
-  border: 0.5px solid rgba(0,0,0,0.3);
+  border: 0.5px solid rgba(0,0,0,0.2);
   border-radius: 100px;
-  padding: 12px 35px;
+  padding: 12px 30px;
   font-size: 9px;
   letter-spacing: 3px;
   text-transform: uppercase;
@@ -62,19 +57,19 @@ body, html, #root, .app-viewport {
   cursor: pointer;
 }
 
-/* HERO CONTAINER & TYPOGRAPHY */
+/* TITLE & HERO */
 .hero-container {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
   justify-content: center; 
-  align-items: flex-start; /* LEFT ALIGNED LIKE REFERENCE */
+  align-items: flex-start; /* LEFT ALIGNED */
   text-align: left;
 }
 
 .brand-subtitle {
-  font-size: 0.75rem;
-  letter-spacing: 0.8em;
+  font-size: 0.7rem;
+  letter-spacing: 0.7em;
   text-transform: uppercase;
   font-family: sans-serif;
   opacity: 0.4;
@@ -82,12 +77,13 @@ body, html, #root, .app-viewport {
 }
 
 .brand-title {
-  font-size: clamp(4rem, 12vw, 11rem);
-  font-weight: 400;
-  color: #21162e; /* DEEP PURPLE FROM REFERENCE */
+  font-size: clamp(4rem, 14vw, 12rem); /* MASSIVE SCALE */
+  font-weight: 700;
+  font-style: italic;
+  color: #21162e; /* DEEP PURPLE */
   margin: 0;
-  line-height: 0.85;
-  letter-spacing: -0.04em;
+  line-height: 0.82;
+  letter-spacing: -0.05em;
 }
 
 .explore-button {
@@ -99,12 +95,12 @@ body, html, #root, .app-viewport {
   padding: 18px 45px;
   border-radius: 100px;
   text-transform: uppercase;
-  letter-spacing: 3px;
+  letter-spacing: 4px;
   font-size: 0.65rem;
   cursor: pointer;
 }
 
-/* FOOTER STYLES */
+/* FOOTER */
 .main-footer {
   display: flex;
   justify-content: space-between;
@@ -116,39 +112,35 @@ body, html, #root, .app-viewport {
   opacity: 0.4;
 }
 
-.social-links {
-  display: flex;
-  gap: 20px;
-  pointer-events: auto;
-}
-
-.social-links span { cursor: pointer; font-weight: bold; }
-
+.social-links { display: flex; gap: 20px; pointer-events: auto; font-weight: bold; }
+.social-links span { cursor: pointer; }
 .footer-center { flex-grow: 1; text-align: center; }
-
 .footer-right { text-align: right; line-height: 1.8; }
 
-/* MOBILE REFINEMENTS */
+/* MOBILE: TIGHT & HIGH */
 @media (max-width: 768px) {
   .ui-overlay {
-    padding: 30px 25px;
+    padding: 40px 25px;
+    /* ULTRA LIGHT FROST */
     background: linear-gradient(to bottom, rgba(247, 236, 232, 0.2) 0%, transparent 100%);
   }
   
+  .header-nav { display: none; }
+  
   .hero-container {
-    padding-top: 40px;
+    justify-content: flex-start; 
+    padding-top: 50px;
   }
   
   .brand-title {
-    font-size: 4.5rem !important;
+    font-size: 4.8rem !important;
     line-height: 0.8 !important;
   }
   
   .main-footer {
     flex-direction: column;
     align-items: flex-start;
-    gap: 20px;
+    gap: 15px;
   }
-  
   .footer-center, .footer-right { text-align: left; }
 }

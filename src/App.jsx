@@ -11,17 +11,20 @@ export default function App() {
     <div className="app-viewport">
       <div className={`ui-overlay ${!isHome ? 'fade-out' : ''}`}>
         
-        {/* ORIGINAL PREMIUM HEADER */}
+        {/* HEADER: Nav Link + Business Name + Button */}
         <header className="main-header">
           <div className="logo">MOORE LOVE & CARE</div>
+          <nav className="header-nav">
+            <span className="nav-link">THE SANCTUARY</span>
+          </nav>
           <button className="inquiry-button">INQUIRY</button>
         </header>
 
-        {/* ORIGINAL HERO AREA */}
+        {/* HERO: Big, Left-Aligned, 3-Line Stack */}
         <div className="hero-container">
           <div className="brand-subtitle">THE SOLARIUM SANCTUARY</div>
           <h1 className="brand-title">
-            Moore Love <br /> & Care.
+            Moore <br /> Love <br /> & Care.
           </h1>
           <button 
             className="explore-button" 
@@ -31,7 +34,7 @@ export default function App() {
           </button>
         </div>
 
-        {/* ORIGINAL PREMIUM FOOTER */}
+        {/* FOOTER: Social Icons + Meta + Legal */}
         <footer className="main-footer">
           <div className="footer-left">
             <div className="social-links">
