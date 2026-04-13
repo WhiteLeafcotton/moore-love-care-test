@@ -1,48 +1,86 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,300&display=swap');
 
 :root {
-  --unseen-pink: #e5d9d3;
   --text-main: #1a1a1a;
+  --bg-color: #f7ece8;
 }
 
-body, html, #root {
+/* RESET */
+* { box-sizing: border-box; }
+
+html, body, #root, .main-container {
   margin: 0;
   padding: 0;
   width: 100%;
-  height: 100%;
+  height: 100dvh; /* Use dvh to stop mobile white bars */
+  background-color: var(--bg-color);
   overflow: hidden;
   font-family: 'Playfair Display', serif;
 }
 
+/* UI OVERLAY BASE */
 .ui-overlay {
-  position: absolute;
-  top: 45%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
+  position: fixed;
+  inset: 0;
   z-index: 100;
-  width: 90%;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+  transition: opacity 1.2s ease;
+  padding: 50px 80px; /* Desktop Padding */
 }
 
+/* HERO CONTENT ALIGNMENT */
+.hero-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* WEB: CENTERED */
+  align-items: center;    /* WEB: CENTERED */
+  text-align: center;      /* WEB: CENTERED */
+}
+
+/* --- MOBILE OVERRIDES (TOP LEFT) --- */
+@media (max-width: 768px) {
+  .ui-overlay {
+    padding: calc(env(safe-area-inset-top) + 20px) 30px;
+  }
+
+  .hero-content {
+    justify-content: flex-start; /* MOBILE: TOP */
+    align-items: flex-start;    /* MOBILE: LEFT */
+    text-align: left;           /* MOBILE: LEFT */
+    padding-top: 80px;          /* Adjust for header space */
+  }
+
+  .brand-title {
+    font-size: 3.5rem !important;
+    line-height: 0.9 !important;
+  }
+}
+
+/* TYPOGRAPHY */
 .brand-title {
   font-size: clamp(3rem, 12vw, 8rem);
-  font-weight: 300; 
+  font-weight: 300;
   line-height: 0.95;
   color: var(--text-main);
-  font-style: italic; 
+  font-style: italic;
+  margin: 0;
 }
 
 .brand-subtitle {
   font-size: 0.75rem;
   letter-spacing: 0.6em;
-  margin-top: 1.5rem;
-  margin-bottom: 3rem;
   text-transform: uppercase;
-  font-family: sans-serif; 
+  font-family: sans-serif;
   opacity: 0.7;
+  margin-bottom: 1rem;
 }
 
+/* BUTTONS */
 .explore-button {
+  pointer-events: auto;
   background: white;
   border: none;
   color: var(--text-main);
@@ -52,98 +90,21 @@ body, html, #root {
   text-transform: uppercase;
   cursor: pointer;
   border-radius: 50px;
-  font-weight: 700;
+  margin-top: 30px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.05);
 }
 
-/* 🌊 ENABLE SCROLL ONLY WHEN SUBMERGED */
-body.submerged {
-  overflow-y: scroll;
-  height: 300vh;
-}
-
-/* 🌊 FADE OUT TOP UI */
-.ui-overlay.fade-out {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 1.2s ease;
-}
-
-/* 🌊 UNDERWATER PAGE BASE */
-.underwater-page {
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 1.5s ease;
-}
-
-.underwater-page.active {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/* 🌊 LUXURY WATER ATMOSPHERE */
-.underwater-page::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    circle at 50% 30%,
-    rgba(11, 42, 58, 0.7),
-    rgba(2, 8, 12, 0.95)
-  );
-  backdrop-filter: blur(8px);
-  z-index: -2;
-}
-
-/* 🌊 SOFT LIGHT RAYS */
-.underwater-page::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    120deg,
-    rgba(255,255,255,0.05) 0%,
-    transparent 40%
-  );
-  animation: lightShift 8s ease-in-out infinite alternate;
-  z-index: -1;
-}
-
-@keyframes lightShift {
-  from { transform: translateY(-20px); }
-  to { transform: translateY(20px); }
-}
-
-/* 🌊 DEPTH LAYERS */
-.depth-layer {
-  position: absolute;
+.site-header, .site-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   width: 100%;
-  text-align: center;
-  color: #e8f6ff;
-  padding: 0 20px;
-  transition: all 0.8s ease;
-  animation: floatSoft 6s ease-in-out infinite;
 }
 
-.depth-layer.hero { top: 25%; }
-.depth-layer.hero h1 { font-size: clamp(3rem, 10vw, 7rem); font-style: italic; font-weight: 300; }
-.depth-layer.mid { top: 70%; }
-.depth-layer.mid h2 { font-size: 2rem; letter-spacing: 0.1em; }
-.depth-layer.deep { top: 120%; }
-.depth-layer.deep h2 { font-size: 2.2rem; }
+.inquiry-btn { pointer-events: auto; background: transparent; border: 1px solid rgba(0,0,0,0.1); border-radius: 100px; padding: 10px 25px; font-size: 9px; text-transform: uppercase; }
 
-.depth-layer p {
-  max-width: 500px;
-  margin: 20px auto;
-  line-height: 1.6;
-  opacity: 0.8;
-}
-
-@keyframes floatSoft {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(12px); }
-  100% { transform: translateY(0px); }
-}
+/* UNDERWATER PAGE */
+.underwater-page { position: fixed; inset: 0; z-index: 50; opacity: 0; pointer-events: none; transition: 1.5s ease; background: radial-gradient(circle at 50% 30%, rgba(11, 42, 58, 0.7), rgba(2, 8, 12, 0.95)); backdrop-filter: blur(8px); }
+.underwater-page.active { opacity: 1; pointer-events: auto; }
+.depth-layer { position: absolute; top: 25%; width: 100%; text-align: center; color: white; }
+.return-btn { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); padding: 14px 40px; background: rgba(255,255,255,0.1); border: 1px solid white; color: white; border-radius: 50px; cursor: pointer; }
