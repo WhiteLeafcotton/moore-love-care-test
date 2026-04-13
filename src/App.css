@@ -1,6 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,300&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,300;1,400&display=swap');
 
-* { box-sizing: border-box; }
+* { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
 
 body, html, #root, .app-viewport {
   margin: 0;
@@ -20,21 +20,31 @@ body, html, #root, .app-viewport {
   flex-direction: column;
   pointer-events: none;
   transition: opacity 1.2s ease;
-  padding: 60px 80px;
+  padding: 50px 80px;
   
-  /* WEB FROST: Elegant dual-fade */
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  /* WEB FROST: Restored premium depth */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   background: linear-gradient(
     to bottom, 
-    rgba(247, 236, 232, 0.4) 0%, 
-    transparent 25%, 
-    transparent 75%, 
-    rgba(247, 236, 232, 0.4) 100%
+    rgba(247, 236, 232, 0.45) 0%, 
+    transparent 30%, 
+    transparent 70%, 
+    rgba(247, 236, 232, 0.45) 100%
   );
 }
 
-/* DESKTOP: CENTERED */
+/* BIG JAGUAR TITLE STYLE */
+.brand-title {
+  font-size: clamp(4rem, 15vw, 11rem); /* Massive, high-end scale */
+  font-weight: 300;
+  font-style: italic;
+  color: #1a1a1a;
+  margin: 0;
+  line-height: 0.85; /* Tightened like the Jaguar font example */
+  letter-spacing: -0.02em;
+}
+
 .hero-container {
   flex-grow: 1;
   display: flex;
@@ -44,20 +54,20 @@ body, html, #root, .app-viewport {
   text-align: center;
 }
 
-/* MOBILE OVERRIDES */
+/* MOBILE: TAILORED HIGH-END ALIGNMENT */
 @media (max-width: 768px) {
   .ui-overlay {
-    padding: calc(env(safe-area-inset-top) + 20px) 30px;
+    padding: calc(env(safe-area-inset-top) + 20px) 25px;
     
-    /* LIGHTENED MOBILE FROST */
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    /* MOBILE FROST: Lightened for clarity */
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
     background: linear-gradient(
       to bottom, 
-      rgba(247, 236, 232, 0.2) 0%, 
-      transparent 20%, 
-      transparent 80%, 
-      rgba(247, 236, 232, 0.2) 100%
+      rgba(247, 236, 232, 0.25) 0%, 
+      transparent 15%, 
+      transparent 85%, 
+      rgba(247, 236, 232, 0.25) 100%
     );
   }
   
@@ -65,69 +75,55 @@ body, html, #root, .app-viewport {
     justify-content: flex-start; 
     align-items: flex-start;    
     text-align: left;
-    padding-top: 100px;
-    padding-left: 10px; /* Slight left padding as requested */
+    padding-top: 120px;
   }
   
   .brand-title {
-    font-size: 3.5rem !important;
-    line-height: 0.9 !important;
+    font-size: 4.2rem !important;
+    line-height: 0.8 !important;
   }
 }
 
-.brand-title {
-  font-size: clamp(3rem, 12vw, 8rem);
-  font-weight: 300;
-  font-style: italic;
-  color: #1a1a1a;
-  margin: 0;
-}
-
 .brand-subtitle {
-  font-size: 0.75rem;
-  letter-spacing: 0.5em;
+  font-size: 0.7rem;
+  letter-spacing: 0.6em;
   text-transform: uppercase;
   font-family: sans-serif;
-  opacity: 0.7;
-  margin-bottom: 1rem;
+  opacity: 0.5;
+  margin-bottom: 2rem;
 }
 
-/* MODERN HIGH-END BUTTONS */
-.inquiry-button {
+/* PREMIUM BUTTONS */
+.tour-button {
   pointer-events: auto;
-  background: white;
+  background: #1a1a1a;
   border: none;
   border-radius: 100px;
-  padding: 10px 25px;
-  font-size: 10px;
+  padding: 12px 28px;
+  font-size: 9px;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: #1a1a1a;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  color: white;
   cursor: pointer;
-  transition: 0.3s ease;
+  transition: 0.3s cubic-bezier(0.2, 1, 0.3, 1);
 }
 
 .explore-button {
   pointer-events: auto;
-  margin-top: 30px;
-  background: #1a1a1a;
-  color: white;
-  border: none;
-  padding: 18px 45px;
-  border-radius: 50px;
+  margin-top: 40px;
+  background: white;
+  color: #1a1a1a;
+  border: 1px solid rgba(0,0,0,0.1);
+  padding: 20px 50px;
+  border-radius: 100px;
   text-transform: uppercase;
-  letter-spacing: 3px;
-  font-size: 0.7rem;
+  letter-spacing: 4px;
+  font-size: 0.65rem;
   cursor: pointer;
   transition: 0.4s ease;
 }
 
-.explore-button:hover {
-  background: #2d1d3d;
-  transform: translateY(-2px);
-}
-
+/* PREMIUM FOOTER */
 .main-header, .main-footer {
   display: flex;
   justify-content: space-between;
@@ -135,9 +131,25 @@ body, html, #root, .app-viewport {
   width: 100%;
 }
 
-.logo { font-weight: 700; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; }
-.socials { display: flex; gap: 20px; font-size: 10px; opacity: 0.6; }
-.legal { font-size: 9px; opacity: 0.4; letter-spacing: 1px; }
+.logo { font-weight: 700; font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; }
+
+.social-links-premium {
+  display: flex;
+  gap: 30px;
+  pointer-events: auto;
+}
+
+.icon-wrap {
+  font-size: 9px;
+  letter-spacing: 2px;
+  opacity: 0.4;
+  cursor: pointer;
+  transition: opacity 0.3s;
+}
+
+.icon-wrap:hover { opacity: 1; }
+
+.legal-mark { font-size: 8px; opacity: 0.3; letter-spacing: 2px; text-transform: uppercase; }
 
 .ui-overlay.fade-out { opacity: 0; }
 
@@ -148,10 +160,10 @@ body, html, #root, .app-viewport {
   opacity: 0;
   pointer-events: none;
   transition: opacity 1.5s ease;
-  background: radial-gradient(circle at 50% 30%, rgba(11, 42, 58, 0.7), rgba(2, 8, 12, 0.95));
-  backdrop-filter: blur(8px);
+  background: radial-gradient(circle at 50% 30%, rgba(11, 42, 58, 0.8), rgba(2, 8, 12, 0.98));
+  backdrop-filter: blur(15px);
 }
 
 .underwater-page.active { opacity: 1; pointer-events: auto; }
 .depth-layer { position: absolute; top: 25%; width: 100%; text-align: center; color: white; }
-.back-button { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); padding: 15px 40px; background: rgba(255,255,255,0.1); border: 1px solid white; color: white; border-radius: 50px; cursor: pointer; }
+.back-button { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); padding: 15px 45px; background: none; border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 100px; cursor: pointer; text-transform: uppercase; font-size: 10px; letter-spacing: 2px; }

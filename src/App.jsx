@@ -13,7 +13,7 @@ export default function App() {
         
         <header className="main-header">
           <div className="logo">Moore Love & Care</div>
-          <button className="inquiry-button">Schedule Tour</button>
+          <button className="tour-button">Schedule Tour</button>
         </header>
 
         <div className="hero-container">
@@ -30,11 +30,12 @@ export default function App() {
         </div>
 
         <footer className="main-footer">
-          <div className="socials">
-            <span>FB</span>
-            <span>IG</span>
+          <div className="social-links-premium">
+            <span className="icon-wrap">INSTAGRAM</span>
+            <span className="icon-wrap">FACEBOOK</span>
+            <span className="icon-wrap">LINKEDIN</span>
           </div>
-          <div className="legal">EST. 2026 // MOORE ESTATES</div>
+          <div className="legal-mark">EST. 2026 // MOORE ESTATES</div>
         </footer>
       </div>
 
