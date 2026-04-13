@@ -11,40 +11,44 @@ export default function App() {
     <div className="app-viewport">
       <div className={`ui-overlay ${!isHome ? 'fade-out' : ''}`}>
         
-        {/* PREMIUM HEADER */}
+        {/* ORIGINAL PREMIUM HEADER */}
         <header className="main-header">
-          <div className="logo">Moore Love & Care</div>
-          <nav className="header-nav">
-            <span className="nav-link">The Sanctuary</span>
-          </nav>
-          <button className="tour-button">Schedule Tour</button>
+          <div className="logo">MOORE LOVE & CARE</div>
+          <button className="inquiry-button">INQUIRY</button>
         </header>
 
-        {/* HERO AREA */}
+        {/* ORIGINAL HERO AREA */}
         <div className="hero-container">
-          <div className="brand-subtitle">The Solarium Sanctuary</div>
+          <div className="brand-subtitle">THE SOLARIUM SANCTUARY</div>
           <h1 className="brand-title">
-            Moore <br /> Love & <br /> Care.
+            Moore Love <br /> & Care.
           </h1>
           <button 
             className="explore-button" 
             onClick={() => setCurrentView("collection")}
           >
-            Explore Sanctuary
+            EXPLORE COLLECTION
           </button>
         </div>
 
-        {/* PREMIUM FOOTER */}
+        {/* ORIGINAL PREMIUM FOOTER */}
         <footer className="main-footer">
           <div className="footer-left">
-            <div className="social-links-premium">
-              <span className="social-icon">IG</span>
-              <span className="social-icon">FB</span>
-              <span className="social-icon">LI</span>
+            <div className="social-links">
+              <span>FB</span>
+              <span>IG</span>
+              <span>LI</span>
+              <span>YT</span>
             </div>
           </div>
+          <div className="footer-center">
+             MENTAL RESTORATION // REHABILITATION // EST. 2026
+          </div>
           <div className="footer-right">
-            <div className="legal-mark">EST. 2026 // MOORE ESTATES</div>
+            <div className="legal-mark">
+              MOORE ESTATES INTERNATIONAL<br/>
+              PRIVACY POLICY // TERMS OF SERVICE
+            </div>
           </div>
         </footer>
       </div>
