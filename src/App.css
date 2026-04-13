@@ -1,106 +1,203 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,300&display=swap');
 
-* { box-sizing: border-box; }
+/* --- Root & Reset --- */
+:root {
+  --unseen-pink: #e5d9d3; /* A lighter base */
+  --text-primary: #1a1a1a;
+  --purple-theme: #21162e; 
+  --gold-accent: #c5a059;
+}
 
-body, html, #root, .app-viewport {
+/* 1. THE WHITE BAR KILLER & DYNAMIC VIEWPORT */
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root, .solarium-app {
   margin: 0;
   padding: 0;
   width: 100%;
-  height: 100dvh;
-  overflow: hidden;
-  background-color: #f7ece8;
+  /* CRITICAL: Must use dvh to force edge-to-edge on mobile Safari/Chrome */
+  height: 100dvh; 
+  background-color: #f7ece8; /* Ensure Canvas clearColor matches */
+  overflow: hidden; 
+  /* Prevents "rubber-banding" white space when swiping */
+  overscroll-behavior: none; 
   font-family: 'Playfair Display', serif;
 }
 
-.ui-overlay {
-  position: fixed;
+/* 2. THE HIGH-END UI LAYER */
+.main-ui {
+  position: fixed; /* Keeps UI locked to the "glass" */
   inset: 0;
-  z-index: 100;
+  z-index: 10;
   display: flex;
   flex-direction: column;
-  pointer-events: none;
-  transition: opacity 1.2s ease;
-  padding: 60px 80px;
+  pointer-events: none; /* Let 3D scene be interactive underneath */
+  transition: opacity 1.2s cubic-bezier(0.23, 1, 0.32, 1);
+  padding: 50px 80px; /* Editorial desktop padding */
 }
 
-/* DESKTOP: CENTERED */
-.hero-container {
+/* 3. THE DUAL-FADE FROST (The Mask is everything) */
+@media (max-width: 768px) {
+  .main-ui {
+    /* Safe area padding for notches and home indicators */
+    padding: calc(env(safe-area-inset-top) + 20px) 30px calc(env(safe-area-inset-bottom) + 20px);
+    
+    /* NEW LIGHTER FROST: Delicate blur */
+    backdrop-filter: blur(15px) saturate(110%);
+    -webkit-backdrop-filter: blur(15px) saturate(110%);
+    
+    /* FROST FADE GRADIENT: Pink at top and bottom, clear in middle 40% */
+    background: linear-gradient(
+      to bottom, 
+      rgba(247, 236, 232, 0.6) 0%, 
+      transparent 30%, 
+      transparent 70%, 
+      rgba(247, 236, 232, 0.6) 100%
+    );
+
+    /* THE MASK: Physically hides the blur in the middle 40% window */
+    -webkit-mask-image: linear-gradient(
+      to bottom, 
+      black 0%, 
+      black 15%, 
+      transparent 35%, 
+      transparent 65%, 
+      black 85%, 
+      black 100%
+    );
+    mask-image: linear-gradient(to bottom, black 15%, transparent 35%, transparent 65%, black 85%);
+  }
+}
+
+/* 4. MOBILE LAYOUT: PIN TO TOP-LEFT */
+.solarium-hero {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center; 
-  align-items: center;    
-  text-align: center;
+  justify-content: center; /* Desktop Default: Center in view */
 }
 
-/* MOBILE: TOP-LEFT */
+.content-lockup {
+  /* editorial width */
+  max-width: 600px;
+}
+
 @media (max-width: 768px) {
-  .ui-overlay {
-    padding: calc(env(safe-area-inset-top) + 20px) 30px;
+  .solarium-hero {
+    justify-content: flex-start; /* MOBILE: PINS TO TOP */
+    padding-top: 80px; /* Space below header */
   }
-  .hero-container {
-    justify-content: flex-start; 
-    align-items: flex-start;    
-    text-align: left;
-    padding-top: 100px;
+  
+  .content-lockup {
+    text-align: left; /* MOBILE: PIN LEFT */
+    margin-left: -5px; /* editorial offset */
   }
+
   .brand-title {
-    font-size: 3.5rem !important;
+    font-size: 3.2rem !important; /* Elegant size for mobile */
     line-height: 0.9 !important;
   }
 }
 
+/* 5. TYPOGRAPHY */
 .brand-title {
   font-size: clamp(3rem, 12vw, 8rem);
   font-weight: 300;
+  line-height: 0.95;
+  color: var(--text-primary);
   font-style: italic;
-  color: #1a1a1a;
   margin: 0;
 }
 
 .brand-subtitle {
-  font-size: 0.75rem;
-  letter-spacing: 0.5em;
+  font-size: 0.7rem;
+  letter-spacing: 0.6em;
+  margin-top: 1.5rem;
+  margin-bottom: 2.5rem;
   text-transform: uppercase;
   font-family: sans-serif;
-  opacity: 0.7;
-  margin-bottom: 1rem;
+  opacity: 0.6;
 }
 
-.explore-button {
-  pointer-events: auto;
-  margin-top: 30px;
-  background: white;
-  border: none;
-  padding: 18px 45px;
-  border-radius: 50px;
-  text-transform: uppercase;
-  letter-spacing: 3px;
-  font-size: 0.7rem;
+/* 6. BUTTONS & UI ELEMENTS */
+.inquiry-btn, .explore-cta, .social-links, . editorial-meta {
+  pointer-events: auto; /* Re-enable clicks for the buttons */
   cursor: pointer;
 }
 
-.main-header, .main-footer {
+/* MODERN INQUIRY BUTTON */
+.inquiry-btn {
+  background: white;
+  border: none;
+  border-radius: 50px;
+  color: var(--text-primary);
+  padding: 12px 30px;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.inquiry-btn:active {
+  transform: scale(0.95);
+}
+
+.explore-cta {
+  background: transparent;
+  border: 1px solid rgba(0,0,0,0.15);
+  color: var(--text-primary);
+  padding: 18px 45px;
+  font-size: 0.7rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  border-radius: 50px;
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.explore-cta:hover {
+  background: white;
+  border-color: white;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+/* SHARED FLEX BOXES */
+.solarium-header, .solarium-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
+  pointer-events: none; /* Allow interaction with scene */
 }
 
-.logo { font-weight: 700; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; }
-.ui-overlay.fade-out { opacity: 0; }
+.brand-logotype {
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--text-primary);
+}
 
-.underwater-page {
+.social-links { display: flex; gap: 20px; font-size: 9px; opacity: 0.5; color: var(--text-primary); }
+.editorial-meta { font-size: 8px; opacity: 0.3; letter-spacing: 0.1em; color: var(--text-primary); }
+
+.main-ui.fade-out {
+  opacity: 0;
+}
+
+/* 7. UNDERWATER PAGES (Base structure preserved) */
+.underwater-overlay {
   position: fixed;
   inset: 0;
-  z-index: 50;
-  opacity: 0;
+  z-index: 5;
   pointer-events: none;
+  opacity: 0;
   transition: opacity 1.5s ease;
   background: radial-gradient(circle at 50% 30%, rgba(11, 42, 58, 0.7), rgba(2, 8, 12, 0.95));
   backdrop-filter: blur(8px);
 }
-
-.underwater-page.active { opacity: 1; pointer-events: auto; }
-.depth-layer { position: absolute; top: 25%; width: 100%; text-align: center; color: white; }
-.back-button { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); padding: 15px 40px; background: rgba(255,255,255,0.1); border: 1px solid white; color: white; border-radius: 50px; cursor: pointer; }
+.underwater-overlay.active { opacity: 1; pointer-events: auto; }
+.depth-layer { position: absolute; top: 25%; width: 100%; text-align: center; color: #e8f6ff; }
+.return-btn { position: absolute; bottom: calc(env(safe-area-inset-bottom) + 40px); left: 50%; transform: translateX(-50%); padding: 14px 40px; border-radius: 50px; border: 1px solid white; color: white; background: none; cursor: pointer;}

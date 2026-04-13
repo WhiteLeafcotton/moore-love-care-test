@@ -1,53 +1,74 @@
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
 import Scene from "./components/Scene";
-import "./App.css"; 
+import "./App.css"; // Double check: Is your file named App.css with a capital A?
 
 export default function App() {
   const [currentView, setCurrentView] = useState("home");
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const isHome = currentView === "home";
 
+  // Efficient mobile detection to handle alignment shifts
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
-    <div className="app-viewport">
-      <div className={`ui-overlay ${!isHome ? 'fade-out' : ''}`}>
+    <div className="solarium-app">
+      
+      {/* 1. HIGH-END UI LAYER (HOME VIEW) */}
+      <div className={`main-ui ${!isHome ? 'fade-out' : ''}`}>
         
-        <header className="main-header">
-          <div className="logo">Moore Love & Care</div>
-          <button className="inquiry-button">Inquiry</button>
+        {/* SHARED HEADER */}
+        <header className="solarium-header">
+          <div className="brand-logotype">Moore Love & Care</div>
+          <button className="inquiry-btn">Schedule Tour</button>
         </header>
 
-        <div className="hero-container">
-          <div className="brand-subtitle">The Solarium Sanctuary</div>
-          <h1 className="brand-title">
-            Moore Love <br /> & Care.
-          </h1>
-          <button 
-            className="explore-button" 
-            onClick={() => setCurrentView("collection")}
-          >
-            Explore Collection
-          </button>
-        </div>
+        {/* HERO SECTION (EDITORIAL LAYOUT) */}
+        <main className="solarium-hero">
+          <div className="content-lockup">
+            <div className="brand-subtitle">The Solarium Sanctuary</div>
+            <h1 className="brand-title">
+              Moore Love <br /> & Care.
+            </h1>
+            <button 
+              className="explore-cta" 
+              onClick={() => setCurrentView("collection")}
+            >
+              Explore Sanctuary
+            </button>
+          </div>
+        </main>
 
-        <footer className="main-footer">
-          <div className="socials">
+        {/* SHARED FOOTER */}
+        <footer className="solarium-footer">
+          <div className="social-links">
             <span>FB</span>
             <span>IG</span>
           </div>
-          <div className="legal">EST. 2026 // MOORE ESTATES</div>
+          <div className="editorial-meta">EST. 2026 // SOLIS ESTATES</div>
         </footer>
       </div>
 
-      <div className={`underwater-page ${!isHome ? 'active' : ''}`}>
-        <div className="depth-layer">
+      {/* 2. UNDERWATER VIEW */}
+      <div className={`underwater-overlay ${!isHome ? 'active' : ''}`}>
+        <div className="depth-layer hero">
           <h1>Submerged Grace</h1>
           <p>Mental Restoration // Rehabilitation</p>
         </div>
-        <button className="back-button" onClick={() => setCurrentView("home")}>
+        
+        <button 
+          className="return-btn"
+          onClick={() => setCurrentView("home")}
+        >
           ← Return to Surface
         </button>
       </div>
 
+      {/* 3. 3D SCENE */}
       <Canvas shadows dpr={[1, 2]} camera={{ position: [-14, 3.2, 24], fov: 35 }}>
         <Suspense fallback={null}>
           <Scene currentView={currentView} />
