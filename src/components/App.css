@@ -1,129 +1,149 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,300&display=swap');
 
 :root {
-  --accent-gold: #c5a059; 
-  --brand-purple: #2d1d3d;    
-  --bg-color: #f7ece8; 
+  --unseen-pink: #e5d9d3;
+  --text-main: #1a1a1a;
 }
 
-/* 1. RESET & WHITE BAR REMOVAL */
-* { box-sizing: border-box; }
-
-html, body, #root, .app-container {
+body, html, #root {
   margin: 0;
   padding: 0;
   width: 100%;
-  height: 100dvh; /* Kills white bars on mobile Safari/Chrome */
-  background-color: var(--bg-color);
-  overflow: hidden; 
-  overscroll-behavior: none;
-}
-
-/* 2. OVERLAY & DUAL-FROST */
-.ui-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  display: flex;
-  flex-direction: column;
-  pointer-events: none;
-  transition: opacity 1.2s ease;
-  padding: 50px 80px; /* Desktop Default */
-}
-
-@media (max-width: 768px) {
-  .ui-overlay {
-    padding: calc(env(safe-area-inset-top) + 20px) 30px calc(env(safe-area-inset-bottom) + 20px);
-    backdrop-filter: blur(18px) saturate(120%);
-    -webkit-backdrop-filter: blur(18px) saturate(120%);
-    
-    background: linear-gradient(
-      to bottom, 
-      rgba(247, 236, 232, 0.7) 0%, 
-      transparent 35%, 
-      transparent 65%, 
-      rgba(247, 236, 232, 0.7) 100%
-    );
-
-    -webkit-mask-image: linear-gradient(to bottom, black 0%, black 20%, transparent 40%, transparent 60%, black 80%, black 100%);
-    mask-image: linear-gradient(to bottom, black 20%, transparent 40%, transparent 60%, black 80%);
-  }
-}
-
-/* 3. MOBILE ALIGNMENT (TOP LEFT) */
-.hero-content {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center; /* Desktop Default */
-  pointer-events: none;
-}
-
-@media (max-width: 768px) {
-  .hero-content {
-    justify-content: flex-start; /* Pins to top */
-    padding-top: 60px; /* Space below header */
-  }
-  
-  .brand-title {
-    font-size: 3.5rem !important;
-    text-align: left;
-    line-height: 0.9 !important;
-  }
-  
-  .brand-subtitle {
-    text-align: left !important;
-    margin-bottom: 0.5rem !important;
-  }
-}
-
-/* 4. BUTTONS & UI */
-.site-header, .site-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
-
-.brand-logo { 
-  font-weight: 700; 
-  letter-spacing: 0.3em; 
-  text-transform: uppercase; 
-  font-size: 11px; 
-  color: var(--brand-purple); 
-}
-
-.explore-button, .inquiry-btn {
-  pointer-events: auto;
-  cursor: pointer;
-}
-
-.explore-button {
-  margin-top: 30px;
-  background: var(--brand-purple);
-  color: var(--bg-color);
-  border: none;
-  padding: 18px 45px;
-  border-radius: 50px;
-  text-transform: uppercase;
-  letter-spacing: 3px;
-  font-size: 0.7rem;
-  align-self: flex-start; /* Ensures left-align on mobile */
-}
-
-/* 5. TYPOGRAPHY */
-.brand-title {
+  height: 100%;
+  overflow: hidden;
   font-family: 'Playfair Display', serif;
-  font-style: italic;
-  margin: 0;
-  color: var(--brand-purple);
+}
+
+.ui-overlay {
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 100;
+  width: 90%;
+}
+
+.brand-title {
+  font-size: clamp(3rem, 12vw, 8rem);
+  font-weight: 300; 
+  line-height: 0.95;
+  color: var(--text-main);
+  font-style: italic; 
 }
 
 .brand-subtitle {
   font-size: 0.75rem;
-  letter-spacing: 0.5em;
+  letter-spacing: 0.6em;
+  margin-top: 1.5rem;
+  margin-bottom: 3rem;
   text-transform: uppercase;
-  color: var(--brand-purple);
+  font-family: sans-serif; 
+  opacity: 0.7;
 }
 
-.ui-overlay.fade-out { opacity: 0; }
+.explore-button {
+  background: white;
+  border: none;
+  color: var(--text-main);
+  padding: 18px 45px;
+  font-size: 0.7rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 50px;
+  font-weight: 700;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+/* 🌊 ENABLE SCROLL ONLY WHEN SUBMERGED */
+body.submerged {
+  overflow-y: scroll;
+  height: 300vh;
+}
+
+/* 🌊 FADE OUT TOP UI */
+.ui-overlay.fade-out {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.2s ease;
+}
+
+/* 🌊 UNDERWATER PAGE BASE */
+.underwater-page {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.5s ease;
+}
+
+.underwater-page.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* 🌊 LUXURY WATER ATMOSPHERE */
+.underwater-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 50% 30%,
+    rgba(11, 42, 58, 0.7),
+    rgba(2, 8, 12, 0.95)
+  );
+  backdrop-filter: blur(8px);
+  z-index: -2;
+}
+
+/* 🌊 SOFT LIGHT RAYS */
+.underwater-page::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    rgba(255,255,255,0.05) 0%,
+    transparent 40%
+  );
+  animation: lightShift 8s ease-in-out infinite alternate;
+  z-index: -1;
+}
+
+@keyframes lightShift {
+  from { transform: translateY(-20px); }
+  to { transform: translateY(20px); }
+}
+
+/* 🌊 DEPTH LAYERS */
+.depth-layer {
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  color: #e8f6ff;
+  padding: 0 20px;
+  transition: all 0.8s ease;
+  animation: floatSoft 6s ease-in-out infinite;
+}
+
+.depth-layer.hero { top: 25%; }
+.depth-layer.hero h1 { font-size: clamp(3rem, 10vw, 7rem); font-style: italic; font-weight: 300; }
+.depth-layer.mid { top: 70%; }
+.depth-layer.mid h2 { font-size: 2rem; letter-spacing: 0.1em; }
+.depth-layer.deep { top: 120%; }
+.depth-layer.deep h2 { font-size: 2.2rem; }
+
+.depth-layer p {
+  max-width: 500px;
+  margin: 20px auto;
+  line-height: 1.6;
+  opacity: 0.8;
+}
+
+@keyframes floatSoft {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(12px); }
+  100% { transform: translateY(0px); }
+}
