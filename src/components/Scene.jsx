@@ -388,18 +388,21 @@ export default function Scene({ currentView }) {
       <directionalLight position={[-15, 30, 10]} intensity={1.6} castShadow />
 
       <group position={[0, 0, 0]}>
-        {/* MAIN BASE PLATFORM */}
-        <mesh position={[15.5, -2.1, 15.0]} castShadow receiveShadow><boxGeometry args={[20, 8.0, 30]} /><meshStandardMaterial {...butterProps} /></mesh>
+        {/* --- MAIN BASE PLATFORM: RAISED FOR FULL VISIBILITY --- */}
+        <mesh position={[15.5, -0.5, 15.0]} castShadow receiveShadow>
+          <boxGeometry args={[20, 12.0, 30]} />
+          <meshStandardMaterial {...butterProps} />
+        </mesh>
+
         <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={butterProps} />
 
-        {/* --- THE PROMINENT NOOK DISC --- */}
-        {/* Significantly shifted out of the corner and enlarged for premium visual balance */}
-        <mesh position={[8.5, -1.42, 14.0]} castShadow receiveShadow>
-          <cylinderGeometry args={[2.5, 2.5, 0.04, 64]} />
+        {/* --- THE NOOK DISC: PROMINENT & ABOVE WATER --- */}
+        <mesh position={[8.5, -1.4, 14.0]} castShadow receiveShadow>
+          <cylinderGeometry args={[2.5, 2.5, 0.06, 64]} />
           <meshStandardMaterial 
             {...butterProps} 
             transparent 
-            opacity={0.95} 
+            opacity={0.98} 
           />
         </mesh>
 
