@@ -1,4 +1,4 @@
-import { useState, Suspense, useEffect } from "react";
+import { useState, Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
 import Scene from "./components/Scene";
 import "./App.css"; 
@@ -16,7 +16,6 @@ export default function App() {
           <button className="inquiry-button">Inquiry</button>
         </header>
 
-        {/* This class handles the Desktop vs Mobile alignment */}
         <div className="hero-container">
           <div className="brand-subtitle">The Solarium Sanctuary</div>
           <h1 className="brand-title">
