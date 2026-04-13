@@ -34,7 +34,7 @@ export default function App() {
           </button>
         </div>
 
-        {/* FOOTER: Social Icons + Meta + Legal */}
+        {/* FOOTER: Social Icons + Metajj + Legal */}
         <footer className="main-footer">
           <div className="footer-left">
             <div className="social-links">
