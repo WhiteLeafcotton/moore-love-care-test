@@ -1,7 +1,7 @@
 import { useState, Suspense, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
 import Scene from "./components/Scene";
-import "./App.css"; 
+import "./App.css"; // MUST MATCH FILENAME EXACTLY
 
 export default function App() {
   const [currentView, setCurrentView] = useState("home");

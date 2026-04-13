@@ -2,7 +2,6 @@
 
 :root {
   --text-main: #1a1a1a;
-  --bg-color: #f7ece8;
 }
 
 /* 1. RESET & FULLSCREEN */
@@ -12,9 +11,9 @@ body, html, #root, .app-viewport {
   margin: 0;
   padding: 0;
   width: 100%;
-  height: 100dvh; /* Kills mobile white bars */
+  height: 100dvh; /* dvh prevents white bars on mobile scroll */
   overflow: hidden;
-  background-color: var(--bg-color);
+  background-color: #f7ece8;
   font-family: 'Playfair Display', serif;
 }
 
@@ -46,10 +45,10 @@ body, html, #root, .app-viewport {
   }
 
   .hero-container {
-    justify-content: flex-start; /* MOBILE: PINS TO TOP */
-    align-items: flex-start;    /* MOBILE: PINS TO LEFT */
+    justify-content: flex-start; /* MOBILE: PUSH TO TOP */
+    align-items: flex-start;    /* MOBILE: PUSH TO LEFT */
     text-align: left;
-    padding-top: 100px;         /* Space for the header */
+    padding-top: 100px;         /* Space below header */
   }
 
   .brand-title {
@@ -58,7 +57,7 @@ body, html, #root, .app-viewport {
   }
 }
 
-/* 4. VISUALS */
+/* 4. VISUAL STYLES */
 .brand-title {
   font-size: clamp(3rem, 12vw, 8rem);
   font-weight: 300;
