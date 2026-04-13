@@ -1,7 +1,7 @@
 import { useState, Suspense, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
 import Scene from "./components/Scene";
-import "./App.css"; // MUST MATCH FILENAME EXACTLY
+import "./App.css"; 
 
 export default function App() {
   const [currentView, setCurrentView] = useState("home");
@@ -9,8 +9,6 @@ export default function App() {
 
   return (
     <div className="app-viewport">
-      
-      {/* UI OVERLAY */}
       <div className={`ui-overlay ${!isHome ? 'fade-out' : ''}`}>
         
         <header className="main-header">
@@ -18,7 +16,7 @@ export default function App() {
           <button className="inquiry-button">Inquiry</button>
         </header>
 
-        {/* This container handles the Desktop vs Mobile alignment */}
+        {/* This class handles the Desktop vs Mobile alignment */}
         <div className="hero-container">
           <div className="brand-subtitle">The Solarium Sanctuary</div>
           <h1 className="brand-title">
@@ -41,7 +39,6 @@ export default function App() {
         </footer>
       </div>
 
-      {/* UNDERWATER VIEW */}
       <div className={`underwater-page ${!isHome ? 'active' : ''}`}>
         <div className="depth-layer">
           <h1>Submerged Grace</h1>
