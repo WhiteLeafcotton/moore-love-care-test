@@ -2,7 +2,9 @@
 
 :root {
   --unseen-pink: #e5d9d3;
-  --text-main: #1a1a1a;
+  --text-main: #2d1d3d; /* Updated to match your App.js brand color */
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
 }
 
 body, html, #root {
@@ -12,77 +14,95 @@ body, html, #root {
   height: 100%;
   overflow: hidden;
   font-family: 'Playfair Display', serif;
+  background: #f7ece8;
 }
+
+/* --- MOBILE RECONSTRUCTION --- */
 
 .ui-overlay {
   position: absolute;
-  top: 45%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
+  inset: 0;
   z-index: 100;
-  width: 90%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  /* Top padding accounts for the Status Bar/Notch */
+  padding: calc(var(--safe-top) + 20px) 30px var(--safe-bottom);
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+/* The Vertical Frost Fade for Mobile */
+@media (max-width: 768px) {
+  .ui-overlay {
+    backdrop-filter: blur(10px) saturate(110%);
+    -webkit-backdrop-filter: blur(10px) saturate(110%);
+    background: linear-gradient(
+      to bottom, 
+      rgba(255, 250, 248, 0.5) 0%, 
+      rgba(255, 250, 248, 0.2) 50%, 
+      transparent 100%
+    );
+    /* Mask creates the smooth physical fade out at the bottom */
+    -webkit-mask-image: linear-gradient(to bottom, black 25%, rgba(0,0,0,0.8) 50%, transparent 95%);
+    mask-image: linear-gradient(to bottom, black 25%, rgba(0,0,0,0.8) 50%, transparent 95%);
+  }
 }
 
 .brand-title {
-  font-size: clamp(3rem, 12vw, 8rem);
-  font-weight: 300; /* Use thin weight for italic elegance */
-  line-height: 0.95;
+  font-size: clamp(3.5rem, 15vw, 8rem);
+  font-weight: 300;
+  line-height: 0.85;
   color: var(--text-main);
-  font-style: italic; /* Match 'Creating the' style */
+  font-style: italic;
+  margin: 0;
+  pointer-events: auto;
 }
 
 .brand-subtitle {
-  font-size: 0.75rem;
-  letter-spacing: 0.6em;
-  margin-top: 1.5rem;
-  margin-bottom: 3rem;
+  font-size: 0.65rem;
+  letter-spacing: 0.5em;
+  margin-top: 1.2rem;
+  margin-bottom: 2.5rem;
   text-transform: uppercase;
-  font-family: sans-serif; /* Subtitles should be clean sans-serif */
-  opacity: 0.7;
+  font-family: sans-serif;
+  color: var(--text-main);
+  opacity: 0.6;
 }
 
 .explore-button {
-  background: white;
+  background: var(--text-main);
   border: none;
-  color: var(--text-main);
-  padding: 18px 45px;
+  color: #f7ece8;
+  padding: 16px 40px;
   font-size: 0.7rem;
   letter-spacing: 3px;
   text-transform: uppercase;
   cursor: pointer;
   border-radius: 50px;
-  font-weight: 700;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  font-weight: 600;
+  pointer-events: auto;
+  transition: transform 0.3s ease, background 0.3s ease;
 }
 
-
-
-
-
-
-
-/* 🌊 ENABLE SCROLL ONLY WHEN SUBMERGED */
-body.submerged {
-  overflow-y: scroll;
-  height: 300vh;
+.explore-button:active {
+  transform: scale(0.96);
+  background: #4a345e;
 }
 
-/* 🌊 FADE OUT TOP UI (keep your layout intact) */
-.ui-overlay.fade-out {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 1.2s ease;
-}
+/* --- UNDERWATER TRANSITION LAYERS --- */
 
-/* 🌊 UNDERWATER PAGE BASE */
 .underwater-page {
   position: fixed;
   inset: 0;
-  z-index: 50;
+  z-index: 150;
   pointer-events: none;
   opacity: 0;
   transition: opacity 1.5s ease;
+  /* Ensure underwater content also respects the notch */
+  padding-top: var(--safe-top);
 }
 
 .underwater-page.active {
@@ -90,94 +110,56 @@ body.submerged {
   pointer-events: auto;
 }
 
-/* 🌊 LUXURY WATER ATMOSPHERE */
 .underwater-page::before {
   content: "";
   position: absolute;
   inset: 0;
   background: radial-gradient(
     circle at 50% 30%,
-    rgba(11, 42, 58, 0.7),
-    rgba(2, 8, 12, 0.95)
+    rgba(33, 22, 46, 0.85), /* Dark Purple to match water */
+    rgba(10, 5, 15, 0.98)
   );
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
   z-index: -2;
 }
 
-/* 🌊 SOFT LIGHT RAYS */
-.underwater-page::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    120deg,
-    rgba(255,255,255,0.05) 0%,
-    transparent 40%
-  );
-  animation: lightShift 8s ease-in-out infinite alternate;
-  z-index: -1;
-}
-
-@keyframes lightShift {
-  from { transform: translateY(-20px); }
-  to { transform: translateY(20px); }
-}
-
-/* 🌊 DEPTH LAYERS (FLOATING TYPOGRAPHY) */
+/* 🌊 DEPTH LAYERS (Optimized for Mobile) */
 .depth-layer {
   position: absolute;
   width: 100%;
-  text-align: center;
-  color: #e8f6ff;
-  padding: 0 20px;
-  transition: all 0.8s ease;
+  left: 0;
+  color: #fce4e4;
+  padding: 0 40px;
+  box-sizing: border-box;
 }
 
-/* HERO (surface) */
-.depth-layer.hero {
-  top: 25%;
-}
+.depth-layer.hero { top: 20%; }
+.depth-layer.mid  { top: 55%; }
+.depth-layer.deep { top: 90%; }
 
-.depth-layer.hero h1 {
-  font-size: clamp(3rem, 10vw, 7rem);
-  font-style: italic;
+.depth-layer h1, .depth-layer h2 {
   font-weight: 300;
+  font-style: italic;
+  margin-bottom: 10px;
 }
 
-/* MID DEPTH */
-.depth-layer.mid {
-  top: 70%;
-}
-
-.depth-layer.mid h2 {
-  font-size: 2rem;
-  letter-spacing: 0.1em;
-}
-
-/* DEEP */
-.depth-layer.deep {
-  top: 120%;
-}
-
-.depth-layer.deep h2 {
-  font-size: 2.2rem;
-}
-
-/* 🌊 FLOATING FEEL */
 .depth-layer p {
-  max-width: 500px;
-  margin: 20px auto;
+  font-family: sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  max-width: 320px;
+  margin: 0 auto;
+  opacity: 0.7;
   line-height: 1.6;
-  opacity: 0.8;
 }
 
-/* 🌊 SUBTLE FLOAT ANIMATION */
-.depth-layer {
-  animation: floatSoft 6s ease-in-out infinite;
-}
-
+/* Float animation for the "Drifting" feel */
 @keyframes floatSoft {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(12px); }
-  100% { transform: translateY(0px); }
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(15px) rotate(0.5deg); }
+}
+
+.depth-layer {
+  animation: floatSoft 8s ease-in-out infinite;
 }

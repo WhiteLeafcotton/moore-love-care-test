@@ -1,27 +1,33 @@
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
 import Scene from "./components/Scene";
 
 export default function App() {
   const [currentView, setCurrentView] = useState("home");
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const isHome = currentView === "home";
 
-  // Consistent Button Style
+  // Handle Resize for Mobile UI triggers
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const buttonBaseStyle = {
     pointerEvents: "auto",
-    padding: "14px 40px",
+    padding: isMobile ? "12px 32px" : "14px 40px",
     border: "1px solid #2d1d3d",
     background: "#2d1d3d",
     color: "#f7ece8",
     borderRadius: "100px",
-    fontSize: "10px",
+    fontSize: isMobile ? "9px" : "10px",
     letterSpacing: "0.2em",
     cursor: "pointer",
     textTransform: "uppercase",
     transition: "all 0.3s ease"
   };
 
-  // Raw SVG Icon Definitions (placeholder for library install)
   const FacebookIcon = () => (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
   );
@@ -36,59 +42,91 @@ export default function App() {
   );
 
   return (
-    <div style={{ width: "100vw", height: "100vh", background: "#f7ece8", position: "relative", overflow: "hidden" }}>
+    <div style={{ 
+      width: "100vw", 
+      height: "100vh", 
+      background: "#f7ece8", 
+      position: "relative", 
+      overflow: "hidden",
+      // Force content into the status bar area
+      padding: "env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)" 
+    }}>
       
       {/* UI OVERLAY */}
       <div style={{
         position: "absolute", inset: 0, zIndex: 10, 
         display: "flex", flexDirection: "column", justifyContent: "space-between",
-        padding: "50px 80px",
+        // Desktop padding vs Mobile padding
+        padding: isMobile ? "20px 30px 40px" : "50px 80px",
         pointerEvents: "none",
         transition: "opacity 0.8s ease-in-out, backdrop-filter 0.8s ease-in-out",
         opacity: isHome ? 1 : 0,
 
-        /* --- Updated FADE EFFECT: GLOBAL Baseline Blur and Directional Background Gradient --- */
-        /* Update: Baseline blur reduced for global lightness */
-        backdropFilter: isHome ? "blur(5px) saturate(105%)" : "blur(0px)",
-        WebkitBackdropFilter: isHome ? "blur(5px) saturate(105%)" : "blur(0px)",
+        /* --- FROST RECONSTRUCTION --- */
+        backdropFilter: isHome ? "blur(8px) saturate(110%)" : "blur(0px)",
+        WebkitBackdropFilter: isHome ? "blur(8px) saturate(110%)" : "blur(0px)",
         
-        /* Updated Background Gradient (lightttttttttled significantly) */
+        /* Mobile: Top to Bottom Fade | Desktop: Right to Left Fade */
         background: isHome 
-          ? "linear-gradient(to right, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.03) 50%, rgba(255, 255, 255, 0.01) 100%)" 
+          ? (isMobile 
+              ? "linear-gradient(to bottom, rgba(255, 250, 248, 0.4) 0%, rgba(255, 250, 248, 0.1) 60%, transparent 100%)"
+              : "linear-gradient(to right, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%)") 
           : "transparent",
         
-        /* Mask ensured the blur itself fades to right, kept for effect consistency */
-        WebkitMaskImage: "linear-gradient(to right, black 30%, rgba(0, 0, 0, 0.4) 100%)",
-        maskImage: "linear-gradient(to right, black 30%, rgba(0, 0, 0, 0.4) 100%)"
+        WebkitMaskImage: isMobile
+          ? "linear-gradient(to bottom, black 20%, rgba(0, 0, 0, 0.8) 50%, rgba(0, 0, 0, 0) 95%)"
+          : "linear-gradient(to right, black 30%, rgba(0, 0, 0, 0.4) 100%)",
+        maskImage: isMobile
+          ? "linear-gradient(to bottom, black 20%, rgba(0, 0, 0, 0.8) 50%, rgba(0, 0, 0, 0) 95%)"
+          : "linear-gradient(to right, black 30%, rgba(0, 0, 0, 0.4) 100%)"
       }}>
         
         {/* HEADER */}
-        <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <header style={{ 
+          display: "flex", 
+          justifyContent: "space-between", 
+          alignItems: "center",
+          marginTop: isMobile ? "env(safe-area-inset-top)" : "0" 
+        }}>
           <div style={{ 
             fontWeight: 700, letterSpacing: "0.3em", textTransform: "uppercase", 
-            fontSize: "11px", color: "#2d1d3d" 
+            fontSize: isMobile ? "9px" : "11px", color: "#2d1d3d" 
           }}>
             Moore Love & Care
           </div>
-          <button style={{ ...buttonBaseStyle, background: "transparent", color: "#2d1d3d", padding: "10px 30px" }}>
+          <button style={{ 
+            ...buttonBaseStyle, 
+            background: "transparent", 
+            color: "#2d1d3d", 
+            border: "1px solid rgba(45, 29, 61, 0.2)",
+            padding: isMobile ? "8px 20px" : "10px 30px",
+            fontSize: "8px"
+          }}>
             Inquiry
           </button>
         </header>
 
         {/* HERO SECTION */}
-        <main style={{ textAlign: "left", maxWidth: "900px" }}>
+        <main style={{ 
+            textAlign: isMobile ? "center" : "left", 
+            maxWidth: isMobile ? "100%" : "900px",
+            marginTop: isMobile ? "-10vh" : "0" // Pull up slightly on mobile for balance
+        }}>
           <div style={{ 
-            fontSize: "11px", letterSpacing: "0.6em", textTransform: "uppercase", 
-            marginBottom: "20px", color: "rgba(45, 29, 61, 0.7)" 
+            fontSize: isMobile ? "9px" : "11px", 
+            letterSpacing: "0.5em", 
+            textTransform: "uppercase", 
+            marginBottom: "15px", 
+            color: "rgba(45, 29, 61, 0.6)" 
           }}>
             THE SOLARIUM SANCTUARY
           </div>
           <h1 style={{
-            fontSize: "clamp(80px, 14vw, 160px)", 
-            lineHeight: "0.8",
+            fontSize: isMobile ? "64px" : "clamp(80px, 14vw, 160px)", 
+            lineHeight: isMobile ? "0.9" : "0.8",
             color: "#2d1d3d", 
             fontWeight: 400, 
-            margin: "0 0 50px 0", 
+            margin: isMobile ? "0 0 40px 0" : "0 0 50px 0", 
             fontFamily: "'Playfair Display', serif",
             letterSpacing: "-0.02em"
           }}>
@@ -102,44 +140,49 @@ export default function App() {
           </button>
         </main>
 
-        {/* --- FOOTER UPDATED: Icons replace Text --- */}
+        {/* FOOTER */}
         <footer style={{ 
-          display: "grid", 
-          gridTemplateColumns: "1fr 1fr 1fr", 
-          fontSize: "9px", 
+          display: isMobile ? "flex" : "grid", 
+          flexDirection: isMobile ? "column" : "row",
+          gridTemplateColumns: isMobile ? "none" : "1fr 1fr 1fr", 
+          gap: isMobile ? "20px" : "0",
+          fontSize: "8px", 
           letterSpacing: "0.2em", 
           color: "#2d1d3d",
           textTransform: "uppercase",
           borderTop: "1px solid rgba(45, 29, 61, 0.1)",
-          paddingTop: "30px",
-          alignItems: "center"
+          paddingTop: "25px",
+          alignItems: "center",
+          marginBottom: isMobile ? "env(safe-area-inset-bottom)" : "0"
         }}>
-          {/* Social Icons instead of Text */}
-          <div style={{ display: "flex", gap: "20px", pointerEvents: "auto", color: "rgba(45, 29, 61, 0.6)" }}>
-            <a href="#" style={{ textDecoration: "none", color: "inherit" }}><FacebookIcon /></a>
-            <a href="#" style={{ textDecoration: "none", color: "inherit" }}><InstagramIcon /></a>
-            <a href="#" style={{ textDecoration: "none", color: "inherit" }}><LinkedinIcon /></a>
-            <a href="#" style={{ textDecoration: "none", color: "inherit" }}><YoutubeIcon /></a>
+          <div style={{ display: "flex", gap: "25px", pointerEvents: "auto", color: "rgba(45, 29, 61, 0.5)" }}>
+            <a href="#" style={{ color: "inherit" }}><FacebookIcon /></a>
+            <a href="#" style={{ color: "inherit" }}><InstagramIcon /></a>
+            <a href="#" style={{ color: "inherit" }}><LinkedinIcon /></a>
+            <a href="#" style={{ color: "inherit" }}><YoutubeIcon /></a>
           </div>
           
           <div style={{ textAlign: "center", opacity: 0.4 }}>
-            Mental Restoration // Rehabilitation // Est. 2026
+            Mental Restoration // Rehabilitation
           </div>
 
-          <div style={{ textAlign: "right", display: "flex", flexDirection: "column", gap: "5px" }}>
+          <div style={{ textAlign: isMobile ? "center" : "right", display: "flex", flexDirection: "column", gap: "4px" }}>
             <div style={{ opacity: 0.6 }}>Moore Estates International</div>
-            <div style={{ opacity: 0.3 }}>Privacy Policy // Terms of Service</div>
+            <div style={{ opacity: 0.2 }}>Est. 2026</div>
           </div>
         </footer>
       </div>
 
-      {/* RETURN BUTTON - CONSISTENT STYLE */}
       {!isHome && (
         <button 
           onClick={() => setCurrentView("home")}
           style={{
             ...buttonBaseStyle,
-            position: "absolute", bottom: "50px", left: "80px", zIindex: 20,
+            position: "absolute", 
+            bottom: isMobile ? "40px" : "50px", 
+            left: isMobile ? "50%" : "80px",
+            transform: isMobile ? "translateX(-50%)" : "none",
+            zIndex: 20,
             padding: "12px 30px"
           }}
         >
