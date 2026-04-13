@@ -5,20 +5,20 @@
   --bg-color: #f7ece8;
 }
 
-/* RESET */
+/* 1. RESET & FULLSCREEN */
 * { box-sizing: border-box; }
 
-html, body, #root, .main-container {
+body, html, #root, .app-viewport {
   margin: 0;
   padding: 0;
   width: 100%;
-  height: 100dvh; /* Use dvh to stop mobile white bars */
-  background-color: var(--bg-color);
+  height: 100dvh; /* Kills mobile white bars */
   overflow: hidden;
+  background-color: var(--bg-color);
   font-family: 'Playfair Display', serif;
 }
 
-/* UI OVERLAY BASE */
+/* 2. LAYOUT ENGINE */
 .ui-overlay {
   position: fixed;
   inset: 0;
@@ -27,30 +27,29 @@ html, body, #root, .main-container {
   flex-direction: column;
   pointer-events: none;
   transition: opacity 1.2s ease;
-  padding: 50px 80px; /* Desktop Padding */
+  padding: 60px 80px; /* Desktop Padding */
 }
 
-/* HERO CONTENT ALIGNMENT */
-.hero-content {
+.hero-container {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center; /* WEB: CENTERED */
-  align-items: center;    /* WEB: CENTERED */
-  text-align: center;      /* WEB: CENTERED */
+  justify-content: center; /* WEB: CENTERED VERTICALLY */
+  align-items: center;    /* WEB: CENTERED HORIZONTALLY */
+  text-align: center;
 }
 
-/* --- MOBILE OVERRIDES (TOP LEFT) --- */
+/* 3. MOBILE OVERRIDES: TOP-LEFT ALIGNMENT */
 @media (max-width: 768px) {
   .ui-overlay {
     padding: calc(env(safe-area-inset-top) + 20px) 30px;
   }
 
-  .hero-content {
-    justify-content: flex-start; /* MOBILE: TOP */
-    align-items: flex-start;    /* MOBILE: LEFT */
-    text-align: left;           /* MOBILE: LEFT */
-    padding-top: 80px;          /* Adjust for header space */
+  .hero-container {
+    justify-content: flex-start; /* MOBILE: PINS TO TOP */
+    align-items: flex-start;    /* MOBILE: PINS TO LEFT */
+    text-align: left;
+    padding-top: 100px;         /* Space for the header */
   }
 
   .brand-title {
@@ -59,52 +58,59 @@ html, body, #root, .main-container {
   }
 }
 
-/* TYPOGRAPHY */
+/* 4. VISUALS */
 .brand-title {
   font-size: clamp(3rem, 12vw, 8rem);
   font-weight: 300;
-  line-height: 0.95;
-  color: var(--text-main);
   font-style: italic;
+  color: var(--text-main);
   margin: 0;
 }
 
 .brand-subtitle {
   font-size: 0.75rem;
-  letter-spacing: 0.6em;
+  letter-spacing: 0.5em;
   text-transform: uppercase;
   font-family: sans-serif;
   opacity: 0.7;
   margin-bottom: 1rem;
 }
 
-/* BUTTONS */
 .explore-button {
   pointer-events: auto;
+  margin-top: 30px;
   background: white;
   border: none;
-  color: var(--text-main);
   padding: 18px 45px;
-  font-size: 0.7rem;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  cursor: pointer;
   border-radius: 50px;
-  margin-top: 30px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  font-size: 0.7rem;
+  cursor: pointer;
 }
 
-.site-header, .site-footer {
+.main-header, .main-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
 }
 
-.inquiry-btn { pointer-events: auto; background: transparent; border: 1px solid rgba(0,0,0,0.1); border-radius: 100px; padding: 10px 25px; font-size: 9px; text-transform: uppercase; }
+.logo { font-weight: 700; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; }
+.ui-overlay.fade-out { opacity: 0; }
 
-/* UNDERWATER PAGE */
-.underwater-page { position: fixed; inset: 0; z-index: 50; opacity: 0; pointer-events: none; transition: 1.5s ease; background: radial-gradient(circle at 50% 30%, rgba(11, 42, 58, 0.7), rgba(2, 8, 12, 0.95)); backdrop-filter: blur(8px); }
+/* 5. UNDERWATER */
+.underwater-page {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.5s ease;
+  background: radial-gradient(circle at 50% 30%, rgba(11, 42, 58, 0.7), rgba(2, 8, 12, 0.95));
+  backdrop-filter: blur(8px);
+}
+
 .underwater-page.active { opacity: 1; pointer-events: auto; }
 .depth-layer { position: absolute; top: 25%; width: 100%; text-align: center; color: white; }
-.return-btn { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); padding: 14px 40px; background: rgba(255,255,255,0.1); border: 1px solid white; color: white; border-radius: 50px; cursor: pointer; }
+.back-button { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); padding: 15px 40px; background: rgba(255,255,255,0.1); border: 1px solid white; color: white; border-radius: 50px; cursor: pointer; }

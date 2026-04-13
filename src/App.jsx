@@ -5,46 +5,39 @@ import "./App.css";
 
 export default function App() {
   const [currentView, setCurrentView] = useState("home");
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const isHome = currentView === "home";
 
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
   return (
-    <div className="main-container">
+    <div className="app-viewport">
       
       {/* UI OVERLAY */}
       <div className={`ui-overlay ${!isHome ? 'fade-out' : ''}`}>
         
-        <header className="site-header">
-          <div className="brand-logo">Moore Love & Care</div>
-          <button className="inquiry-btn">Inquiry</button>
+        <header className="main-header">
+          <div className="logo">Moore Love & Care</div>
+          <button className="inquiry-button">Inquiry</button>
         </header>
 
-        {/* HERO SECTION - Handled by CSS for Desktop vs Mobile alignment */}
-        <main className="hero-content">
+        {/* This container handles the Desktop vs Mobile alignment */}
+        <div className="hero-container">
           <div className="brand-subtitle">The Solarium Sanctuary</div>
           <h1 className="brand-title">
             Moore Love <br /> & Care.
           </h1>
           <button 
             className="explore-button" 
-            onClick={() => setCurrentView("collection")} 
+            onClick={() => setCurrentView("collection")}
           >
             Explore Collection
           </button>
-        </main>
+        </div>
 
-        <footer className="site-footer">
-          <div className="social-links">
+        <footer className="main-footer">
+          <div className="socials">
             <span>FB</span>
             <span>IG</span>
           </div>
-          <div className="est-tag">EST. 2026 // MOORE ESTATES</div>
+          <div className="legal">EST. 2026 // MOORE ESTATES</div>
         </footer>
       </div>
 
@@ -54,7 +47,7 @@ export default function App() {
           <h1>Submerged Grace</h1>
           <p>Mental Restoration // Rehabilitation</p>
         </div>
-        <button className="return-btn" onClick={() => setCurrentView("home")}>
+        <button className="back-button" onClick={() => setCurrentView("home")}>
           ← Return to Surface
         </button>
       </div>
