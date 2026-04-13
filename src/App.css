@@ -1,203 +1,157 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,300&display=swap');
 
-/* --- Root & Reset --- */
-:root {
-  --unseen-pink: #e5d9d3; /* A lighter base */
-  --text-primary: #1a1a1a;
-  --purple-theme: #21162e; 
-  --gold-accent: #c5a059;
-}
+* { box-sizing: border-box; }
 
-/* 1. THE WHITE BAR KILLER & DYNAMIC VIEWPORT */
-* {
-  box-sizing: border-box;
-}
-
-html, body, #root, .solarium-app {
+body, html, #root, .app-viewport {
   margin: 0;
   padding: 0;
   width: 100%;
-  /* CRITICAL: Must use dvh to force edge-to-edge on mobile Safari/Chrome */
-  height: 100dvh; 
-  background-color: #f7ece8; /* Ensure Canvas clearColor matches */
-  overflow: hidden; 
-  /* Prevents "rubber-banding" white space when swiping */
-  overscroll-behavior: none; 
+  height: 100dvh;
+  overflow: hidden;
+  background-color: #f7ece8;
   font-family: 'Playfair Display', serif;
 }
 
-/* 2. THE HIGH-END UI LAYER */
-.main-ui {
-  position: fixed; /* Keeps UI locked to the "glass" */
+.ui-overlay {
+  position: fixed;
   inset: 0;
-  z-index: 10;
+  z-index: 100;
   display: flex;
   flex-direction: column;
-  pointer-events: none; /* Let 3D scene be interactive underneath */
-  transition: opacity 1.2s cubic-bezier(0.23, 1, 0.32, 1);
-  padding: 50px 80px; /* Editorial desktop padding */
+  pointer-events: none;
+  transition: opacity 1.2s ease;
+  padding: 60px 80px;
+  
+  /* WEB FROST: Elegant dual-fade */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background: linear-gradient(
+    to bottom, 
+    rgba(247, 236, 232, 0.4) 0%, 
+    transparent 25%, 
+    transparent 75%, 
+    rgba(247, 236, 232, 0.4) 100%
+  );
 }
 
-/* 3. THE DUAL-FADE FROST (The Mask is everything) */
-@media (max-width: 768px) {
-  .main-ui {
-    /* Safe area padding for notches and home indicators */
-    padding: calc(env(safe-area-inset-top) + 20px) 30px calc(env(safe-area-inset-bottom) + 20px);
-    
-    /* NEW LIGHTER FROST: Delicate blur */
-    backdrop-filter: blur(15px) saturate(110%);
-    -webkit-backdrop-filter: blur(15px) saturate(110%);
-    
-    /* FROST FADE GRADIENT: Pink at top and bottom, clear in middle 40% */
-    background: linear-gradient(
-      to bottom, 
-      rgba(247, 236, 232, 0.6) 0%, 
-      transparent 30%, 
-      transparent 70%, 
-      rgba(247, 236, 232, 0.6) 100%
-    );
-
-    /* THE MASK: Physically hides the blur in the middle 40% window */
-    -webkit-mask-image: linear-gradient(
-      to bottom, 
-      black 0%, 
-      black 15%, 
-      transparent 35%, 
-      transparent 65%, 
-      black 85%, 
-      black 100%
-    );
-    mask-image: linear-gradient(to bottom, black 15%, transparent 35%, transparent 65%, black 85%);
-  }
-}
-
-/* 4. MOBILE LAYOUT: PIN TO TOP-LEFT */
-.solarium-hero {
+/* DESKTOP: CENTERED */
+.hero-container {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Desktop Default: Center in view */
+  justify-content: center; 
+  align-items: center;    
+  text-align: center;
 }
 
-.content-lockup {
-  /* editorial width */
-  max-width: 600px;
-}
-
+/* MOBILE OVERRIDES */
 @media (max-width: 768px) {
-  .solarium-hero {
-    justify-content: flex-start; /* MOBILE: PINS TO TOP */
-    padding-top: 80px; /* Space below header */
+  .ui-overlay {
+    padding: calc(env(safe-area-inset-top) + 20px) 30px;
+    
+    /* LIGHTENED MOBILE FROST */
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    background: linear-gradient(
+      to bottom, 
+      rgba(247, 236, 232, 0.2) 0%, 
+      transparent 20%, 
+      transparent 80%, 
+      rgba(247, 236, 232, 0.2) 100%
+    );
   }
   
-  .content-lockup {
-    text-align: left; /* MOBILE: PIN LEFT */
-    margin-left: -5px; /* editorial offset */
+  .hero-container {
+    justify-content: flex-start; 
+    align-items: flex-start;    
+    text-align: left;
+    padding-top: 100px;
+    padding-left: 10px; /* Slight left padding as requested */
   }
-
+  
   .brand-title {
-    font-size: 3.2rem !important; /* Elegant size for mobile */
+    font-size: 3.5rem !important;
     line-height: 0.9 !important;
   }
 }
 
-/* 5. TYPOGRAPHY */
 .brand-title {
   font-size: clamp(3rem, 12vw, 8rem);
   font-weight: 300;
-  line-height: 0.95;
-  color: var(--text-primary);
   font-style: italic;
+  color: #1a1a1a;
   margin: 0;
 }
 
 .brand-subtitle {
-  font-size: 0.7rem;
-  letter-spacing: 0.6em;
-  margin-top: 1.5rem;
-  margin-bottom: 2.5rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.5em;
   text-transform: uppercase;
   font-family: sans-serif;
-  opacity: 0.6;
+  opacity: 0.7;
+  margin-bottom: 1rem;
 }
 
-/* 6. BUTTONS & UI ELEMENTS */
-.inquiry-btn, .explore-cta, .social-links, . editorial-meta {
-  pointer-events: auto; /* Re-enable clicks for the buttons */
-  cursor: pointer;
-}
-
-/* MODERN INQUIRY BUTTON */
-.inquiry-btn {
+/* MODERN HIGH-END BUTTONS */
+.inquiry-button {
+  pointer-events: auto;
   background: white;
   border: none;
-  border-radius: 50px;
-  color: var(--text-primary);
-  padding: 12px 30px;
-  font-size: 9px;
-  letter-spacing: 0.15em;
+  border-radius: 100px;
+  padding: 10px 25px;
+  font-size: 10px;
+  letter-spacing: 2px;
   text-transform: uppercase;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.03);
-  transition: transform 0.3s ease, background 0.3s ease;
+  color: #1a1a1a;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  cursor: pointer;
+  transition: 0.3s ease;
 }
 
-.inquiry-btn:active {
-  transform: scale(0.95);
-}
-
-.explore-cta {
-  background: transparent;
-  border: 1px solid rgba(0,0,0,0.15);
-  color: var(--text-primary);
+.explore-button {
+  pointer-events: auto;
+  margin-top: 30px;
+  background: #1a1a1a;
+  color: white;
+  border: none;
   padding: 18px 45px;
-  font-size: 0.7rem;
-  letter-spacing: 3px;
-  text-transform: uppercase;
   border-radius: 50px;
-  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: 0.4s ease;
 }
 
-.explore-cta:hover {
-  background: white;
-  border-color: white;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+.explore-button:hover {
+  background: #2d1d3d;
+  transform: translateY(-2px);
 }
 
-/* SHARED FLEX BOXES */
-.solarium-header, .solarium-footer {
+.main-header, .main-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  pointer-events: none; /* Allow interaction with scene */
 }
 
-.brand-logotype {
-  font-weight: 700;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  font-size: 11px;
-  color: var(--text-primary);
-}
+.logo { font-weight: 700; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; }
+.socials { display: flex; gap: 20px; font-size: 10px; opacity: 0.6; }
+.legal { font-size: 9px; opacity: 0.4; letter-spacing: 1px; }
 
-.social-links { display: flex; gap: 20px; font-size: 9px; opacity: 0.5; color: var(--text-primary); }
-.editorial-meta { font-size: 8px; opacity: 0.3; letter-spacing: 0.1em; color: var(--text-primary); }
+.ui-overlay.fade-out { opacity: 0; }
 
-.main-ui.fade-out {
-  opacity: 0;
-}
-
-/* 7. UNDERWATER PAGES (Base structure preserved) */
-.underwater-overlay {
+.underwater-page {
   position: fixed;
   inset: 0;
-  z-index: 5;
-  pointer-events: none;
+  z-index: 50;
   opacity: 0;
+  pointer-events: none;
   transition: opacity 1.5s ease;
   background: radial-gradient(circle at 50% 30%, rgba(11, 42, 58, 0.7), rgba(2, 8, 12, 0.95));
   backdrop-filter: blur(8px);
 }
-.underwater-overlay.active { opacity: 1; pointer-events: auto; }
-.depth-layer { position: absolute; top: 25%; width: 100%; text-align: center; color: #e8f6ff; }
-.return-btn { position: absolute; bottom: calc(env(safe-area-inset-bottom) + 40px); left: 50%; transform: translateX(-50%); padding: 14px 40px; border-radius: 50px; border: 1px solid white; color: white; background: none; cursor: pointer;}
+
+.underwater-page.active { opacity: 1; pointer-events: auto; }
+.depth-layer { position: absolute; top: 25%; width: 100%; text-align: center; color: white; }
+.back-button { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); padding: 15px 40px; background: rgba(255,255,255,0.1); border: 1px solid white; color: white; border-radius: 50px; cursor: pointer; }
