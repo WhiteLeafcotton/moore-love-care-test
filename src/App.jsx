@@ -15,52 +15,18 @@ export default function App() {
   }, []);
 
   return (
-    /* Change height to 100dvh here */
-    <div style={{ width: "100vw", height: "100dvh", background: "#f7ece8", position: "relative", overflow: "hidden" }}>
+    <div className="app-container">
       
       {/* UI OVERLAY */}
       <div className={`ui-overlay ${!isHome ? 'fade-out' : ''}`}>
         
-        {/* HEADER */}
-        <header style={{ 
-          width: "100%", 
-          display: "flex", 
-          justifyContent: "space-between", 
-          alignItems: "center",
-          position: "absolute",
-          top: "0",
-          left: "0",
-          padding: isMobile ? "calc(env(safe-area-inset-top) + 20px) 30px" : "50px 80px",
-          boxSizing: "border-box",
-          pointerEvents: "none",
-          zIndex: 10
-        }}>
-          <div style={{ fontWeight: 700, letterSpacing: "0.3em", textTransform: "uppercase", fontSize: isMobile ? "9px" : "11px", color: "#2d1d3d" }}>
-            Moore Love & Care
-          </div>
-          <button style={{ 
-            pointerEvents: "auto",
-            background: "transparent", 
-            border: "1px solid rgba(45,29,61,0.2)", 
-            borderRadius: "100px",
-            color: "#2d1d3d", 
-            padding: isMobile ? "8px 20px" : "10px 30px", 
-            fontSize: "8px", 
-            textTransform: "uppercase"
-          }}>
-            Inquiry
-          </button>
+        <header className="site-header">
+          <div className="brand-logo">Moore Love & Care</div>
+          <button className="inquiry-btn">Inquiry</button>
         </header>
 
-        {/* HERO SECTION - RESTRUCTURED FOR TOP-LEFT ALIGNMENT */}
-        <div style={{ 
-          position: "absolute",
-          top: isMobile ? "calc(env(safe-area-inset-top) + 120px)" : "50%",
-          left: isMobile ? "30px" : "8%",
-          transform: isMobile ? "none" : "translateY(-50%)",
-          pointerEvents: "none",
-          textAlign: "left"
-        }}>
+        {/* HERO SECTION */}
+        <main className="hero-content">
           <div className="brand-subtitle">The Solarium Sanctuary</div>
           <h1 className="brand-title">
             Moore Love <br /> & Care.
@@ -68,60 +34,27 @@ export default function App() {
           <button 
             className="explore-button" 
             onClick={() => setCurrentView("collection")} 
-            style={{ marginTop: "30px", pointerEvents: "auto" }}
           >
             Explore Collection
           </button>
-        </div>
+        </main>
 
-        {/* FOOTER */}
-        <footer style={{ 
-          position: "absolute", 
-          bottom: "0", 
-          left: "0", 
-          width: "100%",
-          padding: isMobile ? "0 30px calc(env(safe-area-inset-bottom) + 20px)" : "30px 80px",
-          display: "flex", 
-          justifyContent: "space-between", 
-          alignItems: "center", 
-          boxSizing: "border-box"
-        }}>
-          <div style={{ display: "flex", gap: "20px", color: "rgba(45, 29, 61, 0.5)", fontSize: "9px", pointerEvents: "auto" }}>
+        <footer className="site-footer">
+          <div className="social-links">
             <span>FB</span>
             <span>IG</span>
           </div>
-          <div style={{ fontSize: "8px", opacity: 0.4, letterSpacing: "0.1em" }}>
-            EST. 2026 // MOORE ESTATES
-          </div>
+          <div className="est-tag">EST. 2026 // MOORE ESTATES</div>
         </footer>
       </div>
 
       {/* UNDERWATER VIEW */}
       <div className={`underwater-page ${!isHome ? 'active' : ''}`}>
-        <div className="depth-layer hero">
+        <div className="depth-layer">
           <h1>Submerged Grace</h1>
           <p>Mental Restoration // Rehabilitation</p>
         </div>
-        
-        <button 
-          onClick={() => setCurrentView("home")}
-          style={{
-            position: "absolute", 
-            bottom: "calc(env(safe-area-inset-bottom) + 40px)", 
-            left: "50%", 
-            transform: "translateX(-50%)",
-            background: "rgba(255,255,255,0.1)",
-            border: "1px solid rgba(255,255,255,0.2)",
-            color: "white", 
-            padding: "14px 40px", 
-            borderRadius: "50px", 
-            fontSize: "9px",
-            letterSpacing: "0.2em", 
-            pointerEvents: "auto", 
-            cursor: "pointer",
-            textTransform: "uppercase"
-          }}
-        >
+        <button className="return-btn" onClick={() => setCurrentView("home")}>
           ← Return to Surface
         </button>
       </div>

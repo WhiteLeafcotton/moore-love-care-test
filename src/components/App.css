@@ -1,145 +1,129 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,700&display=swap');
 
-/* --- Root & Reset --- */
 :root {
   --accent-gold: #c5a059; 
   --brand-purple: #2d1d3d;    
-  --bg-color: #f7ece8; /* Ensure this matches your Canvas clearColor */
+  --bg-color: #f7ece8; 
 }
 
-/* CRITICAL: The White Bar Killer */
-* {
-  box-sizing: border-box;
-}
+/* 1. RESET & WHITE BAR REMOVAL */
+* { box-sizing: border-box; }
 
-html, body, #root {
+html, body, #root, .app-container {
   margin: 0;
   padding: 0;
   width: 100%;
-  height: 100dvh; /* Dynamic viewport height is key for mobile */
+  height: 100dvh; /* Kills white bars on mobile Safari/Chrome */
   background-color: var(--bg-color);
   overflow: hidden; 
-  overscroll-behavior: none; /* Prevents white space on swipe/bounce */
+  overscroll-behavior: none;
 }
 
-/* --- UI Overlay Structure --- */
+/* 2. OVERLAY & DUAL-FROST */
 .ui-overlay {
-  position: fixed; /* Keep it locked to the glass */
+  position: fixed;
   inset: 0;
   z-index: 100;
   display: flex;
   flex-direction: column;
-  pointer-events: none; /* Let 3D scene be interactive underneath */
-  transition: opacity 1.2s cubic-bezier(0.23, 1, 0.32, 1);
+  pointer-events: none;
+  transition: opacity 1.2s ease;
+  padding: 50px 80px; /* Desktop Default */
 }
 
-.ui-overlay.fade-out {
-  opacity: 0;
-}
-
-/* --- THE DUAL-FADE FROST (Mobile) --- */
 @media (max-width: 768px) {
   .ui-overlay {
-    /* Apply the Blur */
+    padding: calc(env(safe-area-inset-top) + 20px) 30px calc(env(safe-area-inset-bottom) + 20px);
     backdrop-filter: blur(18px) saturate(120%);
     -webkit-backdrop-filter: blur(18px) saturate(120%);
     
-    /* Frost Tint: White/Pink at top and bottom, clear in middle */
     background: linear-gradient(
       to bottom, 
-      rgba(247, 236, 232, 0.6) 0%, 
-      transparent 30%, 
-      transparent 70%, 
-      rgba(247, 236, 232, 0.6) 100%
+      rgba(247, 236, 232, 0.7) 0%, 
+      transparent 35%, 
+      transparent 65%, 
+      rgba(247, 236, 232, 0.7) 100%
     );
 
-    /* THE MASK: Physically hides the blur in the middle 40% of the screen */
-    -webkit-mask-image: linear-gradient(
-      to bottom, 
-      black 0%, 
-      black 20%, 
-      rgba(0,0,0,0) 40%, 
-      rgba(0,0,0,0) 60%, 
-      black 80%, 
-      black 100%
-    );
+    -webkit-mask-image: linear-gradient(to bottom, black 0%, black 20%, transparent 40%, transparent 60%, black 80%, black 100%);
     mask-image: linear-gradient(to bottom, black 20%, transparent 40%, transparent 60%, black 80%);
   }
+}
 
+/* 3. MOBILE ALIGNMENT (TOP LEFT) */
+.hero-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Desktop Default */
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .hero-content {
+    justify-content: flex-start; /* Pins to top */
+    padding-top: 60px; /* Space below header */
+  }
+  
   .brand-title {
     font-size: 3.5rem !important;
+    text-align: left;
     line-height: 0.9 !important;
-    text-align: left;
-    color: var(--brand-purple);
   }
-
+  
   .brand-subtitle {
-    text-align: left;
-    margin-bottom: 1rem !important;
-    color: var(--brand-purple);
-    opacity: 0.7;
-  }
-
-  .explore-button {
-    align-self: flex-start;
-    background: var(--brand-purple) !important;
-    color: var(--bg-color) !important;
-    border: none !important;
-    padding: 16px 40px !important;
+    text-align: left !important;
+    margin-bottom: 0.5rem !important;
   }
 }
 
-/* --- Desktop Layout --- */
-@media (min-width: 769px) {
-  .ui-overlay {
-    padding: 80px;
-    justify-content: center;
-  }
-  
-  .brand-title {
-    font-size: 5.5rem;
-    color: var(--brand-purple);
-  }
-  
-  /* Vertical line for desktop elegance */
-  .brand-title::before {
-    content: '';
-    position: absolute;
-    left: -40px;
-    top: 10px;
-    width: 1px;
-    height: 100px;
-    background: linear-gradient(to bottom, var(--accent-gold), transparent);
-  }
+/* 4. BUTTONS & UI */
+.site-header, .site-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
 
-/* --- Shared Elements --- */
-.brand-title {
-  font-family: 'Playfair Display', serif;
-  font-weight: 400;
-  margin: 0;
-  letter-spacing: -2px;
-  font-style: italic;
+.brand-logo { 
+  font-weight: 700; 
+  letter-spacing: 0.3em; 
+  text-transform: uppercase; 
+  font-size: 11px; 
+  color: var(--brand-purple); 
 }
 
-.brand-subtitle {
-  font-family: sans-serif;
-  font-size: 0.75rem;
-  letter-spacing: 0.5em;
-  text-transform: uppercase;
-  margin-bottom: 2rem;
+.explore-button, .inquiry-btn {
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 .explore-button {
-  pointer-events: auto; /* Re-enable clicks for the button */
+  margin-top: 30px;
+  background: var(--brand-purple);
+  color: var(--bg-color);
+  border: none;
+  padding: 18px 45px;
   border-radius: 50px;
-  font-size: 0.7rem;
-  letter-spacing: 3px;
   text-transform: uppercase;
-  cursor: pointer;
-  transition: transform 0.3s ease, background 0.3s ease;
+  letter-spacing: 3px;
+  font-size: 0.7rem;
+  align-self: flex-start; /* Ensures left-align on mobile */
 }
 
-.explore-button:active {
-  transform: scale(0.95);
+/* 5. TYPOGRAPHY */
+.brand-title {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  margin: 0;
+  color: var(--brand-purple);
 }
+
+.brand-subtitle {
+  font-size: 0.75rem;
+  letter-spacing: 0.5em;
+  text-transform: uppercase;
+  color: var(--brand-purple);
+}
+
+.ui-overlay.fade-out { opacity: 0; }
