@@ -388,23 +388,8 @@ export default function Scene({ currentView }) {
       <directionalLight position={[-15, 30, 10]} intensity={1.6} castShadow />
 
       <group position={[0, 0, 0]}>
-        {/* --- MAIN BASE PLATFORM: RAISED FOR FULL VISIBILITY --- */}
-        <mesh position={[15.5, -0.5, 15.0]} castShadow receiveShadow>
-          <boxGeometry args={[20, 12.0, 30]} />
-          <meshStandardMaterial {...butterProps} />
-        </mesh>
-
+        <mesh position={[15.5, -2.1, 15.0]} castShadow receiveShadow><boxGeometry args={[20, 8.0, 30]} /><meshStandardMaterial {...butterProps} /></mesh>
         <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={butterProps} />
-
-        {/* --- THE NOOK DISC: PROMINENT & ABOVE WATER --- */}
-        <mesh position={[8.5, -1.4, 14.0]} castShadow receiveShadow>
-          <cylinderGeometry args={[2.5, 2.5, 0.06, 64]} />
-          <meshStandardMaterial 
-            {...butterProps} 
-            transparent 
-            opacity={0.98} 
-          />
-        </mesh>
 
         <group position={[-16, -1.6, 0]}>
           <mesh position={[1, 8.5 + extraWallHeight/2, 0]} castShadow receiveShadow><boxGeometry args={[4, 17 + extraWallHeight, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
@@ -422,12 +407,14 @@ export default function Scene({ currentView }) {
         </group>
 
         <group>
+          {/* SITTING AREA - COUPLE REMOVED FROM BENCH GROUP */}
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <Bench materialProps={butterProps} />
           </group>
 
           <WalkingToConversationChapter butterProps={butterProps} />
 
+          {/* RESTORED ANIMATED WALKER COUPLE (BY THE STAIRS) - REMAINING */}
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <group position={[3.5, 0, -0.2]} rotation={[0, -0.5, 0]}>
                <BlockHumanoid 
