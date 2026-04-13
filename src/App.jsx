@@ -15,12 +15,13 @@ export default function App() {
   }, []);
 
   return (
-    <div style={{ width: "100vw", height: "100vh", background: "#f7ece8", position: "relative", overflow: "hidden" }}>
+    /* Change height to 100dvh here */
+    <div style={{ width: "100vw", height: "100dvh", background: "#f7ece8", position: "relative", overflow: "hidden" }}>
       
-      {/* UI OVERLAY (HOME VIEW) */}
+      {/* UI OVERLAY */}
       <div className={`ui-overlay ${!isHome ? 'fade-out' : ''}`}>
         
-        {/* HEADER: Spaced for Status Bar/Notch */}
+        {/* HEADER */}
         <header style={{ 
           width: "100%", 
           display: "flex", 
@@ -31,7 +32,8 @@ export default function App() {
           left: "0",
           padding: isMobile ? "calc(env(safe-area-inset-top) + 20px) 30px" : "50px 80px",
           boxSizing: "border-box",
-          pointerEvents: "none"
+          pointerEvents: "none",
+          zIndex: 10
         }}>
           <div style={{ fontWeight: 700, letterSpacing: "0.3em", textTransform: "uppercase", fontSize: isMobile ? "9px" : "11px", color: "#2d1d3d" }}>
             Moore Love & Care
@@ -44,15 +46,21 @@ export default function App() {
             color: "#2d1d3d", 
             padding: isMobile ? "8px 20px" : "10px 30px", 
             fontSize: "8px", 
-            textTransform: "uppercase", 
-            letterSpacing: "0.1em"
+            textTransform: "uppercase"
           }}>
             Inquiry
           </button>
         </header>
 
-        {/* HERO SECTION: Centered for Mobile */}
-        <div style={{ pointerEvents: "none" }}>
+        {/* HERO SECTION - RESTRUCTURED FOR TOP-LEFT ALIGNMENT */}
+        <div style={{ 
+          position: "absolute",
+          top: isMobile ? "calc(env(safe-area-inset-top) + 120px)" : "50%",
+          left: isMobile ? "30px" : "8%",
+          transform: isMobile ? "none" : "translateY(-50%)",
+          pointerEvents: "none",
+          textAlign: "left"
+        }}>
           <div className="brand-subtitle">The Solarium Sanctuary</div>
           <h1 className="brand-title">
             Moore Love <br /> & Care.
@@ -60,25 +68,25 @@ export default function App() {
           <button 
             className="explore-button" 
             onClick={() => setCurrentView("collection")} 
-            style={{ marginTop: "40px", pointerEvents: "auto" }}
+            style={{ marginTop: "30px", pointerEvents: "auto" }}
           >
             Explore Collection
           </button>
         </div>
 
-        {/* FOOTER: Spaced for Home Indicator */}
+        {/* FOOTER */}
         <footer style={{ 
           position: "absolute", 
           bottom: "0", 
           left: "0", 
           width: "100%",
-          padding: isMobile ? "20px 30px calc(env(safe-area-inset-bottom) + 20px)" : "30px 80px",
+          padding: isMobile ? "0 30px calc(env(safe-area-inset-bottom) + 20px)" : "30px 80px",
           display: "flex", 
           justifyContent: "space-between", 
           alignItems: "center", 
           boxSizing: "border-box"
         }}>
-          <div style={{ display: "flex", gap: "20px", color: "rgba(45, 29, 61, 0.5)", fontSize: "9px" }}>
+          <div style={{ display: "flex", gap: "20px", color: "rgba(45, 29, 61, 0.5)", fontSize: "9px", pointerEvents: "auto" }}>
             <span>FB</span>
             <span>IG</span>
           </div>
@@ -88,7 +96,7 @@ export default function App() {
         </footer>
       </div>
 
-      {/* UNDERWATER / COLLECTION VIEW */}
+      {/* UNDERWATER VIEW */}
       <div className={`underwater-page ${!isHome ? 'active' : ''}`}>
         <div className="depth-layer hero">
           <h1>Submerged Grace</h1>
@@ -118,7 +126,6 @@ export default function App() {
         </button>
       </div>
 
-      {/* 3D SCENE */}
       <Canvas shadows dpr={[1, 2]} camera={{ position: [-14, 3.2, 24], fov: 35 }}>
         <Suspense fallback={null}>
           <Scene currentView={currentView} />

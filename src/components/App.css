@@ -3,149 +3,143 @@
 /* --- Root & Reset --- */
 :root {
   --accent-gold: #c5a059; 
-  --deep-navy: #05101a;    
-  --soft-white: rgba(255, 255, 255, 0.85);
+  --brand-purple: #2d1d3d;    
+  --bg-color: #f7ece8; /* Ensure this matches your Canvas clearColor */
 }
 
-/* CRITICAL: Reset to remove white bars */
+/* CRITICAL: The White Bar Killer */
 * {
   box-sizing: border-box;
 }
 
-html, body {
+html, body, #root {
   margin: 0;
   padding: 0;
   width: 100%;
-  /* Use dvh to force edge-to-edge on mobile browsers */
-  height: 100dvh; 
-  background-color: var(--deep-navy);
+  height: 100dvh; /* Dynamic viewport height is key for mobile */
+  background-color: var(--bg-color);
   overflow: hidden; 
-  /* Prevents "rubber-banding" white space when swiping */
-  overscroll-behavior: none; 
+  overscroll-behavior: none; /* Prevents white space on swipe/bounce */
 }
 
-#root {
-  width: 100%;
-  height: 100%;
-}
-
-/* --- THE DUAL-FADE FROST (Mobile) --- */
-/* This creates blur at the top and bottom, but keeps the middle clear */
-@media (max-width: 768px) {
-  .ui-overlay {
-    position: absolute;
-    inset: 0; /* Cover full screen */
-    left: 0 !important; 
-    top: 0 !important;
-    transform: none !important;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start; /* Aligns content to top */
-    padding: calc(env(safe-area-inset-top) + 40px) 30px;
-    
-    backdrop-filter: blur(15px) saturate(120%);
-    -webkit-backdrop-filter: blur(15px) saturate(120%);
-    
-    /* Frost Fade Gradient */
-    background: linear-gradient(
-      to bottom, 
-      rgba(5, 16, 26, 0.5) 0%, 
-      transparent 35%, 
-      transparent 65%, 
-      rgba(5, 16, 26, 0.5) 100%
-    );
-
-    /* The Mask "cuts" the blur out of the middle */
-    -webkit-mask-image: linear-gradient(
-      to bottom, 
-      black 0%, 
-      black 15%, 
-      transparent 35%, 
-      transparent 65%, 
-      black 85%, 
-      black 100%
-    );
-    mask-image: linear-gradient(to bottom, black 15%, transparent 35%, transparent 65%, black 85%);
-  }
-
-  /* Vertical line accent - hide on mobile to keep it clean */
-  .ui-overlay::before {
-    display: none;
-  }
-
-  .brand-title {
-    font-size: 3.2rem !important; /* Elegant size for mobile */
-    text-align: left;
-    letter-spacing: -1px;
-  }
-
-  .brand-subtitle {
-    text-align: left;
-    margin-top: 1rem;
-    margin-bottom: 2.5rem;
-    font-size: 0.7rem;
-  }
-
-  .explore-button {
-    align-self: flex-start; /* Pins button to left */
-    padding: 15px 35px;
-  }
-}
-
-/* --- Desktop Layout (Keep your original logic) --- */
-@media (min-width: 769px) {
-  .ui-overlay {
-    position: absolute;
-    top: 50%;
-    left: 8%;
-    transform: translateY(-50%);
-    z-index: 100;
-  }
-  
-  .ui-overlay::before {
-    content: '';
-    position: absolute;
-    left: -30px;
-    top: 12px;
-    width: 1px;
-    height: 80px;
-    background: linear-gradient(to bottom, var(--accent-gold), transparent);
-  }
-}
-
-/* --- Shared Typography --- */
-.brand-title {
-  font-size: clamp(3rem, 8vw, 5.5rem);
-  font-weight: 400;
-  line-height: 1;
-  margin: 0;
-  letter-spacing: -2px;
-  font-family: 'Playfair Display', serif;
-}
-
-.brand-subtitle {
-  font-size: 0.85rem;
-  letter-spacing: 0.6em;
-  margin-top: 1.5rem;
-  margin-bottom: 3.5rem;
-  color: var(--accent-gold);
-  text-transform: uppercase;
-  font-family: sans-serif;
-}
-
-.explore-button {
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #fff;
-  padding: 20px 50px;
-  font-size: 0.7rem;
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: all 0.5s ease;
+/* --- UI Overlay Structure --- */
+.ui-overlay {
+  position: fixed; /* Keep it locked to the glass */
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none; /* Let 3D scene be interactive underneath */
+  transition: opacity 1.2s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .ui-overlay.fade-out {
   opacity: 0;
-  pointer-events: none;
+}
+
+/* --- THE DUAL-FADE FROST (Mobile) --- */
+@media (max-width: 768px) {
+  .ui-overlay {
+    /* Apply the Blur */
+    backdrop-filter: blur(18px) saturate(120%);
+    -webkit-backdrop-filter: blur(18px) saturate(120%);
+    
+    /* Frost Tint: White/Pink at top and bottom, clear in middle */
+    background: linear-gradient(
+      to bottom, 
+      rgba(247, 236, 232, 0.6) 0%, 
+      transparent 30%, 
+      transparent 70%, 
+      rgba(247, 236, 232, 0.6) 100%
+    );
+
+    /* THE MASK: Physically hides the blur in the middle 40% of the screen */
+    -webkit-mask-image: linear-gradient(
+      to bottom, 
+      black 0%, 
+      black 20%, 
+      rgba(0,0,0,0) 40%, 
+      rgba(0,0,0,0) 60%, 
+      black 80%, 
+      black 100%
+    );
+    mask-image: linear-gradient(to bottom, black 20%, transparent 40%, transparent 60%, black 80%);
+  }
+
+  .brand-title {
+    font-size: 3.5rem !important;
+    line-height: 0.9 !important;
+    text-align: left;
+    color: var(--brand-purple);
+  }
+
+  .brand-subtitle {
+    text-align: left;
+    margin-bottom: 1rem !important;
+    color: var(--brand-purple);
+    opacity: 0.7;
+  }
+
+  .explore-button {
+    align-self: flex-start;
+    background: var(--brand-purple) !important;
+    color: var(--bg-color) !important;
+    border: none !important;
+    padding: 16px 40px !important;
+  }
+}
+
+/* --- Desktop Layout --- */
+@media (min-width: 769px) {
+  .ui-overlay {
+    padding: 80px;
+    justify-content: center;
+  }
+  
+  .brand-title {
+    font-size: 5.5rem;
+    color: var(--brand-purple);
+  }
+  
+  /* Vertical line for desktop elegance */
+  .brand-title::before {
+    content: '';
+    position: absolute;
+    left: -40px;
+    top: 10px;
+    width: 1px;
+    height: 100px;
+    background: linear-gradient(to bottom, var(--accent-gold), transparent);
+  }
+}
+
+/* --- Shared Elements --- */
+.brand-title {
+  font-family: 'Playfair Display', serif;
+  font-weight: 400;
+  margin: 0;
+  letter-spacing: -2px;
+  font-style: italic;
+}
+
+.brand-subtitle {
+  font-family: sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.5em;
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+}
+
+.explore-button {
+  pointer-events: auto; /* Re-enable clicks for the button */
+  border-radius: 50px;
+  font-size: 0.7rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.explore-button:active {
+  transform: scale(0.95);
 }
