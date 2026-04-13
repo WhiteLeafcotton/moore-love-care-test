@@ -11,15 +11,20 @@ export default function App() {
     <div className="app-viewport">
       <div className={`ui-overlay ${!isHome ? 'fade-out' : ''}`}>
         
+        {/* PREMIUM HEADER */}
         <header className="main-header">
           <div className="logo">Moore Love & Care</div>
+          <nav className="header-nav">
+            <span className="nav-link">The Sanctuary</span>
+          </nav>
           <button className="tour-button">Schedule Tour</button>
         </header>
 
+        {/* HERO AREA */}
         <div className="hero-container">
           <div className="brand-subtitle">The Solarium Sanctuary</div>
           <h1 className="brand-title">
-            Moore Love <br /> & Care.
+            Moore <br /> Love & <br /> Care.
           </h1>
           <button 
             className="explore-button" 
@@ -29,13 +34,18 @@ export default function App() {
           </button>
         </div>
 
+        {/* PREMIUM FOOTER */}
         <footer className="main-footer">
-          <div className="social-links-premium">
-            <span className="icon-wrap">INSTAGRAM</span>
-            <span className="icon-wrap">FACEBOOK</span>
-            <span className="icon-wrap">LINKEDIN</span>
+          <div className="footer-left">
+            <div className="social-links-premium">
+              <span className="social-icon">IG</span>
+              <span className="social-icon">FB</span>
+              <span className="social-icon">LI</span>
+            </div>
           </div>
-          <div className="legal-mark">EST. 2026 // MOORE ESTATES</div>
+          <div className="footer-right">
+            <div className="legal-mark">EST. 2026 // MOORE ESTATES</div>
+          </div>
         </footer>
       </div>
 

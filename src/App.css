@@ -20,29 +20,51 @@ body, html, #root, .app-viewport {
   flex-direction: column;
   pointer-events: none;
   transition: opacity 1.2s ease;
-  padding: 50px 80px;
+  padding: 40px 60px;
   
-  /* WEB FROST: Restored premium depth */
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  /* WEB FROST: LIGHT LEFT-TO-RIGHT FADE */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   background: linear-gradient(
-    to bottom, 
-    rgba(247, 236, 232, 0.45) 0%, 
-    transparent 30%, 
-    transparent 70%, 
-    rgba(247, 236, 232, 0.45) 100%
+    to right, 
+    rgba(247, 236, 232, 0.4) 0%, 
+    rgba(247, 236, 232, 0.1) 50%, 
+    transparent 100%
   );
 }
 
-/* BIG JAGUAR TITLE STYLE */
+/* HEADER & NAV STYLES */
+.main-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  pointer-events: auto;
+}
+
+.header-nav {
+  display: flex;
+  gap: 40px;
+}
+
+.nav-link {
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  opacity: 0.6;
+  cursor: pointer;
+  font-family: sans-serif;
+}
+
+/* 3-LINE TIGHT TITLE */
 .brand-title {
-  font-size: clamp(4rem, 15vw, 11rem); /* Massive, high-end scale */
+  font-size: clamp(4rem, 12vw, 10rem);
   font-weight: 300;
   font-style: italic;
   color: #1a1a1a;
   margin: 0;
-  line-height: 0.85; /* Tightened like the Jaguar font example */
-  letter-spacing: -0.02em;
+  line-height: 0.8; /* Tight stack */
+  letter-spacing: -0.03em;
 }
 
 .hero-container {
@@ -54,20 +76,18 @@ body, html, #root, .app-viewport {
   text-align: center;
 }
 
-/* MOBILE: TAILORED HIGH-END ALIGNMENT */
+/* MOBILE: TAILORED & TIGHT */
 @media (max-width: 768px) {
   .ui-overlay {
-    padding: calc(env(safe-area-inset-top) + 20px) 25px;
+    padding: calc(env(safe-area-inset-top) + 15px) 20px;
     
-    /* MOBILE FROST: Lightened for clarity */
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
+    /* MOBILE FROST: ULTRA LIGHT */
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
     background: linear-gradient(
       to bottom, 
-      rgba(247, 236, 232, 0.25) 0%, 
-      transparent 15%, 
-      transparent 85%, 
-      rgba(247, 236, 232, 0.25) 100%
+      rgba(247, 236, 232, 0.15) 0%, 
+      transparent 100%
     );
   }
   
@@ -75,79 +95,68 @@ body, html, #root, .app-viewport {
     justify-content: flex-start; 
     align-items: flex-start;    
     text-align: left;
-    padding-top: 120px;
+    padding-top: 60px; /* Moved up */
   }
   
   .brand-title {
-    font-size: 4.2rem !important;
-    line-height: 0.8 !important;
+    font-size: 4rem !important;
+    line-height: 0.85 !important;
   }
+
+  .header-nav { display: none; } /* Clean up mobile header */
 }
 
-.brand-subtitle {
-  font-size: 0.7rem;
-  letter-spacing: 0.6em;
-  text-transform: uppercase;
-  font-family: sans-serif;
-  opacity: 0.5;
-  margin-bottom: 2rem;
-}
-
-/* PREMIUM BUTTONS */
+/* BUTTONS */
 .tour-button {
   pointer-events: auto;
   background: #1a1a1a;
   border: none;
   border-radius: 100px;
-  padding: 12px 28px;
-  font-size: 9px;
+  padding: 10px 22px;
+  font-size: 8px;
   letter-spacing: 2px;
   text-transform: uppercase;
   color: white;
   cursor: pointer;
-  transition: 0.3s cubic-bezier(0.2, 1, 0.3, 1);
 }
 
 .explore-button {
   pointer-events: auto;
-  margin-top: 40px;
+  margin-top: 30px;
   background: white;
   color: #1a1a1a;
-  border: 1px solid rgba(0,0,0,0.1);
-  padding: 20px 50px;
+  border: 1px solid rgba(0,0,0,0.08);
+  padding: 18px 40px;
   border-radius: 100px;
   text-transform: uppercase;
-  letter-spacing: 4px;
-  font-size: 0.65rem;
+  letter-spacing: 3px;
+  font-size: 0.6rem;
   cursor: pointer;
-  transition: 0.4s ease;
 }
 
-/* PREMIUM FOOTER */
-.main-header, .main-footer {
+/* FOOTER */
+.main-footer {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-end;
   width: 100%;
 }
 
-.logo { font-weight: 700; font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; }
+.logo { font-weight: 700; font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; }
 
 .social-links-premium {
   display: flex;
-  gap: 30px;
+  gap: 20px;
   pointer-events: auto;
 }
 
-.icon-wrap {
-  font-size: 9px;
-  letter-spacing: 2px;
-  opacity: 0.4;
+.social-icon {
+  font-size: 10px;
+  font-weight: bold;
+  opacity: 0.5;
   cursor: pointer;
-  transition: opacity 0.3s;
+  letter-spacing: 1px;
 }
-
-.icon-wrap:hover { opacity: 1; }
 
 .legal-mark { font-size: 8px; opacity: 0.3; letter-spacing: 2px; text-transform: uppercase; }
 
