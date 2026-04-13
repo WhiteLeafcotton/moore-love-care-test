@@ -392,11 +392,15 @@ export default function Scene({ currentView }) {
         <mesh position={[15.5, -2.1, 15.0]} castShadow receiveShadow><boxGeometry args={[20, 8.0, 30]} /><meshStandardMaterial {...butterProps} /></mesh>
         <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={butterProps} />
 
-        {/* --- THE NOOK DISC --- */}
-        {/* Adjusted size and position to bring it slightly out of the 90-degree corner */}
-        <mesh position={[6.5, -1.42, 16.5]} castShadow receiveShadow>
-          <cylinderGeometry args={[1.5, 1.5, 0.03, 64]} />
-          <meshStandardMaterial {...butterProps} transparent opacity={0.85} />
+        {/* --- THE PROMINENT NOOK DISC --- */}
+        {/* Significantly shifted out of the corner and enlarged for premium visual balance */}
+        <mesh position={[8.5, -1.42, 14.0]} castShadow receiveShadow>
+          <cylinderGeometry args={[2.5, 2.5, 0.04, 64]} />
+          <meshStandardMaterial 
+            {...butterProps} 
+            transparent 
+            opacity={0.95} 
+          />
         </mesh>
 
         <group position={[-16, -1.6, 0]}>
