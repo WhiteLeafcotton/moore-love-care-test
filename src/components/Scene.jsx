@@ -6,7 +6,7 @@ import * as THREE from "three";
 
 extend({ Water });
 
-const GRASS_COUNT = 150000; // Reduced slightly for memory stability on Safari
+const GRASS_COUNT = 80000; // Reduced slightly for memory stability on mobile
 const TITLE_PURPLE = "#21162e"; 
 const DARKER_PINK_THEME = "#bf9fb3"; 
 
@@ -27,14 +27,14 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
-// --- THE CIRCULAR FLOATING PLATFORM (WITH CHAIR & LAMP) ---
+// --- THE CIRCULAR FLOATING PLATFORM + FURNITURE ---
 const FloatingPlatform = ({ butterProps }) => {
   return (
     <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
       <group position={[10, -1.1, 16]}>
-        {/* The Base Circle */}
-        <mesh receiveShadow>
-          <cylinderGeometry args={[3.5, 3.5, 0.2, 64]} /> 
+        {/* THE DISC */}
+        <mesh renderOrder={1} frustumCulled={false}>
+          <cylinderGeometry args={[3.2, 3.2, 0.2, 64]} /> 
           <meshStandardMaterial 
             color="#ffffff" 
             transparent={true} 
@@ -43,44 +43,41 @@ const FloatingPlatform = ({ butterProps }) => {
           />
         </mesh>
 
-        {/* The Rug */}
+        {/* RUG */}
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.11, 0]}>
-          <circleGeometry args={[2.8, 64]} />
-          <meshStandardMaterial color="#2a1d38" />
+            <circleGeometry args={[2.4, 64]} />
+            <meshStandardMaterial color="#2a1d38" />
         </mesh>
 
-        {/* The Chair */}
-        <group position={[-0.8, 0.1, 0]} rotation={[0, 0.5, 0]}>
-          <mesh position={[0, 0.4, 0]} castShadow>
-            <boxGeometry args={[1.4, 0.2, 1.4]} />
-            <meshStandardMaterial color="#3b2a4d" />
-          </mesh>
-          <mesh position={[0, 1.1, -0.6]} castShadow>
-            <boxGeometry args={[1.4, 1.2, 0.2]} />
-            <meshStandardMaterial color="#3b2a4d" />
-          </mesh>
+        {/* CHAIR */}
+        <group position={[-0.7, 0.1, 0]} rotation={[0, 0.4, 0]}>
+            <mesh position={[0, 0.4, 0]} castShadow>
+                <boxGeometry args={[1.3, 0.2, 1.3]} />
+                <meshStandardMaterial color="#3b2a4d" />
+            </mesh>
+            <mesh position={[0, 1.1, -0.6]} rotation={[-0.1, 0, 0]} castShadow>
+                <boxGeometry args={[1.3, 1.3, 0.2]} />
+                <meshStandardMaterial color="#3b2a4d" />
+            </mesh>
         </group>
 
-        {/* The Lamp */}
-        <group position={[1.5, 0.1, -0.8]}>
-          <mesh position={[0, 1.5, 0]} castShadow>
-            <cylinderGeometry args={[0.05, 0.05, 3]} />
-            <meshStandardMaterial color="#111" />
-          </mesh>
-          <mesh position={[-0.7, 3, 0]} castShadow>
-            <boxGeometry args={[1.4, 0.05, 0.05]} />
-            <meshStandardMaterial color="#111" />
-          </mesh>
-          <mesh position={[-1.4, 2.6, 0]}>
-            <sphereGeometry args={[0.15, 32, 32]} />
-            <meshStandardMaterial emissive="#ffdca8" emissiveIntensity={5} color="#fff4cc" />
-          </mesh>
-          <pointLight position={[-1.4, 2.6, 0]} intensity={2} distance={10} color="#ffdca8" />
+        {/* LAMP */}
+        <group position={[1.4, 0.1, -0.8]}>
+            <mesh position={[0, 1.5, 0]}><cylinderGeometry args={[0.05, 0.05, 3]} /><meshStandardMaterial color="#111" /></mesh>
+            <mesh position={[-0.7, 3, 0]}><boxGeometry args={[1.4, 0.05, 0.05]} /><meshStandardMaterial color="#111" /></mesh>
+            <mesh position={[-1.4, 2.6, 0]}>
+                <sphereGeometry args={[0.15, 32, 32]} />
+                <meshStandardMaterial emissive="#ffdca8" emissiveIntensity={6} color="#fff4cc" />
+            </mesh>
+            <pointLight position={[-1.4, 2.6, 0]} intensity={2.5} distance={10} color="#ffdca8" />
         </group>
 
-        {/* Placeholder for Character on Chair */}
-        <group position={[-0.8, 0.35, 0]} rotation={[0, 0.5, 0]}>
-             {/* Character would render here */}
+        {/* CHARACTERS ON PLATFORM */}
+        <group position={[-0.7, 0.35, 0]}>
+             <BlockHumanoid scale={0.75} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI/2, 0, 0], rightLegRotation: [Math.PI/2, 0, 0], headRotationY: 0.3 }} />
+        </group>
+        <group position={[1.0, 0.1, 0.8]} rotation={[0, -0.5, 0]}>
+             <BlockHumanoid isHelper scale={0.85} materialProps={butterProps} poseProps={{ leftArmRotation: [-1.2, 0, 0.1], rightArmRotation: [-1.2, 0, -0.1] }} />
         </group>
       </group>
     </Float>
@@ -419,7 +416,7 @@ const WalkingToConversationChapter = ({ butterProps }) => {
 };
 
 // --- MAIN SCENE ---
-export function Scene({ currentView }) {
+export default function Scene({ currentView }) {
   const { camera, size } = useThree();
   const waterRef = useRef();
   const isMobile = size.width < 768;
@@ -430,20 +427,14 @@ export function Scene({ currentView }) {
 
   useFrame((state, delta) => {
     const isHome = currentView === "home";
+    // Camera is pulled back to see the platform better
+    const targetPos = isHome ? (isMobile ? new THREE.Vector3(-18, 4.5, 38) : new THREE.Vector3(-14, 4.2, 32)) : new THREE.Vector3(-24.5, 3.5, -450);
     
-    // CAMERA POSITION
-    const targetPos = isHome 
-      ? (isMobile ? new THREE.Vector3(-18, 4.5, 38) : new THREE.Vector3(-13, 3.2, 28)) 
-      : new THREE.Vector3(-24.5, 3.5, -450);
-
-    // CAMERA FOCUS - Focused specifically on the circle platform at [10, -1.1, 16]
-    const targetLook = isHome 
-      ? new THREE.Vector3(10, 0, 16) 
-      : new THREE.Vector3(-24.5, 1.5, -1000);
+    // LookAt adjusted to center on the Floating Platform [10, -1.1, 16]
+    const targetLook = isHome ? new THREE.Vector3(10, 1.2, 10) : new THREE.Vector3(-24.5, 1.5, -1000);
     
     camera.position.lerp(targetPos, 0.05); 
     camera.lookAt(targetLook);
-    
     if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.08;
   });
 
@@ -538,10 +529,7 @@ export function Scene({ currentView }) {
         position={[0, -1.45, 0]} 
       />
 
-      {/* CIRCLE PLATFORM ATTACHED TO SCENE */}
       <FloatingPlatform butterProps={butterProps} />
     </>
   );
 }
-
-export default Scene;
