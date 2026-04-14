@@ -3,15 +3,15 @@
   <head>
     <meta charset="utf-8" />
 
-    <!-- 🔥 THIS IS CRITICAL -->
+    <!-- 🔥 CRITICAL -->
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
     <meta name="theme-color" content="#f7ece8" />
     <title>Moore Love & Care</title>
 
     <style>
-      /* 🔥 HARD RESET (removes ALL white gaps) */
-      html, body, #root {
+      /* 🔥 HARD LOCK ROOT (THIS FIXES WHITE BARS) */
+      html, body {
         margin: 0;
         padding: 0;
         width: 100%;
@@ -21,7 +21,12 @@
       }
 
       body {
-        position: fixed; /* 🔥 prevents mobile bounce gaps */
+        position: fixed;
+        inset: 0;
+      }
+
+      #root {
+        position: fixed;
         inset: 0;
       }
     </style>
