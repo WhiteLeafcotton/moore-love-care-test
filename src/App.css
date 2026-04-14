@@ -26,6 +26,24 @@ html, body, #root {
   background: transparent;
 }
 
+/* ✅ FORCE TRUE FULL HEIGHT */
+.app-viewport {
+  position: fixed;
+  inset: 0;
+
+  width: 100vw;
+  height: 100dvh;
+
+  background: transparent;
+}
+
+/* ✅ CANVAS FULL BLEED */
+canvas {
+  position: fixed !important;
+  inset: 0;
+  width: 100vw !important;
+  height: 100dvh !important;
+}
 
 /* ================= UI OVERLAY ================= */
 
@@ -50,8 +68,8 @@ html, body, #root {
 
   background: linear-gradient(
     90deg,
-    rgba(247, 236, 232, 0.2) 0%,
-    rgba(247, 236, 232, 0.05) 35%,
+    rgba(247, 236, 232, 0.45) 0%,
+    rgba(247, 236, 232, 0.15) 35%,
     transparent 65%
   );
 }
@@ -122,213 +140,51 @@ html, body, #root {
   color: white;
 }
 
-/* ================= FOOTER UPGRADE ================= */
+/* ================= FOOTER ================= */
 
 .main-footer {
-  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
   font-size: 9px;
-  letter-spacing: 0.2em;
+  letter-spacing: 1.5px;
   color: var(--text-soft);
-  padding-bottom: 5px; /* Fine-tune distance from bottom */
-  pointer-events: none;
 }
 
-/* LEFT SIDE: Icons */
 .social-links {
   display: flex;
-  gap: 20px;
+  gap: 24px;
   pointer-events: auto;
-  flex: 1; /* Takes up 1/3 of space */
 }
 
 .social-icon {
   color: var(--text-main);
-  opacity: 0.4;
-  transition: opacity 0.3s ease;
-  display: flex;
-  align-items: center;
+  opacity: 0.5;
 }
 
-.social-icon:hover {
-  opacity: 1;
-}
+/* ================= MOBILE ================= */
 
-/* CENTER: The Tagline */
-.footer-tag {
-  flex: 1; /* Takes up 1/3 of space */
-  text-align: center;
-  font-weight: 400;
-  opacity: 0.6;
-  white-space: nowrap;
-}
-
-/* RIGHT SIDE: Legal */
-.footer-right {
-  flex: 1; /* Takes up 1/3 of space */
-  text-align: right;
-  line-height: 1.6;
-  text-transform: uppercase;
-}
-
-/* ================= MOBILE FOOTER FIX ================= */
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400&family=Inter:wght@300;400;600&display=swap');
-
-:root {
-  --bg: #f7ece8;
-  --text-main: #1f1726;
-  --text-soft: rgba(31, 23, 38, 0.4);
-  --safe-top: env(safe-area-inset-top);
-  --safe-bottom: env(safe-area-inset-bottom);
-}
-
-/* RESET */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  -webkit-font-smoothing: antialiased;
-}
-
-html, body, #root {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  background-color: var(--bg) !important;
-  position: fixed;
-}
-
-/* OVERDRAW FIX: Shoves bars off-screen */
-.app-viewport {
-  position: fixed;
-  top: -20vh;
-  left: 0;
-  right: 0;
-  width: 100vw;
-  height: 140vh; 
-  background: var(--bg);
-  overflow: hidden;
-}
-
-/* UI LAYER: 35% LEFT FROST */
-.ui-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: calc(var(--safe-top) + 6vh) 7vw calc(var(--safe-bottom) + 6vh);
-  pointer-events: none;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  
-  /* FROST CONTROL: Change 0.45 and 0.15 to lighten/darken */
-  background: linear-gradient(
-    90deg,
-    rgba(247, 236, 232, 0.2) 0%,
-    rgba(247, 236, 232, 0.05) 35%,
-    transparent 65%
-  );
-}
-
-/* HEADER */
-.main-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  pointer-events: auto;
-}
-
-.logo {
-  font-size: 11px;
-  letter-spacing: 0.5em;
-  text-transform: uppercase;
-  font-weight: 600;
-}
-
-/* HERO */
-.hero-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  flex-grow: 1;
-}
-
-.brand-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(4rem, 10vw, 8.5rem);
-  line-height: 0.82;
-  letter-spacing: -0.04em;
-  pointer-events: auto;
-}
-
-.brand-subtitle {
-  font-size: 11px;
-  letter-spacing: 0.8em;
-  text-transform: uppercase;
-  color: var(--text-soft);
-  margin-bottom: 1.5rem;
-}
-
-/* PILL BUTTONS */
-.inquiry-button, .explore-button {
-  background: transparent;
-  border: 1px solid rgba(31, 23, 38, 0.2);
-  border-radius: 999px;
-  padding: 10px 24px;
-  font-size: 9px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  cursor: pointer;
-  pointer-events: auto;
-  color: var(--text-main);
-  transition: 0.3s ease;
-}
-
-.explore-button { margin-top: 50px; width: fit-content; }
-.inquiry-button:hover, .explore-button:hover {
-  background: var(--text-main);
-  color: white;
-}
-
-/* FOOTER UPGRADE */
-.main-footer {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  font-size: 9px;
-  letter-spacing: 0.15em;
-  color: var(--text-soft);
-}
-
-.social-links { display: flex; gap: 24px; flex: 1; pointer-events: auto; }
-.footer-tag { flex: 1; text-align: center; }
-.footer-right { flex: 1; text-align: right; line-height: 1.6; }
-.social-icon { color: var(--text-main); opacity: 0.5; display: flex; }
-
-/* ================= THE UNIFIED MOBILE BLOCK ================= */
 @media (max-width: 768px) {
   .ui-overlay {
-    /* Safe area aware padding */
-    padding: calc(var(--safe-top) + 25px) 25px calc(var(--safe-bottom) + 25px);
-    background: linear-gradient(to bottom, rgba(247,236,232,0.4) 0%, transparent 45%);
+    padding:
+      calc(var(--safe-top) + 25px)
+      25px
+      calc(var(--safe-bottom) + 25px);
+
+    background: linear-gradient(
+      to bottom,
+      rgba(247,236,232,0.35) 0%,
+      transparent 45%
+    );
   }
 
-  .brand-subtitle { display: none !important; } /* Hidden on mobile */
-  .brand-title { font-size: 4.5rem; line-height: 0.9; }
+  .brand-title {
+    font-size: 4.5rem;
+  }
 
   .main-footer {
     flex-direction: column;
-    align-items: center; 
-    text-align: center;
-    gap: 20px;
+    align-items: flex-start;
+    gap: 15px;
   }
-
-  .footer-tag { order: 1; font-size: 8px; }
-  .social-links { order: 2; justify-content: center; }
-  .footer-right { order: 3; text-align: center; font-size: 8px; }
 }
