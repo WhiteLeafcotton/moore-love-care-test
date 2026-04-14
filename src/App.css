@@ -14,7 +14,7 @@ body, html, #root, .app-viewport {
   font-family: 'Inter', sans-serif;
 }
 
-/* UI LAYER - THE GHOST TINT (0.15 Opacity) */
+/* UI LAYER - GHOST TINT (0.15 Opacity) */
 .ui-overlay {
   position: fixed;
   inset: 0;
@@ -27,7 +27,7 @@ body, html, #root, .app-viewport {
   pointer-events: none;
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
-  /* Tint vanishes by mid-screen to reveal 3D */
+  /* The frost now disappears by the middle of the screen */
   background: linear-gradient(
     90deg, 
     rgba(247, 236, 232, 0.15) 0%, 
@@ -63,43 +63,13 @@ body, html, #root, .app-viewport {
   pointer-events: auto;
 }
 
-.hero-container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-}
-
-.brand-subtitle {
-  font-size: 10px;
-  letter-spacing: 0.8em;
-  text-transform: uppercase;
-  color: var(--text-soft);
-  margin-bottom: 1.2rem;
-}
-
 .brand-title {
   font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(3rem, 8vw, 6.2rem); /* Slightly smaller for premium feel */
+  font-size: clamp(3rem, 8vw, 6.2rem);
   font-weight: 400;
   line-height: 0.85;
   letter-spacing: -0.03em;
   margin: 0;
-  pointer-events: auto;
-}
-
-.explore-button {
-  margin-top: 40px;
-  background: var(--text-main);
-  color: white;
-  border: none;
-  border-radius: 50px;
-  padding: 18px 45px;
-  text-transform: uppercase;
-  letter-spacing: 4px;
-  font-size: 9px;
-  cursor: pointer;
   pointer-events: auto;
 }
 
@@ -119,19 +89,27 @@ body, html, #root, .app-viewport {
   pointer-events: auto;
 }
 
-.social-icon { color: var(--text-main); opacity: 0.6; cursor: pointer; transition: opacity 0.3s; }
+.social-icon { 
+  color: var(--text-main); 
+  opacity: 0.6; 
+  cursor: pointer; 
+  display: flex;
+  align-items: center;
+}
+
 .social-icon:hover { opacity: 1; }
 
-.footer-tag { font-size: 8px; letter-spacing: 3.5px; opacity: 0.5; text-transform: uppercase; }
-.footer-right { text-align: right; line-height: 1.6; }
-
-/* MOBILE REFINEMENT - NO BARS */
+/* MOBILE REFINEMENT - STOPS THE BOXED-IN LOOK */
 @media (max-width: 768px) {
   .ui-overlay {
     padding: 40px 30px;
     background: linear-gradient(to bottom, rgba(247,236,232,0.25) 0%, transparent 45%);
   }
-  .main-header, .main-footer { border: none !important; padding: 0 !important; }
+  /* Explicitly ensuring no white bars exist */
+  .main-header, .main-footer { 
+    border: none !important; 
+    padding: 0 !important; 
+  }
   .brand-title { font-size: 3.8rem; }
   .main-footer { flex-direction: column; align-items: flex-start; gap: 30px; }
   .footer-tag { display: none; }
