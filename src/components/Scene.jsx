@@ -36,9 +36,9 @@ const FloatingPlatform = () => {
       floatIntensity={0.5} 
     >
       <mesh 
-        // X reduced to 6 to move left toward the stairs
-        // Z reduced to 12 to pull it back into the architectural space
-        position={[6, -0.6, 12]} 
+        // Increased X to 10 to push it right, out of the stairs
+        // Increased Z to 16 to bring it slightly more forward
+        position={[10, -0.6, 16]} 
         renderOrder={10000}       
         frustumCulled={false}     
       >
