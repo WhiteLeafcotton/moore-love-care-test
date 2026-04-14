@@ -9,6 +9,7 @@ extend({ Water });
 const GRASS_COUNT = 400000;
 const TITLE_PURPLE = "#21162e"; 
 const DARKER_PINK_THEME = "#bf9fb3"; 
+const BUTTER_MATERIAL = { color: "#fce4e4", roughness: 0.9, metalness: 0.02 };
 
 const getHillHeight = (x, z) => {
   const dist = Math.sqrt(x * x + z * z);
@@ -27,23 +28,28 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
-// --- THE OVERLAY RED BALL (IMMUNE TO WATER) ---
-const RedBall = () => {
+// --- NEW: THE ARCHITECTURAL FLOATING PLATFORM ---
+const FloatingPlatform = () => {
   return (
-    <Float speed={5} rotationIntensity={1} floatIntensity={2}>
-      <mesh 
-        position={[10, -0.5, 20]} // Moved closer to camera view
-        renderOrder={10000}       // Highest possible priority
-        frustumCulled={false}     // Never hide, even if "off screen"
-      >
-        <sphereGeometry args={[2.2, 32, 32]} />
-        <meshBasicMaterial 
-          color="#ff0000" 
-          depthTest={false}       // Draw over everything
-          transparent={true} 
-          opacity={1}
-        />
-      </mesh>
+    <Float 
+      speed={1.5} 
+      rotationIntensity={0.1} 
+      floatIntensity={0.5} 
+      floatingRange={[-0.1, 0.1]}
+    >
+      <group position={[12, -1.2, 18]}> {/* Positioned exactly where the red ball was */}
+        {/* Main Platform Base */}
+        <mesh castShadow receiveShadow>
+          <cylinderGeometry args={[5, 5, 0.4, 64]} />
+          <meshStandardMaterial {...BUTTER_MATERIAL} />
+        </mesh>
+        
+        {/* Subtle Decorative Rim - matching your pink theme */}
+        <mesh position={[0, 0.2, 0]}>
+          <torusGeometry args={[5, 0.05, 16, 100]} rotation={[Math.PI / 2, 0, 0]} />
+          <meshStandardMaterial color={DARKER_PINK_THEME} />
+        </mesh>
+      </group>
     </Float>
   );
 };
@@ -399,8 +405,6 @@ export default function Scene({ currentView }) {
     if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.08;
   });
 
-  const butterProps = { color: "#fce4e4", roughness: 0.9, metalness: 0.02 };
-
   return (
     <>
       <Sky distance={450000} sunPosition={[-20, 8, -100]} inclination={0.6} azimuth={0.25} />
@@ -409,36 +413,36 @@ export default function Scene({ currentView }) {
       <directionalLight position={[-15, 30, 10]} intensity={1.6} castShadow />
 
       <group position={[0, 0, 0]}>
-        <mesh position={[15.5, -2.1, 15.0]} castShadow receiveShadow><boxGeometry args={[20, 8.0, 30]} /><meshStandardMaterial {...butterProps} /></mesh>
-        <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={butterProps} />
+        <mesh position={[15.5, -2.1, 15.0]} castShadow receiveShadow><boxGeometry args={[20, 8.0, 30]} /><meshStandardMaterial {...BUTTER_MATERIAL} /></mesh>
+        <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={BUTTER_MATERIAL} />
 
         <group position={[-16, -1.6, 0]}>
-          <mesh position={[1, 8.5 + extraWallHeight/2, 0]} castShadow receiveShadow><boxGeometry args={[4, 17 + extraWallHeight, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
-          <WallOpening position={[6, 0, 0]} colorProps={butterProps} /> 
-          <WallOpening position={[12, 0, 0]} colorProps={butterProps} /> 
-          <mesh position={[24, 8.5 + extraWallHeight/2, 0]} castShadow receiveShadow><boxGeometry args={[18, 17 + extraWallHeight, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
+          <mesh position={[1, 8.5 + extraWallHeight/2, 0]} castShadow receiveShadow><boxGeometry args={[4, 17 + extraWallHeight, 2]} /><meshStandardMaterial {...BUTTER_MATERIAL} /></mesh>
+          <WallOpening position={[6, 0, 0]} colorProps={BUTTER_MATERIAL} /> 
+          <WallOpening position={[12, 0, 0]} colorProps={BUTTER_MATERIAL} /> 
+          <mesh position={[24, 8.5 + extraWallHeight/2, 0]} castShadow receiveShadow><boxGeometry args={[18, 17 + extraWallHeight, 2]} /><meshStandardMaterial {...BUTTER_MATERIAL} /></mesh>
         </group>
 
         <group position={[17, -1.6, 1]} rotation={[0, -Math.PI / 2, 0]}>
-          <mesh castShadow receiveShadow position={[0.5, 8.5 + extraWallHeight/2, 0]}><boxGeometry args={[1, 17 + extraWallHeight, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
-          <mesh castShadow receiveShadow position={[4.5, 8.5 + extraWallHeight/2, 0]}><boxGeometry args={[7, 17 + extraWallHeight, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
-          <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={butterProps} />
-          <WallOpening position={[17, 0, 0]} isWindow={true} colorProps={butterProps} />
-          <mesh castShadow receiveShadow position={[24, 8.5 + extraWallHeight/2, 0]}><boxGeometry args={[8, 17 + extraWallHeight, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
+          <mesh castShadow receiveShadow position={[0.5, 8.5 + extraWallHeight/2, 0]}><boxGeometry args={[1, 17 + extraWallHeight, 2]} /><meshStandardMaterial {...BUTTER_MATERIAL} /></mesh>
+          <mesh castShadow receiveShadow position={[4.5, 8.5 + extraWallHeight/2, 0]}><boxGeometry args={[7, 17 + extraWallHeight, 2]} /><meshStandardMaterial {...BUTTER_MATERIAL} /></mesh>
+          <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={BUTTER_MATERIAL} />
+          <WallOpening position={[17, 0, 0]} isWindow={true} colorProps={BUTTER_MATERIAL} />
+          <mesh castShadow receiveShadow position={[24, 8.5 + extraWallHeight/2, 0]}><boxGeometry args={[8, 17 + extraWallHeight, 2]} /><meshStandardMaterial {...BUTTER_MATERIAL} /></mesh>
         </group>
 
         <group>
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
-            <Bench materialProps={butterProps} />
+            <Bench materialProps={BUTTER_MATERIAL} />
           </group>
 
-          <WalkingToConversationChapter butterProps={butterProps} />
+          <WalkingToConversationChapter butterProps={BUTTER_MATERIAL} />
 
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <group position={[3.5, 0, -0.2]} rotation={[0, -0.5, 0]}>
                <BlockHumanoid 
                 scale={0.84} 
-                materialProps={butterProps} 
+                materialProps={BUTTER_MATERIAL} 
                 poseProps={{ 
                   walker: true, 
                   torsoRotationX: 0.1, 
@@ -453,7 +457,7 @@ export default function Scene({ currentView }) {
                <BlockHumanoid 
                 isHelper
                 scale={0.95} 
-                materialProps={butterProps} 
+                materialProps={BUTTER_MATERIAL} 
                 poseProps={{ 
                   position: [-0.95, 0, 0.35], 
                   rotation: [0, 0.65, 0], 
@@ -465,11 +469,11 @@ export default function Scene({ currentView }) {
           </group>
 
           <group position={[6.0, 1.6, 10.0]} rotation={[0, Math.PI / 2, 0]}>
-            <BlockHumanoid isHelper scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0], rotation: [0, -0.4, 0]}} />
-            <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
+            <BlockHumanoid isHelper scale={0.9} materialProps={BUTTER_MATERIAL} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0], rotation: [0, -0.4, 0]}} />
+            <BlockHumanoid scale={0.88} materialProps={BUTTER_MATERIAL} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
           </group>
 
-          <WheelchairChapter butterProps={butterProps} isMobile={isMobile} />
+          <WheelchairChapter butterProps={BUTTER_MATERIAL} isMobile={isMobile} />
         </group>
       </group>
 
@@ -490,8 +494,7 @@ export default function Scene({ currentView }) {
         position={[0, -1.45, 0]} 
       />
 
-      {/* RENDERED LAST OUTSIDE ALL GROUPS */}
-      <RedBall />
+      <FloatingPlatform />
     </>
   );
 }
