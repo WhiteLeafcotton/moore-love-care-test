@@ -1,6 +1,6 @@
 import { useRef, useMemo, useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
-import { Environment, Sky, Float } from "@react-three/drei"; // Added Float
+import { Environment, Sky, Float } from "@react-three/drei"; 
 import { Water } from "three-stdlib";
 import * as THREE from "three";
 
@@ -27,23 +27,20 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
-// --- THE FAIL-SAFE RED BALL COMPONENT ---
+// --- THE OVERLAY RED BALL (IMMUNE TO WATER) ---
 const RedBall = () => {
   return (
-    <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
+    <Float speed={5} rotationIntensity={1} floatIntensity={2}>
       <mesh 
-        position={[22, -0.6, 25]} 
-        renderOrder={9999} // Extreme high priority
+        position={[10, -0.5, 20]} // Moved closer to camera view
+        renderOrder={10000}       // Highest possible priority
+        frustumCulled={false}     // Never hide, even if "off screen"
       >
-        <sphereGeometry args={[2.8, 32, 32]} />
-        <meshStandardMaterial 
+        <sphereGeometry args={[2.2, 32, 32]} />
+        <meshBasicMaterial 
           color="#ff0000" 
-          emissive="#440000" 
-          emissiveIntensity={0.5}
-          roughness={0.2}
-          metalness={0.8}
-          depthTest={false} // Prevents water from cutting into it
-          transparent={true} // Triggers better transparency sorting
+          depthTest={false}       // Draw over everything
+          transparent={true} 
           opacity={1}
         />
       </mesh>
@@ -51,7 +48,7 @@ const RedBall = () => {
   );
 };
 
-// --- OTHER COMPONENTS ---
+// --- HUMANOID COMPONENTS ---
 const HeartBadge = () => {
   const shape = useMemo(() => {
     const s = new THREE.Shape();
@@ -493,7 +490,7 @@ export default function Scene({ currentView }) {
         position={[0, -1.45, 0]} 
       />
 
-      {/* FINAL RENDER OVERRIDE */}
+      {/* RENDERED LAST OUTSIDE ALL GROUPS */}
       <RedBall />
     </>
   );
