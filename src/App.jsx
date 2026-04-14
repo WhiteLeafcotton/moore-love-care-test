@@ -10,21 +10,16 @@ export default function App() {
   return (
     <div className="app-viewport">
       
-      {/* ===== UI LAYER ===== */}
+      {/* ===== UI LAYER (Light Frost + Left Aligned) ===== */}
       <div className={`ui-overlay ${!isHome ? "fade-out" : ""}`}>
 
         {/* ===== HEADER ===== */}
         <header className="main-header">
           <div className="logo">MOORE LOVE & CARE</div>
-
-          <nav className="header-nav">
-            <span className="nav-link">THE SANCTUARY</span>
-          </nav>
-
           <button className="inquiry-button">INQUIRY</button>
         </header>
 
-        {/* ===== HERO ===== */}
+        {/* ===== HERO (Strict Left Alignment) ===== */}
         <div className="hero-container">
           <div className="brand-subtitle">
             THE SOLARIUM SANCTUARY
@@ -53,7 +48,6 @@ export default function App() {
               <span>LI</span>
               <span>YT</span>
             </div>
-
             <div className="footer-tag">
               MENTAL RESTORATION // REHABILITATION
             </div>
@@ -61,24 +55,22 @@ export default function App() {
 
           <div className="footer-right">
             MOORE ESTATES INTERNATIONAL <br />
-            PRIVACY POLICY // TERMS
+            EST. 2026 — PRIVACY POLICY // TERMS
           </div>
         </footer>
       </div>
 
-      {/* ===== UNDERWATER PAGE ===== */}
+      {/* ===== UNDERWATER / SECONDARY VIEW ===== */}
       <div className={`underwater-page ${!isHome ? "active" : ""}`}>
         <div className="depth-layer">
           <h1>Submerged Grace</h1>
-          <p>Mental Restoration // Rehabilitation</p>
+          <button
+            className="back-button"
+            onClick={() => setCurrentView("home")}
+          >
+            ← Return to Surface
+          </button>
         </div>
-
-        <button
-          className="back-button"
-          onClick={() => setCurrentView("home")}
-        >
-          ← Return to Surface
-        </button>
       </div>
 
       {/* ===== 3D CANVAS ===== */}

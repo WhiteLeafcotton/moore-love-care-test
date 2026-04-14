@@ -1,12 +1,11 @@
-/* ===== FONTS (PREMIUM PAIRING) ===== */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Inter:wght@300;400;500;600&display=swap');
+/* ===== FONTS ===== */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
 
 /* ===== ROOT ===== */
 :root {
   --bg: #f7ece8;
   --text-main: #1f1726;
-  --text-soft: rgba(31, 23, 38, 0.6);
-  --accent: #d4a373;
+  --text-soft: rgba(31, 23, 38, 0.5);
 }
 
 /* ===== BASE ===== */
@@ -26,24 +25,24 @@ body, html, #root, .app-viewport {
   color: var(--text-main);
 }
 
-/* ===== UI LAYER (LIGHTENED FROST) ===== */
+/* ===== UI LAYER (ULTRA LIGHT FROST) ===== */
 .ui-overlay {
   position: fixed;
   inset: 0;
   z-index: 100;
   display: flex;
   flex-direction: column;
-  padding: 60px 80px;
+  padding: 60px 7vw;
 
-  /* Significantly lightened blur and saturation */
-  backdrop-filter: blur(6px) saturate(110%);
-  -webkit-backdrop-filter: blur(6px) saturate(110%);
+  /* Significantly lightened frost effect */
+  backdrop-filter: blur(4px) saturate(110%);
+  -webkit-backdrop-filter: blur(4px) saturate(110%);
 
-  /* Gradient shifted to clear more of the 3D scene */
+  /* Gradient shifted to clear the right side of the screen */
   background: linear-gradient(
     110deg,
-    rgba(247,236,232,0.4) 0%,
-    rgba(247,236,232,0.15) 45%,
+    rgba(247,236,232,0.35) 0%,
+    rgba(247,236,232,0.1) 45%,
     transparent 100%
   );
 
@@ -51,11 +50,9 @@ body, html, #root, .app-viewport {
   transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.fade-out {
-  opacity: 0;
-}
+.fade-out { opacity: 0; }
 
-/* ===== HEADER (PREMIUM ALIGNMENT) ===== */
+/* ===== HEADER ===== */
 .main-header {
   display: flex;
   justify-content: space-between;
@@ -72,24 +69,6 @@ body, html, #root, .app-viewport {
   text-transform: uppercase;
 }
 
-.header-nav {
-  display: flex;
-  gap: 40px;
-}
-
-.nav-link {
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 3px;
-  color: var(--text-soft);
-  cursor: pointer;
-  transition: color 0.3s ease;
-}
-
-.nav-link:hover {
-  color: var(--text-main);
-}
-
 .inquiry-button {
   background: rgba(255,255,255,0.4);
   backdrop-filter: blur(10px);
@@ -97,45 +76,45 @@ body, html, #root, .app-viewport {
   border-radius: 999px;
   padding: 12px 32px;
   font-size: 10px;
-  font-weight: 500;
   letter-spacing: 2px;
   text-transform: uppercase;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  transition: all 0.4s ease;
 }
 
 .inquiry-button:hover {
   background: var(--text-main);
   color: white;
-  transform: translateY(-2px);
 }
 
-/* ===== HERO (LEFT ALIGNED) ===== */
+/* ===== HERO (STRICT LEFT ALIGN) ===== */
 .hero-container {
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: flex-start; /* Pushes content to the left */
-  max-width: 900px;
+  align-items: flex-start; /* Corrects the centering issue */
+  text-align: left;
+  max-width: 1000px;
 }
 
 .brand-subtitle {
-  font-size: 0.7rem;
+  font-size: 11px;
   letter-spacing: 0.8em;
   text-transform: uppercase;
   color: var(--text-soft);
   margin-bottom: 1.5rem;
+  padding-left: 5px; /* Visual alignment for serif fonts */
 }
 
 .brand-title {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Cormorant Garamond', serif;
   font-size: clamp(4rem, 12vw, 10rem);
   font-weight: 400;
-  line-height: 0.85;
+  line-height: 0.82;
   letter-spacing: -0.04em;
   margin: 0;
-  text-align: left;
+  margin-left: 0; /* Forced left */
 }
 
 .explore-button {
@@ -144,29 +123,26 @@ body, html, #root, .app-viewport {
   color: white;
   border: none;
   border-radius: 999px;
-  padding: 20px 50px;
+  padding: 22px 55px;
   text-transform: uppercase;
   letter-spacing: 4px;
-  font-size: 0.65rem;
-  font-weight: 500;
+  font-size: 10px;
   cursor: pointer;
   pointer-events: auto;
-  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
-.explore-button:hover {
-  transform: scale(1.05);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-}
+.explore-button:hover { transform: scale(1.03); }
 
-/* ===== FOOTER (PREMIUM GRID) ===== */
+/* ===== FOOTER ===== */
 .main-footer {
-  display: grid;
-  grid-template-columns: 1.5fr 1fr;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
   padding-top: 30px;
   border-top: 1px solid rgba(31, 23, 38, 0.08);
   font-size: 10px;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
   color: var(--text-soft);
 }
@@ -183,43 +159,33 @@ body, html, #root, .app-viewport {
   pointer-events: auto;
 }
 
-.social-links span {
-  cursor: pointer;
-  transition: color 0.3s ease;
-}
-
-.social-links span:hover {
-  color: var(--text-main);
-}
+.social-links span:hover { color: var(--text-main); cursor: pointer; }
 
 .footer-right {
   text-align: right;
   line-height: 1.8;
 }
 
-/* ===== MOBILE VIEW (STUNNING) ===== */
+/* ===== MOBILE VIEW (STUNNING OPTIMIZATION) ===== */
 @media (max-width: 768px) {
   .ui-overlay {
     padding: 40px 25px;
+    /* Soft top-down gradient for mobile readability */
     background: linear-gradient(
       to bottom,
       rgba(247,236,232,0.6) 0%,
-      rgba(247,236,232,0.2) 60%,
+      rgba(247,236,232,0.2) 50%,
       transparent 100%
     );
   }
 
-  .header-nav {
-    display: none; /* Keep mobile clean */
-  }
-
   .brand-title {
-    font-size: 4.8rem;
+    font-size: 5rem; /* Larger impact on mobile */
     line-height: 0.9;
   }
 
   .brand-subtitle {
-    font-size: 0.6rem;
+    font-size: 9px;
     letter-spacing: 0.5em;
   }
 
@@ -229,7 +195,8 @@ body, html, #root, .app-viewport {
   }
 
   .main-footer {
-    grid-template-columns: 1fr;
+    flex-direction: column;
+    align-items: flex-start;
     gap: 30px;
     border-top: none;
   }
@@ -237,11 +204,10 @@ body, html, #root, .app-viewport {
   .footer-right {
     text-align: left;
     font-size: 9px;
-    opacity: 0.7;
   }
 }
 
-/* ===== UNDERWATER PAGE ===== */
+/* ===== SECONDARY PAGE ===== */
 .underwater-page {
   position: fixed;
   inset: 0;
@@ -249,11 +215,9 @@ body, html, #root, .app-viewport {
   pointer-events: none;
   opacity: 0;
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
   transition: opacity 1.5s ease;
-  background: rgba(31, 23, 38, 0.1);
 }
 
 .underwater-page.active {
@@ -261,26 +225,17 @@ body, html, #root, .app-viewport {
   pointer-events: auto;
 }
 
-.depth-layer {
-  text-align: center;
-  color: white;
-}
-
 .depth-layer h1 {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Cormorant Garamond', serif;
+  color: white;
   font-size: 4rem;
-  margin-bottom: 10px;
 }
 
 .back-button {
-  margin-top: 40px;
   background: transparent;
-  border: 1px solid rgba(255,255,255,0.4);
+  border: 1px solid white;
   color: white;
-  padding: 12px 30px;
+  padding: 10px 25px;
   border-radius: 999px;
   cursor: pointer;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  font-size: 10px;
 }
