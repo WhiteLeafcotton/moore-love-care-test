@@ -4,38 +4,77 @@
   --bg: #f7ece8;
   --text-main: #1f1726;
   --text-soft: rgba(31, 23, 38, 0.4);
+
+  /* 🔥 SAFE AREAS */
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
 }
 
-* { box-sizing: border-box; -webkit-font-smoothing: antialiased; margin: 0; padding: 0; }
+/* ===== HARD RESET ===== */
+* {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  margin: 0;
+  padding: 0;
+}
 
-.app-viewport {
+html, body, #root {
   width: 100%;
-  height: 100dvh;
-  position: relative;
-  background-color: var(--bg);
+  height: 100%;
+  background: var(--bg);
+  overflow: hidden;
 }
 
-/* UI LAYER - 35% LEFT FROST (FORCED SPECIFICITY) */
+/* 🔥 REAL FULL HEIGHT FIX */
+.app-viewport {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+}
+
+/* ===== UI OVERLAY ===== */
 .ui-overlay {
-  position: fixed !important;
-  inset: 0 !important;
+  position: absolute;
+  inset: 0;
   z-index: 100;
+
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 7vh 7vw;
+
+  /* 🔥 SAFE AREA PADDING */
+  padding: calc(var(--safe-top) + 40px) 30px calc(var(--safe-bottom) + 30px);
+
   pointer-events: none;
-  /* Re-added the frost tint */
+
   background: linear-gradient(
-    90deg, 
-    rgba(247, 236, 232, 0.45) 0%, 
-    rgba(247, 236, 232, 0.15) 35%, 
+    90deg,
+    rgba(247,236,232,0.45) 0%,
+    rgba(247,236,232,0.15) 35%,
     transparent 65%
-  ) !important;
+  );
 }
 
-/* CONSISTENT PILL BUTTONS */
-.inquiry-button, .explore-button {
+/* ===== HEADER ===== */
+.main-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: auto;
+}
+
+.logo {
+  font-size: 10px;
+  letter-spacing: 0.5em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+}
+
+/* ===== BUTTONS ===== */
+.inquiry-button,
+.explore-button {
   background: transparent;
   border: 1px solid rgba(31, 23, 38, 0.2);
   border-radius: 999px;
@@ -49,20 +88,17 @@
   transition: 0.3s ease;
 }
 
-.explore-button { margin-top: 50px; width: fit-content; }
-.inquiry-button:hover, .explore-button:hover {
+.inquiry-button:hover,
+.explore-button:hover {
   background: var(--text-main);
   color: white;
 }
 
-.brand-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(4rem, 10vw, 8.5rem);
-  font-weight: 400;
-  line-height: 0.82;
-  letter-spacing: -0.04em;
-  margin: 0;
-  pointer-events: auto;
+/* ===== HERO ===== */
+.hero-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .brand-subtitle {
@@ -73,8 +109,21 @@
   margin-bottom: 1.5rem;
 }
 
+.brand-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(4rem, 10vw, 8.5rem);
+  line-height: 0.82;
+  letter-spacing: -0.04em;
+  pointer-events: auto;
+}
+
+.explore-button {
+  margin-top: 50px;
+  width: fit-content;
+}
+
+/* ===== FOOTER ===== */
 .main-footer {
-  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
@@ -83,41 +132,44 @@
   color: var(--text-soft);
 }
 
-.social-links { display: flex; gap: 24px; pointer-events: auto; }
-.social-icon { color: var(--text-main); opacity: 0.5; }
+.social-links {
+  display: flex;
+  gap: 20px;
+  pointer-events: auto;
+}
 
-/* MOBILE REFINEMENT: NO BARS, NO SUBTITLE */
+.social-icon {
+  opacity: 0.5;
+}
+
+/* ===== CANVAS FIX (IMPORTANT) ===== */
+canvas {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+/* ===== MOBILE ===== */
 @media (max-width: 768px) {
-  .ui-overlay {
-    padding: 0 !important;
-    /* Force vertical gradient to cover notch/bottom */
-    background: linear-gradient(to bottom, rgba(247,236,232,0.4) 0%, transparent 40%) !important;
-  }
-  
-  .brand-subtitle { display: none !important; }
 
-  .main-header {
-    padding: 40px 30px;
-    position: absolute;
-    top: 0;
-    width: 100%;
+  .brand-subtitle {
+    display: none;
   }
 
-  .hero-container {
-    padding: 12vh 30px 0 30px;
-    justify-content: flex-start;
+  .brand-title {
+    font-size: 4.5rem;
+    line-height: 0.9;
   }
 
-  .main-footer { 
-    position: absolute;
-    bottom: 0;
-    padding: 0 30px 40px 30px;
-    flex-direction: column; 
-    align-items: flex-start; 
-    gap: 15px;
+  .main-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
   }
-  
-  .brand-title { font-size: 4.5rem; line-height: 0.9; }
-  .footer-tag { display: none; }
-  .footer-right { text-align: left; }
+
+  .footer-right {
+    text-align: left;
+  }
 }
