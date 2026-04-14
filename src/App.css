@@ -4,11 +4,13 @@
   --bg: #f7ece8;
   --text-main: #1f1726;
   --text-soft: rgba(31, 23, 38, 0.4);
+
+  /* ✅ SAFE AREAS */
   --safe-top: env(safe-area-inset-top);
   --safe-bottom: env(safe-area-inset-bottom);
 }
 
-/* RESET & BAR KILLER */
+/* RESET */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -16,40 +18,54 @@
   -webkit-font-smoothing: antialiased;
 }
 
+/* ✅ FULLSCREEN FIX */
 html, body, #root {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background-color: var(--bg) !important; /* Prevents white bars if canvas lags */
-  position: fixed;
+  background: transparent;
 }
 
-/* OVERDRAW FIX: Physically shoves edges 20% past the screen top/bottom */
+/* ✅ FORCE TRUE FULL HEIGHT */
 .app-viewport {
   position: fixed;
-  top: -20vh;
-  left: 0;
-  right: 0;
+  inset: 0;
+
   width: 100vw;
-  height: 140vh; 
-  background: var(--bg);
-  overflow: hidden;
+  height: 100dvh;
+
+  background: transparent;
 }
 
-/* UI OVERLAY - 35% LEFT FROST */
+/* ✅ CANVAS FULL BLEED */
+canvas {
+  position: fixed !important;
+  inset: 0;
+  width: 100vw !important;
+  height: 100dvh !important;
+}
+
+/* ================= UI OVERLAY ================= */
+
 .ui-overlay {
   position: fixed;
   inset: 0;
   z-index: 100;
+
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: calc(var(--safe-top) + 40px) 7vw calc(var(--safe-bottom) + 40px);
+
+  padding:
+    calc(var(--safe-top) + 40px)
+    7vw
+    calc(var(--safe-bottom) + 40px);
+
   pointer-events: none;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  
-  /* The 35% Left Frost Gradient */
+
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
   background: linear-gradient(
     90deg,
     rgba(247, 236, 232, 0.45) 0%,
@@ -57,6 +73,8 @@ html, body, #root {
     transparent 65%
   );
 }
+
+/* ================= HEADER ================= */
 
 .main-header {
   display: flex;
@@ -69,15 +87,14 @@ html, body, #root {
   font-size: 11px;
   letter-spacing: 0.5em;
   text-transform: uppercase;
-  font-weight: 600;
 }
 
-/* HERO */
+/* ================= HERO ================= */
+
 .hero-container {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  flex-grow: 1;
 }
 
 .brand-title {
@@ -85,7 +102,6 @@ html, body, #root {
   font-size: clamp(4rem, 10vw, 8.5rem);
   line-height: 0.82;
   letter-spacing: -0.04em;
-  pointer-events: auto;
 }
 
 .brand-subtitle {
@@ -96,8 +112,10 @@ html, body, #root {
   margin-bottom: 1.5rem;
 }
 
-/* UNIFIED PILL BUTTONS */
-.inquiry-button, .explore-button {
+/* ================= BUTTONS ================= */
+
+.inquiry-button,
+.explore-button {
   background: transparent;
   border: 1px solid rgba(31, 23, 38, 0.2);
   border-radius: 999px;
@@ -116,12 +134,14 @@ html, body, #root {
   width: fit-content;
 }
 
-.inquiry-button:hover, .explore-button:hover {
+.inquiry-button:hover,
+.explore-button:hover {
   background: var(--text-main);
   color: white;
 }
 
-/* FOOTER */
+/* ================= FOOTER ================= */
+
 .main-footer {
   display: flex;
   justify-content: space-between;
@@ -137,20 +157,30 @@ html, body, #root {
   pointer-events: auto;
 }
 
-.social-icon { color: var(--text-main); opacity: 0.5; }
+.social-icon {
+  color: var(--text-main);
+  opacity: 0.5;
+}
 
-/* MOBILE REFINEMENT */
+/* ================= MOBILE ================= */
+
 @media (max-width: 768px) {
   .ui-overlay {
-    padding: calc(var(--safe-top) + 25px) 25px calc(var(--safe-bottom) + 25px);
-    /* Switch to top-down gradient for mobile aesthetics */
-    background: linear-gradient(to bottom, rgba(247,236,232,0.4) 0%, transparent 45%);
+    padding:
+      calc(var(--safe-top) + 25px)
+      25px
+      calc(var(--safe-bottom) + 25px);
+
+    background: linear-gradient(
+      to bottom,
+      rgba(247,236,232,0.35) 0%,
+      transparent 45%
+    );
   }
 
-  /* HIDE SUBTITLE ON MOBILE ONLY */
-  .brand-subtitle { display: none !important; }
-
-  .brand-title { font-size: 4.5rem; line-height: 0.9; }
+  .brand-title {
+    font-size: 4.5rem;
+  }
 
   .main-footer {
     flex-direction: column;

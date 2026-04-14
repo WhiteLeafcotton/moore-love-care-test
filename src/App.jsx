@@ -18,8 +18,6 @@ const Icons = {
   )
 };
 
-// ... (Your Icons here)
-
 export default function App() {
   const [currentView, setCurrentView] = useState("home");
   const isHome = currentView === "home";
@@ -46,7 +44,10 @@ export default function App() {
 
         <footer className="main-footer">
           <div className="social-links">
-             {/* Social icons here */}
+            <span className="social-icon"><Icons.Instagram /></span>
+            <span className="social-icon"><Icons.Facebook /></span>
+            <span className="social-icon"><Icons.Linkedin /></span>
+            <span className="social-icon"><Icons.Youtube /></span>
           </div>
           <div className="footer-tag">RESTORATION // REHABILITATION</div>
           <div className="footer-right">
@@ -60,13 +61,7 @@ export default function App() {
         shadows 
         dpr={[1, 2]} 
         camera={{ position: [-14, 3.2, 24], fov: 35 }}
-        style={{
-          position: "absolute",
-          top: "-20vh",
-          left: 0,
-          width: "100vw",
-          height: "140vh"
-        }}
+        style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh' }}
       >
         <Suspense fallback={null}>
           <Scene currentView={currentView} />
