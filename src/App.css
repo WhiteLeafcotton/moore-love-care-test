@@ -1,88 +1,68 @@
-/* ===== FONTS (PREMIUM PAIRING) ===== */
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400&family=Inter:wght@300;400;600&display=swap');
 
-/* ===== ROOT ===== */
 :root {
   --bg: #f7ece8;
   --text-main: #1f1726;
-  --text-soft: rgba(31, 23, 38, 0.5);
-  --safe-top: env(safe-area-inset-top);
-  --safe-bottom: env(safe-area-inset-bottom);
+  --text-soft: rgba(31, 23, 38, 0.35);
 }
 
-/* ===== BASE RESET ===== */
-* {
-  box-sizing: border-box;
-  -webkit-font-smoothing: antialiased;
-}
+* { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
 
 body, html, #root, .app-viewport {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100dvh;
-  overflow: hidden;
-  background: var(--bg);
+  margin: 0; padding: 0; width: 100%; height: 100dvh;
+  overflow: hidden; background: var(--bg);
   font-family: 'Inter', sans-serif;
-  color: var(--text-main);
 }
 
-/* ===== UI LAYER (LEFT-RIGHT FADE) ===== */
+/* ===== UI LAYER (ULTRA LIGHT TINT) ===== */
 .ui-overlay {
   position: fixed;
   inset: 0;
   z-index: 100;
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* Header top, footer bottom */
-  align-items: flex-start; /* Title left-aligned */
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 8vh 8vw;
 
-  /* PREMIUM SPACING AND PADDING (Balanced frame) */
-  padding: calc(8vh + var(--safe-top)) calc(8vw) calc(8vh + var(--safe-bottom));
+  /* Barely-there frost */
+  backdrop-filter: blur(2px) saturate(105%);
+  -webkit-backdrop-filter: blur(2px) saturate(105%);
 
-  /* Lightened Blur */
-  backdrop-filter: blur(5px) saturate(110%);
-  -webkit-backdrop-filter: blur(5px) saturate(110%);
-
-  /* CRITICAL CHANGE: Left dense, right clear, faded edge to reveal the 3D */
+  /* Gradient is now almost invisible, fading quickly left-to-right */
   background: linear-gradient(
-    110deg,
-    rgba(247,236,232,0.45) 0%, /* Lightest white starts here */
-    rgba(247,236,232,0.2) 40%, /* Frost starts to dissolve */
-    transparent 80%              /* Vanishes here to show architecture */
+    90deg,
+    rgba(247,236,232,0.15) 0%,
+    rgba(247,236,232,0.05) 25%,
+    transparent 50%
   );
 
   pointer-events: none;
-  transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.fade-out { opacity: 0; }
-
-/* ===== HEADER (REFINED PADDING) ===== */
+/* ===== HEADER (NO BARS) ===== */
 .main-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  padding-bottom: 25px;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
   pointer-events: auto;
 }
 
 .logo {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
-  letter-spacing: 0.5em;
+  letter-spacing: 0.6em;
   text-transform: uppercase;
-  color: var(--text-soft);
+  color: var(--text-main);
 }
 
 .inquiry-button {
-  background: white;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: transparent;
+  border: 1px solid rgba(31, 23, 38, 0.15);
   border-radius: 999px;
-  padding: 12px 30px;
-  font-size: 10px;
+  padding: 10px 28px;
+  font-size: 9px;
   letter-spacing: 2px;
   text-transform: uppercase;
   cursor: pointer;
@@ -95,143 +75,115 @@ body, html, #root, .app-viewport {
   color: white;
 }
 
-/* ===== HERO (LEFT ALIGNED) ===== */
+/* ===== HERO ===== */
 .hero-container {
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Vertical center of the screen */
-  align-items: flex-start; /* Forced left alignment */
-  width: 100%;
-  max-width: 900px;
-  /* Visual gap around the title block */
-  margin: 5vh 0;
+  justify-content: center;
+  align-items: flex-start;
 }
 
 .brand-subtitle {
-  font-size: 11px;
+  font-size: 10px;
   letter-spacing: 0.8em;
   text-transform: uppercase;
   color: var(--text-soft);
-  margin-bottom: 1.5rem;
-  padding-left: 5px; /* Alignment visual correction */
+  margin-bottom: 1rem;
 }
 
-/* TITLE SIZE REDUCED */
 .brand-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(3.5rem, 10vw, 8.5rem); /* Reduced max clamp */
+  font-family: 'Cormorant+Garamond', serif;
+  font-size: clamp(3rem, 8vw, 7rem); /* Slightly smaller for premium tension */
   font-weight: 400;
-  line-height: 0.82;
-  letter-spacing: -0.04em;
+  line-height: 0.85;
+  letter-spacing: -0.03em;
   margin: 0;
-  pointer-events: auto;
+  color: var(--text-main);
 }
 
 .explore-button {
-  margin-top: 50px;
+  margin-top: 40px;
   background: var(--text-main);
   color: white;
   border: none;
-  border-radius: 999px;
-  padding: 22px 55px;
+  border-radius: 50px;
+  padding: 18px 45px;
   text-transform: uppercase;
   letter-spacing: 4px;
-  font-size: 10px;
+  font-size: 9px;
   cursor: pointer;
   pointer-events: auto;
-  transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
-.explore-button:hover {
-  transform: scale(1.05);
-  box-shadow: 0 15px 30px rgba(0,0,0,0.1);
-}
-
-/* ===== FOOTER (BALANCED PREMIUM GRID) ===== */
+/* ===== FOOTER (CLEAN & BALANCED) ===== */
 .main-footer {
   width: 100%;
-  /* 3 intentional columns for balance */
-  display: grid;
-  grid-template-columns: 1fr 1.2fr 1fr;
-  align-items: flex-end; /* Pin items to the bottom border */
-  padding-top: 30px;
-  border-top: 1px solid rgba(0,0,0,0.06);
-  font-size: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  font-size: 9px;
   letter-spacing: 1.5px;
-  text-transform: uppercase;
   color: var(--text-soft);
-  gap: 20px;
 }
 
-/* Socials Column */
 .social-links {
   display: flex;
-  justify-content: flex-start;
-  gap: 25px;
+  gap: 18px;
   pointer-events: auto;
-}
-.social-links span { cursor: pointer; transition: color 0.3s ease; }
-.social-links span:hover { color: var(--text-main); }
-
-/* Tagline Column */
-.footer-tag {
-  text-align: center;
-  font-weight: 500;
   color: var(--text-main);
-  border-left: 1px solid rgba(0,0,0,0.06);
-  border-right: 1px solid rgba(0,0,0,0.06);
-  padding: 0 20px;
+  opacity: 0.7;
 }
 
-/* Legal/Address Column */
+.social-links svg {
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+}
+
+.social-links svg:hover {
+  opacity: 1;
+}
+
+.footer-tag {
+  text-transform: uppercase;
+  font-size: 8px;
+  letter-spacing: 4px;
+  opacity: 0.5;
+}
+
 .footer-right {
   text-align: right;
-  line-height: 1.8;
+  line-height: 1.6;
 }
 
-/* ===== MOBILE VIEW (STUNNING OPTIMIZATION) ===== */
+/* ===== MOBILE VIEW (NO BARS / CLEAN STACK) ===== */
 @media (max-width: 768px) {
   .ui-overlay {
-    padding: 30px 25px;
+    padding: 40px 30px;
+    /* Soft vertical fade instead of horizontal for mobile */
     background: linear-gradient(
       to bottom,
-      rgba(247,236,232,0.6) 0%,
-      rgba(247,236,232,0.2) 60%,
-      transparent 100%
+      rgba(247,236,232,0.3) 0%,
+      transparent 40%
     );
   }
 
+  /* Explicitly ensuring no bars exist */
+  .main-header, .main-footer {
+    border: none !important;
+    padding: 0 !important;
+  }
+
   .brand-title {
-    font-size: 4.8rem;
-    line-height: 0.9;
+    font-size: 4rem;
   }
 
   .main-footer {
-    grid-template-columns: 1fr;
-    gap: 30px;
-    border-top: none;
-    text-align: center; /* Simple, powerful stacking on mobile */
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 25px;
   }
 
-  .social-links { justify-content: center; }
-  .footer-tag { border: none; padding: 0; }
-  .footer-right { text-align: center; }
+  .footer-tag { display: none; }
+  .footer-right { text-align: left; }
 }
-
-/* ===== SECONDARY PAGE ===== */
-.underwater-page {
-  position: fixed;
-  inset: 0;
-  z-index: 150;
-  pointer-events: none;
-  opacity: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transition: opacity 1.5s ease;
-  background: rgba(31, 23, 38, 0.2);
-}
-.underwater-page.active { opacity: 1; pointer-events: auto; }
-.underwater-page h1 { font-family: 'Cormorant Garamond', serif; color: white; font-size: 3.5rem; }
-.back-button { background: transparent; border: 1px solid white; color: white; padding: 10px 25px; border-radius: 999px; cursor: pointer; margin-top: 20px;}
