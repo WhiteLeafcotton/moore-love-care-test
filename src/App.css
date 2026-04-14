@@ -26,24 +26,6 @@ html, body, #root {
   background: transparent;
 }
 
-/* ✅ FORCE TRUE FULL HEIGHT */
-.app-viewport {
-  position: fixed;
-  inset: 0;
-
-  width: 100vw;
-  height: 100dvh;
-
-  background: transparent;
-}
-
-/* ✅ CANVAS FULL BLEED */
-canvas {
-  position: fixed !important;
-  inset: 0;
-  width: 100vw !important;
-  height: 100dvh !important;
-}
 
 /* ================= UI OVERLAY ================= */
 
@@ -246,8 +228,8 @@ html, body, #root {
   /* FROST CONTROL: Change 0.45 and 0.15 to lighten/darken */
   background: linear-gradient(
     90deg,
-    rgba(247, 236, 232, 0.45) 0%,
-    rgba(247, 236, 232, 0.15) 35%,
+    rgba(247, 236, 232, 0.2) 0%,
+    rgba(247, 236, 232, 0.05) 35%,
     transparent 65%
   );
 }

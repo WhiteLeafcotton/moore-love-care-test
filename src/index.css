@@ -1,6 +1,5 @@
-/* index.css - The Bar Killer */
 :root {
-  background-color: #f7ece8; /* Match your 3D background exactly */
+  background-color: #f7ece8 !important;
 }
 
 html, body, #root {
@@ -8,10 +7,8 @@ html, body, #root {
   padding: 0 !important;
   width: 100% !important;
   height: 100% !important;
-  height: 100dvh !important;
+  height: 100dvh !important; /* Forces height on mobile */
   overflow: hidden !important;
-  background-color: #f7ece8 !important;
-  position: fixed;
-  top: 0;
-  left: 0;
+  background-color: #f7ece8 !important; /* Kills the white flash/bars */
+  position: fixed; /* Prevents mobile scroll bounce */
 }
