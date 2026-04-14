@@ -27,6 +27,16 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
+// --- NEW COMPONENT: RED BALL ---
+const RedBall = () => {
+  return (
+    <mesh position={[10, 0.4, 21]} castShadow>
+      <sphereGeometry args={[1.5, 32, 32]} />
+      <meshStandardMaterial color="#f04d3d" roughness={0.4} />
+    </mesh>
+  );
+};
+
 // --- COMPONENTS ---
 const HeartBadge = () => {
   const shape = useMemo(() => {
@@ -451,6 +461,9 @@ export default function Scene({ currentView }) {
           </group>
 
           <WheelchairChapter butterProps={butterProps} isMobile={isMobile} />
+          
+          {/* THE RED BALL ADDED HERE */}
+          <RedBall />
         </group>
       </group>
 
