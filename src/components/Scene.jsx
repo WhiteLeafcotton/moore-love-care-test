@@ -27,7 +27,7 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
-// --- THE FLOATING PLATFORM (FURNITURE RE-ADDED) ---
+// --- THE FLOATING PLATFORM WITH FURNITURE ---
 const FloatingPlatform = ({ butterProps }) => {
   return (
     <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5} position={[12, -0.6, 18]}>
@@ -165,7 +165,7 @@ export default function Scene({ currentView }) {
 
   useFrame((state, delta) => {
     const isHome = currentView === "home";
-    // Target position is further back and higher to see the floating platform clearly
+    // Camera is backed up and tilted to show the platform properly
     const targetPos = isHome ? (isMobile ? new THREE.Vector3(-22, 7, 48) : new THREE.Vector3(-18, 6, 42)) : new THREE.Vector3(-24.5, 3.5, -450);
     const targetLook = isHome ? new THREE.Vector3(12, 1, 15) : new THREE.Vector3(-24.5, 1.5, -1000);
     
