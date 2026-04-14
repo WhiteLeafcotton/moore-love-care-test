@@ -27,27 +27,63 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
-// --- THE CIRCULAR FLOATING PLATFORM ---
+// --- NEW COMPONENT FOR FURNITURE NESTING ---
+
+function Chair(props) {
+  return (
+    <group {...props}>
+      {/* Seat */}
+      <mesh position={[0, 0.4, 0]} castShadow>
+        <boxGeometry args={[1, 0.5, 0.9]} />
+        <meshStandardMaterial color="#fce4e4" roughness={0.8} />
+      </mesh>
+      {/* Backrest */}
+      <mesh position={[0, 0.9, -0.4]} rotation={[-0.1, 0, 0]} castShadow>
+        <boxGeometry args={[1, 1, 0.2]} />
+        <meshStandardMaterial color="#fce4e4" roughness={0.8} />
+      </mesh>
+    </group>
+  );
+}
+
+function FloorLamp(props) {
+  return (
+    <group {...props}>
+      <mesh position={[0, 0.5, 0]} castShadow>
+        <cylinderGeometry args={[0.02, 0.02, 1, 16]} />
+        <meshStandardMaterial color="#222" metalness={0.8} />
+      </mesh>
+      <mesh position={[0, 1, 0]} castShadow>
+        <coneGeometry args={[0.2, 0.3, 16]} />
+        <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.5} />
+      </mesh>
+    </group>
+  );
+}
+
+// --- THE CIRCULAR FLOATING PLATFORM (UPDATED) ---
 const FloatingPlatform = () => {
   return (
     <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
-      <mesh 
-        position={[14, -1.1, 12]} 
-        renderOrder={10000}       
-        frustumCulled={false}     
-      >
-        <cylinderGeometry args={[3, 3, 0.2, 64]} /> 
-        <meshBasicMaterial 
-          color="#ffffff" 
-          depthTest={false}        
-          transparent={true} 
-          opacity={0.85}
-        />
-      </mesh>
+      <group position={[14, -1.1, 12]}> {/* Keeping that sweet spot position */}
+        
+        {/* The Glassy Platform Base */}
+        <mesh receiveShadow castShadow renderOrder={10000} frustumCulled={false}>
+          <cylinderGeometry args={[3, 3, 0.2, 64]} /> 
+          <meshBasicMaterial color="#ffffff" transparent={true} opacity={0.85} depthTest={false} />
+        </mesh>
+
+        {/* NEW: Place furniture directly within this Floating group */}
+        {/* The chair sits centered but slightly back */}
+        <Chair position={[0, 0.1, 0]} rotation={[0, Math.PI / 4, 0]} scale={0.8} />
+        {/* The lamp sits to the side */}
+        <FloorLamp position={[0.8, 0.1, -0.2]} scale={0.8} />
+      </group>
     </Float>
   );
 };
 
+// --- HUMANOID COMPONENTS ---
 const HeartBadge = () => {
   const shape = useMemo(() => {
     const s = new THREE.Shape();
@@ -60,7 +96,7 @@ const HeartBadge = () => {
   }, []);
 
   return (
-    <mesh position={[0.12, 1.0, 0.19]}>
+    <mesh position={[0.12, 1.0, 0.19]} rotation={[0, 0, 0]}>
       <shapeGeometry args={[shape]} />
       <meshStandardMaterial color={DARKER_PINK_THEME} emissive={DARKER_PINK_THEME} emissiveIntensity={0.5} />
     </mesh>
@@ -82,6 +118,7 @@ const BlockHumanoid = forwardRef(({ scale = 1, materialProps, poseProps = {}, is
     walkSpeed = 8,
     torsoRotationZ = 0,
     torsoRotationX = 0,
+    walkRotationY = 0,
     headRotationY = 0,
     animateArmsTo = null 
   } = poseProps;
@@ -183,6 +220,7 @@ const BlockHumanoid = forwardRef(({ scale = 1, materialProps, poseProps = {}, is
   );
 });
 
+// --- GRASS ---
 const GrassySassyHills = () => {
   const meshRef = useRef();
   const bladeGeo = useMemo(() => {
@@ -220,6 +258,7 @@ const GrassySassyHills = () => {
   return <group position={[0, -3.5, -40]}><mesh geometry={terrainGeo} receiveShadow><meshStandardMaterial color="#0c020f" roughness={1} /></mesh><instancedMesh ref={meshRef} args={[bladeGeo, grassMaterial, GRASS_COUNT]} castShadow /></group>;
 };
 
+// --- ARCHITECTURE ---
 const Staircase = ({ position, width, rotation, materialProps }) => (
   <group position={position} rotation={rotation}>
     {Array.from({ length: 16 }).map((_, i) => (
@@ -250,6 +289,7 @@ const WallOpening = ({ position, colorProps, width = 6, openingW = 4.8, height =
   </group>
 );
 
+// --- ANIMATED CHAPTERS ---
 const WheelchairChapter = ({ butterProps, isMobile }) => {
   const groupRef = useRef(); 
   const wheelRef = useRef(); 
@@ -375,6 +415,7 @@ const WalkingToConversationChapter = ({ butterProps }) => {
   );
 };
 
+// --- MAIN SCENE ---
 export default function Scene({ currentView }) {
   const { camera, size } = useThree();
   const waterRef = useRef();
@@ -485,6 +526,7 @@ export default function Scene({ currentView }) {
         position={[0, -1.45, 0]} 
       />
 
+      {/* RENDERED LAST - NEW CIRCLE PLATFORM */}
       <FloatingPlatform />
     </>
   );
