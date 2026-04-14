@@ -27,80 +27,27 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
-// --- NEW SUB-COMPONENTS FOR THE PLATFORM ---
-
-const ComfyChair = (props) => {
-  return (
-    <group {...props}>
-      {/* Seat */}
-      <mesh position={[0, 0.4, 0]} castShadow>
-        <boxGeometry args={[1.2, 0.5, 1.1]} />
-        <meshStandardMaterial color="#fce4e4" roughness={0.8} />
-      </mesh>
-      {/* Backrest */}
-      <mesh position={[0, 0.9, -0.45]} rotation={[-0.1, 0, 0]} castShadow>
-        <boxGeometry args={[1.2, 1.2, 0.3]} />
-        <meshStandardMaterial color="#fce4e4" roughness={0.8} />
-      </mesh>
-      {/* Arms */}
-      <mesh position={[-0.65, 0.7, 0]} castShadow>
-        <boxGeometry args={[0.2, 0.6, 1.1]} />
-        <meshStandardMaterial color={DARKER_PINK_THEME} />
-      </mesh>
-      <mesh position={[0.65, 0.7, 0]} castShadow>
-        <boxGeometry args={[0.2, 0.6, 1.1]} />
-        <meshStandardMaterial color={DARKER_PINK_THEME} />
-      </mesh>
-    </group>
-  );
-};
-
-const DesignerLamp = (props) => {
-  return (
-    <group {...props}>
-      <mesh position={[0, 1, 0]} castShadow>
-        <cylinderGeometry args={[0.03, 0.03, 2, 16]} />
-        <meshStandardMaterial color={DARKER_PINK_THEME} metalness={0.8} />
-      </mesh>
-      <mesh position={[0, 2, 0]} castShadow>
-        <coneGeometry args={[0.4, 0.6, 32]} />
-        <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.5} />
-      </mesh>
-      <pointLight position={[0, 2, 0]} intensity={1.2} distance={8} color="#fff1d7" />
-    </group>
-  );
-};
-
 // --- THE CIRCULAR FLOATING PLATFORM ---
 const FloatingPlatform = () => {
   return (
-    <Float 
-      speed={1.5} 
-      rotationIntensity={0.1} 
-      floatIntensity={0.4} 
-      position={[10, 2.5, 16]} /* Lifted it up so it floats above the floor */
-    >
-      <group>
-        {/* The Glassy Platform Base */}
-        <mesh receiveShadow castShadow>
-          <cylinderGeometry args={[3, 3, 0.2, 64]} /> 
-          <meshStandardMaterial 
-            color="#ffffff" 
-            transparent={true} 
-            opacity={0.7}
-            roughness={0.1}
-          />
-        </mesh>
-
-        {/* The Comfy Pair Nested on the Platform */}
-        <ComfyChair position={[-0.5, 0.1, 0]} rotation={[0, Math.PI / 6, 0]} scale={0.8} />
-        <DesignerLamp position={[1.2, 0.1, -0.5]} scale={0.8} />
-      </group>
+    <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
+      <mesh 
+        position={[14, -1.1, 12]} 
+        renderOrder={10000}       
+        frustumCulled={false}     
+      >
+        <cylinderGeometry args={[3, 3, 0.2, 64]} /> 
+        <meshBasicMaterial 
+          color="#ffffff" 
+          depthTest={false}        
+          transparent={true} 
+          opacity={0.85}
+        />
+      </mesh>
     </Float>
   );
 };
 
-// --- HUMANOID COMPONENTS ---
 const HeartBadge = () => {
   const shape = useMemo(() => {
     const s = new THREE.Shape();
@@ -113,7 +60,7 @@ const HeartBadge = () => {
   }, []);
 
   return (
-    <mesh position={[0.12, 1.0, 0.19]} rotation={[0, 0, 0]}>
+    <mesh position={[0.12, 1.0, 0.19]}>
       <shapeGeometry args={[shape]} />
       <meshStandardMaterial color={DARKER_PINK_THEME} emissive={DARKER_PINK_THEME} emissiveIntensity={0.5} />
     </mesh>
@@ -236,7 +183,6 @@ const BlockHumanoid = forwardRef(({ scale = 1, materialProps, poseProps = {}, is
   );
 });
 
-// --- GRASS ---
 const GrassySassyHills = () => {
   const meshRef = useRef();
   const bladeGeo = useMemo(() => {
@@ -274,7 +220,6 @@ const GrassySassyHills = () => {
   return <group position={[0, -3.5, -40]}><mesh geometry={terrainGeo} receiveShadow><meshStandardMaterial color="#0c020f" roughness={1} /></mesh><instancedMesh ref={meshRef} args={[bladeGeo, grassMaterial, GRASS_COUNT]} castShadow /></group>;
 };
 
-// --- ARCHITECTURE ---
 const Staircase = ({ position, width, rotation, materialProps }) => (
   <group position={position} rotation={rotation}>
     {Array.from({ length: 16 }).map((_, i) => (
@@ -305,7 +250,6 @@ const WallOpening = ({ position, colorProps, width = 6, openingW = 4.8, height =
   </group>
 );
 
-// --- ANIMATED CHAPTERS ---
 const WheelchairChapter = ({ butterProps, isMobile }) => {
   const groupRef = useRef(); 
   const wheelRef = useRef(); 
@@ -431,7 +375,6 @@ const WalkingToConversationChapter = ({ butterProps }) => {
   );
 };
 
-// --- MAIN SCENE ---
 export default function Scene({ currentView }) {
   const { camera, size } = useThree();
   const waterRef = useRef();
@@ -542,7 +485,6 @@ export default function Scene({ currentView }) {
         position={[0, -1.45, 0]} 
       />
 
-      {/* RENDERED LAST - FIXED FLOATING PLATFORM WITH CHAIR & LAMP */}
       <FloatingPlatform />
     </>
   );

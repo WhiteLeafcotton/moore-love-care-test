@@ -52,17 +52,17 @@ export default function App() {
       </div>
 
       <Canvas 
-  shadows 
-  dpr={[1, 2]} 
-  camera={{ position: [-14, 3.2, 24], fov: 35 }}
-  style={{
-    position: "absolute",
-    top: 0,            /* Reset to top of screen */
-    left: 0,
-    width: "100vw",    /* Stay exactly screen width */
-    height: "100dvh"   /* Use 'dvh' to fill the screen perfectly on mobile */
-  }}
->
+        shadows 
+        dpr={[1, 2]} 
+        camera={{ position: [-14, 3.2, 24], fov: 35 }}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          height: "100dvh"
+        }}
+      >
         <Suspense fallback={null}>
           <Scene currentView={currentView} />
         </Suspense>
