@@ -28,13 +28,15 @@ const getHillHeight = (x, z) => {
 };
 
 // --- UPDATED RED BALL COMPONENT: PLACED IN THE WATER ---
+// --- UPDATED RED BALL COMPONENT ---
 const RedBall = () => {
   return (
-    // y: -0.6 submerges the bottom into the water (floor is y: 0)
-    // z: 28 pulls it very far forward to the bottom right of the frame
-    <mesh position={[18, -0.6, 28]} castShadow>
+    <mesh 
+      position={[18, -0.6, 28]} 
+      castShadow 
+      renderOrder={999} // Forces the ball to render after the water
+    >
       <sphereGeometry args={[2.5, 32, 32]} />
-      {/* Changed to MeshPhysicalMaterial for wet, high reflectivity */}
       <meshPhysicalMaterial 
         color="#ff0000" 
         clearcoat={1.0} 
@@ -42,6 +44,7 @@ const RedBall = () => {
         roughness={0.1} 
         metalness={0.1}
         envMapIntensity={1.0}
+        depthTest={false} // Prevents the water surface from "cutting" into the ball
       />
     </mesh>
   );
