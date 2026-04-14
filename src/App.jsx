@@ -37,10 +37,7 @@ export default function App() {
             Love <br />
             & Care.
           </h1>
-          <button 
-            className="explore-button" 
-            onClick={() => setCurrentView("collection")}
-          >
+          <button className="explore-button" onClick={() => setCurrentView("collection")}>
             EXPLORE COLLECTION
           </button>
         </div>

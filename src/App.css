@@ -6,12 +6,17 @@
   --text-soft: rgba(31, 23, 38, 0.4);
 }
 
-* { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+/* CRITICAL: KILL ALL MARGINS */
+* { box-sizing: border-box; -webkit-font-smoothing: antialiased; margin: 0; padding: 0; }
 
 body, html, #root, .app-viewport {
-  margin: 0; padding: 0; width: 100%; height: 100dvh;
-  overflow: hidden; background: var(--bg);
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--bg);
   font-family: 'Inter', sans-serif;
+  position: fixed; /* Prevents bounce/scroll bars */
 }
 
 /* UI LAYER - 35% LEFT FROST */
@@ -26,7 +31,6 @@ body, html, #root, .app-viewport {
   pointer-events: none;
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
-  /* Pronounced left side tint (0.35) fading to architecture visibility */
   background: linear-gradient(
     90deg, 
     rgba(247, 236, 232, 0.35) 0%, 
@@ -87,7 +91,6 @@ body, html, #root, .app-viewport {
   margin-bottom: 1.5rem;
 }
 
-/* LARGE WEB TITLE */
 .brand-title {
   font-family: 'Cormorant Garamond', serif;
   font-size: clamp(4rem, 10vw, 8.5rem);
@@ -129,36 +132,43 @@ body, html, #root, .app-viewport {
   pointer-events: auto;
 }
 
-.social-icon { 
-  color: var(--text-main); 
-  opacity: 0.5; 
-  cursor: pointer; 
-}
+.social-icon { color: var(--text-main); opacity: 0.5; cursor: pointer; }
 
-/* MOBILE REFINEMENT - NO WHITE BARS */
+/* MOBILE REFINEMENT - ZERO MARGINS, ZERO BARS */
 @media (max-width: 768px) {
   .ui-overlay {
-    padding: 0; /* Floods edges */
+    padding: 0;
     background: linear-gradient(to bottom, rgba(247,236,232,0.3) 0%, transparent 45%);
   }
   
+  /* POSITION HEADER AT THE VERY TOP */
+  .main-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 40px 30px;
+    z-index: 110;
+  }
+
+  /* POSITION HERO HIGH UP */
   .hero-container {
-    padding: 12vh 35px 0 35px; /* Title pushed even higher */
+    padding: 14vh 30px 0 30px;
     justify-content: flex-start;
   }
 
-  .main-header {
-    padding: 40px 35px; /* Manual padding replaces container padding */
-  }
-
+  /* POSITION FOOTER AT THE VERY BOTTOM */
   .main-footer { 
-    padding: 0 35px 50px 35px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    padding: 0 30px 40px 30px;
     flex-direction: column; 
     align-items: flex-start; 
-    gap: 20px; 
+    gap: 15px;
+    z-index: 110;
   }
   
-  .brand-title { font-size: 4.5rem; }
+  .brand-title { font-size: 4.2rem; line-height: 0.9; }
   .footer-tag { display: none; }
   .footer-right { text-align: left; }
 }
