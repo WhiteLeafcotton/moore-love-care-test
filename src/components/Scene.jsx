@@ -1,6 +1,6 @@
 import { useRef, useMemo, useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
-import { Environment, Sky, Float } from "@react-three/drei"; 
+import { Environment, Sky } from "@react-three/drei"; // Float removed
 import { Water } from "three-stdlib";
 import * as THREE from "three";
 
@@ -27,25 +27,25 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
-// --- THE OVERLAY PLATFORM (REPLACED RED BALL) ---
-const FloatingPlatform = () => {
+// --- LOCKED-IN STATIONARY PLATFORM (REPLACED FLOAT & REDBALL) ---
+const LockedStationaryPlatform = () => {
   return (
-    <Float speed={2} rotationIntensity={0.5} floatIntensity={1}>
-      <mesh 
-        position={[10, -0.5, 20]} 
-        renderOrder={10000}       
-        frustumCulled={false}     
-      >
-        {/* Width: 6, Height: 0.4, Depth: 4 */}
-        <boxGeometry args={[6, 0.4, 4]} /> 
+    /* The Float component is removed to make the platform perfectly still */
+    <group 
+      position={[13, -1.0, 20]} // X moved closer (13), Y lowered just above water (-1.0)
+      renderOrder={10000}       
+    >
+      {/* Platform Material - matching the 'editorial' feel */}
+      <mesh>
+        <cylinderGeometry args={[4.5, 4.5, 0.4, 64]} />
         <meshBasicMaterial 
-          color="#ffffff" 
-          depthTest={false}       
+          color={DARKER_PINK_THEME} 
+          depthTest={false} 
           transparent={true} 
-          opacity={0.9}
+          opacity={0.85} 
         />
       </mesh>
-    </Float>
+    </group>
   );
 };
 
@@ -491,7 +491,7 @@ export default function Scene({ currentView }) {
         position={[0, -1.45, 0]} 
       />
 
-      {/* RENDERED LAST - NEW PLATFORM */}
+      {/* RENDERED LAST OUTSIDE ALL GROUPS */}
       <FloatingPlatform />
     </>
   );
