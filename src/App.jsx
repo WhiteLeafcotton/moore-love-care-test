@@ -1,3 +1,4 @@
+
 import React, { useState, Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
 import Scene from "./components/Scene";
@@ -41,7 +42,9 @@ export default function App() {
             <span className="social-icon"><Icons.Linkedin /></span>
             <span className="social-icon"><Icons.Youtube /></span>
           </div>
+          
           <div className="footer-tag">RESTORATION // REHABILITATION</div>
+          
           <div className="footer-right">
             MOORE ESTATES INTERNATIONAL <br />
             PRIVACY // TERMS
@@ -50,17 +53,17 @@ export default function App() {
       </div>
 
       <Canvas 
-        shadows 
-        dpr={[1, 2]} 
-        camera={{ position: [-14, 3.2, 24], fov: 35 }}
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100vw",
-          height: "100dvh"
-        }}
-      >
+  shadows 
+  dpr={[1, 2]} 
+  camera={{ position: [-14, 3.2, 24], fov: 35 }}
+  style={{
+    position: "absolute",
+    top: 0,            /* Reset to top of screen */
+    left: 0,
+    width: "100vw",    /* Stay exactly screen width */
+    height: "100dvh"   /* Use 'dvh' to fill the screen perfectly on mobile */
+  }}
+>
         <Suspense fallback={null}>
           <Scene currentView={currentView} />
         </Suspense>
