@@ -6,14 +6,15 @@
   --text-soft: rgba(31, 23, 38, 0.4);
 }
 
-/* TOTAL RESET TO KILL BARS */
+/* TOTAL RESET: Kills browser-level bars */
 html, body {
   margin: 0 !important;
   padding: 0 !important;
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background-color: var(--bg); /* Matches 3D background */
+  background-color: var(--bg);
+  position: fixed; /* Prevents mobile scroll bounce from showing bars */
 }
 
 * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
@@ -24,23 +25,25 @@ html, body {
   position: relative;
 }
 
-/* UI LAYER - 35% LEFT FROST */
+/* UI LAYER - 35% LEFT FROST (LOCKED IN) */
 .ui-overlay {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
+  inset: 0;
   z-index: 100;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   padding: 7vh 7vw;
   pointer-events: none;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
   background: linear-gradient(
     90deg, 
     rgba(247, 236, 232, 0.35) 0%, 
     rgba(247, 236, 232, 0.1) 35%, 
     transparent 65%
   );
-  transition: opacity 1.2s ease;
+  transition: opacity 1.2s ease-in-out;
 }
 
 .fade-out { opacity: 0; pointer-events: none; }
@@ -70,8 +73,10 @@ html, body {
   text-transform: uppercase;
   cursor: pointer;
   pointer-events: auto;
+  transition: 0.3s ease;
 }
 
+/* LARGE WEB TITLE */
 .brand-title {
   font-family: 'Cormorant Garamond', serif;
   font-size: clamp(4rem, 10vw, 8.5rem);
@@ -114,30 +119,34 @@ html, body {
 
 .social-icon { color: var(--text-main); opacity: 0.5; }
 
-/* MOBILE REFINEMENT - ZERO MARGINS / NO BROW LINE */
+/* MOBILE BARS & TITLE FIX */
 @media (max-width: 768px) {
   .ui-overlay {
     padding: 0;
-    /* Removed top margin/padding to prevent bar */
+    /* Vertical gradient for mobile tint */
     background: linear-gradient(to bottom, rgba(247,236,232,0.3) 0%, transparent 45%);
   }
   
+  /* Hides the brow line and moves header to true top */
   .main-header {
-    border: none !important; /* Hides any brow line */
-    padding: 40px 30px;
-    background: transparent;
+    border: none !important;
+    padding: calc(10px + env(safe-area-inset-top)) 30px 20px 30px;
+    position: absolute;
+    top: 0;
   }
 
   .hero-container {
-    padding: 12vh 30px 0 30px;
+    padding: 14vh 30px 0 30px; /* Title moved up significantly */
     justify-content: flex-start;
   }
 
   .main-footer { 
-    padding: 0 30px 40px 30px;
+    position: absolute;
+    bottom: 0;
+    padding: 0 30px calc(20px + env(safe-area-inset-bottom)) 30px;
     flex-direction: column; 
     align-items: flex-start; 
-    gap: 20px; 
+    gap: 15px;
     border: none !important;
   }
   
