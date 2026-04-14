@@ -1,6 +1,6 @@
 import { useRef, useMemo, useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
-import { Environment, Sky } from "@react-three/drei";
+import { Environment, Sky, Float } from "@react-three/drei"; // Added Float
 import { Water } from "three-stdlib";
 import * as THREE from "three";
 
@@ -27,26 +27,27 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
-// --- UPDATED RED BALL COMPONENT: PLACED IN THE WATER ---
-// --- UPDATED RED BALL COMPONENT ---
+// --- THE FAIL-SAFE RED BALL COMPONENT ---
 const RedBall = () => {
   return (
-    <mesh 
-      position={[18, -0.6, 28]} 
-      castShadow 
-      renderOrder={999} // Forces the ball to render after the water
-    >
-      <sphereGeometry args={[2.5, 32, 32]} />
-      <meshPhysicalMaterial 
-        color="#ff0000" 
-        clearcoat={1.0} 
-        clearcoatRoughness={0.1} 
-        roughness={0.1} 
-        metalness={0.1}
-        envMapIntensity={1.0}
-        depthTest={false} // Prevents the water surface from "cutting" into the ball
-      />
-    </mesh>
+    <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
+      <mesh 
+        position={[22, -0.6, 25]} 
+        renderOrder={9999} // Extreme high priority
+      >
+        <sphereGeometry args={[2.8, 32, 32]} />
+        <meshStandardMaterial 
+          color="#ff0000" 
+          emissive="#440000" 
+          emissiveIntensity={0.5}
+          roughness={0.2}
+          metalness={0.8}
+          depthTest={false} // Prevents water from cutting into it
+          transparent={true} // Triggers better transparency sorting
+          opacity={1}
+        />
+      </mesh>
+    </Float>
   );
 };
 
@@ -430,14 +431,12 @@ export default function Scene({ currentView }) {
         </group>
 
         <group>
-          {/* SITTING AREA */}
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <Bench materialProps={butterProps} />
           </group>
 
           <WalkingToConversationChapter butterProps={butterProps} />
 
-          {/* ANIMATED WALKER COUPLE */}
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <group position={[3.5, 0, -0.2]} rotation={[0, -0.5, 0]}>
                <BlockHumanoid 
@@ -494,7 +493,7 @@ export default function Scene({ currentView }) {
         position={[0, -1.45, 0]} 
       />
 
-      {/* THE RED BALL: ADDED LAST OUTSIDE ALL GROUPS */}
+      {/* FINAL RENDER OVERRIDE */}
       <RedBall />
     </>
   );
