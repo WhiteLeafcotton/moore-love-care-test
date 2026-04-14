@@ -36,10 +36,10 @@ const FloatingPlatform = () => {
       floatIntensity={0.5} 
     >
       <mesh 
-        // X: 10 (Centered right of stairs)
-        // Y: -1.1 (Lowered to sit flush with the water)
-        // Z: 16 (Forward for breathing room)
-        position={[10, -1.1, 16]} 
+        // X: 10 (Keeping the horizontal placement)
+        // Y: -1.4 (Sinking it further into the water)
+        // Z: 20 (Moving it forward toward the camera)
+        position={[10, -1.4, 20]} 
         renderOrder={10000}       
         frustumCulled={false}     
       >
