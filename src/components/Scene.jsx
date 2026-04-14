@@ -1,6 +1,6 @@
 import { useRef, useMemo, useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
-import { Environment, Sky } from "@react-three/drei"; // Float removed
+import { Environment, Sky } from "@react-three/drei";
 import { Water } from "three-stdlib";
 import * as THREE from "three";
 
@@ -27,22 +27,20 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
-// --- LOCKED-IN STATIONARY PLATFORM (REPLACED FLOAT & REDBALL) ---
+// --- CIRCULAR STATIONARY PLATFORM ---
 const LockedStationaryPlatform = () => {
   return (
-    /* The Float component is removed to make the platform perfectly still */
     <group 
-      position={[13, -1.0, 20]} // X moved closer (13), Y lowered just above water (-1.0)
-      renderOrder={10000}       
+      position={[13.5, -1.0, 20]} // Closer to stairs (13.5) and just above water (-1.0)
     >
-      {/* Platform Material - matching the 'editorial' feel */}
-      <mesh>
+      <mesh receiveShadow>
+        {/* cylinderGeometry [topRadius, bottomRadius, height, radialSegments] makes it a circle */}
         <cylinderGeometry args={[4.5, 4.5, 0.4, 64]} />
-        <meshBasicMaterial 
+        <meshStandardMaterial 
           color={DARKER_PINK_THEME} 
-          depthTest={false} 
           transparent={true} 
-          opacity={0.85} 
+          opacity={0.9} 
+          roughness={0.3}
         />
       </mesh>
     </group>
@@ -491,8 +489,7 @@ export default function Scene({ currentView }) {
         position={[0, -1.45, 0]} 
       />
 
-      {/* RENDERED LAST OUTSIDE ALL GROUPS */}
-      <FloatingPlatform />
+      <LockedStationaryPlatform />
     </>
   );
 }
