@@ -31,16 +31,17 @@ const getHillHeight = (x, z) => {
 const FloatingPlatform = () => {
   return (
     <Float 
-      speed={1.5} // Gentle speed
-      rotationIntensity={0.2} // Very slight tilt
-      floatIntensity={0.5} // Subtle up/down
+      speed={1.5} 
+      rotationIntensity={0.2} 
+      floatIntensity={0.5} 
     >
       <mesh 
-        position={[14, -0.6, 22]} // Adjusted position to stay visible in frame
+        // X reduced to 6 to move left toward the stairs
+        // Z reduced to 12 to pull it back into the architectural space
+        position={[6, -0.6, 12]} 
         renderOrder={10000}       
         frustumCulled={false}     
       >
-        {/* Radius: 3, Height: 0.2, Segments: 64 */}
         <cylinderGeometry args={[3, 3, 0.2, 64]} /> 
         <meshBasicMaterial 
           color="#ffffff" 
