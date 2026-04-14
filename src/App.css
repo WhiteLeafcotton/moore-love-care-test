@@ -3,7 +3,7 @@
 :root {
   --bg: #f7ece8;
   --text-main: #1f1726;
-  --text-soft: rgba(31, 23, 38, 0.3);
+  --text-soft: rgba(31, 23, 38, 0.4);
 }
 
 * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
@@ -14,7 +14,7 @@ body, html, #root, .app-viewport {
   font-family: 'Inter', sans-serif;
 }
 
-/* UI LAYER - GHOST TINT (0.15 Opacity) */
+/* THE LOCKED GHOST TINT */
 .ui-overlay {
   position: fixed;
   inset: 0;
@@ -22,19 +22,20 @@ body, html, #root, .app-viewport {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  align-items: flex-start;
-  padding: 8vh 8vw;
+  padding: 7vh 7vw;
   pointer-events: none;
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
-  /* The frost now disappears by the middle of the screen */
   background: linear-gradient(
     90deg, 
     rgba(247, 236, 232, 0.15) 0%, 
-    rgba(247, 236, 232, 0.05) 25%, 
-    transparent 55%
+    rgba(247, 236, 232, 0.05) 30%, 
+    transparent 65%
   );
+  transition: opacity 1.2s ease-in-out;
 }
+
+.fade-out { opacity: 0; pointer-events: none; }
 
 .main-header {
   display: flex;
@@ -51,28 +52,74 @@ body, html, #root, .app-viewport {
   text-transform: uppercase;
 }
 
+/* BUTTON STYLES */
 .inquiry-button {
   background: transparent;
-  border: 1px solid rgba(31, 23, 38, 0.15);
+  border: 1px solid rgba(31, 23, 38, 0.2);
   border-radius: 999px;
-  padding: 10px 28px;
+  padding: 10px 24px;
   font-size: 9px;
   letter-spacing: 2px;
   text-transform: uppercase;
   cursor: pointer;
   pointer-events: auto;
+  transition: 0.3s ease;
 }
 
+.inquiry-button:hover {
+  background: var(--text-main);
+  color: white;
+  border-color: var(--text-main);
+}
+
+.hero-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.brand-subtitle {
+  font-size: 11px;
+  letter-spacing: 0.8em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+  margin-bottom: 1.5rem;
+}
+
+/* LARGE WEB TITLE */
 .brand-title {
   font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(3rem, 8vw, 6.2rem);
+  font-size: clamp(4rem, 10vw, 8.5rem); /* Increased scale */
   font-weight: 400;
-  line-height: 0.85;
-  letter-spacing: -0.03em;
+  line-height: 0.82;
+  letter-spacing: -0.04em;
   margin: 0;
   pointer-events: auto;
 }
 
+.explore-button {
+  margin-top: 50px;
+  background: var(--text-main);
+  color: white;
+  border: none;
+  border-radius: 4px; /* Subtle sharp edge for luxury feel */
+  padding: 14px 36px;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  font-size: 9px;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: 0.4s cubic-bezier(0.2, 1, 0.3, 1);
+}
+
+.explore-button:hover {
+  letter-spacing: 5px;
+  background: #32253d;
+}
+
+/* FOOTER */
 .main-footer {
   width: 100%;
   display: flex;
@@ -85,33 +132,51 @@ body, html, #root, .app-viewport {
 
 .social-links {
   display: flex;
-  gap: 20px;
+  gap: 24px;
   pointer-events: auto;
 }
 
 .social-icon { 
   color: var(--text-main); 
-  opacity: 0.6; 
-  cursor: pointer; 
-  display: flex;
-  align-items: center;
+  opacity: 0.5; 
+  cursor: pointer;
+  transition: 0.3s;
 }
 
 .social-icon:hover { opacity: 1; }
 
-/* MOBILE REFINEMENT - STOPS THE BOXED-IN LOOK */
+.footer-tag { font-size: 8px; letter-spacing: 4px; text-transform: uppercase; }
+.footer-right { text-align: right; line-height: 1.7; }
+
+/* MOBILE REFINEMENT */
 @media (max-width: 768px) {
   .ui-overlay {
-    padding: 40px 30px;
-    background: linear-gradient(to bottom, rgba(247,236,232,0.25) 0%, transparent 45%);
+    padding: 60px 35px; /* Increased top padding */
+    justify-content: flex-start; /* Shifts everything up */
+    background: linear-gradient(to bottom, rgba(247,236,232,0.2) 0%, transparent 40%);
   }
-  /* Explicitly ensuring no white bars exist */
-  .main-header, .main-footer { 
-    border: none !important; 
-    padding: 0 !important; 
+  
+  .hero-container {
+    justify-content: flex-start;
+    margin-top: 15vh; /* Precise move up */
   }
-  .brand-title { font-size: 3.8rem; }
-  .main-footer { flex-direction: column; align-items: flex-start; gap: 30px; }
+
+  .main-header, .main-footer { border: none !important; padding: 0 !important; }
+  
+  .brand-title { 
+    font-size: 4.5rem; 
+    line-height: 0.9;
+  }
+  
+  .main-footer { 
+    position: absolute;
+    bottom: 50px;
+    left: 35px;
+    flex-direction: column; 
+    align-items: flex-start; 
+    gap: 20px; 
+  }
+  
   .footer-tag { display: none; }
   .footer-right { text-align: left; }
 }
