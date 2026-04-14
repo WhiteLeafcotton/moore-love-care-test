@@ -188,19 +188,19 @@ const ComfyChair = () => (
 
 const FloatingPlatform = ({ butterProps }) => {
   return (
-    <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
-      <group position={[10, -1.4, 20]}>
-        <mesh renderOrder={10000} frustumCulled={false}>
-          <cylinderGeometry args={[3.5, 3.5, 0.2, 64]} /> 
-          <meshBasicMaterial color="#ffffff" depthTest={false} transparent={true} opacity={0.85} />
+    <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.3}>
+      {/* RAISED Group Position from -1.4 to 1.2 */}
+      <group position={[11, 1.2, 22]}> 
+        <mesh position={[0, -0.2, 0]} receiveShadow>
+          <cylinderGeometry args={[3.8, 4.2, 0.4, 64]} /> 
+          <meshStandardMaterial color="#ffffff" transparent opacity={0.8} roughness={0.1} metalness={0.2} />
         </mesh>
-        <mesh position={[0, 0.11, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <circleGeometry args={[2.8, 64]} />
-          <meshStandardMaterial color="#e8d5e0" transparent opacity={0.9} />
-        </mesh>
+        
         <LLamp />
         <ComfyChair />
-        <group position={[0, 0.5, 0]}>
+        
+        {/* Seated Resident */}
+        <group position={[0, 0.6, 0]}>
            <BlockHumanoid 
             scale={0.85} 
             materialProps={butterProps} 
@@ -214,7 +214,9 @@ const FloatingPlatform = ({ butterProps }) => {
             }} 
            />
         </group>
-        <group position={[1.8, 0.1, 0.8]} rotation={[0, -0.8, 0]}>
+
+        {/* Helper Standing Nearby */}
+        <group position={[1.6, 0.1, 0.8]} rotation={[0, -0.8, 0]}>
            <BlockHumanoid 
             isHelper
             scale={0.95} 
@@ -225,10 +227,11 @@ const FloatingPlatform = ({ butterProps }) => {
               headRotationY: -0.5
             }} 
            />
-           <mesh position={[-0.4, 1.1, 0.4]}>
-             <cylinderGeometry args={[0.35, 0.35, 0.05, 32]} />
+           {/* Side Table with water/juice */}
+           <mesh position={[-0.5, 1.1, 0.2]}>
+             <cylinderGeometry args={[0.3, 0.3, 0.05, 32]} />
              <meshStandardMaterial color="#fff" />
-             <mesh position={[0.1, 0.05, 0]}><boxGeometry args={[0.1, 0.1, 0.1]} /><meshStandardMaterial color={DARKER_PINK_THEME} /></mesh>
+             <mesh position={[0.05, 0.15, 0]}><cylinderGeometry args={[0.08, 0.08, 0.25, 16]} /><meshStandardMaterial color="#fff" transparent opacity={0.6} /></mesh>
            </mesh>
         </group>
       </group>
@@ -355,7 +358,7 @@ const WalkingToConversationChapter = ({ butterProps }) => {
     const smoothProgress = THREE.MathUtils.smoothstep(t, 0, 1);
     
     if (phase === "walking") {
-      groupRef.current.position.z = 4.0 + (finalStopZ - 4.0) * smoothProgress;
+      if (groupRef.current) groupRef.current.position.z = 4.0 + (finalStopZ - 4.0) * smoothProgress;
 
       if (p1Ref.current) {
         const swingA = Math.sin(et * 10.5) * 0.45;
