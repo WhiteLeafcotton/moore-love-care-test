@@ -32,11 +32,8 @@ const getHillHeight = (x, z) => {
 // --- UPDATED RED BALL COMPONENT ---
 const RedBall = () => {
   return (
-    // X: 11.0 centers it on the platform area
-    // Y: 2.2 keeps it resting on the floor (not floating, not sinking)
-    // Z: 20.0 pulls it forward so it's in front of the windows
-    <mesh position={[11.0, 2.2, 20.0]} castShadow>
-      <sphereGeometry args={[2.0, 32, 32]} />
+    <mesh position={[18, 3.8, 15]} castShadow>
+      <sphereGeometry args={[2.5, 32, 32]} />
       <meshStandardMaterial color="#ff0000" roughness={0.4} />
     </mesh>
   );
