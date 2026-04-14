@@ -2,8 +2,7 @@ import { useRef, useMemo, useEffect, useState, forwardRef, useImperativeHandle }
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
 import { Environment, Sky, Float } from "@react-three/drei"; 
 import { Water } from "three-stdlib";
-import * as THREE from "semantic-ui-react";
-import * as THREE_CORE from "three";
+import * as THREE from "three";
 
 extend({ Water });
 
@@ -28,32 +27,24 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
-// --- NEW SEPARATE MATERIAL PLATFORM ---
-const DarkPurplePlatform = () => {
+// --- THE OVERLAY PLATFORM (REPLACED RED BALL) ---
+const FloatingPlatform = () => {
   return (
-    <Float speed={2} rotationIntensity={0.1} floatIntensity={0.5}>
-      <group position={[10, 1.85, 20]}> 
-        {/* Main Base - Dark Purple */}
-        <mesh castShadow receiveShadow>
-          <cylinderGeometry args={[4.5, 4.5, 0.4, 64]} />
-          <meshStandardMaterial 
-            color={TITLE_PURPLE} 
-            roughness={0.2} 
-            metalness={0.8} 
-            emissive={TITLE_PURPLE} 
-            emissiveIntensity={0.2}
-          />
-        </mesh>
-        {/* Glowing Rim - Darker Pink Theme */}
-        <mesh position={[0, 0.21, 0]}>
-          <torusGeometry args={[4.5, 0.04, 16, 100]} rotation={[Math.PI / 2, 0, 0]} />
-          <meshStandardMaterial 
-            color={DARKER_PINK_THEME} 
-            emissive={DARKER_PINK_THEME} 
-            emissiveIntensity={1} 
-          />
-        </mesh>
-      </group>
+    <Float speed={2} rotationIntensity={0.5} floatIntensity={1}>
+      <mesh 
+        position={[10, -0.5, 20]} 
+        renderOrder={10000}       
+        frustumCulled={false}     
+      >
+        {/* Width: 6, Height: 0.4, Depth: 4 */}
+        <boxGeometry args={[6, 0.4, 4]} /> 
+        <meshBasicMaterial 
+          color="#ffffff" 
+          depthTest={false}       
+          transparent={true} 
+          opacity={0.9}
+        />
+      </mesh>
     </Float>
   );
 };
@@ -61,7 +52,7 @@ const DarkPurplePlatform = () => {
 // --- HUMANOID COMPONENTS ---
 const HeartBadge = () => {
   const shape = useMemo(() => {
-    const s = new THREE_CORE.Shape();
+    const s = new THREE.Shape();
     s.moveTo(0, 0);
     s.bezierCurveTo(0, 0.05, 0.1, 0.1, 0.1, 0);
     s.bezierCurveTo(0.1, -0.05, 0, -0.1, 0, -0.15);
@@ -116,15 +107,15 @@ const BlockHumanoid = forwardRef(({ scale = 1, materialProps, poseProps = {}, is
   }));
 
   const limbGeo = useMemo(() => {
-    const pts = [new THREE_CORE.Vector2(0, 0), new THREE_CORE.Vector2(0.08, 0.05), new THREE_CORE.Vector2(0.08, 0.75), new THREE_CORE.Vector2(0, 0.8)];
-    const g = new THREE_CORE.LatheGeometry(pts, 32);
+    const pts = [new THREE.Vector2(0, 0), new THREE.Vector2(0.08, 0.05), new THREE.Vector2(0.08, 0.75), new THREE.Vector2(0, 0.8)];
+    const g = new THREE.LatheGeometry(pts, 32);
     g.translate(0, -0.8, 0); 
     return g;
   }, []);
 
   const torsoGeo = useMemo(() => {
-    const pts = [new THREE_CORE.Vector2(0, 0), new THREE_CORE.Vector2(0.18, 0.1), new THREE_CORE.Vector2(0.18, 0.9), new THREE_CORE.Vector2(0, 1.0)];
-    return new THREE_CORE.LatheGeometry(pts, 32);
+    const pts = [new THREE.Vector2(0, 0), new THREE.Vector2(0.18, 0.1), new THREE.Vector2(0.18, 0.9), new THREE.Vector2(0, 1.0)];
+    return new THREE.LatheGeometry(pts, 32);
   }, []);
 
   useFrame((state) => {
@@ -143,14 +134,14 @@ const BlockHumanoid = forwardRef(({ scale = 1, materialProps, poseProps = {}, is
       if (leftArmRef.current) leftArmRef.current.rotation.x = -swing * 0.5;
       if (rightArmRef.current) rightArmRef.current.rotation.x = swing * 0.5;
     } else if (animateArmsTo) {
-      const reachProgress = THREE_CORE.MathUtils.smoothstep(t, 0.5, 3.5); 
+      const reachProgress = THREE.MathUtils.smoothstep(t, 0.5, 3.5); 
       if (leftArmRef.current) {
-        leftArmRef.current.rotation.x = THREE_CORE.MathUtils.lerp(leftArmRotation[0], animateArmsTo[0], reachProgress);
-        leftArmRef.current.rotation.z = THREE_CORE.MathUtils.lerp(leftArmRotation[2], animateArmsTo[2], reachProgress);
+        leftArmRef.current.rotation.x = THREE.MathUtils.lerp(leftArmRotation[0], animateArmsTo[0], reachProgress);
+        leftArmRef.current.rotation.z = THREE.MathUtils.lerp(leftArmRotation[2], animateArmsTo[2], reachProgress);
       }
       if (rightArmRef.current) {
-        rightArmRef.current.rotation.x = THREE_CORE.MathUtils.lerp(rightArmRotation[0], animateArmsTo[0], reachProgress);
-        rightArmRef.current.rotation.z = THREE_CORE.MathUtils.lerp(rightArmRotation[2], -animateArmsTo[2], reachProgress);
+        rightArmRef.current.rotation.x = THREE.MathUtils.lerp(rightArmRotation[0], animateArmsTo[0], reachProgress);
+        rightArmRef.current.rotation.z = THREE.MathUtils.lerp(rightArmRotation[2], -animateArmsTo[2], reachProgress);
       }
     } else {
         if (leftArmRef.current) leftArmRef.current.rotation.set(...leftArmRotation);
@@ -198,29 +189,29 @@ const BlockHumanoid = forwardRef(({ scale = 1, materialProps, poseProps = {}, is
 const GrassySassyHills = () => {
   const meshRef = useRef();
   const bladeGeo = useMemo(() => {
-    const g = new THREE_CORE.PlaneGeometry(0.05, 1.2, 1, 4);
+    const g = new THREE.PlaneGeometry(0.05, 1.2, 1, 4);
     g.translate(0, 0.6, 0);
     const pos = g.attributes.position.array;
     for (let i = 0; i < pos.length; i += 3) { pos[i] += Math.pow(pos[i + 1] / 1.2, 2) * 0.15; }
     g.computeVertexNormals(); return g;
   }, []);
   const terrainGeo = useMemo(() => {
-    const g = new THREE_CORE.PlaneGeometry(400, 400, 100, 100);
+    const g = new THREE.PlaneGeometry(400, 400, 100, 100);
     g.rotateX(-Math.PI / 2);
     const pos = g.attributes.position.array;
     for (let i = 0; i < pos.length; i += 3) { pos[i + 1] = getHillHeight(pos[i], pos[i + 2]); }
     g.computeVertexNormals(); return g;
   }, []);
-  const grassMaterial = useMemo(() => new THREE_CORE.ShaderMaterial({
-    uniforms: { uTime: { value: 0 }, uColorRoots: { value: new THREE_CORE.Color("#13051a") }, uColorTips: { value: new THREE_CORE.Color("#c292f5") } },
+  const grassMaterial = useMemo(() => new THREE.ShaderMaterial({
+    uniforms: { uTime: { value: 0 }, uColorRoots: { value: new THREE.Color("#13051a") }, uColorTips: { value: new THREE.Color("#c292f5") } },
     vertexShader: `varying float vHeight; uniform float uTime; void main() { vHeight = position.y / 1.2; vec3 worldPos = (instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz; float totalWind = (sin(uTime * 0.5 + worldPos.x * 0.05) + sin(uTime * 2.0 + worldPos.x * 0.2)) * vHeight; vec3 pos = position; gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(pos, 1.0); }`,
     fragmentShader: `varying float vHeight; uniform vec3 uColorRoots; uniform vec3 uColorTips; void main() { gl_FragColor = vec4(mix(uColorRoots, uColorTips, vHeight) * pow(vHeight, 0.4), 1.0); }`,
-    side: THREE_CORE.DoubleSide
+    side: THREE.DoubleSide
   }), []);
   useFrame((state) => {
     grassMaterial.uniforms.uTime.value = state.clock.getElapsedTime();
     if (meshRef.current && !meshRef.current._init) {
-      const dummy = new THREE_CORE.Object3D();
+      const dummy = new THREE.Object3D();
       for (let i = 0; i < GRASS_COUNT; i++) {
         const x = (Math.random() - 0.5) * 400; const z = (Math.random() - 0.5) * 400; const y = getHillHeight(x, z);
         if (y > 0.05) { dummy.position.set(x, y - 0.05, z); dummy.rotation.y = Math.random() * Math.PI; dummy.scale.setScalar(0.6 + Math.random() * 0.8); dummy.updateMatrix(); meshRef.current.setMatrixAt(i, dummy.matrix); }
@@ -274,7 +265,7 @@ const WheelchairChapter = ({ butterProps, isMobile }) => {
 
   useFrame((state) => {
     const t = Math.min(state.clock.elapsedTime / 14, 1);
-    const smoothProgress = THREE_CORE.MathUtils.smoothstep(t, 0, 1);
+    const smoothProgress = THREE.MathUtils.smoothstep(t, 0, 1);
     const currentZ = startZ + (finalStopZ - startZ) * smoothProgress;
     
     if (groupRef.current) groupRef.current.position.z = currentZ;
@@ -310,7 +301,7 @@ const WalkingToConversationChapter = ({ butterProps }) => {
   useFrame((state) => {
     const et = state.clock.elapsedTime;
     const t = Math.min(et / 16, 1);
-    const smoothProgress = THREE_CORE.MathUtils.smoothstep(t, 0, 1);
+    const smoothProgress = THREE.MathUtils.smoothstep(t, 0, 1);
     
     if (phase === "walking") {
       groupRef.current.position.z = 4.0 + (finalStopZ - 4.0) * smoothProgress;
@@ -396,13 +387,13 @@ export default function Scene({ currentView }) {
   const isMobile = size.width < 768;
   const extraWallHeight = isMobile ? 30 : 0; 
 
-  const waterNormals = useLoader(THREE_CORE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
-  useEffect(() => { if (waterNormals) waterNormals.wrapS = waterNormals.wrapT = THREE_CORE.RepeatWrapping; }, [waterNormals]);
+  const waterNormals = useLoader(THREE.TextureLoader, "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg");
+  useEffect(() => { if (waterNormals) waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping; }, [waterNormals]);
 
   useFrame((state, delta) => {
     const isHome = currentView === "home";
-    const targetPos = isHome ? (isMobile ? new THREE_CORE.Vector3(-18, 4.5, 38) : new THREE_CORE.Vector3(-13, 3.2, 28)) : new THREE_CORE.Vector3(-24.5, 3.5, -450);
-    const targetLook = isHome ? new THREE_CORE.Vector3(10, 1.2, 20) : new THREE_CORE.Vector3(-24.5, 1.5, -1000);
+    const targetPos = isHome ? (isMobile ? new THREE.Vector3(-18, 4.5, 38) : new THREE.Vector3(-13, 3.2, 28)) : new THREE.Vector3(-24.5, 3.5, -450);
+    const targetLook = isHome ? new THREE.Vector3(20, 1.2, -2) : new THREE.Vector3(-24.5, 1.5, -1000);
     
     camera.position.lerp(targetPos, 0.05); 
     camera.lookAt(targetLook);
@@ -419,9 +410,6 @@ export default function Scene({ currentView }) {
       <directionalLight position={[-15, 30, 10]} intensity={1.6} castShadow />
 
       <group position={[0, 0, 0]}>
-        {/* PLATFORM - DARK PURPLE MATERIAL */}
-        <DarkPurplePlatform />
-
         <mesh position={[15.5, -2.1, 15.0]} castShadow receiveShadow><boxGeometry args={[20, 8.0, 30]} /><meshStandardMaterial {...butterProps} /></mesh>
         <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={butterProps} />
 
@@ -449,31 +437,31 @@ export default function Scene({ currentView }) {
 
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <group position={[3.5, 0, -0.2]} rotation={[0, -0.5, 0]}>
-                <BlockHumanoid 
-                 scale={0.84} 
-                 materialProps={butterProps} 
-                 poseProps={{ 
-                   walker: true, 
-                   torsoRotationX: 0.1, 
-                   leftArmRotation: [0.1, 0, -0.1], 
-                   rightArmRotation: [0.1, 0, 0.1], 
-                   animateArmsTo: [-1.1, 0, -0.1], 
-                   leftLegRotation: [0.15, 0, 0],   
-                   rightLegRotation: [-0.1, 0, 0],  
-                   headRotationY: -0.2
-                 }} 
-                />
-                <BlockHumanoid 
-                 isHelper
-                 scale={0.95} 
-                 materialProps={butterProps} 
-                 poseProps={{ 
-                   position: [-0.95, 0, 0.35], 
-                   rotation: [0, 0.65, 0], 
-                   headRotationY: -0.4,
-                   leftArmRotation: [-0.8, 0, -0.25] 
-                 }} 
-                />
+               <BlockHumanoid 
+                scale={0.84} 
+                materialProps={butterProps} 
+                poseProps={{ 
+                  walker: true, 
+                  torsoRotationX: 0.1, 
+                  leftArmRotation: [0.1, 0, -0.1], 
+                  rightArmRotation: [0.1, 0, 0.1], 
+                  animateArmsTo: [-1.1, 0, -0.1], 
+                  leftLegRotation: [0.15, 0, 0],   
+                  rightLegRotation: [-0.1, 0, 0],  
+                  headRotationY: -0.2
+                }} 
+               />
+               <BlockHumanoid 
+                isHelper
+                scale={0.95} 
+                materialProps={butterProps} 
+                poseProps={{ 
+                  position: [-0.95, 0, 0.35], 
+                  rotation: [0, 0.65, 0], 
+                  headRotationY: -0.4,
+                  leftArmRotation: [-0.8, 0, -0.25] 
+                }} 
+               />
             </group>
           </group>
 
@@ -489,10 +477,10 @@ export default function Scene({ currentView }) {
       <water 
         ref={waterRef} 
         args={[
-          new THREE_CORE.PlaneGeometry(2000, 2000), 
+          new THREE.PlaneGeometry(2000, 2000), 
           { 
             waterNormals, 
-            sunDirection: new THREE_CORE.Vector3(-10, 10, -100).normalize(), 
+            sunDirection: new THREE.Vector3(-10, 10, -100).normalize(), 
             sunColor: 0xffffff, 
             waterColor: TITLE_PURPLE, 
             distortionScale: 1.0, 
@@ -502,6 +490,9 @@ export default function Scene({ currentView }) {
         rotation={[-Math.PI / 2, 0, 0]} 
         position={[0, -1.45, 0]} 
       />
+
+      {/* RENDERED LAST - NEW PLATFORM */}
+      <FloatingPlatform />
     </>
   );
 }
