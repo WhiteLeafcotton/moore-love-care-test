@@ -41,9 +41,7 @@ export default function App() {
             <span className="social-icon"><Icons.Linkedin /></span>
             <span className="social-icon"><Icons.Youtube /></span>
           </div>
-          
           <div className="footer-tag">RESTORATION // REHABILITATION</div>
-          
           <div className="footer-right">
             MOORE ESTATES INTERNATIONAL <br />
             PRIVACY // TERMS
