@@ -5,44 +5,48 @@
   --text-main: #1f1726;
   --text-soft: rgba(31, 23, 38, 0.4);
 
+  /* ✅ SAFE AREAS */
   --safe-top: env(safe-area-inset-top);
   --safe-bottom: env(safe-area-inset-bottom);
 }
 
-/* ===== HARD RESET ===== */
+/* RESET */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  -webkit-font-smoothing: antialiased;
 }
 
+/* ✅ FULLSCREEN FIX */
 html, body, #root {
   width: 100%;
   height: 100%;
-  background: var(--bg);
   overflow: hidden;
+  background: transparent;
 }
 
-/* 🔥 TRUE FULLSCREEN ROOT */
+/* ✅ FORCE TRUE FULL HEIGHT */
 .app-viewport {
   position: fixed;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  background: var(--bg);
-  overflow: hidden;
+
+  width: 100vw;
+  height: 100dvh;
+
+  background: transparent;
 }
 
-/* 🔥 FORCE CANVAS FULLSCREEN */
+/* ✅ CANVAS FULL BLEED */
 canvas {
   position: fixed !important;
-  inset: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  display: block;
+  inset: 0;
+  width: 100vw !important;
+  height: 100dvh !important;
 }
 
-/* ===== UI OVERLAY ===== */
+/* ================= UI OVERLAY ================= */
+
 .ui-overlay {
   position: fixed;
   inset: 0;
@@ -52,20 +56,26 @@ canvas {
   flex-direction: column;
   justify-content: space-between;
 
-  /* 🔥 SAFE AREA = NO TOP/BOTTOM GAPS */
-  padding: calc(var(--safe-top) + 30px) 25px calc(var(--safe-bottom) + 25px);
+  padding:
+    calc(var(--safe-top) + 40px)
+    7vw
+    calc(var(--safe-bottom) + 40px);
 
   pointer-events: none;
 
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
   background: linear-gradient(
     90deg,
-    rgba(247,236,232,0.45) 0%,
-    rgba(247,236,232,0.15) 35%,
+    rgba(247, 236, 232, 0.45) 0%,
+    rgba(247, 236, 232, 0.15) 35%,
     transparent 65%
   );
 }
 
-/* ===== HEADER ===== */
+/* ================= HEADER ================= */
+
 .main-header {
   display: flex;
   justify-content: space-between;
@@ -74,39 +84,24 @@ canvas {
 }
 
 .logo {
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.5em;
   text-transform: uppercase;
-  color: var(--text-soft);
 }
 
-/* ===== BUTTONS ===== */
-.inquiry-button,
-.explore-button {
-  background: transparent;
-  border: 1px solid rgba(31, 23, 38, 0.2);
-  border-radius: 999px;
-  padding: 10px 22px;
-  font-size: 9px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  cursor: pointer;
-  pointer-events: auto;
-  color: var(--text-main);
-  transition: 0.3s ease;
-}
+/* ================= HERO ================= */
 
-.inquiry-button:hover,
-.explore-button:hover {
-  background: var(--text-main);
-  color: white;
-}
-
-/* ===== HERO ===== */
 .hero-container {
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+
+.brand-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(4rem, 10vw, 8.5rem);
+  line-height: 0.82;
+  letter-spacing: -0.04em;
 }
 
 .brand-subtitle {
@@ -117,18 +112,36 @@ canvas {
   margin-bottom: 1.5rem;
 }
 
-.brand-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(4rem, 10vw, 8rem);
-  line-height: 0.85;
+/* ================= BUTTONS ================= */
+
+.inquiry-button,
+.explore-button {
+  background: transparent;
+  border: 1px solid rgba(31, 23, 38, 0.2);
+  border-radius: 999px;
+  padding: 10px 24px;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  pointer-events: auto;
+  color: var(--text-main);
+  transition: 0.3s ease;
 }
 
 .explore-button {
-  margin-top: 40px;
+  margin-top: 50px;
   width: fit-content;
 }
 
-/* ===== FOOTER ===== */
+.inquiry-button:hover,
+.explore-button:hover {
+  background: var(--text-main);
+  color: white;
+}
+
+/* ================= FOOTER ================= */
+
 .main-footer {
   display: flex;
   justify-content: space-between;
@@ -140,32 +153,38 @@ canvas {
 
 .social-links {
   display: flex;
-  gap: 18px;
+  gap: 24px;
   pointer-events: auto;
 }
 
 .social-icon {
+  color: var(--text-main);
   opacity: 0.5;
 }
 
-/* ===== MOBILE ===== */
-@media (max-width: 768px) {
+/* ================= MOBILE ================= */
 
-  .brand-subtitle {
-    display: none;
+@media (max-width: 768px) {
+  .ui-overlay {
+    padding:
+      calc(var(--safe-top) + 25px)
+      25px
+      calc(var(--safe-bottom) + 25px);
+
+    background: linear-gradient(
+      to bottom,
+      rgba(247,236,232,0.35) 0%,
+      transparent 45%
+    );
   }
 
   .brand-title {
-    font-size: 4.3rem;
+    font-size: 4.5rem;
   }
 
   .main-footer {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
-  }
-
-  .footer-right {
-    text-align: left;
+    gap: 15px;
   }
 }

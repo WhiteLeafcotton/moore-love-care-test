@@ -3,31 +3,31 @@
   <head>
     <meta charset="utf-8" />
 
-    <!-- 🔥 CRITICAL -->
+    <!-- ✅ THIS IS THE MOST IMPORTANT LINE -->
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
     <meta name="theme-color" content="#f7ece8" />
     <title>Moore Love & Care</title>
 
     <style>
-      /* 🔥 HARD LOCK ROOT (THIS FIXES WHITE BARS) */
       html, body {
         margin: 0;
         padding: 0;
         width: 100%;
         height: 100%;
-        background: #f7ece8;
         overflow: hidden;
-      }
 
-      body {
-        position: fixed;
-        inset: 0;
+        /* ❌ REMOVE WHITE FLASH */
+        background: #000; /* matches your scene better than pink */
       }
 
       #root {
-        position: fixed;
-        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      canvas {
+        display: block;
       }
     </style>
   </head>
