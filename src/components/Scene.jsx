@@ -15,9 +15,9 @@ const getHillHeight = (x, z) => {
   const flatZone = 45; 
   const influence = dist < flatZone ? 0 : Math.min((dist - flatZone) / 25, 1.0);
   const hills = [
-    { x: 20, z: -100, h: 18, w: 16 },    
-    { x: -70, z: -50, h: 12, w: 12 },    
-    { x: 55, z: -40, h: 14, w: 14 }     
+    { x: 20, z: -100, h: 18, w: 16 },     
+    { x: -70, z: -50, h: 12, w: 12 },     
+    { x: 55, z: -40, h: 14, w: 14 }      
   ];
   let hillHeight = 0;
   hills.forEach(h => {
@@ -27,20 +27,29 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
-// --- THE OVERLAY PLATFORM (STABILIZED & FIXED) ---
+// --- THE CIRCULAR FLOATING PLATFORM ---
 const FloatingPlatform = () => {
   return (
-    <group position={[10, 1.91, 20]}> 
-      <mesh renderOrder={999} frustumCulled={false}>
-        <cylinderGeometry args={[3, 3, 0.1, 32]} /> 
-        <meshStandardMaterial 
-          color="#ffffff"  
+    <Float 
+      speed={1.5} // Gentle speed
+      rotationIntensity={0.2} // Very slight tilt
+      floatIntensity={0.5} // Subtle up/down
+    >
+      <mesh 
+        position={[14, -0.6, 22]} // Adjusted position to stay visible in frame
+        renderOrder={10000}       
+        frustumCulled={false}     
+      >
+        {/* Radius: 3, Height: 0.2, Segments: 64 */}
+        <cylinderGeometry args={[3, 3, 0.2, 64]} /> 
+        <meshBasicMaterial 
+          color="#ffffff" 
+          depthTest={false}       
           transparent={true} 
-          opacity={0.8}
-          depthWrite={true}
+          opacity={0.85}
         />
       </mesh>
-    </group>
+    </Float>
   );
 };
 
@@ -486,6 +495,7 @@ export default function Scene({ currentView }) {
         position={[0, -1.45, 0]} 
       />
 
+      {/* RENDERED LAST - NEW CIRCLE PLATFORM */}
       <FloatingPlatform />
     </>
   );
