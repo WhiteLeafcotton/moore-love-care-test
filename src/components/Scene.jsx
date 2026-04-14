@@ -27,95 +27,6 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
-// --- NEW WHOLESOME SCENE COMPONENTS ---
-
-const LLamp = ({ materialProps }) => (
-  <group position={[-1.2, 0, -0.8]}>
-    {/* Base */}
-    <mesh position={[0, 0.05, 0]}><cylinderGeometry args={[0.3, 0.3, 0.1, 32]} /><meshStandardMaterial color={DARKER_PINK_THEME} /></mesh>
-    {/* Tall Vertical Pole */}
-    <mesh position={[0, 2.5, 0]}><cylinderGeometry args={[0.04, 0.04, 5, 16]} /><meshStandardMaterial color={DARKER_PINK_THEME} /></mesh>
-    {/* Horizontal L Arm */}
-    <mesh position={[0.75, 5, 0]} rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[0.04, 0.04, 1.5, 16]} /><meshStandardMaterial color={DARKER_PINK_THEME} /></mesh>
-    {/* Hanging Bulb */}
-    <group position={[1.5, 4.8, 0]}>
-      <mesh><sphereGeometry args={[0.15, 16, 16]} /><meshStandardMaterial color="#fff" emissive="#fff" emissiveIntensity={2} /></mesh>
-      <pointLight intensity={1.5} distance={10} color="#fff" />
-    </group>
-  </group>
-);
-
-const ComfyChair = ({ materialProps }) => (
-  <group position={[0, 0.1, 0]}>
-    <mesh position={[0, 0.4, 0]} castShadow><boxGeometry args={[1.4, 0.6, 1.4]} /><meshStandardMaterial color={DARKER_PINK_THEME} /></mesh>
-    <mesh position={[0, 1.1, -0.6]} castShadow><boxGeometry args={[1.4, 1.2, 0.3]} /><meshStandardMaterial color={DARKER_PINK_THEME} /></mesh>
-    <mesh position={[-0.75, 0.8, 0]} castShadow><boxGeometry args={[0.2, 0.5, 1.2]} /><meshStandardMaterial color={DARKER_PINK_THEME} /></mesh>
-    <mesh position={[0.75, 0.8, 0]} castShadow><boxGeometry args={[0.2, 0.5, 1.2]} /><meshStandardMaterial color={DARKER_PINK_THEME} /></mesh>
-  </group>
-);
-
-// --- THE CIRCULAR FLOATING PLATFORM ---
-const FloatingPlatform = ({ butterProps }) => {
-  return (
-    <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
-      <group position={[10, -1.1, 16]}>
-        {/* The Platform */}
-        <mesh renderOrder={10000} frustumCulled={false}>
-          <cylinderGeometry args={[3.5, 3.5, 0.2, 64]} /> 
-          <meshBasicMaterial color="#ffffff" depthTest={false} transparent={true} opacity={0.85} />
-        </mesh>
-        
-        {/* Wholesome Rug */}
-        <mesh position={[0, 0.11, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <circleGeometry args={[2.8, 64]} />
-          <meshStandardMaterial color="#e8d5e0" transparent opacity={0.9} />
-        </mesh>
-
-        <LLamp materialProps={butterProps} />
-        <ComfyChair materialProps={butterProps} />
-
-        {/* The Elderly Person Sitting */}
-        <group position={[0, 0.5, 0]}>
-           <BlockHumanoid 
-            scale={0.85} 
-            materialProps={butterProps} 
-            poseProps={{ 
-              leftLegRotation: [Math.PI / 2.2, 0, 0], 
-              rightLegRotation: [Math.PI / 2.2, 0, 0], 
-              leftArmRotation: [0.8, 0, 0.2], 
-              rightArmRotation: [0.8, 0, -0.2],
-              torsoRotationX: 0.1,
-              headRotationY: 0.3
-            }} 
-           />
-        </group>
-
-        {/* The Helper Holding a Platter */}
-        <group position={[1.8, 0.1, 0.8]} rotation={[0, -0.8, 0]}>
-           <BlockHumanoid 
-            isHelper
-            scale={0.95} 
-            materialProps={butterProps} 
-            poseProps={{ 
-              leftArmRotation: [-1.2, 0, 0.3], // Holding platter
-              rightArmRotation: [0.2, 0, -0.1],
-              headRotationY: -0.5
-            }} 
-           />
-           {/* The Platter */}
-           <mesh position={[-0.4, 1.1, 0.4]}>
-             <cylinderGeometry args={[0.35, 0.35, 0.05, 32]} />
-             <meshStandardMaterial color="#fff" />
-             {/* Tiny food blocks */}
-             <mesh position={[0.1, 0.05, 0]}><boxGeometry args={[0.1, 0.1, 0.1]} /><meshStandardMaterial color={DARKER_PINK_THEME} /></mesh>
-             <mesh position={[-0.1, 0.05, 0.1]}><boxGeometry args={[0.08, 0.08, 0.08]} /><meshStandardMaterial color="#d4a5a5" /></mesh>
-           </mesh>
-        </group>
-      </group>
-    </Float>
-  );
-};
-
 // --- HUMANOID COMPONENTS ---
 const HeartBadge = () => {
   const shape = useMemo(() => {
@@ -246,11 +157,84 @@ const BlockHumanoid = forwardRef(({ scale = 1, materialProps, poseProps = {}, is
       )}
       <group position={[0, 0.4, 0]}>
         <group ref={leftLegRef} position={[-0.12, 0, 0]}><mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh></group>
-        <group ref={rightLegRef} position={0.12, 0, 0]}><mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh></group>
+        <group ref={rightLegRef} position={[0.12, 0, 0]}><mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh></group>
       </group>
     </group>
   );
 });
+
+// --- NEW WHOLESOME SCENE COMPONENTS ---
+
+const LLamp = () => (
+  <group position={[-1.2, 0, -0.8]}>
+    <mesh position={[0, 0.05, 0]}><cylinderGeometry args={[0.3, 0.3, 0.1, 32]} /><meshStandardMaterial color={DARKER_PINK_THEME} /></mesh>
+    <mesh position={[0, 2.5, 0]}><cylinderGeometry args={[0.04, 0.04, 5, 16]} /><meshStandardMaterial color={DARKER_PINK_THEME} /></mesh>
+    <mesh position={[0.75, 5, 0]} rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[0.04, 0.04, 1.5, 16]} /><meshStandardMaterial color={DARKER_PINK_THEME} /></mesh>
+    <group position={[1.5, 4.8, 0]}>
+      <mesh><sphereGeometry args={[0.15, 16, 16]} /><meshStandardMaterial color="#fff" emissive="#fff" emissiveIntensity={2} /></mesh>
+      <pointLight intensity={1.5} distance={10} color="#fff" />
+    </group>
+  </group>
+);
+
+const ComfyChair = () => (
+  <group position={[0, 0.1, 0]}>
+    <mesh position={[0, 0.4, 0]} castShadow><boxGeometry args={[1.4, 0.6, 1.4]} /><meshStandardMaterial color={DARKER_PINK_THEME} /></mesh>
+    <mesh position={[0, 1.1, -0.6]} castShadow><boxGeometry args={[1.4, 1.2, 0.3]} /><meshStandardMaterial color={DARKER_PINK_THEME} /></mesh>
+    <mesh position={[-0.75, 0.8, 0]} castShadow><boxGeometry args={[0.2, 0.5, 1.2]} /><meshStandardMaterial color={DARKER_PINK_THEME} /></mesh>
+    <mesh position={[0.75, 0.8, 0]} castShadow><boxGeometry args={[0.2, 0.5, 1.2]} /><meshStandardMaterial color={DARKER_PINK_THEME} /></mesh>
+  </group>
+);
+
+const FloatingPlatform = ({ butterProps }) => {
+  return (
+    <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
+      <group position={[10, -1.4, 20]}>
+        <mesh renderOrder={10000} frustumCulled={false}>
+          <cylinderGeometry args={[3.5, 3.5, 0.2, 64]} /> 
+          <meshBasicMaterial color="#ffffff" depthTest={false} transparent={true} opacity={0.85} />
+        </mesh>
+        <mesh position={[0, 0.11, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <circleGeometry args={[2.8, 64]} />
+          <meshStandardMaterial color="#e8d5e0" transparent opacity={0.9} />
+        </mesh>
+        <LLamp />
+        <ComfyChair />
+        <group position={[0, 0.5, 0]}>
+           <BlockHumanoid 
+            scale={0.85} 
+            materialProps={butterProps} 
+            poseProps={{ 
+              leftLegRotation: [Math.PI / 2.2, 0, 0], 
+              rightLegRotation: [Math.PI / 2.2, 0, 0], 
+              leftArmRotation: [0.8, 0, 0.2], 
+              rightArmRotation: [0.8, 0, -0.2],
+              torsoRotationX: 0.1,
+              headRotationY: 0.3
+            }} 
+           />
+        </group>
+        <group position={[1.8, 0.1, 0.8]} rotation={[0, -0.8, 0]}>
+           <BlockHumanoid 
+            isHelper
+            scale={0.95} 
+            materialProps={butterProps} 
+            poseProps={{ 
+              leftArmRotation: [-1.2, 0, 0.3], 
+              rightArmRotation: [0.2, 0, -0.1],
+              headRotationY: -0.5
+            }} 
+           />
+           <mesh position={[-0.4, 1.1, 0.4]}>
+             <cylinderGeometry args={[0.35, 0.35, 0.05, 32]} />
+             <meshStandardMaterial color="#fff" />
+             <mesh position={[0.1, 0.05, 0]}><boxGeometry args={[0.1, 0.1, 0.1]} /><meshStandardMaterial color={DARKER_PINK_THEME} /></mesh>
+           </mesh>
+        </group>
+      </group>
+    </Float>
+  );
+};
 
 // --- GRASS ---
 const GrassySassyHills = () => {
@@ -558,7 +542,6 @@ export default function Scene({ currentView }) {
         position={[0, -1.45, 0]} 
       />
 
-      {/* RENDERED LAST - UPDATED CIRCLE PLATFORM SCENE */}
       <FloatingPlatform butterProps={butterProps} />
     </>
   );
