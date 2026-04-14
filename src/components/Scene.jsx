@@ -28,25 +28,26 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
-// --- NEW: THE ARCHITECTURAL FLOATING PLATFORM ---
-const FloatingPlatform = () => {
+// --- NEW: THE HOVERING PLATFORM (REPLACED RED BALL) ---
+const HoveringPlatform = () => {
   return (
     <Float 
-      speed={1.5} 
-      rotationIntensity={0.1} 
+      speed={2} 
+      rotationIntensity={0.2} 
       floatIntensity={0.5} 
       floatingRange={[-0.1, 0.1]}
     >
-      <group position={[12, -1.2, 18]}> {/* Positioned exactly where the red ball was */}
-        {/* Main Platform Base */}
+      {/* Positioned exactly where our red beacon was */}
+      <group position={[10, -1.1, 20]}> 
+        {/* Main Base - Matching your building structure */}
         <mesh castShadow receiveShadow>
-          <cylinderGeometry args={[5, 5, 0.4, 64]} />
+          <cylinderGeometry args={[4.5, 4.5, 0.4, 64]} />
           <meshStandardMaterial {...BUTTER_MATERIAL} />
         </mesh>
         
-        {/* Subtle Decorative Rim - matching your pink theme */}
+        {/* Decorative Pink Accent Rim */}
         <mesh position={[0, 0.2, 0]}>
-          <torusGeometry args={[5, 0.05, 16, 100]} rotation={[Math.PI / 2, 0, 0]} />
+          <torusGeometry args={[4.5, 0.04, 16, 100]} rotation={[Math.PI / 2, 0, 0]} />
           <meshStandardMaterial color={DARKER_PINK_THEME} />
         </mesh>
       </group>
@@ -494,7 +495,8 @@ export default function Scene({ currentView }) {
         position={[0, -1.45, 0]} 
       />
 
-      <FloatingPlatform />
+      {/* NEW PLATFORM ADDED HERE */}
+      <HoveringPlatform />
     </>
   );
 }
