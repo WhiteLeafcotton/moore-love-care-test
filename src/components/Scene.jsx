@@ -27,25 +27,15 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
-// --- THE FLOATING PLATFORM (FIXED NESTING) ---
+// --- THE FLOATING PLATFORM (FURNITURE RE-ADDED) ---
 const FloatingPlatform = ({ butterProps }) => {
   return (
-    <Float 
-      speed={1.5} 
-      rotationIntensity={0.2} 
-      floatIntensity={0.5} 
-      position={[12, -0.6, 18]} // The floating logic happens to this whole group
-    >
+    <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5} position={[12, -0.6, 18]}>
       <group>
-        {/* THE MAIN BASE MESH */}
+        {/* BASE PLATFORM */}
         <mesh receiveShadow castShadow>
           <cylinderGeometry args={[3.5, 3.5, 0.2, 64]} /> 
-          <meshStandardMaterial 
-            color="#ffffff" 
-            transparent={true} 
-            opacity={0.9} 
-            roughness={0.1}
-          />
+          <meshStandardMaterial color="#ffffff" transparent={true} opacity={0.9} roughness={0.1} />
         </mesh>
 
         {/* RUG */}
@@ -72,10 +62,6 @@ const FloatingPlatform = ({ butterProps }) => {
               <cylinderGeometry args={[0.05, 0.05, 3]} />
               <meshStandardMaterial color="#111" />
             </mesh>
-            <mesh position={[-0.7, 3, 0]}>
-              <boxGeometry args={[1.4, 0.05, 0.05]} />
-              <meshStandardMaterial color="#111" />
-            </mesh>
             <mesh position={[-1.4, 2.6, 0]}>
                 <sphereGeometry args={[0.15, 32, 32]} />
                 <meshStandardMaterial emissive="#ffdca8" emissiveIntensity={6} color="#fff4cc" />
@@ -85,10 +71,10 @@ const FloatingPlatform = ({ butterProps }) => {
 
         {/* CHARACTERS ON PLATFORM */}
         <group position={[-0.8, 0.45, 0]}>
-             <BlockHumanoid scale={0.8} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI/2, 0, 0], rightLegRotation: [Math.PI/2, 0, 0], headRotationY: 0.4 }} />
+             <BlockHumanoid scale={0.8} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI/2, 0, 0], rightLegRotation: [Math.PI/2, 0, 0] }} />
         </group>
         <group position={[1.2, 0.1, 1.0]} rotation={[0, -0.6, 0]}>
-             <BlockHumanoid isHelper scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, headRotationY: -0.3 }} />
+             <BlockHumanoid isHelper scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true }} />
         </group>
       </group>
     </Float>
@@ -97,27 +83,17 @@ const FloatingPlatform = ({ butterProps }) => {
 
 // --- HUMANOID COMPONENT ---
 const BlockHumanoid = forwardRef(({ scale = 1, materialProps, poseProps = {}, isHelper = false }, ref) => {
-  const { 
-    leftLegRotation = [0, 0, 0], 
-    rightLegRotation = [0, 0, 0], 
-    isLeaning = false,
-    headRotationY = 0 
-  } = poseProps;
-  
+  const { leftLegRotation = [0, 0, 0], rightLegRotation = [0, 0, 0], isLeaning = false } = poseProps;
   const torsoRef = useRef();
-  const headRef = useRef();
-
   useFrame((state) => {
-    const t = state.clock.elapsedTime;
     if (torsoRef.current && isLeaning) {
-        torsoRef.current.rotation.z = Math.sin(t * 0.5) * 0.15;
+        torsoRef.current.rotation.z = Math.sin(state.clock.elapsedTime * 0.5) * 0.15;
     }
   });
-
   return (
     <group scale={scale}>
       <group ref={torsoRef}>
-        <mesh ref={headRef} position={[0, 1.4, 0]} castShadow><sphereGeometry args={[0.22, 32, 32]} /><meshStandardMaterial {...materialProps} /></mesh>
+        <mesh position={[0, 1.4, 0]} castShadow><sphereGeometry args={[0.22, 32, 32]} /><meshStandardMaterial {...materialProps} /></mesh>
         <mesh position={[0, 0.8, 0]} castShadow><boxGeometry args={[0.36, 1.0, 0.2]} /><meshStandardMaterial {...materialProps} /></mesh>
         <group position={[0, 0.4, 0]}>
           <mesh position={[-0.12, -0.4, 0]} rotation={leftLegRotation} castShadow><boxGeometry args={[0.12, 0.8, 0.12]} /><meshStandardMaterial {...materialProps} /></mesh>
@@ -189,8 +165,9 @@ export default function Scene({ currentView }) {
 
   useFrame((state, delta) => {
     const isHome = currentView === "home";
-    const targetPos = isHome ? (isMobile ? new THREE.Vector3(-18, 5, 42) : new THREE.Vector3(-14, 4.5, 34)) : new THREE.Vector3(-24.5, 3.5, -450);
-    const targetLook = isHome ? new THREE.Vector3(8, 1.5, 10) : new THREE.Vector3(-24.5, 1.5, -1000);
+    // Target position is further back and higher to see the floating platform clearly
+    const targetPos = isHome ? (isMobile ? new THREE.Vector3(-22, 7, 48) : new THREE.Vector3(-18, 6, 42)) : new THREE.Vector3(-24.5, 3.5, -450);
+    const targetLook = isHome ? new THREE.Vector3(12, 1, 15) : new THREE.Vector3(-24.5, 1.5, -1000);
     
     camera.position.lerp(targetPos, 0.05); 
     camera.lookAt(targetLook);
