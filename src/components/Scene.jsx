@@ -1,4 +1,4 @@
-import { useRef, useMemo, useEffect } from "react";
+import React, { useRef, useMemo, useEffect } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
 import { Environment, Sky, Float } from "@react-three/drei";
 import { Water } from "three-stdlib";
@@ -6,53 +6,27 @@ import * as THREE from "three";
 
 extend({ Water });
 
-const GRASS_COUNT = 400000;
 const TITLE_PURPLE = "#21162e";
-const DARKER_PINK_THEME = "#bf9fb3";
-
-// -------------------- HILLS --------------------
-const getHillHeight = (x, z) => {
-  const dist = Math.sqrt(x * x + z * z);
-
-  const flatZone = 45;
-  const influence =
-    dist < flatZone ? 0 : Math.min((dist - flatZone) / 25, 1.0);
-
-  const hills = [
-    { x: 20, z: -100, h: 18, w: 16 },
-    { x: -70, z: -50, h: 12, w: 12 },
-    { x: 55, z: -40, h: 14, w: 14 }
-  ];
-
-  let height = 0;
-
-  for (let i = 0; i < hills.length; i++) {
-    const h = hills[i];
-    const dx = x - h.x;
-    const dz = z - h.z;
-    const d = Math.sqrt(dx * dx + dz * dz);
-
-    const falloff = Math.exp(-(d * d) / (h.w * h.w));
-    height += falloff * h.h;
-  }
-
-  return height * influence;
-};
 
 // -------------------- FLOATING PLATFORM --------------------
-const FloatingPlatform = () => (
-  <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
-    <mesh position={[10, -1.1, 16]} renderOrder={1000}>
-      <cylinderGeometry args={[3, 3, 0.2, 64]} />
-      <meshBasicMaterial
-        color="#ffffff"
-        transparent
-        opacity={0.85}
-        depthTest={false}
-      />
-    </mesh>
-  </Float>
-);
+const FloatingPlatform = () => {
+  // Memoize geometry to prevent re-allocation on every render
+  const geo = useMemo(() => new THREE.CylinderGeometry(3, 3, 0.2, 64), []);
+  
+  return (
+    <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
+      <mesh position={[10, -1.1, 16]} geometry={geo}>
+        <meshStandardMaterial
+          color="#ffffff"
+          transparent
+          opacity={0.7}
+          roughness={0.1}
+          metalness={0.5}
+        />
+      </mesh>
+    </Float>
+  );
+};
 
 // -------------------- PLATFORM SCENE --------------------
 const PlatformScene = ({ butterProps, BlockHumanoid }) => {
@@ -110,15 +84,15 @@ const PlatformScene = ({ butterProps, BlockHumanoid }) => {
             <sphereGeometry args={[0.12, 32, 32]} />
             <meshStandardMaterial
               emissive="#ffdca8"
-              emissiveIntensity={2}
+              emissiveIntensity={4}
               color="#fff4cc"
             />
           </mesh>
 
           <pointLight
             position={[-1.4, 2.6, 0]}
-            intensity={1.5}
-            distance={6}
+            intensity={2}
+            distance={8}
             color="#ffdca8"
           />
         </group>
@@ -156,6 +130,10 @@ const PlatformScene = ({ butterProps, BlockHumanoid }) => {
 export default function Scene({ currentView, BlockHumanoid }) {
   const { camera, size } = useThree();
   const waterRef = useRef();
+  
+  // Ref for camera look-at target to ensure smooth rotation lerping
+  const lookAtTarget = useRef(new THREE.Vector3(20, 1.2, -2));
+  
   const isMobile = size.width < 768;
 
   const waterNormals = useLoader(
@@ -169,31 +147,46 @@ export default function Scene({ currentView, BlockHumanoid }) {
     }
   }, [waterNormals]);
 
+  // Memoize Water config
+  const waterGeometry = useMemo(() => new THREE.PlaneGeometry(2000, 2000), []);
+  const waterOptions = useMemo(() => ({
+    textureWidth: 512,
+    textureHeight: 512,
+    waterNormals,
+    sunDirection: new THREE.Vector3(-10, 10, -100).normalize(),
+    sunColor: 0xffffff,
+    waterColor: TITLE_PURPLE,
+    distortionScale: 3.7,
+    fog: false
+  }), [waterNormals]);
+
   useFrame((state, delta) => {
     const isHome = currentView === "home";
 
+    // Position Targets
     const targetPos = isHome
-      ? (isMobile
-          ? new THREE.Vector3(-18, 4.5, 38)
-          : new THREE.Vector3(-13, 3.2, 28))
+      ? (isMobile ? new THREE.Vector3(-18, 4.5, 38) : new THREE.Vector3(-13, 3.2, 28))
       : new THREE.Vector3(-24.5, 3.5, -450);
 
+    // LookAt Targets
     const targetLook = isHome
-      ? new THREE.Vector3(20, 1.2, -2)
+      ? new THREE.Vector3(10, 1.2, 10) // Focus on the platform
       : new THREE.Vector3(-24.5, 1.5, -1000);
 
+    // Lerp both position AND the lookAt point for maximum smoothness
     camera.position.lerp(targetPos, 0.05);
-    camera.lookAt(targetLook);
+    lookAtTarget.current.lerp(targetLook, 0.05);
+    camera.lookAt(lookAtTarget.current);
 
     if (waterRef.current) {
-      waterRef.current.material.uniforms["time"].value += delta * 0.08;
+      waterRef.current.material.uniforms["time"].value += delta * 0.5;
     }
   });
 
   const butterProps = {
     color: "#fce4e4",
-    roughness: 0.9,
-    metalness: 0.02
+    roughness: 0.8,
+    metalness: 0.1
   };
 
   return (
@@ -201,24 +194,18 @@ export default function Scene({ currentView, BlockHumanoid }) {
       <Sky distance={450000} sunPosition={[-20, 8, -100]} />
       <Environment preset="sunset" />
 
+      <ambientLight intensity={0.4} />
+      <directionalLight position={[-10, 10, 5]} intensity={1} />
+
       {/* WATER */}
       <water
         ref={waterRef}
-        args={[
-          new THREE.PlaneGeometry(2000, 2000),
-          {
-            waterNormals,
-            sunDirection: new THREE.Vector3(-10, 10, -100).normalize(),
-            waterColor: TITLE_PURPLE,
-            distortionScale: 1.0,
-            alpha: 0.95
-          }
-        ]}
+        args={[waterGeometry, waterOptions]}
         rotation={[-Math.PI / 2, 0, 0]}
         position={[0, -1.45, 0]}
       />
 
-      {/* PLATFORM */}
+      {/* PLATFORM SCENE */}
       <FloatingPlatform />
       <PlatformScene butterProps={butterProps} BlockHumanoid={BlockHumanoid} />
     </>
