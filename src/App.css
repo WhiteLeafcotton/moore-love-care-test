@@ -14,7 +14,7 @@ body, html, #root, .app-viewport {
   font-family: 'Inter', sans-serif;
 }
 
-/* UI LAYER - THE GHOST TINT */
+/* UI LAYER - THE GHOST TINT (0.15 Opacity) */
 .ui-overlay {
   position: fixed;
   inset: 0;
@@ -27,7 +27,7 @@ body, html, #root, .app-viewport {
   pointer-events: none;
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
-  /* Tint vanishes by mid-screen */
+  /* Tint vanishes by mid-screen to reveal 3D */
   background: linear-gradient(
     90deg, 
     rgba(247, 236, 232, 0.15) 0%, 
@@ -61,12 +61,6 @@ body, html, #root, .app-viewport {
   text-transform: uppercase;
   cursor: pointer;
   pointer-events: auto;
-  transition: all 0.3s ease;
-}
-
-.inquiry-button:hover {
-  background: var(--text-main);
-  color: white;
 }
 
 .hero-container {
@@ -87,7 +81,7 @@ body, html, #root, .app-viewport {
 
 .brand-title {
   font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(3rem, 8.5vw, 6.5rem);
+  font-size: clamp(3rem, 8vw, 6.2rem); /* Slightly smaller for premium feel */
   font-weight: 400;
   line-height: 0.85;
   letter-spacing: -0.03em;
@@ -125,32 +119,20 @@ body, html, #root, .app-viewport {
   pointer-events: auto;
 }
 
-.social-icon {
-  color: var(--text-main);
-  opacity: 0.6;
-  cursor: pointer;
-  transition: opacity 0.3s;
-}
-
+.social-icon { color: var(--text-main); opacity: 0.6; cursor: pointer; transition: opacity 0.3s; }
 .social-icon:hover { opacity: 1; }
 
-.footer-tag {
-  font-size: 8px;
-  letter-spacing: 3.5px;
-  opacity: 0.5;
-  text-transform: uppercase;
-}
-
+.footer-tag { font-size: 8px; letter-spacing: 3.5px; opacity: 0.5; text-transform: uppercase; }
 .footer-right { text-align: right; line-height: 1.6; }
 
-/* MOBILE - NO BARS */
+/* MOBILE REFINEMENT - NO BARS */
 @media (max-width: 768px) {
   .ui-overlay {
     padding: 40px 30px;
     background: linear-gradient(to bottom, rgba(247,236,232,0.25) 0%, transparent 45%);
   }
-  .main-header, .main-footer { border: none !important; }
-  .brand-title { font-size: 4rem; }
+  .main-header, .main-footer { border: none !important; padding: 0 !important; }
+  .brand-title { font-size: 3.8rem; }
   .main-footer { flex-direction: column; align-items: flex-start; gap: 30px; }
   .footer-tag { display: none; }
   .footer-right { text-align: left; }
