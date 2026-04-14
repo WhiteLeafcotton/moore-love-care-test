@@ -1,6 +1,6 @@
 import { useRef, useMemo, useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
-import { Environment, Sky } from "@react-three/drei"; 
+import { Environment, Sky, Float } from "@react-three/drei"; 
 import { Water } from "three-stdlib";
 import * as THREE from "three";
 
@@ -27,22 +27,20 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
-// --- THE CIRCULAR STILL PLATFORM ---
-const CircularStillPlatform = () => {
+// --- THE OVERLAY PLATFORM (STABILIZED & FIXED) ---
+const FloatingPlatform = () => {
   return (
-    <mesh 
-      position={[10, -1.2, 20]} // Positioned slightly above the water plane
-      receiveShadow
-    >
-      {/* cylinderGeometry args: [topRadius, bottomRadius, height, radialSegments] */}
-      <cylinderGeometry args={[4, 4, 0.3, 64]} /> 
-      <meshStandardMaterial 
-        color="#ffffff" 
-        transparent={true} 
-        opacity={0.9}
-        roughness={0.1}
-      />
-    </mesh>
+    <group position={[10, 1.91, 20]}> 
+      <mesh renderOrder={999} frustumCulled={false}>
+        <cylinderGeometry args={[3, 3, 0.1, 32]} /> 
+        <meshStandardMaterial 
+          color="#ffffff"  
+          transparent={true} 
+          opacity={0.8}
+          depthWrite={true}
+        />
+      </mesh>
+    </group>
   );
 };
 
@@ -488,7 +486,7 @@ export default function Scene({ currentView }) {
         position={[0, -1.45, 0]} 
       />
 
-      <CircularStillPlatform />
+      <FloatingPlatform />
     </>
   );
 }
