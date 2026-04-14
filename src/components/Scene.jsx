@@ -27,15 +27,21 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
-// --- STEP 1: UPDATED COMPONENT WITH ABSOLUTE COORDINATES ---
+// --- UPDATED RED BALL COMPONENT: PLACED IN THE WATER ---
 const RedBall = () => {
   return (
-    <mesh position={[24, 4.4, 18]} castShadow>
-      <sphereGeometry args={[2.8, 32, 32]} />
-      <meshStandardMaterial 
+    // y: -0.6 submerges the bottom into the water (floor is y: 0)
+    // z: 28 pulls it very far forward to the bottom right of the frame
+    <mesh position={[18, -0.6, 28]} castShadow>
+      <sphereGeometry args={[2.5, 32, 32]} />
+      {/* Changed to MeshPhysicalMaterial for wet, high reflectivity */}
+      <meshPhysicalMaterial 
         color="#ff0000" 
-        roughness={0.2} 
+        clearcoat={1.0} 
+        clearcoatRoughness={0.1} 
+        roughness={0.1} 
         metalness={0.1}
+        envMapIntensity={1.0}
       />
     </mesh>
   );
@@ -485,7 +491,7 @@ export default function Scene({ currentView }) {
         position={[0, -1.45, 0]} 
       />
 
-      {/* STEP 2: MOVED OUTSIDE OF ALL GROUPS TO THE BOTTOM */}
+      {/* THE RED BALL: ADDED LAST OUTSIDE ALL GROUPS */}
       <RedBall />
     </>
   );
