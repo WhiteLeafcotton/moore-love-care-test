@@ -462,12 +462,29 @@ export default function Scene({ currentView }) {
 
           <WheelchairChapter butterProps={butterProps} isMobile={isMobile} />
           
-          {/* THE RED BALL ADDED HERE */}
+         <WheelchairChapter butterProps={butterProps} isMobile={isMobile} />
+          
+          {/* THE RED BALL */}
           <RedBall />
         </group>
       </group>
 
-      <water ref={waterRef} args={[new THREE.PlaneGeometry(2000, 2000), { waterNormals, sunDirection: new THREE.Vector3(-10, 10, -100).normalize(), sunColor: 0xffffff, waterColor: TITLE_PURPLE, distortionScale: 1.0, alpha: 0.95 }]} rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.45, 0]} />
+      <water 
+        ref={waterRef} 
+        args={[
+          new THREE.PlaneGeometry(2000, 2000), 
+          { 
+            waterNormals, 
+            sunDirection: new THREE.Vector3(-10, 10, -100).normalize(), 
+            sunColor: 0xffffff, 
+            waterColor: TITLE_PURPLE, 
+            distortionScale: 1.0, 
+            alpha: 0.95 
+          }
+        ]} 
+        rotation={[-Math.PI / 2, 0, 0]} 
+        position={[0, -1.45, 0]} 
+      />
     </>
   );
 }
