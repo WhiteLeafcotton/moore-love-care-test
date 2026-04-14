@@ -1,6 +1,6 @@
 import React, { useState, Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
-import { Instagram, Facebook, Linkedin, Youtube } from "lucide-react";
+import { Instagram, Facebook, Linkedin, Youtube } from "lucide-react"; 
 import Scene from "./components/Scene";
 import "./App.css";
 
@@ -36,22 +36,21 @@ export default function App() {
 
         <footer className="main-footer">
           <div className="social-links">
-            <Instagram size={18} strokeWidth={1.25} className="social-icon" />
-            <Facebook size={18} strokeWidth={1.25} className="social-icon" />
-            <Linkedin size={18} strokeWidth={1.25} className="social-icon" />
-            <Youtube size={18} strokeWidth={1.25} className="social-icon" />
+            <Instagram size={18} strokeWidth={1.2} className="social-icon" />
+            <Facebook size={18} strokeWidth={1.2} className="social-icon" />
+            <Linkedin size={18} strokeWidth={1.2} className="social-icon" />
+            <Youtube size={18} strokeWidth={1.2} className="social-icon" />
           </div>
 
           <div className="footer-tag">RESTORATION // REHABILITATION</div>
 
           <div className="footer-right">
-            MOORE ESTATES <br />
-            PRIVACY // TERMS
+            MOORE ESTATES INTERNATIONAL <br />
+            EST. 2026 — PRIVACY // TERMS
           </div>
         </footer>
       </div>
 
-      {/* 3D SCENE */}
       <Canvas 
         shadows 
         dpr={[1, 2]} 

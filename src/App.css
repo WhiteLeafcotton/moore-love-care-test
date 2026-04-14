@@ -1,28 +1,20 @@
-/* ===== FONTS ===== */
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400&family=Inter:wght@300;400;600&display=swap');
 
 :root {
   --bg: #f7ece8;
   --text-main: #1f1726;
-  --text-soft: rgba(31, 23, 38, 0.35);
+  --text-soft: rgba(31, 23, 38, 0.3);
 }
 
-* { 
-  box-sizing: border-box; 
-  -webkit-font-smoothing: antialiased; 
-}
+* { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
 
 body, html, #root, .app-viewport {
-  margin: 0; 
-  padding: 0; 
-  width: 100%; 
-  height: 100dvh;
-  overflow: hidden; 
-  background: var(--bg);
+  margin: 0; padding: 0; width: 100%; height: 100dvh;
+  overflow: hidden; background: var(--bg);
   font-family: 'Inter', sans-serif;
 }
 
-/* ===== UI LAYER (GHOST TINT) ===== */
+/* UI LAYER - THE GHOST TINT */
 .ui-overlay {
   position: fixed;
   inset: 0;
@@ -33,21 +25,17 @@ body, html, #root, .app-viewport {
   align-items: flex-start;
   padding: 8vh 8vw;
   pointer-events: none;
-
-  /* Subtle ghost frost */
-  backdrop-filter: blur(2px) saturate(105%);
-  -webkit-backdrop-filter: blur(2px) saturate(105%);
-
-  /* Gradient starts at 15% and vanishes by the middle of the screen */
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  /* Tint vanishes by mid-screen */
   background: linear-gradient(
-    90deg,
-    rgba(247, 236, 232, 0.15) 0%,
-    rgba(247, 236, 232, 0.05) 25%,
+    90deg, 
+    rgba(247, 236, 232, 0.15) 0%, 
+    rgba(247, 236, 232, 0.05) 25%, 
     transparent 55%
   );
 }
 
-/* ===== HEADER ===== */
 .main-header {
   display: flex;
   justify-content: space-between;
@@ -59,9 +47,8 @@ body, html, #root, .app-viewport {
 .logo {
   font-size: 10px;
   font-weight: 600;
-  letter-spacing: 0.6em;
+  letter-spacing: 0.5em;
   text-transform: uppercase;
-  color: var(--text-main);
 }
 
 .inquiry-button {
@@ -73,6 +60,7 @@ body, html, #root, .app-viewport {
   letter-spacing: 2px;
   text-transform: uppercase;
   cursor: pointer;
+  pointer-events: auto;
   transition: all 0.3s ease;
 }
 
@@ -81,7 +69,6 @@ body, html, #root, .app-viewport {
   color: white;
 }
 
-/* ===== HERO ===== */
 .hero-container {
   flex: 1;
   display: flex;
@@ -99,18 +86,17 @@ body, html, #root, .app-viewport {
 }
 
 .brand-title {
-  font-family: 'Cormorant Garamond', serif; /* Fixed naming error */
-  font-size: clamp(3rem, 8.5vw, 6.8rem); 
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(3rem, 8.5vw, 6.5rem);
   font-weight: 400;
   line-height: 0.85;
   letter-spacing: -0.03em;
   margin: 0;
-  color: var(--text-main);
   pointer-events: auto;
 }
 
 .explore-button {
-  margin-top: 45px;
+  margin-top: 40px;
   background: var(--text-main);
   color: white;
   border: none;
@@ -121,14 +107,8 @@ body, html, #root, .app-viewport {
   font-size: 9px;
   cursor: pointer;
   pointer-events: auto;
-  transition: transform 0.3s ease;
 }
 
-.explore-button:hover {
-  transform: scale(1.02);
-}
-
-/* ===== FOOTER ===== */
 .main-footer {
   width: 100%;
   display: flex;
@@ -149,51 +129,29 @@ body, html, #root, .app-viewport {
   color: var(--text-main);
   opacity: 0.6;
   cursor: pointer;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.3s;
 }
 
-.social-icon:hover {
-  opacity: 1;
-}
+.social-icon:hover { opacity: 1; }
 
 .footer-tag {
-  text-transform: uppercase;
   font-size: 8px;
-  letter-spacing: 4px;
+  letter-spacing: 3.5px;
   opacity: 0.5;
+  text-transform: uppercase;
 }
 
-.footer-right {
-  text-align: right;
-  line-height: 1.6;
-}
+.footer-right { text-align: right; line-height: 1.6; }
 
-/* ===== MOBILE (CLEAN / NO BARS) ===== */
+/* MOBILE - NO BARS */
 @media (max-width: 768px) {
   .ui-overlay {
     padding: 40px 30px;
-    /* Soft vertical fade for mobile readability */
-    background: linear-gradient(
-      to bottom,
-      rgba(247, 236, 232, 0.25) 0%,
-      transparent 45%
-    );
+    background: linear-gradient(to bottom, rgba(247,236,232,0.25) 0%, transparent 45%);
   }
-
-  .main-header, .main-footer {
-    border: none !important;
-  }
-
-  .brand-title {
-    font-size: 4rem;
-  }
-
-  .main-footer {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 30px;
-  }
-
+  .main-header, .main-footer { border: none !important; }
+  .brand-title { font-size: 4rem; }
+  .main-footer { flex-direction: column; align-items: flex-start; gap: 30px; }
   .footer-tag { display: none; }
   .footer-right { text-align: left; }
 }
