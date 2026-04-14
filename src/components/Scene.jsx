@@ -1,6 +1,6 @@
 import { useRef, useMemo, useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
-import { Environment, Sky } from "@react-three/drei";
+import { Environment, Sky } from "@react-three/drei"; 
 import { Water } from "three-stdlib";
 import * as THREE from "three";
 
@@ -27,23 +27,22 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
-// --- CIRCULAR STATIONARY PLATFORM ---
-const LockedStationaryPlatform = () => {
+// --- THE CIRCULAR STILL PLATFORM ---
+const CircularStillPlatform = () => {
   return (
-    <group 
-      position={[13.5, -1.0, 20]} // Closer to stairs (13.5) and just above water (-1.0)
+    <mesh 
+      position={[10, -1.2, 20]} // Positioned slightly above the water plane
+      receiveShadow
     >
-      <mesh receiveShadow>
-        {/* cylinderGeometry [topRadius, bottomRadius, height, radialSegments] makes it a circle */}
-        <cylinderGeometry args={[4.5, 4.5, 0.4, 64]} />
-        <meshStandardMaterial 
-          color={DARKER_PINK_THEME} 
-          transparent={true} 
-          opacity={0.9} 
-          roughness={0.3}
-        />
-      </mesh>
-    </group>
+      {/* cylinderGeometry args: [topRadius, bottomRadius, height, radialSegments] */}
+      <cylinderGeometry args={[4, 4, 0.3, 64]} /> 
+      <meshStandardMaterial 
+        color="#ffffff" 
+        transparent={true} 
+        opacity={0.9}
+        roughness={0.1}
+      />
+    </mesh>
   );
 };
 
@@ -489,7 +488,7 @@ export default function Scene({ currentView }) {
         position={[0, -1.45, 0]} 
       />
 
-      <LockedStationaryPlatform />
+      <CircularStillPlatform />
     </>
   );
 }
