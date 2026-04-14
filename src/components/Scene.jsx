@@ -27,14 +27,16 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
-// --- UPDATED RED BALL COMPONENT: SPECIFIC SIZE AND ELEVATION ---
-// --- UPDATED RED BALL COMPONENT ---
-// --- UPDATED RED BALL COMPONENT ---
+// --- STEP 1: UPDATED COMPONENT WITH ABSOLUTE COORDINATES ---
 const RedBall = () => {
   return (
-    <mesh position={[18, 3.8, 15]} castShadow>
-      <sphereGeometry args={[2.5, 32, 32]} />
-      <meshStandardMaterial color="#ff0000" roughness={0.4} />
+    <mesh position={[24, 4.4, 18]} castShadow>
+      <sphereGeometry args={[2.8, 32, 32]} />
+      <meshStandardMaterial 
+        color="#ff0000" 
+        roughness={0.2} 
+        metalness={0.1}
+      />
     </mesh>
   );
 };
@@ -463,9 +465,6 @@ export default function Scene({ currentView }) {
           </group>
 
           <WheelchairChapter butterProps={butterProps} isMobile={isMobile} />
-          
-          {/* THE RED BALL: ADDED INSIDE THE ARCHITECTURE GROUP */}
-          <RedBall />
         </group>
       </group>
 
@@ -485,6 +484,9 @@ export default function Scene({ currentView }) {
         rotation={[-Math.PI / 2, 0, 0]} 
         position={[0, -1.45, 0]} 
       />
+
+      {/* STEP 2: MOVED OUTSIDE OF ALL GROUPS TO THE BOTTOM */}
+      <RedBall />
     </>
   );
 }
