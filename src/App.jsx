@@ -1,7 +1,10 @@
 import React, { useState, Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
-// Direct imports are safest for React rendering
-import { Instagram, Facebook, Linkedin, Youtube } from "lucide-react"; 
+// Specific individual imports are the most stable for production builds
+import Instagram from 'lucide-react/dist/esm/icons/instagram';
+import Facebook from 'lucide-react/dist/esm/icons/facebook';
+import Linkedin from 'lucide-react/dist/esm/icons/linkedin';
+import Youtube from 'lucide-react/dist/esm/icons/youtube';
 import Scene from "./components/Scene";
 import "./App.css";
 
@@ -24,14 +27,16 @@ export default function App() {
             Love <br />
             & Care.
           </h1>
-          <button className="explore-button" onClick={() => setCurrentView("collection")}>
+          <button 
+            className="explore-button" 
+            onClick={() => setCurrentView("collection")}
+          >
             EXPLORE COLLECTION
           </button>
         </div>
 
         <footer className="main-footer">
           <div className="social-links">
-            {/* Direct component usage prevents rendering errors */}
             <Instagram size={18} strokeWidth={1.2} className="social-icon" />
             <Facebook size={18} strokeWidth={1.2} className="social-icon" />
             <Linkedin size={18} strokeWidth={1.2} className="social-icon" />
