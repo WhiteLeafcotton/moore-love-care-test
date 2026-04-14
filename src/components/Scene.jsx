@@ -1,4 +1,4 @@
-import { useRef, useMemo, useEffect, forwardRef, useImperativeHandle } from "react";
+import { useRef, useMemo, useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
 import { Environment, Sky, Float } from "@react-three/drei"; 
 import { Water } from "three-stdlib";
@@ -6,11 +6,10 @@ import * as THREE from "three";
 
 extend({ Water });
 
+const GRASS_COUNT = 400000;
 const TITLE_PURPLE = "#21162e"; 
 const DARKER_PINK_THEME = "#bf9fb3"; 
-const GRASS_COUNT = 400000;
 
-// --- HEIGHT LOGIC ---
 const getHillHeight = (x, z) => {
   const dist = Math.sqrt(x * x + z * z);
   const flatZone = 45; 
@@ -40,7 +39,7 @@ const HeartBadge = () => {
     return s;
   }, []);
   return (
-    <mesh position={[0.12, 1.0, 0.19]}>
+    <mesh position={[0.12, 1.0, 0.19]} rotation={[0, 0, 0]}>
       <shapeGeometry args={[shape]} />
       <meshStandardMaterial color={DARKER_PINK_THEME} emissive={DARKER_PINK_THEME} emissiveIntensity={0.5} />
     </mesh>
@@ -51,14 +50,23 @@ const BlockHumanoid = forwardRef(({ scale = 1, materialProps, poseProps = {}, is
   const { 
     leftLegRotation = [0, 0, 0], rightLegRotation = [0, 0, 0], 
     leftArmRotation = [0.2, 0, -0.1], rightArmRotation = [0.2, 0, 0.1], 
-    position = [0,0,0], rotation = [0,0,0],
+    position = [0,0,0], rotation = [0,0,0], cane = false, walker = false,
     torsoRotationX = 0, headRotationY = 0 
   } = poseProps;
   
-  const torsoGeo = useMemo(() => {
-    const pts = [new THREE.Vector2(0, 0), new THREE.Vector2(0.18, 0.1), new THREE.Vector2(0.18, 0.9), new THREE.Vector2(0, 1.0)];
-    return new THREE.LatheGeometry(pts, 32);
-  }, []);
+  const torsoRef = useRef();
+  const leftLegRef = useRef();
+  const rightLegRef = useRef();
+  const leftArmRef = useRef();
+  const rightArmRef = useRef();
+  const headRef = useRef();
+  const innerGroupRef = useRef();
+
+  useImperativeHandle(ref, () => ({
+    leftLeg: leftLegRef.current, rightLeg: rightLegRef.current,
+    leftArm: leftArmRef.current, rightArm: rightArmRef.current,
+    head: headRef.current, torso: torsoRef.current, group: innerGroupRef.current
+  }));
 
   const limbGeo = useMemo(() => {
     const pts = [new THREE.Vector2(0, 0), new THREE.Vector2(0.08, 0.05), new THREE.Vector2(0.08, 0.75), new THREE.Vector2(0, 0.8)];
@@ -66,38 +74,36 @@ const BlockHumanoid = forwardRef(({ scale = 1, materialProps, poseProps = {}, is
     g.translate(0, -0.8, 0); return g;
   }, []);
 
+  const torsoGeo = useMemo(() => {
+    const pts = [new THREE.Vector2(0, 0), new THREE.Vector2(0.18, 0.1), new THREE.Vector2(0.18, 0.9), new THREE.Vector2(0, 1.0)];
+    return new THREE.LatheGeometry(pts, 32);
+  }, []);
+
   return (
-    <group scale={scale} position={position} rotation={rotation}>
-      <group rotation={[torsoRotationX, 0, 0]}>
-        <mesh position={[0, 1.4, 0]} castShadow>
-          <sphereGeometry args={[0.22, 32, 32]} />
-          <meshStandardMaterial {...materialProps} />
-        </mesh>
-        <mesh position={[0, 0.3, 0]} castShadow>
-          <primitive object={torsoGeo} />
-          <meshStandardMaterial {...materialProps} />
-        </mesh>
+    <group scale={scale} position={position} rotation={rotation} ref={innerGroupRef}>
+      <group ref={torsoRef} rotation={[torsoRotationX, 0, 0]}>
+        <mesh ref={headRef} position={[0, 1.4, 0]} castShadow><sphereGeometry args={[0.22, 32, 32]} /><meshStandardMaterial {...materialProps} /></mesh>
+        <mesh position={[0, 0.3, 0]} castShadow><primitive object={torsoGeo} /><meshStandardMaterial {...materialProps} /></mesh>
         {isHelper && <HeartBadge />}
         <group position={[0, 1.2, 0]}>
-          <mesh position={[-0.22, 0, 0]} rotation={leftArmRotation} castShadow>
-            <primitive object={limbGeo} />
-            <meshStandardMaterial {...materialProps} />
-          </mesh>
-          <mesh position={[0.22, 0, 0]} rotation={rightArmRotation} castShadow>
-            <primitive object={limbGeo} />
-            <meshStandardMaterial {...materialProps} />
-          </mesh>
+          <group ref={leftArmRef} position={[-0.22, 0, 0]} rotation={leftArmRotation}><mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh></group>
+          <group ref={rightArmRef} position={[0.22, 0, 0]} rotation={rightArmRotation}>
+            <mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} />
+              {cane && <mesh position={[0, -0.7, 0.1]}><cylinderGeometry args={[0.015, 0.015, 1.1]} /><meshStandardMaterial color={DARKER_PINK_THEME} /></mesh>}
+            </mesh>
+          </group>
         </group>
       </group>
+      {walker && (
+        <group position={[0, -0.2, 0.35]}>
+          <mesh position={[0.3, 0.45, 0]}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color={DARKER_PINK_THEME} /></mesh>
+          <mesh position={[-0.3, 0.45, 0]}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color={DARKER_PINK_THEME} /></mesh>
+          <mesh position={[0, 0.85, 0]}><boxGeometry args={[0.65, 0.03, 0.03]} /><meshStandardMaterial color={DARKER_PINK_THEME} /></mesh>
+        </group>
+      )}
       <group position={[0, 0.4, 0]}>
-        <mesh position={[-0.12, 0, 0]} rotation={leftLegRotation} castShadow>
-          <primitive object={limbGeo} />
-          <meshStandardMaterial {...materialProps} />
-        </mesh>
-        <mesh position={[0.12, 0, 0]} rotation={rightLegRotation} castShadow>
-          <primitive object={limbGeo} />
-          <meshStandardMaterial {...materialProps} />
-        </mesh>
+        <group ref={leftLegRef} position={[-0.12, 0, 0]} rotation={leftLegRotation}><mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh></group>
+        <group ref={rightLegRef} position={[0.12, 0, 0]} rotation={rightLegRotation}><mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh></group>
       </group>
     </group>
   );
@@ -126,7 +132,16 @@ const Staircase = ({ position, width, rotation, materialProps }) => (
   </group>
 );
 
-// --- MAIN SCENE EXPORT ---
+const WallOpening = ({ position, colorProps, width = 6, openingW = 4.8, height = 17, openingH = 9, isWindow = false }) => (
+  <group position={position}>
+    <mesh position={[-(openingW + (width - openingW) / 2) / 2, height / 2, 0]} castShadow receiveShadow><boxGeometry args={[(width - openingW) / 2, height, 2]} /><meshStandardMaterial {...colorProps} /></mesh>
+    <mesh position={[(openingW + (width - openingW) / 2) / 2, height / 2, 0]} castShadow receiveShadow><boxGeometry args={[(width - openingW) / 2, height, 2]} /><meshStandardMaterial {...colorProps} /></mesh>
+    <mesh position={[0, height - (height - openingH - (isWindow ? 4 : 0)) / 2, 0]} castShadow receiveShadow><boxGeometry args={[openingW, height - openingH - (isWindow ? 4 : 0), 2]} /><meshStandardMaterial {...colorProps} /></mesh>
+    {isWindow && <mesh position={[0, 2, 0]} castShadow receiveShadow><boxGeometry args={[openingW, 4, 2]} /><meshStandardMaterial {...colorProps} /></mesh>}
+  </group>
+);
+
+// --- MAIN SCENE ---
 export default function Scene({ currentView }) {
   const { camera, size } = useThree();
   const waterRef = useRef();
@@ -153,32 +168,34 @@ export default function Scene({ currentView }) {
       <GrassySassyHills />
       <directionalLight position={[-15, 30, 10]} intensity={1.6} castShadow />
 
-      {/* Architecture */}
+      {/* Main Architecture */}
       <group position={[0, 0, 0]}>
         <mesh position={[15.5, -2.1, 15.0]} castShadow receiveShadow><boxGeometry args={[20, 8.0, 30]} /><meshStandardMaterial {...butterProps} /></mesh>
         <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={butterProps} />
+        <group position={[-16, -1.6, 0]}>
+            <mesh position={[1, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[4, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
+            <WallOpening position={[6, 0, 0]} colorProps={butterProps} /> 
+            <WallOpening position={[12, 0, 0]} colorProps={butterProps} /> 
+            <mesh position={[24, 8.5, 0]} castShadow receiveShadow><boxGeometry args={[18, 17, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
+        </group>
       </group>
 
-      {/* Water */}
       <water 
         ref={waterRef} 
-        args={[new THREE.PlaneGeometry(2000, 2000), { 
-            waterNormals, sunDirection: new THREE.Vector3(-10, 10, -100).normalize(), 
-            waterColor: TITLE_PURPLE, distortionScale: 1.0, alpha: 0.95 
-        }]} 
+        args={[new THREE.PlaneGeometry(2000, 2000), { waterNormals, sunDirection: new THREE.Vector3(-10, 10, -100).normalize(), waterColor: TITLE_PURPLE, distortionScale: 1.0, alpha: 0.95 }]} 
         rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.45, 0]} 
       />
 
-      {/* WHOLESOME PLATFORM SCENE - Placed last to ensure render visibility */}
+      {/* THE WHOLESOME MOMENT - Rendered Last for visibility */}
       <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
         <group position={[10, -1.1, 16]}>
-          {/* The Disk */}
+          {/* Circular Platform Base */}
           <mesh renderOrder={10000}>
             <cylinderGeometry args={[3, 3, 0.2, 64]} /> 
             <meshBasicMaterial color="#ffffff" transparent opacity={0.85} depthTest={false} />
           </mesh>
 
-          {/* Rug */}
+          {/* Soft Lavender Rug */}
           <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.11, 0]}>
             <circleGeometry args={[2.2, 64]} />
             <meshStandardMaterial color="#d6b3ff" />
@@ -190,7 +207,7 @@ export default function Scene({ currentView }) {
             <mesh position={[0, 0.6, -0.5]} castShadow><boxGeometry args={[1.2, 1, 0.2]} /><meshStandardMaterial color="#f3d9ff" /></mesh>
           </group>
 
-          {/* Old Person Sitting */}
+          {/* Old Person Seated */}
           <BlockHumanoid
             scale={0.7}
             materialProps={butterProps}
@@ -205,7 +222,7 @@ export default function Scene({ currentView }) {
             }}
           />
 
-          {/* L-Lamp */}
+          {/* Tall L-Lamp */}
           <group position={[0.7, 0.1, -0.8]}>
             <mesh position={[0, 1.2, 0]} castShadow><cylinderGeometry args={[0.04, 0.04, 2.4]} /><meshStandardMaterial color="#ffffff" /></mesh>
             <mesh position={[0.4, 2.4, 0]} castShadow><boxGeometry args={[0.8, 0.04, 0.04]} /><meshStandardMaterial color="#ffffff" /></mesh>
@@ -223,7 +240,7 @@ export default function Scene({ currentView }) {
                 rightArmRotation: [-1.1, 0, -0.2]
               }}
             />
-            {/* Platter */}
+            {/* Food Platter */}
             <mesh position={[0, 0.9, 0.4]}>
               <cylinderGeometry args={[0.35, 0.35, 0.03, 32]} />
               <meshStandardMaterial color="#ffffff" />
