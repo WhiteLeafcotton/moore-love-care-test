@@ -27,27 +27,75 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
+// --- NEW SUB-COMPONENTS FOR THE PLATFORM ---
+
+const ComfyChair = (props) => {
+  return (
+    <group {...props}>
+      {/* Seat */}
+      <mesh position={[0, 0.4, 0]} castShadow>
+        <boxGeometry args={[1.2, 0.5, 1.1]} />
+        <meshStandardMaterial color="#fce4e4" roughness={0.8} />
+      </mesh>
+      {/* Backrest */}
+      <mesh position={[0, 0.9, -0.45]} rotation={[-0.1, 0, 0]} castShadow>
+        <boxGeometry args={[1.2, 1.2, 0.3]} />
+        <meshStandardMaterial color="#fce4e4" roughness={0.8} />
+      </mesh>
+      {/* Arms */}
+      <mesh position={[-0.65, 0.7, 0]} castShadow>
+        <boxGeometry args={[0.2, 0.6, 1.1]} />
+        <meshStandardMaterial color={DARKER_PINK_THEME} />
+      </mesh>
+      <mesh position={[0.65, 0.7, 0]} castShadow>
+        <boxGeometry args={[0.2, 0.6, 1.1]} />
+        <meshStandardMaterial color={DARKER_PINK_THEME} />
+      </mesh>
+    </group>
+  );
+};
+
+const DesignerLamp = (props) => {
+  return (
+    <group {...props}>
+      <mesh position={[0, 1, 0]} castShadow>
+        <cylinderGeometry args={[0.03, 0.03, 2, 16]} />
+        <meshStandardMaterial color={DARKER_PINK_THEME} metalness={0.8} />
+      </mesh>
+      <mesh position={[0, 2, 0]} castShadow>
+        <coneGeometry args={[0.4, 0.6, 32]} />
+        <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.5} />
+      </mesh>
+      <pointLight position={[0, 2, 0]} intensity={1.2} distance={8} color="#fff1d7" />
+    </group>
+  );
+};
+
 // --- THE CIRCULAR FLOATING PLATFORM ---
 const FloatingPlatform = () => {
   return (
     <Float 
       speed={1.5} 
-      rotationIntensity={0.2} 
-      floatIntensity={0.5} 
+      rotationIntensity={0.1} 
+      floatIntensity={0.4} 
+      position={[10, 2.5, 16]} /* Lifted it up so it floats above the floor */
     >
-      <mesh 
-        position={[10, -1.1, 16]} 
-        renderOrder={10000}        
-        frustumCulled={false}      
-      >
-        <cylinderGeometry args={[3, 3, 0.2, 64]} /> 
-        <meshBasicMaterial 
-          color="#ffffff" 
-          depthTest={false}        
-          transparent={true} 
-          opacity={0.85}
-        />
-      </mesh>
+      <group>
+        {/* The Glassy Platform Base */}
+        <mesh receiveShadow castShadow>
+          <cylinderGeometry args={[3, 3, 0.2, 64]} /> 
+          <meshStandardMaterial 
+            color="#ffffff" 
+            transparent={true} 
+            opacity={0.7}
+            roughness={0.1}
+          />
+        </mesh>
+
+        {/* The Comfy Pair Nested on the Platform */}
+        <ComfyChair position={[-0.5, 0.1, 0]} rotation={[0, Math.PI / 6, 0]} scale={0.8} />
+        <DesignerLamp position={[1.2, 0.1, -0.5]} scale={0.8} />
+      </group>
     </Float>
   );
 };
@@ -494,7 +542,7 @@ export default function Scene({ currentView }) {
         position={[0, -1.45, 0]} 
       />
 
-      {/* RENDERED LAST - NEW CIRCLE PLATFORM */}
+      {/* RENDERED LAST - FIXED FLOATING PLATFORM WITH CHAIR & LAMP */}
       <FloatingPlatform />
     </>
   );
