@@ -27,17 +27,17 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
-// --- NEW COMPONENT: RED BALL ---
+// --- RED BALL COMPONENT ---
 const RedBall = () => {
   return (
-    <mesh position={[10, 0.4, 21]} castShadow>
+    <mesh position={[11.5, 2.5, 18]} castShadow>
       <sphereGeometry args={[1.5, 32, 32]} />
-      <meshStandardMaterial color="#f04d3d" roughness={0.4} />
+      <meshStandardMaterial color="#ff0000" />
     </mesh>
   );
 };
 
-// --- COMPONENTS ---
+// --- OTHER COMPONENTS ---
 const HeartBadge = () => {
   const shape = useMemo(() => {
     const s = new THREE.Shape();
@@ -417,14 +417,14 @@ export default function Scene({ currentView }) {
         </group>
 
         <group>
-          {/* SITTING AREA - COUPLE REMOVED FROM BENCH GROUP */}
+          {/* SITTING AREA */}
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <Bench materialProps={butterProps} />
           </group>
 
           <WalkingToConversationChapter butterProps={butterProps} />
 
-          {/* RESTORED ANIMATED WALKER COUPLE (BY THE STAIRS) - REMAINING */}
+          {/* ANIMATED WALKER COUPLE */}
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <group position={[3.5, 0, -0.2]} rotation={[0, -0.5, 0]}>
                <BlockHumanoid 
@@ -461,8 +461,6 @@ export default function Scene({ currentView }) {
           </group>
 
           <WheelchairChapter butterProps={butterProps} isMobile={isMobile} />
-          
-         <WheelchairChapter butterProps={butterProps} isMobile={isMobile} />
           
           {/* THE RED BALL */}
           <RedBall />
