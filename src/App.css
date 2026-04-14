@@ -61,14 +61,16 @@ canvas {
     calc(var(--safe-bottom) + 6vh);
 
   pointer-events: none;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  
+  /* Frost reduced to almost nothing */
+  backdrop-filter: blur(1px);
+  -webkit-backdrop-filter: blur(1px);
 
-  /* 35% Left Frost - Lightened as requested */
+  /* Left Frost reduced to extreme transparency */
   background: linear-gradient(
     90deg,
-    rgba(247, 236, 232, 0.35) 0%,
-    rgba(247, 236, 232, 0.1) 35%,
+    rgba(247, 236, 232, 0.05) 0%,
+    rgba(247, 236, 232, 0.01) 35%,
     transparent 65%
   );
   transition: opacity 1.2s ease-in-out;
@@ -194,9 +196,10 @@ canvas {
       25px
       calc(var(--safe-bottom) + 25px);
 
+    /* Mobile gradient reduced to almost nothing */
     background: linear-gradient(
       to bottom,
-      rgba(247,236,232,0.35) 0%,
+      rgba(247,236,232,0.05) 0%,
       transparent 45%
     );
   }
