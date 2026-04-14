@@ -28,11 +28,13 @@ const getHillHeight = (x, z) => {
 };
 
 // --- UPDATED RED BALL COMPONENT: SPECIFIC SIZE AND ELEVATION ---
+// --- UPDATED RED BALL COMPONENT ---
 const RedBall = () => {
   return (
-    // position and radius are refined to fit the platform space
-    <mesh position={[11.2, 2.5, 18.2]} castShadow>
-      <sphereGeometry args={[1.65, 32, 32]} />
+    // y: 3.5 lifts it out of the floor clipping
+    // z: 12.0 moves it back toward the windows as seen in your mockup
+    <mesh position={[24.5, 3.5, 12.0]} castShadow>
+      <sphereGeometry args={[3.0, 32, 32]} />
       <meshStandardMaterial color="#ff0000" roughness={0.4} />
     </mesh>
   );
