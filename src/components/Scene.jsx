@@ -15,9 +15,9 @@ const getHillHeight = (x, z) => {
   const flatZone = 45; 
   const influence = dist < flatZone ? 0 : Math.min((dist - flatZone) / 25, 1.0);
   const hills = [
-    { x: 20, z: -100, h: 18, w: 16 },     
-    { x: -70, z: -50, h: 12, w: 12 },     
-    { x: 55, z: -40, h: 14, w: 14 }      
+    { x: 20, z: -100, h: 18, w: 16 },      
+    { x: -70, z: -50, h: 12, w: 12 },      
+    { x: 55, z: -40, h: 14, w: 14 }       
   ];
   let hillHeight = 0;
   hills.forEach(h => {
@@ -25,6 +25,31 @@ const getHillHeight = (x, z) => {
     hillHeight += Math.exp(-Math.pow(d / h.w, 2)) * h.h;
   });
   return hillHeight * influence;
+};
+
+// --- THE CIRCULAR FLOATING PLATFORM ---
+const FloatingPlatform = () => {
+  return (
+    <Float 
+      speed={1.5} 
+      rotationIntensity={0.2} 
+      floatIntensity={0.5} 
+    >
+      <mesh 
+        position={[10, -1.1, 16]} 
+        renderOrder={10000}        
+        frustumCulled={false}      
+      >
+        <cylinderGeometry args={[3, 3, 0.2, 64]} /> 
+        <meshBasicMaterial 
+          color="#ffffff" 
+          depthTest={false}        
+          transparent={true} 
+          opacity={0.85}
+        />
+      </mesh>
+    </Float>
+  );
 };
 
 // --- HUMANOID COMPONENTS ---
@@ -163,82 +188,6 @@ const BlockHumanoid = forwardRef(({ scale = 1, materialProps, poseProps = {}, is
   );
 });
 
-// --- NEW WHOLESOME SCENE COMPONENTS ---
-
-const LLamp = () => (
-  <group position={[-1.2, 0, -0.8]}>
-    <mesh position={[0, 0.05, 0]}><cylinderGeometry args={[0.3, 0.3, 0.1, 32]} /><meshStandardMaterial color={DARKER_PINK_THEME} /></mesh>
-    <mesh position={[0, 2.5, 0]}><cylinderGeometry args={[0.04, 0.04, 5, 16]} /><meshStandardMaterial color={DARKER_PINK_THEME} /></mesh>
-    <mesh position={[0.75, 5, 0]} rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[0.04, 0.04, 1.5, 16]} /><meshStandardMaterial color={DARKER_PINK_THEME} /></mesh>
-    <group position={[1.5, 4.8, 0]}>
-      <mesh><sphereGeometry args={[0.15, 16, 16]} /><meshStandardMaterial color="#fff" emissive="#fff" emissiveIntensity={2} /></mesh>
-      <pointLight intensity={1.5} distance={10} color="#fff" />
-    </group>
-  </group>
-);
-
-const ComfyChair = () => (
-  <group position={[0, 0.1, 0]}>
-    <mesh position={[0, 0.4, 0]} castShadow><boxGeometry args={[1.4, 0.6, 1.4]} /><meshStandardMaterial color={DARKER_PINK_THEME} /></mesh>
-    <mesh position={[0, 1.1, -0.6]} castShadow><boxGeometry args={[1.4, 1.2, 0.3]} /><meshStandardMaterial color={DARKER_PINK_THEME} /></mesh>
-    <mesh position={[-0.75, 0.8, 0]} castShadow><boxGeometry args={[0.2, 0.5, 1.2]} /><meshStandardMaterial color={DARKER_PINK_THEME} /></mesh>
-    <mesh position={[0.75, 0.8, 0]} castShadow><boxGeometry args={[0.2, 0.5, 1.2]} /><meshStandardMaterial color={DARKER_PINK_THEME} /></mesh>
-  </group>
-);
-
-const FloatingPlatform = ({ butterProps }) => {
-  return (
-    <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.3}>
-      {/* RAISED Group Position from -1.4 to 1.2 */}
-      <group position={[11, 1.2, 22]}> 
-        <mesh position={[0, -0.2, 0]} receiveShadow>
-          <cylinderGeometry args={[3.8, 4.2, 0.4, 64]} /> 
-          <meshStandardMaterial color="#ffffff" transparent opacity={0.8} roughness={0.1} metalness={0.2} />
-        </mesh>
-        
-        <LLamp />
-        <ComfyChair />
-        
-        {/* Seated Resident */}
-        <group position={[0, 0.6, 0]}>
-           <BlockHumanoid 
-            scale={0.85} 
-            materialProps={butterProps} 
-            poseProps={{ 
-              leftLegRotation: [Math.PI / 2.2, 0, 0], 
-              rightLegRotation: [Math.PI / 2.2, 0, 0], 
-              leftArmRotation: [0.8, 0, 0.2], 
-              rightArmRotation: [0.8, 0, -0.2],
-              torsoRotationX: 0.1,
-              headRotationY: 0.3
-            }} 
-           />
-        </group>
-
-        {/* Helper Standing Nearby */}
-        <group position={[1.6, 0.1, 0.8]} rotation={[0, -0.8, 0]}>
-           <BlockHumanoid 
-            isHelper
-            scale={0.95} 
-            materialProps={butterProps} 
-            poseProps={{ 
-              leftArmRotation: [-1.2, 0, 0.3], 
-              rightArmRotation: [0.2, 0, -0.1],
-              headRotationY: -0.5
-            }} 
-           />
-           {/* Side Table with water/juice */}
-           <mesh position={[-0.5, 1.1, 0.2]}>
-             <cylinderGeometry args={[0.3, 0.3, 0.05, 32]} />
-             <meshStandardMaterial color="#fff" />
-             <mesh position={[0.05, 0.15, 0]}><cylinderGeometry args={[0.08, 0.08, 0.25, 16]} /><meshStandardMaterial color="#fff" transparent opacity={0.6} /></mesh>
-           </mesh>
-        </group>
-      </group>
-    </Float>
-  );
-};
-
 // --- GRASS ---
 const GrassySassyHills = () => {
   const meshRef = useRef();
@@ -358,7 +307,7 @@ const WalkingToConversationChapter = ({ butterProps }) => {
     const smoothProgress = THREE.MathUtils.smoothstep(t, 0, 1);
     
     if (phase === "walking") {
-      if (groupRef.current) groupRef.current.position.z = 4.0 + (finalStopZ - 4.0) * smoothProgress;
+      groupRef.current.position.z = 4.0 + (finalStopZ - 4.0) * smoothProgress;
 
       if (p1Ref.current) {
         const swingA = Math.sin(et * 10.5) * 0.45;
@@ -545,7 +494,8 @@ export default function Scene({ currentView }) {
         position={[0, -1.45, 0]} 
       />
 
-      <FloatingPlatform butterProps={butterProps} />
+      {/* RENDERED LAST - NEW CIRCLE PLATFORM */}
+      <FloatingPlatform />
     </>
   );
 }
