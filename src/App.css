@@ -1,4 +1,4 @@
-/* ===== FONTS ===== */
+/* ===== FONTS (PREMIUM PAIRING) ===== */
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
 
 /* ===== ROOT ===== */
@@ -6,9 +6,11 @@
   --bg: #f7ece8;
   --text-main: #1f1726;
   --text-soft: rgba(31, 23, 38, 0.5);
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
 }
 
-/* ===== BASE ===== */
+/* ===== BASE RESET ===== */
 * {
   box-sizing: border-box;
   -webkit-font-smoothing: antialiased;
@@ -25,25 +27,29 @@ body, html, #root, .app-viewport {
   color: var(--text-main);
 }
 
-/* ===== UI LAYER (ULTRA LIGHT FROST) ===== */
+/* ===== UI LAYER (LEFT-RIGHT FADE) ===== */
 .ui-overlay {
   position: fixed;
   inset: 0;
   z-index: 100;
   display: flex;
   flex-direction: column;
-  padding: 60px 7vw;
+  justify-content: space-between; /* Header top, footer bottom */
+  align-items: flex-start; /* Title left-aligned */
 
-  /* Significantly lightened frost effect */
-  backdrop-filter: blur(4px) saturate(110%);
-  -webkit-backdrop-filter: blur(4px) saturate(110%);
+  /* PREMIUM SPACING AND PADDING (Balanced frame) */
+  padding: calc(8vh + var(--safe-top)) calc(8vw) calc(8vh + var(--safe-bottom));
 
-  /* Gradient shifted to clear the right side of the screen */
+  /* Lightened Blur */
+  backdrop-filter: blur(5px) saturate(110%);
+  -webkit-backdrop-filter: blur(5px) saturate(110%);
+
+  /* CRITICAL CHANGE: Left dense, right clear, faded edge to reveal the 3D */
   background: linear-gradient(
     110deg,
-    rgba(247,236,232,0.35) 0%,
-    rgba(247,236,232,0.1) 45%,
-    transparent 100%
+    rgba(247,236,232,0.45) 0%, /* Lightest white starts here */
+    rgba(247,236,232,0.2) 40%, /* Frost starts to dissolve */
+    transparent 80%              /* Vanishes here to show architecture */
   );
 
   pointer-events: none;
@@ -52,13 +58,14 @@ body, html, #root, .app-viewport {
 
 .fade-out { opacity: 0; }
 
-/* ===== HEADER ===== */
+/* ===== HEADER (REFINED PADDING) ===== */
 .main-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
   padding-bottom: 25px;
-  border-bottom: 1px solid rgba(31, 23, 38, 0.08);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
   pointer-events: auto;
 }
 
@@ -67,19 +74,20 @@ body, html, #root, .app-viewport {
   font-weight: 600;
   letter-spacing: 0.5em;
   text-transform: uppercase;
+  color: var(--text-soft);
 }
 
 .inquiry-button {
-  background: rgba(255,255,255,0.4);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(31, 23, 38, 0.1);
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 999px;
-  padding: 12px 32px;
+  padding: 12px 30px;
   font-size: 10px;
   letter-spacing: 2px;
   text-transform: uppercase;
   cursor: pointer;
-  transition: all 0.4s ease;
+  pointer-events: auto;
+  transition: all 0.3s ease;
 }
 
 .inquiry-button:hover {
@@ -87,15 +95,17 @@ body, html, #root, .app-viewport {
   color: white;
 }
 
-/* ===== HERO (STRICT LEFT ALIGN) ===== */
+/* ===== HERO (LEFT ALIGNED) ===== */
 .hero-container {
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: flex-start; /* Corrects the centering issue */
-  text-align: left;
-  max-width: 1000px;
+  justify-content: center; /* Vertical center of the screen */
+  align-items: flex-start; /* Forced left alignment */
+  width: 100%;
+  max-width: 900px;
+  /* Visual gap around the title block */
+  margin: 5vh 0;
 }
 
 .brand-subtitle {
@@ -104,17 +114,18 @@ body, html, #root, .app-viewport {
   text-transform: uppercase;
   color: var(--text-soft);
   margin-bottom: 1.5rem;
-  padding-left: 5px; /* Visual alignment for serif fonts */
+  padding-left: 5px; /* Alignment visual correction */
 }
 
+/* TITLE SIZE REDUCED */
 .brand-title {
   font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(4rem, 12vw, 10rem);
+  font-size: clamp(3.5rem, 10vw, 8.5rem); /* Reduced max clamp */
   font-weight: 400;
   line-height: 0.82;
   letter-spacing: -0.04em;
   margin: 0;
-  margin-left: 0; /* Forced left */
+  pointer-events: auto;
 }
 
 .explore-button {
@@ -132,35 +143,48 @@ body, html, #root, .app-viewport {
   transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
-.explore-button:hover { transform: scale(1.03); }
+.explore-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+}
 
-/* ===== FOOTER ===== */
+/* ===== FOOTER (BALANCED PREMIUM GRID) ===== */
 .main-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
+  width: 100%;
+  /* 3 intentional columns for balance */
+  display: grid;
+  grid-template-columns: 1fr 1.2fr 1fr;
+  align-items: flex-end; /* Pin items to the bottom border */
   padding-top: 30px;
-  border-top: 1px solid rgba(31, 23, 38, 0.08);
+  border-top: 1px solid rgba(0,0,0,0.06);
   font-size: 10px;
   letter-spacing: 1.5px;
   text-transform: uppercase;
   color: var(--text-soft);
+  gap: 20px;
 }
 
-.footer-left {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
+/* Socials Column */
 .social-links {
   display: flex;
+  justify-content: flex-start;
   gap: 25px;
   pointer-events: auto;
 }
+.social-links span { cursor: pointer; transition: color 0.3s ease; }
+.social-links span:hover { color: var(--text-main); }
 
-.social-links span:hover { color: var(--text-main); cursor: pointer; }
+/* Tagline Column */
+.footer-tag {
+  text-align: center;
+  font-weight: 500;
+  color: var(--text-main);
+  border-left: 1px solid rgba(0,0,0,0.06);
+  border-right: 1px solid rgba(0,0,0,0.06);
+  padding: 0 20px;
+}
 
+/* Legal/Address Column */
 .footer-right {
   text-align: right;
   line-height: 1.8;
@@ -169,42 +193,30 @@ body, html, #root, .app-viewport {
 /* ===== MOBILE VIEW (STUNNING OPTIMIZATION) ===== */
 @media (max-width: 768px) {
   .ui-overlay {
-    padding: 40px 25px;
-    /* Soft top-down gradient for mobile readability */
+    padding: 30px 25px;
     background: linear-gradient(
       to bottom,
       rgba(247,236,232,0.6) 0%,
-      rgba(247,236,232,0.2) 50%,
+      rgba(247,236,232,0.2) 60%,
       transparent 100%
     );
   }
 
   .brand-title {
-    font-size: 5rem; /* Larger impact on mobile */
+    font-size: 4.8rem;
     line-height: 0.9;
   }
 
-  .brand-subtitle {
-    font-size: 9px;
-    letter-spacing: 0.5em;
-  }
-
-  .explore-button {
-    width: 100%;
-    margin-top: 40px;
-  }
-
   .main-footer {
-    flex-direction: column;
-    align-items: flex-start;
+    grid-template-columns: 1fr;
     gap: 30px;
     border-top: none;
+    text-align: center; /* Simple, powerful stacking on mobile */
   }
 
-  .footer-right {
-    text-align: left;
-    font-size: 9px;
-  }
+  .social-links { justify-content: center; }
+  .footer-tag { border: none; padding: 0; }
+  .footer-right { text-align: center; }
 }
 
 /* ===== SECONDARY PAGE ===== */
@@ -218,24 +230,8 @@ body, html, #root, .app-viewport {
   justify-content: center;
   align-items: center;
   transition: opacity 1.5s ease;
+  background: rgba(31, 23, 38, 0.2);
 }
-
-.underwater-page.active {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.depth-layer h1 {
-  font-family: 'Cormorant Garamond', serif;
-  color: white;
-  font-size: 4rem;
-}
-
-.back-button {
-  background: transparent;
-  border: 1px solid white;
-  color: white;
-  padding: 10px 25px;
-  border-radius: 999px;
-  cursor: pointer;
-}
+.underwater-page.active { opacity: 1; pointer-events: auto; }
+.underwater-page h1 { font-family: 'Cormorant Garamond', serif; color: white; font-size: 3.5rem; }
+.back-button { background: transparent; border: 1px solid white; color: white; padding: 10px 25px; border-radius: 999px; cursor: pointer; margin-top: 20px;}

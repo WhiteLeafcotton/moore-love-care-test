@@ -10,7 +10,7 @@ export default function App() {
   return (
     <div className="app-viewport">
       
-      {/* ===== UI LAYER (Light Frost + Left Aligned) ===== */}
+      {/* ===== UI LAYER ===== */}
       <div className={`ui-overlay ${!isHome ? "fade-out" : ""}`}>
 
         {/* ===== HEADER ===== */}
@@ -19,7 +19,7 @@ export default function App() {
           <button className="inquiry-button">INQUIRY</button>
         </header>
 
-        {/* ===== HERO (Strict Left Alignment) ===== */}
+        {/* ===== HERO ( Strict Left Alignment) ===== */}
         <div className="hero-container">
           <div className="brand-subtitle">
             THE SOLARIUM SANCTUARY
@@ -39,23 +39,26 @@ export default function App() {
           </button>
         </div>
 
-        {/* ===== FOOTER ===== */}
+        {/* ===== FOOTER (BALANCED GRID) ===== */}
         <footer className="main-footer">
-          <div className="footer-left">
-            <div className="social-links">
-              <span>FB</span>
-              <span>IG</span>
-              <span>LI</span>
-              <span>YT</span>
-            </div>
-            <div className="footer-tag">
-              MENTAL RESTORATION // REHABILITATION
-            </div>
+          {/* Column 1: Socials */}
+          <div className="social-links">
+            <span>FB</span>
+            <span>IG</span>
+            <span>LI</span>
+            <span>YT</span>
           </div>
 
+          {/* Column 2: Tagline */}
+          <div className="footer-tag">
+            MENTAL RESTORATION // REHABILITATION
+          </div>
+
+          {/* Column 3: Legal/Address */}
           <div className="footer-right">
             MOORE ESTATES INTERNATIONAL <br />
-            EST. 2026 — PRIVACY POLICY // TERMS
+            1A AMHERST PLACE — EST. 2026<br />
+            PRIVACY POLICY // TERMS
           </div>
         </footer>
       </div>
