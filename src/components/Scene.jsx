@@ -71,50 +71,31 @@ const FloatingPlatform = () => {
   const butterProps = { color: "#fce4e4", roughness: 0.9, metalness: 0.02 };
 
   return (
-    <Float 
-      speed={1.5} 
-      rotationIntensity={0.2} 
-      floatIntensity={0.5} 
-      position={[10, -1.1, 16]} 
-    >
-      {/* THE PLATFORM DISK */}
-      <mesh renderOrder={10000} frustumCulled={false}>
-        <cylinderGeometry args={[3, 3, 0.2, 64]} /> 
-        <meshBasicMaterial 
-          color="#ffffff" 
-          depthTest={false}         
-          transparent={true} 
-          opacity={0.85}
-        />
+    <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.4} position={[10, -1.1, 16]}>
+      {/* Platform Disk */}
+      <mesh renderOrder={10000}>
+        <cylinderGeometry args={[3.5, 3.5, 0.2, 64]} />
+        <meshBasicMaterial color="#ffffff" depthTest={false} transparent opacity={0.85} />
       </mesh>
 
-      {/* THE CHAIR - Positioned on the platform */}
-      <Chair position={[0, 0.1, 0]} rotation={[0, -Math.PI / 4, 0]} />
+      {/* The Recliner */}
+      <LazyBoyChair position={[0.5, 0.1, 0]} rotation={[0, -Math.PI / 6, 0]} />
 
-      {/* THE LAMP - Simple post and glow ball */}
-      <group position={[1.8, 0.1, -1.2]}>
-        <mesh renderOrder={10001}>
-          <cylinderGeometry args={[0.05, 0.05, 4]} />
-          <meshBasicMaterial color="#21162e" depthTest={false} transparent={true} />
-        </mesh>
-        <mesh position={[0, 2, 0]} renderOrder={10002}>
-          <sphereGeometry args={[0.15]} />
-          <meshBasicMaterial color="#ffffff" depthTest={false} transparent={true} />
-        </mesh>
-      </group>
+      {/* The L-Lamp - Positioned behind the chair to hang over it */}
+      <LStyleLamp position={[1.5, 0.1, -1]} />
 
-      {/* THE COUPLE - Two humanoids standing together */}
-      <group position={[-1.2, 0.1, 1.2]} rotation={[0, Math.PI / 4, 0]}>
+      {/* The Couple - Shifted so they are clearly visible on the platform */}
+      <group position={[-1.5, 0.1, 1.2]} rotation={[0, Math.PI / 5, 0]}>
         <BlockHumanoid 
-          scale={0.75} 
+          scale={0.8} 
           materialProps={butterProps} 
-          poseProps={{ position: [0.3, 0, 0], rotation: [0, -0.2, 0] }} 
+          poseProps={{ position: [0.35, 0, 0], headRotationY: -0.3 }} 
         />
         <BlockHumanoid 
           isHelper 
-          scale={0.75} 
+          scale={0.8} 
           materialProps={butterProps} 
-          poseProps={{ position: [-0.3, 0, 0], rotation: [0, 0.2, 0] }} 
+          poseProps={{ position: [-0.35, 0, 0.1], rotation: [0, 0.4, 0], headRotationY: 0.3 }} 
         />
       </group>
     </Float>
