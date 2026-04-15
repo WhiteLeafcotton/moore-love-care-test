@@ -2,7 +2,7 @@ import { useRef, useMemo, useEffect, useState, forwardRef, useImperativeHandle }
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
 import { Environment, Sky, Float } from "@react-three/drei"; 
 import { Water } from "three-stdlib";
-import * as THREE from "three";
+import * as THREE from "this";
 
 extend({ Water });
 
@@ -81,33 +81,34 @@ const FloatingPlatform = () => {
       </mesh>
 
       {/* The Recliner */}
-      <LazyBoyChair position={[0.8, 0.1, -0.5]} rotation={[0, -Math.PI / 4, 0]} />
+      <LazyBoyChair position={[-0.8, 0.2, 0]} rotation={[0, Math.PI / 4, 0]} />
 
       {/* The L-Lamp */}
-      <LStyleLamp position={[2.2, 0.1, -1.8]} />
+      <LStyleLamp position={[-2.2, 0.2, -1.5]} />
 
-      {/* THE COUPLE */}
-      <group position={[-0.8, 0.1, 1.0]} rotation={[0, Math.PI / 5, 0]}>
+      {/* --- THE COUPLE (SEATED & STANDING) --- */}
+      {/* Resident Seated in Chair */}
+      <group position={[-0.8, 0.7, 0]} rotation={[0, Math.PI / 4, 0]}>
         <BlockHumanoid 
-          scale={0.85} 
-          materialProps={butterProps} 
+          scale={0.8} 
+          materialProps={{...butterProps, depthTest: false}} 
           poseProps={{ 
-            position: [0.4, 0, 0], 
-            headRotationY: -0.4,
-            leftArmRotation: [0.2, 0, -0.1],
-            rightArmRotation: [0.2, 0, 0.1]
+            leftLegRotation: [1.4, 0, 0], 
+            rightLegRotation: [1.4, 0, 0], 
+            torsoRotationX: 0.1 
           }} 
         />
+      </group>
+
+      {/* Helper Standing Beside Chair */}
+      <group position={[1.2, 0.2, 1.0]} rotation={[0, -Math.PI / 1.5, 0]}>
         <BlockHumanoid 
           isHelper 
-          scale={0.85} 
-          materialProps={butterProps} 
+          scale={0.9} 
+          materialProps={{...butterProps, depthTest: false}} 
           poseProps={{ 
-            position: [-0.4, 0, 0.2], 
-            rotation: [0, 0.3, 0], 
-            headRotationY: 0.4,
-            leftArmRotation: [0.2, 0, -0.1],
-            rightArmRotation: [0.2, 0, 0.1]
+            headRotationY: -0.4, 
+            rightArmRotation: [1.1, 0, -0.3] 
           }} 
         />
       </group>
@@ -128,9 +129,9 @@ const HeartBadge = () => {
   }, []);
 
   return (
-    <mesh position={[0.12, 1.0, 0.19]} rotation={[0, 0, 0]}>
+    <mesh position={[0.12, 1.0, 0.19]} rotation={[0, 0, 0]} renderOrder={10003}>
       <shapeGeometry args={[shape]} />
-      <meshStandardMaterial color={DARKER_PINK_THEME} emissive={DARKER_PINK_THEME} emissiveIntensity={0.5} />
+      <meshBasicMaterial color={DARKER_PINK_THEME} depthTest={false} />
     </mesh>
   );
 };
@@ -221,31 +222,31 @@ const BlockHumanoid = forwardRef(({ scale = 1, materialProps, poseProps = {}, is
   return (
     <group scale={scale} position={position} rotation={rotation} ref={innerGroupRef}>
       <group ref={torsoRef}>
-        <mesh ref={headRef} position={[0, 1.4, 0]} castShadow><sphereGeometry args={[0.22, 32, 32]} /><meshStandardMaterial {...materialProps} /></mesh>
-        <mesh position={[0, 0.3, 0]} castShadow><primitive object={torsoGeo} /><meshStandardMaterial {...materialProps} /></mesh>
+        <mesh ref={headRef} position={[0, 1.4, 0]} renderOrder={10002}><sphereGeometry args={[0.22, 32, 32]} /><meshStandardMaterial {...materialProps} /></mesh>
+        <mesh position={[0, 0.3, 0]} renderOrder={10002}><primitive object={torsoGeo} /><meshStandardMaterial {...materialProps} /></mesh>
         {isHelper && <HeartBadge />}
         <group position={[0, 1.2, 0]}>
-          <group ref={leftArmRef} position={[-0.22, 0, 0]}><mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh></group>
+          <group ref={leftArmRef} position={[-0.22, 0, 0]}><mesh renderOrder={10002}><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh></group>
           <group ref={rightArmRef} position={[0.22, 0, 0]}>
-            <mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} />
-              {cane && <mesh position={[0, -0.7, 0.1]}><cylinderGeometry args={[0.015, 0.015, 1.1]} /><meshStandardMaterial color={DARKER_PINK_THEME} /></mesh>}
+            <mesh renderOrder={10002}><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} />
+              {cane && <mesh position={[0, -0.7, 0.1]}><cylinderGeometry args={[0.015, 0.015, 1.1]} /><meshStandardMaterial color={DARKER_PINK_THEME} depthTest={false} /></mesh>}
             </mesh>
           </group>
         </group>
       </group>
       {walker && (
         <group position={[0, -0.2, 0.35]}>
-          <mesh position={[0.3, 0.45, 0]}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color={DARKER_PINK_THEME} /></mesh>
-          <mesh position={[-0.3, 0.45, 0]}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color={DARKER_PINK_THEME} /></mesh>
-          <mesh position={[0, 0.85, 0]}><boxGeometry args={[0.65, 0.03, 0.03]} /><meshStandardMaterial color={DARKER_PINK_THEME} /></mesh>
-          <mesh position={[0.3, 0.45, 0.3]}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color={DARKER_PINK_THEME} /></mesh>
-          <mesh position={[-0.3, 0.45, 0.3]}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color={DARKER_PINK_THEME} /></mesh>
-          <mesh position={[0, 0.85, 0.3]}><boxGeometry args={[0.6, 0.03, 0.03]} /><meshStandardMaterial color={DARKER_PINK_THEME} /></mesh>
+          <mesh position={[0.3, 0.45, 0]} renderOrder={10002}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color={DARKER_PINK_THEME} depthTest={false} /></mesh>
+          <mesh position={[-0.3, 0.45, 0]} renderOrder={10002}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color={DARKER_PINK_THEME} depthTest={false} /></mesh>
+          <mesh position={[0, 0.85, 0]} renderOrder={10002}><boxGeometry args={[0.65, 0.03, 0.03]} /><meshStandardMaterial color={DARKER_PINK_THEME} depthTest={false} /></mesh>
+          <mesh position={[0.3, 0.45, 0.3]} renderOrder={10002}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color={DARKER_PINK_THEME} depthTest={false} /></mesh>
+          <mesh position={[-0.3, 0.45, 0.3]} renderOrder={10002}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color={DARKER_PINK_THEME} depthTest={false} /></mesh>
+          <mesh position={[0, 0.85, 0.3]} renderOrder={10002}><boxGeometry args={[0.6, 0.03, 0.03]} /><meshStandardMaterial color={DARKER_PINK_THEME} depthTest={false} /></mesh>
         </group>
       )}
       <group position={[0, 0.4, 0]}>
-        <group ref={leftLegRef} position={[-0.12, 0, 0]}><mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh></group>
-        <group ref={rightLegRef} position={[0.12, 0, 0]}><mesh castShadow><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh></group>
+        <group ref={leftLegRef} position={[-0.12, 0, 0]}><mesh renderOrder={10002}><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh></group>
+        <group ref={rightLegRef} position={[0.12, 0, 0]}><mesh renderOrder={10002}><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh></group>
       </group>
     </group>
   );
