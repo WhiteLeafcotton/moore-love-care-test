@@ -1,4 +1,3 @@
-
 import React, { useState, Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
 import Scene from "./components/Scene";
@@ -17,7 +16,10 @@ export default function App() {
 
   return (
     <div className="app-viewport">
-      <div className={`ui-overlay ${!isHome ? "fade-out" : ""}`}>
+      
+      {/* ✅ REMOVED ui-overlay CLASS (this removes frost) */}
+      <div className={!isHome ? "fade-out" : ""}>
+        
         <header className="main-header">
           <div className="logo">MOORE LOVE & CARE</div>
           <button className="inquiry-button">INQUIRY</button>
@@ -53,17 +55,17 @@ export default function App() {
       </div>
 
       <Canvas 
-  shadows 
-  dpr={[1, 2]} 
-  camera={{ position: [-14, 3.2, 24], fov: 35 }}
-  style={{
-    position: "absolute",
-    top: 0,            /* Reset to top of screen */
-    left: 0,
-    width: "100vw",    /* Stay exactly screen width */
-    height: "100dvh"   /* Use 'dvh' to fill the screen perfectly on mobile */
-  }}
->
+        shadows 
+        dpr={[1, 2]} 
+        camera={{ position: [-14, 3.2, 24], fov: 35 }}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          height: "100dvh"
+        }}
+      >
         <Suspense fallback={null}>
           <Scene currentView={currentView} />
         </Suspense>
