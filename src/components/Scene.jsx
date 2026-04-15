@@ -90,50 +90,49 @@ const HomeLamp = ({ position }) => (
 // --- THE CIRCULAR FLOATING PLATFORM (SANCUTARY) ---
 // --- THE CIRCULAR FLOATING PLATFORM (SANCUTARY) ---
 // --- THE CIRCULAR FLOATING PLATFORM (SANCUTARY) ---
+// --- THE CIRCULAR FLOATING PLATFORM (SANCUTARY) ---
 const FloatingPlatform = ({ butterProps }) => {
   return (
-    <Float speed={1.8} rotationIntensity={0.15} floatIntensity={0.4} position={[11, -1.0, 17]}>
+    <Float speed={1.8} rotationIntensity={0.2} floatIntensity={0.5} position={[11, -1.0, 17]}>
       {/* Platform Disk - KEPT AT ORIGINAL SIZE */}
-      <mesh renderOrder={10000} frustumCulled={false}>
+      <mesh renderOrder={10000}>
         <cylinderGeometry args={[4.2, 4.2, 0.25, 64]} />
         <meshBasicMaterial color="#ffffff" depthTest={false} transparent opacity={0.8} />
       </mesh>
 
-      {/* Circle Rug - Slightly widened to fit the 2x larger chair */}
+      {/* Circle Rug - WIDENED to fit 2x larger chair */}
       <mesh position={[-0.8, 0.13, 0]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={10001}>
-        <circleGeometry args={[3.5, 64]} />
-        <meshBasicMaterial color={TITLE_PURPLE} depthTest={false} transparent opacity={0.2} />
+        <circleGeometry args={[3.2, 64]} />
+        <meshBasicMaterial color={TITLE_PURPLE} depthTest={false} transparent opacity={0.3} />
       </mesh>
 
-      {/* 2X LARGER CHAIR & BOB */}
-      {/* position Y increased to 0.4 to sit on top of platform */}
-      <group position={[-0.8, 0.4, 0]} rotation={[0, Math.PI, 0]}>
-        <LazyBoyChair position={[0, 0, 0]} scale={1.4} /> {/* 0.7 -> 1.4 */}
-        <group position={[0, 0.8, 0]}>
-          <BlockHumanoid 
-            scale={1.6} {/* 0.8 -> 1.6 */}
-            materialProps={{...butterProps, depthTest: false}} 
-            poseProps={{ 
-              leftLegRotation: [1.5, 0, 0], 
-              rightLegRotation: [1.5, 0, 0], 
-              torsoRotationX: 0.05 
-            }} 
-          />
-        </group>
+      {/* --- 2X LARGER ELEMENTS --- */}
+
+      {/* The Recliner - SCALE doubled to 1.8 */}
+      <LazyBoyChair position={[-0.8, 0.45, 0]} rotation={[0, Math.PI / 4, 0]} scale={1.8} />
+
+      {/* Seated Resident (Bob) - SCALE doubled to 2.0 */}
+      <group position={[-0.8, 1.2, 0]} rotation={[0, Math.PI / 4, 0]}>
+        <BlockHumanoid 
+          scale={2.0} 
+          materialProps={{...butterProps, depthTest: false}} 
+          poseProps={{ 
+            leftLegRotation: [1.5, 0, 0], 
+            rightLegRotation: [1.5, 0, 0], 
+            torsoRotationX: 0.05 
+          }} 
+        />
       </group>
 
-      {/* 2X LARGER LAMP */}
-      {/* Moved slightly further left to make room for the bigger chair */}
-      <group position={[-3.2, 0.14, 0]} scale={2.0}>
-         <HomeLamp position={[0, 0, 0]} />
-      </group>
+      {/* Home Lamp - SCALE doubled to 2.4 */}
+      <HomeLamp position={[-3.0, 0.14, 0]} scale={2.4} />
 
-      {/* 2X LARGER HELPER */}
-      {/* Positioned at [0.6, 0.3, 0.6] to stay on platform while being massive */}
-      <group position={[0.6, 0.3, 0.6]} rotation={[0, -Math.PI / 1.5, 0]} renderOrder={10002}>
+      {/* Helper - SCALE doubled to 2.3 */}
+      {/* Position moved to [0.8, 0.4, 0.8] to keep them on the platform */}
+      <group position={[0.8, 0.4, 0.8]} rotation={[0, -Math.PI / 1.5, 0]}>
         <BlockHumanoid 
           isHelper 
-          scale={1.84} {/* 0.92 -> 1.84 */}
+          scale={2.3} 
           materialProps={{...butterProps, depthTest: false}} 
           poseProps={{ 
             headRotationY: -0.4, 
