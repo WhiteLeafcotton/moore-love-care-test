@@ -93,30 +93,34 @@ const HomeLamp = ({ position }) => (
 // --- THE CIRCULAR FLOATING PLATFORM (SANCUTARY) ---
 // --- THE CIRCULAR FLOATING PLATFORM (SANCUTARY) ---
 // --- THE CIRCULAR FLOATING PLATFORM (SANCUTARY) ---
+// --- THE CIRCULAR FLOATING PLATFORM (SANCUTARY) ---
 const FloatingPlatform = ({ butterProps }) => {
   return (
-    /* POSITION TWEAKED: 
-       X: 8.5 -> 6.5 (Pulls it back toward the left/stairs)
-       Y: -1.5 (Keeps it at the nice submerged depth)
-       Z: 13.5 -> 14.5 (Pushes it slightly further back into the corner)
+    /* X: 5.5 (Tucked right against the stair edge)
+       Y: -2.2 (Lowered deeper into the water)
+       Z: 14.8 (Pushed back into the corner nook)
     */
-    <Float speed={1.8} rotationIntensity={0.2} floatIntensity={0.5} position={[6.5, -1.5, 14.5]}>
-      {/* Platform Disk */}
+    <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.4} position={[5.5, -2.2, 14.8]}>
+      
+      {/* Platform Disk - SHRUNK from 4.2 to 2.8 to fit the nook */}
       <mesh renderOrder={10000}>
-        <cylinderGeometry args={[4.2, 4.2, 0.25, 64]} />
+        <cylinderGeometry args={[2.8, 2.8, 0.2, 64]} />
         <meshBasicMaterial color="#ffffff" depthTest={false} transparent opacity={0.8} />
       </mesh>
 
-      {/* Circle Rug */}
-      <mesh position={[-0.8, 0.13, 0]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={10001}>
-        <circleGeometry args={[3.2, 64]} />
+      {/* Circle Rug - Resized to fit the smaller platform */}
+      <mesh position={[0, 0.11, 0]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={10001}>
+        <circleGeometry args={[2.4, 64]} />
         <meshBasicMaterial color="#6e5c8a" depthTest={false} transparent opacity={0.3} />
       </mesh>
 
-      {/* 2X LARGER ELEMENTS */}
-      <LazyBoyChair position={[-0.8, 0.45, 0]} rotation={[0, Math.PI / 4, 0]} scale={1.8} />
+      {/* --- 2X LARGER ELEMENTS (Maintained for Moore Love & Care aesthetic) --- */}
 
-      <group position={[-0.8, 1.2, 0]} rotation={[0, Math.PI / 4, 0]}>
+      {/* The Recliner - Centered on the smaller platform */}
+      <LazyBoyChair position={[0, 0.4, 0]} rotation={[0, Math.PI / 4, 0]} scale={1.8} />
+
+      {/* Seated Resident (Bob) */}
+      <group position={[0, 1.15, 0]} rotation={[0, Math.PI / 4, 0]}>
         <BlockHumanoid 
           scale={2.0} 
           materialProps={{...butterProps, depthTest: false}} 
@@ -128,9 +132,11 @@ const FloatingPlatform = ({ butterProps }) => {
         />
       </group>
 
-      <HomeLamp position={[-3.0, 0.14, 0]} scale={2.4} />
+      {/* Home Lamp - Placed slightly behind the chair to save space */}
+      <HomeLamp position={[-1.2, 0.12, -1.2]} scale={2.4} />
 
-      <group position={[0.8, 0.4, 0.8]} rotation={[0, -Math.PI / 1.5, 0]}>
+      {/* Helper - Standing close to Bob on the small platform */}
+      <group position={[1.3, 0.35, 0.5]} rotation={[0, -Math.PI / 1.5, 0]}>
         <BlockHumanoid 
           isHelper 
           scale={2.3} 
