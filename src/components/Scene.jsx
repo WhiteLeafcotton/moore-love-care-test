@@ -74,7 +74,7 @@ const FloatingPlatform = () => {
       {/* The L-Lamp */}
       <LStyleLamp position={[-2.2, 0.15, -1.5]} />
 
-      {/* Seated Resident (Bob) */}
+      {/* Bob (Seated) */}
       <group position={[-0.8, 0.62, 0]} rotation={[0, Math.PI / 4, 0]}>
         <BlockHumanoid 
           scale={0.8} 
@@ -87,8 +87,8 @@ const FloatingPlatform = () => {
         />
       </group>
 
-      {/* Standing Helper */}
-      <group position={[1.4, 0.13, 1.1]} rotation={[0, -Math.PI / 1.5, 0]}>
+      {/* Helper (Standing) */}
+      <group position={[1.1, 0.15, 0.8]} rotation={[0, -Math.PI / 1.5, 0]}>
         <BlockHumanoid 
           isHelper 
           scale={0.92} 
