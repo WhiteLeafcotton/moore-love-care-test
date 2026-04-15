@@ -27,7 +27,7 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
-// --- UPGRADED COMPONENTS ---
+// --- FURNITURE COMPONENTS ---
 
 const LStyleLamp = ({ position }) => (
   <group position={position}>
@@ -80,14 +80,14 @@ const FloatingPlatform = () => {
         <meshBasicMaterial color="#ffffff" depthTest={false} transparent opacity={0.8} />
       </mesh>
 
-      {/* The Recliner - Centered better */}
+      {/* The Recliner */}
       <LazyBoyChair position={[0.8, 0.1, -0.5]} rotation={[0, -Math.PI / 4, 0]} />
 
-      {/* The L-Lamp - Higher render order to ensure it doesn't clip */}
+      {/* The L-Lamp */}
       <LStyleLamp position={[2.2, 0.1, -1.8]} />
 
-      {/* THE COUPLE - Fixed position to be front and center */}
-      <group position={[-0.5, 0.1, 1.2]} rotation={[0, Math.PI / 4, 0]}>
+      {/* THE COUPLE */}
+      <group position={[-0.8, 0.1, 1.0]} rotation={[0, Math.PI / 5, 0]}>
         <BlockHumanoid 
           scale={0.85} 
           materialProps={butterProps} 
