@@ -124,7 +124,7 @@ const FloatingPlatform = ({ butterProps }) => {
 
       {/* FIXED: Helper now pulled inward toward the center and raised to sit on the surface */}
       {/* Position adjusted from [1.4, 0.14, 1.1] to [0.8, 0.25, 0.8] */}
-      <group position={[0.8, 0.25, 0.8]} rotation={[0, -Math.PI / 1.5, 0]} renderOrder={10002}>
+      <group position={[0.6, 0.27, 0.6]} rotation={[0, -Math.PI / 1.5, 0]} renderOrder={10002}>
         <BlockHumanoid 
           isHelper 
           scale={0.92} 
