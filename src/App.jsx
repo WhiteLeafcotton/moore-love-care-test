@@ -16,10 +16,14 @@ export default function App() {
 
   return (
     <div className="app-viewport">
-      
-      {/* ✅ REMOVED ui-overlay CLASS (this removes frost) */}
-      <div className={!isHome ? "fade-out" : ""}>
-        
+      <div 
+        className={`ui-overlay ${!isHome ? "fade-out" : ""}`}
+        style={{
+          backdropFilter: "none",
+          WebkitBackdropFilter: "none",
+          background: "transparent"
+        }}
+      >
         <header className="main-header">
           <div className="logo">MOORE LOVE & CARE</div>
           <button className="inquiry-button">INQUIRY</button>
