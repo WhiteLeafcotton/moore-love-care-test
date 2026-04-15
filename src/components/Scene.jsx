@@ -87,10 +87,11 @@ const HomeLamp = ({ position }) => (
 );
 
 // --- THE CIRCULAR FLOATING PLATFORM (SANCUTARY) ---
+// --- THE CIRCULAR FLOATING PLATFORM (SANCUTARY) ---
 const FloatingPlatform = ({ butterProps }) => {
   return (
     <Float speed={1.8} rotationIntensity={0.15} floatIntensity={0.4} position={[11, -1.0, 17]}>
-      {/* Platform Disk */}
+      {/* Platform Disk - 0.25 Height */}
       <mesh renderOrder={10000} frustumCulled={false}>
         <cylinderGeometry args={[4.2, 4.2, 0.25, 64]} />
         <meshBasicMaterial color="#ffffff" depthTest={false} transparent opacity={0.8} />
@@ -121,8 +122,9 @@ const FloatingPlatform = ({ butterProps }) => {
       {/* Home Lamp over Bob's head */}
       <HomeLamp position={[-2.2, 0.14, 0]} />
 
-      {/* FIXED: Helper standing firmly on platform surface */}
-      <group position={[1.4, 0.14, 1.1]} rotation={[0, -Math.PI / 1.5, 0]} renderOrder={10002}>
+      {/* FIXED: Helper now pulled inward toward the center and raised to sit on the surface */}
+      {/* Position adjusted from [1.4, 0.14, 1.1] to [0.8, 0.25, 0.8] */}
+      <group position={[0.8, 0.25, 0.8]} rotation={[0, -Math.PI / 1.5, 0]} renderOrder={10002}>
         <BlockHumanoid 
           isHelper 
           scale={0.92} 
@@ -136,7 +138,6 @@ const FloatingPlatform = ({ butterProps }) => {
     </Float>
   );
 };
-
 // --- HUMANOID SYSTEM ---
 const HeartBadge = () => {
   const shape = useMemo(() => {
