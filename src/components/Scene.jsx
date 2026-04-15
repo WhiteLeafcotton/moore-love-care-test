@@ -27,86 +27,81 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
-// --- UPDATED FURNITURE: LAZY BOY ---
+// --- NEW COMPONENT: L-SHAPE FLOOR LAMP ---
+const FloorLamp = ({ position }) => (
+  <group position={position}>
+    {/* Base */}
+    <mesh position={[0, 0.05, 0]}>
+      <cylinderGeometry args={[0.3, 0.3, 0.1, 32]} />
+      <meshStandardMaterial color="#333" />
+    </mesh>
+    {/* Main Vertical Pole */}
+    <mesh position={[0, 1.5, 0]}>
+      <cylinderGeometry args={[0.04, 0.04, 3, 16]} />
+      <meshStandardMaterial color="#333" />
+    </mesh>
+    {/* Horizontal "L" Arm */}
+    <mesh position={[0.6, 3, 0]} rotation={[0, 0, Math.PI / 2]}>
+      <cylinderGeometry args={[0.04, 0.04, 1.2, 16]} />
+      <meshStandardMaterial color="#333" />
+    </mesh>
+    {/* Lamp Shade & Bulb */}
+    <group position={[1.2, 2.8, 0]}>
+      <mesh>
+        <cylinderGeometry args={[0.4, 0.6, 0.5, 32, 1, true]} />
+        <meshStandardMaterial color="#f5f5f5" side={THREE.DoubleSide} transparent opacity={0.9} />
+      </mesh>
+      <mesh position={[0, 0, 0]}>
+        <sphereGeometry args={[0.15, 16, 16]} />
+        <meshStandardMaterial color="#fff" emissive="#fff" emissiveIntensity={2} />
+      </mesh>
+      <pointLight intensity={1.5} distance={10} color="#ffedc2" />
+    </group>
+  </group>
+);
+
 const LazyBoyChair = ({ position, rotation }) => (
   <group position={position} rotation={rotation} scale={0.7}>
-    {/* Main Seat Cushion */}
-    <mesh position={[0, 0.4, 0]} renderOrder={10001}>
+    <mesh position={[0, 0.4, 0]}>
       <boxGeometry args={[1.5, 0.8, 1.5]} />
-      <meshBasicMaterial color={DARKER_PINK_THEME} depthTest={false} transparent opacity={0.95} />
+      <meshStandardMaterial color={DARKER_PINK_THEME} />
     </mesh>
-    {/* Plush Backrest */}
-    <mesh position={[0, 1.2, -0.6]} rotation={[-0.3, 0, 0]} renderOrder={10001}>
+    <mesh position={[0, 1.2, -0.6]} rotation={[-0.3, 0, 0]}>
       <boxGeometry args={[1.5, 1.6, 0.4]} />
-      <meshBasicMaterial color={DARKER_PINK_THEME} depthTest={false} transparent opacity={0.95} />
+      <meshStandardMaterial color={DARKER_PINK_THEME} />
     </mesh>
-    {/* Arms */}
     {[-0.85, 0.85].map((x, i) => (
-      <mesh key={i} position={[x, 0.7, 0]} renderOrder={10001}>
+      <mesh key={i} position={[x, 0.7, 0]}>
         <boxGeometry args={[0.3, 0.6, 1.5]} />
-        <meshBasicMaterial color={DARKER_PINK_THEME} depthTest={false} transparent opacity={0.95} />
+        <meshStandardMaterial color={DARKER_PINK_THEME} />
       </mesh>
     ))}
   </group>
 );
 
-// --- NEW COMPONENT: L-SHAPE HOME LAMP ---
-const HomeLamp = ({ position }) => (
-  <group position={position}>
-    {/* Lamp Base on platform */}
-    <mesh position={[0, 0.05, 0]} renderOrder={10001}>
-      <cylinderGeometry args={[0.3, 0.3, 0.1, 32]} />
-      <meshBasicMaterial color="#333" depthTest={false} />
-    </mesh>
-    {/* Vertical Pole */}
-    <mesh position={[0, 1.5, 0]} renderOrder={10001}>
-      <cylinderGeometry args={[0.04, 0.04, 3, 16]} />
-      <meshBasicMaterial color="#333" depthTest={false} />
-    </mesh>
-    {/* L-Bend Arm */}
-    <mesh position={[0.4, 3.0, 0]} rotation={[0, 0, Math.PI / 2]} renderOrder={10001}>
-      <cylinderGeometry args={[0.04, 0.04, 0.8, 16]} />
-      <meshBasicMaterial color="#333" depthTest={false} />
-    </mesh>
-    {/* Standard White Shade */}
-    <mesh position={[0.8, 2.7, 0]} renderOrder={10002}>
-      <cylinderGeometry args={[0.3, 0.5, 0.6, 32, 1, true]} />
-      <meshBasicMaterial color="#ffffff" transparent opacity={0.9} depthTest={false} side={THREE.DoubleSide} />
-    </mesh>
-    {/* Glowing Bulb inside shade */}
-    <mesh position={[0.8, 2.7, 0]} renderOrder={10003}>
-      <sphereGeometry args={[0.12, 16, 16]} />
-      <meshStandardMaterial color="#fff" emissive="#fff" emissiveIntensity={1.5} depthTest={false} />
-    </mesh>
-    {/* Light source logic (visual bloom) */}
-    <pointLight position={[0.8, 2.6, 0]} intensity={1} distance={10} color="#fff" />
-  </group>
-);
-
-// --- THE CIRCULAR FLOATING PLATFORM (SANCUTARY) ---
 const FloatingPlatform = ({ butterProps }) => {
   return (
     <Float speed={1.8} rotationIntensity={0.1} floatIntensity={0.4} position={[11, -1.0, 17]}>
       {/* Platform Disk */}
-      <mesh renderOrder={10000} frustumCulled={false}>
+      <mesh receiveShadow>
         <cylinderGeometry args={[4.2, 4.2, 0.25, 64]} />
-        <meshStandardMaterial color="#ffffff" transparent opacity={0.8} />
+        <meshStandardMaterial color="#ffffff" transparent opacity={0.9} />
       </mesh>
 
-      {/* Circle Rug under Chair */}
-      <mesh position={[-0.8, 0.13, 0]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={10001}>
-        <circleGeometry args={[2.5, 64]} />
-        <meshBasicMaterial color={TITLE_PURPLE} depthTest={false} transparent opacity={0.2} />
+      {/* Circle Rug */}
+      <mesh position={[0, 0.13, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <circleGeometry args={[3.2, 64]} />
+        <meshStandardMaterial color={TITLE_PURPLE} transparent opacity={0.15} />
       </mesh>
 
-      {/* The Recliner - Rotated 180 degrees */}
-      <LazyBoyChair position={[-0.8, 0.15, 0]} rotation={[0, Math.PI, 0]} />
+      {/* Recliner turned 180 (facing "forward" relative to scene) */}
+      <LazyBoyChair position={[-0.5, 0.15, 0]} rotation={[0, Math.PI, 0]} />
 
-      {/* Seated Resident (Bob) */}
-      <group position={[-0.8, 0.62, 0]} rotation={[0, Math.PI, 0]}>
+      {/* Bob seated */}
+      <group position={[-0.5, 0.62, 0]} rotation={[0, Math.PI, 0]}>
         <BlockHumanoid 
           scale={0.8} 
-          materialProps={{...butterProps, depthTest: false}} 
+          materialProps={butterProps} 
           poseProps={{ 
             leftLegRotation: [1.5, 0, 0], 
             rightLegRotation: [1.5, 0, 0], 
@@ -115,15 +110,15 @@ const FloatingPlatform = ({ butterProps }) => {
         />
       </group>
 
-      {/* The L-Lamp - Shade over Bob's head */}
-      <HomeLamp position={[-2.0, 0.14, 0]} />
+      {/* The L-Lamp over Bob's head */}
+      <FloorLamp position={[-1.8, 0.13, 0]} />
 
-      {/* Helper (Standing firmly on Platform) */}
-      <group position={[1.4, 0.13, 1.1]} rotation={[0, -Math.PI / 1.5, 0]}>
+      {/* Helper Standing on Platform */}
+      <group position={[1.8, 0.14, 0.5]} rotation={[0, -Math.PI / 1.2, 0]}>
         <BlockHumanoid 
           isHelper 
           scale={0.92} 
-          materialProps={{...butterProps, depthTest: false}} 
+          materialProps={butterProps} 
           poseProps={{ 
             headRotationY: -0.4, 
             rightArmRotation: [1.1, 0, -0.3] 
@@ -147,7 +142,7 @@ const HeartBadge = () => {
   }, []);
 
   return (
-    <mesh position={[0.12, 1.0, 0.19]} rotation={[0, 0, 0]}>
+    <mesh position={[0.12, 1.0, 0.19]}>
       <shapeGeometry args={[shape]} />
       <meshStandardMaterial color={DARKER_PINK_THEME} emissive={DARKER_PINK_THEME} emissiveIntensity={0.5} />
     </mesh>
@@ -164,7 +159,6 @@ const BlockHumanoid = forwardRef(({ scale = 1, materialProps, poseProps = {}, is
     rotation = [0,0,0], 
     cane = false,
     walker = false,
-    isLeaning = false,
     isWalking = false,
     walkSpeed = 8,
     torsoRotationX = 0,
@@ -211,20 +205,12 @@ const BlockHumanoid = forwardRef(({ scale = 1, materialProps, poseProps = {}, is
       const swing = Math.sin(t * walkSpeed) * 0.4;
       if (leftLegRef.current) leftLegRef.current.rotation.x = swing;
       if (rightLegRef.current) rightLegRef.current.rotation.x = -swing;
-      if (leftArmRef.current) leftArmRef.current.rotation.x = -swing * 0.5;
-      if (rightArmRef.current) rightArmRef.current.rotation.x = swing * 0.5;
-    } else if (animateArmsTo) {
-      const reachProgress = THREE.MathUtils.smoothstep(t, 0.5, 3.5); 
-      if (leftArmRef.current) {
-        leftArmRef.current.rotation.x = THREE.MathUtils.lerp(leftArmRotation[0], animateArmsTo[0], reachProgress);
-      }
     } else {
         if (leftArmRef.current) leftArmRef.current.rotation.set(...leftArmRotation);
         if (rightArmRef.current) rightArmRef.current.rotation.set(...rightArmRotation);
+        if (leftLegRef.current) leftLegRef.current.rotation.set(...leftLegRotation);
+        if (rightLegRef.current) rightLegRef.current.rotation.set(...rightLegRotation);
     }
-    
-    if (!isWalking && leftLegRef.current) leftLegRef.current.rotation.set(...leftLegRotation);
-    if (!isWalking && rightLegRef.current) rightLegRef.current.rotation.set(...rightLegRotation);
   });
 
   return (
@@ -385,40 +371,15 @@ const WalkingToConversationChapter = ({ butterProps }) => {
         const swingA = Math.sin(et * 10.5) * 0.45;
         p1Ref.current.leftLeg.rotation.x = swingA;
         p1Ref.current.rightLeg.rotation.x = -swingA;
-        p1Ref.current.leftArm.rotation.x = -swingA * 0.6;
-        p1Ref.current.group.position.y = Math.abs(swingA) * 0.06;
       }
 
       if (p2Ref.current) {
         const swingB = Math.sin((et - 0.5) * 9.2) * 0.35;
         p2Ref.current.leftLeg.rotation.x = swingB;
         p2Ref.current.rightLeg.rotation.x = -swingB;
-        p2Ref.current.leftArm.rotation.x = -swingB * 0.6;
-        p2Ref.current.rightArm.rotation.x = swingB * 0.6;
-        p2Ref.current.group.position.y = Math.abs(swingB) * 0.04;
       }
 
-      if (t >= 1) {
-          setPhase("talking");
-          [p1Ref, p2Ref].forEach(p => {
-              if (p.current) {
-                p.current.leftLeg.rotation.x = 0;
-                p.current.rightLeg.rotation.x = 0;
-                p.current.leftArm.rotation.x = 0.2;
-                p.current.rightArm.rotation.x = 0.2;
-                p.current.group.position.y = 0;
-              }
-          });
-      }
-    } else {
-      if (p1Ref.current) {
-        p1Ref.current.head.rotation.x = Math.sin(et * 1.5) * 0.1;
-        p1Ref.current.head.rotation.z = Math.cos(et * 0.8) * 0.05;
-      }
-      if (p2Ref.current) {
-        p2Ref.current.head.rotation.x = Math.sin(et * 2.2 + 0.5) * 0.12;
-        p2Ref.current.head.rotation.y = -0.4 + Math.sin(et * 1.2) * 0.1;
-      }
+      if (t >= 1) setPhase("talking");
     }
   });
 
@@ -484,23 +445,18 @@ export default function Scene({ currentView }) {
       <directionalLight position={[-15, 30, 10]} intensity={1.6} castShadow />
 
       <group position={[0, 0, 0]}>
+        {/* Main Building Structure */}
         <mesh position={[15.5, -2.1, 15.0]} castShadow receiveShadow><boxGeometry args={[20, 8.0, 30]} /><meshStandardMaterial {...butterProps} /></mesh>
         <Staircase position={[5.0, 1.5, 8.5]} rotation={[0, -Math.PI / 2, 0]} width={17.5} materialProps={butterProps} />
 
         <group position={[-16, -1.6, 0]}>
           <mesh position={[1, 8.5 + extraWallHeight/2, 0]} castShadow receiveShadow><boxGeometry args={[4, 17 + extraWallHeight, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
           <WallOpening position={[6, 0, 0]} colorProps={butterProps} /> 
+          <WallOpening position={[12, 0, 0]} colorProps={butterProps} /> 
           <mesh position={[24, 8.5 + extraWallHeight/2, 0]} castShadow receiveShadow><boxGeometry args={[18, 17 + extraWallHeight, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
 
-        <group position={[17, -1.6, 1]} rotation={[0, -Math.PI / 2, 0]}>
-          <mesh castShadow receiveShadow position={[0.5, 8.5 + extraWallHeight/2, 0]}><boxGeometry args={[1, 17 + extraWallHeight, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
-          <mesh castShadow receiveShadow position={[4.5, 8.5 + extraWallHeight/2, 0]}><boxGeometry args={[7, 17 + extraWallHeight, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
-          <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={butterProps} />
-          <WallOpening position={[17, 0, 0]} isWindow={true} colorProps={butterProps} />
-          <mesh castShadow receiveShadow position={[24, 8.5 + extraWallHeight/2, 0]}><boxGeometry args={[8, 17 + extraWallHeight, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
-        </group>
-
+        {/* Interior Chapters */}
         <group>
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <Bench materialProps={butterProps} />
@@ -510,37 +466,9 @@ export default function Scene({ currentView }) {
 
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <group position={[3.5, 0, -0.2]} rotation={[0, -0.5, 0]}>
-               <BlockHumanoid 
-                scale={0.84} 
-                materialProps={butterProps} 
-                poseProps={{ 
-                  walker: true, 
-                  torsoRotationX: 0.1, 
-                  leftArmRotation: [0.1, 0, -0.1], 
-                  rightArmRotation: [0.1, 0, 0.1], 
-                  animateArmsTo: [-1.1, 0, -0.1], 
-                  leftLegRotation: [0.15, 0, 0],   
-                  rightLegRotation: [-0.1, 0, 0],  
-                  headRotationY: -0.2
-                }} 
-               />
-               <BlockHumanoid 
-                isHelper
-                scale={0.95} 
-                materialProps={butterProps} 
-                poseProps={{ 
-                  position: [-0.95, 0, 0.35], 
-                  rotation: [0, 0.65, 0], 
-                  headRotationY: -0.4,
-                  leftArmRotation: [-0.8, 0, -0.25] 
-                }} 
-               />
+               <BlockHumanoid scale={0.84} materialProps={butterProps} poseProps={{ walker: true, torsoRotationX: 0.1 }} />
+               <BlockHumanoid isHelper scale={0.95} materialProps={butterProps} poseProps={{ position: [-0.95, 0, 0.35], rotation: [0, 0.65, 0] }} />
             </group>
-          </group>
-
-          <group position={[6.0, 1.6, 10.0]} rotation={[0, Math.PI / 2, 0]}>
-            <BlockHumanoid isHelper scale={0.9} materialProps={butterProps} poseProps={{ position: [-0.2, 0, 0], rotation: [0, -0.4, 0]}} />
-            <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
           </group>
 
           <WheelchairChapter butterProps={butterProps} isMobile={isMobile} />
@@ -564,6 +492,7 @@ export default function Scene({ currentView }) {
         position={[0, -1.45, 0]} 
       />
 
+      {/* FIXED: Helper on platform + Lamp over Bob */}
       <FloatingPlatform butterProps={butterProps} />
     </>
   );
