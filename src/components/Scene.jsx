@@ -66,7 +66,10 @@ const Chair = ({ position, rotation }) => (
 );
 
 // --- CIRCULAR FLOATING PLATFORM ---
+// --- UPDATED CIRCULAR FLOATING PLATFORM ---
 const FloatingPlatform = () => {
+  const butterProps = { color: "#fce4e4", roughness: 0.9, metalness: 0.02 };
+
   return (
     <Float 
       speed={1.5} 
@@ -74,6 +77,7 @@ const FloatingPlatform = () => {
       floatIntensity={0.5} 
       position={[10, -1.1, 16]} 
     >
+      {/* THE PLATFORM DISK */}
       <mesh renderOrder={10000} frustumCulled={false}>
         <cylinderGeometry args={[3, 3, 0.2, 64]} /> 
         <meshBasicMaterial 
@@ -83,11 +87,39 @@ const FloatingPlatform = () => {
           opacity={0.85}
         />
       </mesh>
-      <Chair position={[0, 0.2, 0]} rotation={[0, -Math.PI / 4, 0]} />
+
+      {/* THE CHAIR - Positioned on the platform */}
+      <Chair position={[0, 0.1, 0]} rotation={[0, -Math.PI / 4, 0]} />
+
+      {/* THE LAMP - Simple post and glow ball */}
+      <group position={[1.8, 0.1, -1.2]}>
+        <mesh renderOrder={10001}>
+          <cylinderGeometry args={[0.05, 0.05, 4]} />
+          <meshBasicMaterial color="#21162e" depthTest={false} transparent={true} />
+        </mesh>
+        <mesh position={[0, 2, 0]} renderOrder={10002}>
+          <sphereGeometry args={[0.15]} />
+          <meshBasicMaterial color="#ffffff" depthTest={false} transparent={true} />
+        </mesh>
+      </group>
+
+      {/* THE COUPLE - Two humanoids standing together */}
+      <group position={[-1.2, 0.1, 1.2]} rotation={[0, Math.PI / 4, 0]}>
+        <BlockHumanoid 
+          scale={0.75} 
+          materialProps={butterProps} 
+          poseProps={{ position: [0.3, 0, 0], rotation: [0, -0.2, 0] }} 
+        />
+        <BlockHumanoid 
+          isHelper 
+          scale={0.75} 
+          materialProps={butterProps} 
+          poseProps={{ position: [-0.3, 0, 0], rotation: [0, 0.2, 0] }} 
+        />
+      </group>
     </Float>
   );
 };
-
 // --- HUMANOID COMPONENTS ---
 const HeartBadge = () => {
   const shape = useMemo(() => {
