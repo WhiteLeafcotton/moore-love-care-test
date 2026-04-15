@@ -27,46 +27,56 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
-// --- CHAIR COMPONENT ---
-const Chair = ({ position, rotation }) => (
-  <group position={position} rotation={rotation} scale={0.6}>
-    {/* Seat */}
+// --- NEW UPGRADED COMPONENTS ---
+
+const LStyleLamp = ({ position }) => (
+  <group position={position}>
+    {/* Base */}
+    <mesh position={[0, 0.05, 0]} renderOrder={10001}>
+      <cylinderGeometry args={[0.3, 0.3, 0.1, 32]} />
+      <meshBasicMaterial color="#21162e" depthTest={false} transparent opacity={0.9} />
+    </mesh>
+    {/* Vertical Post */}
+    <mesh position={[0, 2, 0]} renderOrder={10001}>
+      <cylinderGeometry args={[0.04, 0.04, 4, 16]} />
+      <meshBasicMaterial color="#21162e" depthTest={false} transparent opacity={0.9} />
+    </mesh>
+    {/* Horizontal "L" Arm */}
+    <mesh position={[-0.75, 4, 0]} rotation={[0, 0, Math.PI / 2]} renderOrder={10001}>
+      <cylinderGeometry args={[0.03, 0.03, 1.5, 16]} />
+      <meshBasicMaterial color="#21162e" depthTest={false} transparent opacity={0.9} />
+    </mesh>
+    {/* Hanging Light Shade */}
+    <mesh position={[-1.5, 3.7, 0]} renderOrder={10002}>
+      <sphereGeometry args={[0.25, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2]} rotation={[Math.PI, 0, 0]} />
+      <meshBasicMaterial color="#ffffff" depthTest={false} transparent opacity={1} />
+    </mesh>
+  </group>
+);
+
+const LazyBoyChair = ({ position, rotation }) => (
+  <group position={position} rotation={rotation} scale={0.7}>
+    {/* Thick Plush Base */}
     <mesh position={[0, 0.4, 0]} renderOrder={10001}>
-      <boxGeometry args={[1.2, 0.1, 1.2]} />
-      <meshBasicMaterial 
-        color={DARKER_PINK_THEME} 
-        depthTest={false} 
-        transparent={true} 
-        opacity={0.9} 
-      />
+      <boxGeometry args={[1.5, 0.8, 1.5]} />
+      <meshBasicMaterial color={DARKER_PINK_THEME} depthTest={false} transparent opacity={0.95} />
     </mesh>
-    {/* Backrest */}
-    <mesh position={[0, 1.0, -0.55]} rotation={[0, 0, 0]} renderOrder={10001}>
-      <boxGeometry args={[1.2, 1.2, 0.1]} />
-      <meshBasicMaterial 
-        color={DARKER_PINK_THEME} 
-        depthTest={false} 
-        transparent={true} 
-        opacity={0.9} 
-      />
+    {/* Rounded Recliner Back */}
+    <mesh position={[0, 1.2, -0.6]} rotation={[-0.3, 0, 0]} renderOrder={10001}>
+      <boxGeometry args={[1.5, 1.6, 0.4]} />
+      <meshBasicMaterial color={DARKER_PINK_THEME} depthTest={false} transparent opacity={0.95} />
     </mesh>
-    {/* Legs */}
-    {[[-0.5, 0.2, 0.5], [0.5, 0.2, 0.5], [-0.5, 0.2, -0.5], [0.5, 0.2, -0.5]].map((pos, i) => (
-      <mesh key={i} position={pos} renderOrder={10001}>
-        <boxGeometry args={[0.1, 0.4, 0.1]} />
-        <meshBasicMaterial 
-          color={DARKER_PINK_THEME} 
-          depthTest={false} 
-          transparent={true} 
-          opacity={0.9} 
-        />
+    {/* Plush Armrests */}
+    {[-0.85, 0.85].map((x, i) => (
+      <mesh key={i} position={[x, 0.7, 0]} renderOrder={10001}>
+        <boxGeometry args={[0.3, 0.6, 1.5]} />
+        <meshBasicMaterial color={DARKER_PINK_THEME} depthTest={false} transparent opacity={0.95} />
       </mesh>
     ))}
   </group>
 );
 
 // --- CIRCULAR FLOATING PLATFORM ---
-// --- UPDATED CIRCULAR FLOATING PLATFORM ---
 const FloatingPlatform = () => {
   const butterProps = { color: "#fce4e4", roughness: 0.9, metalness: 0.02 };
 
@@ -81,11 +91,11 @@ const FloatingPlatform = () => {
       {/* The Recliner */}
       <LazyBoyChair position={[0.5, 0.1, 0]} rotation={[0, -Math.PI / 6, 0]} />
 
-      {/* The L-Lamp - Positioned behind the chair to hang over it */}
+      {/* The L-Lamp - Positioned to hang over the chair */}
       <LStyleLamp position={[1.5, 0.1, -1]} />
 
-      {/* The Couple - Shifted so they are clearly visible on the platform */}
-      <group position={[-1.5, 0.1, 1.2]} rotation={[0, Math.PI / 5, 0]}>
+      {/* The Couple - Shifted so they are clearly visible at the front of the disk */}
+      <group position={[-1.2, 0.1, 1.5]} rotation={[0, Math.PI / 4, 0]}>
         <BlockHumanoid 
           scale={0.8} 
           materialProps={butterProps} 
@@ -101,6 +111,7 @@ const FloatingPlatform = () => {
     </Float>
   );
 };
+
 // --- HUMANOID COMPONENTS ---
 const HeartBadge = () => {
   const shape = useMemo(() => {
@@ -543,7 +554,7 @@ export default function Scene({ currentView }) {
         position={[0, -1.45, 0]} 
       />
 
-      {/* RENDER THE FLOATING PLATFORM COMPONENT HERE */}
+      {/* Floating Platform Upgrade */}
       <FloatingPlatform />
     </>
   );
