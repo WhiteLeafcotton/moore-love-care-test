@@ -27,26 +27,22 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
-// --- NEW UPGRADED COMPONENTS ---
+// --- UPGRADED COMPONENTS ---
 
 const LStyleLamp = ({ position }) => (
   <group position={position}>
-    {/* Base */}
     <mesh position={[0, 0.05, 0]} renderOrder={10001}>
       <cylinderGeometry args={[0.3, 0.3, 0.1, 32]} />
       <meshBasicMaterial color="#21162e" depthTest={false} transparent opacity={0.9} />
     </mesh>
-    {/* Vertical Post */}
     <mesh position={[0, 2, 0]} renderOrder={10001}>
       <cylinderGeometry args={[0.04, 0.04, 4, 16]} />
       <meshBasicMaterial color="#21162e" depthTest={false} transparent opacity={0.9} />
     </mesh>
-    {/* Horizontal "L" Arm */}
     <mesh position={[-0.75, 4, 0]} rotation={[0, 0, Math.PI / 2]} renderOrder={10001}>
       <cylinderGeometry args={[0.03, 0.03, 1.5, 16]} />
       <meshBasicMaterial color="#21162e" depthTest={false} transparent opacity={0.9} />
     </mesh>
-    {/* Hanging Light Shade */}
     <mesh position={[-1.5, 3.7, 0]} renderOrder={10002}>
       <sphereGeometry args={[0.25, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2]} rotation={[Math.PI, 0, 0]} />
       <meshBasicMaterial color="#ffffff" depthTest={false} transparent opacity={1} />
@@ -56,17 +52,14 @@ const LStyleLamp = ({ position }) => (
 
 const LazyBoyChair = ({ position, rotation }) => (
   <group position={position} rotation={rotation} scale={0.7}>
-    {/* Thick Plush Base */}
     <mesh position={[0, 0.4, 0]} renderOrder={10001}>
       <boxGeometry args={[1.5, 0.8, 1.5]} />
       <meshBasicMaterial color={DARKER_PINK_THEME} depthTest={false} transparent opacity={0.95} />
     </mesh>
-    {/* Rounded Recliner Back */}
     <mesh position={[0, 1.2, -0.6]} rotation={[-0.3, 0, 0]} renderOrder={10001}>
       <boxGeometry args={[1.5, 1.6, 0.4]} />
       <meshBasicMaterial color={DARKER_PINK_THEME} depthTest={false} transparent opacity={0.95} />
     </mesh>
-    {/* Plush Armrests */}
     {[-0.85, 0.85].map((x, i) => (
       <mesh key={i} position={[x, 0.7, 0]} renderOrder={10001}>
         <boxGeometry args={[0.3, 0.6, 1.5]} />
@@ -76,36 +69,46 @@ const LazyBoyChair = ({ position, rotation }) => (
   </group>
 );
 
-// --- CIRCULAR FLOATING PLATFORM ---
 const FloatingPlatform = () => {
   const butterProps = { color: "#fce4e4", roughness: 0.9, metalness: 0.02 };
 
   return (
-    <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.4} position={[10, -1.1, 16]}>
+    <Float speed={1.8} rotationIntensity={0.2} floatIntensity={0.5} position={[11, -1.0, 17]}>
       {/* Platform Disk */}
       <mesh renderOrder={10000}>
-        <cylinderGeometry args={[3.5, 3.5, 0.2, 64]} />
-        <meshBasicMaterial color="#ffffff" depthTest={false} transparent opacity={0.85} />
+        <cylinderGeometry args={[4.2, 4.2, 0.25, 64]} />
+        <meshBasicMaterial color="#ffffff" depthTest={false} transparent opacity={0.8} />
       </mesh>
 
-      {/* The Recliner */}
-      <LazyBoyChair position={[0.5, 0.1, 0]} rotation={[0, -Math.PI / 6, 0]} />
+      {/* The Recliner - Centered better */}
+      <LazyBoyChair position={[0.8, 0.1, -0.5]} rotation={[0, -Math.PI / 4, 0]} />
 
-      {/* The L-Lamp - Positioned to hang over the chair */}
-      <LStyleLamp position={[1.5, 0.1, -1]} />
+      {/* The L-Lamp - Higher render order to ensure it doesn't clip */}
+      <LStyleLamp position={[2.2, 0.1, -1.8]} />
 
-      {/* The Couple - Shifted so they are clearly visible at the front of the disk */}
-      <group position={[-1.2, 0.1, 1.5]} rotation={[0, Math.PI / 4, 0]}>
+      {/* THE COUPLE - Fixed position to be front and center */}
+      <group position={[-0.5, 0.1, 1.2]} rotation={[0, Math.PI / 4, 0]}>
         <BlockHumanoid 
-          scale={0.8} 
+          scale={0.85} 
           materialProps={butterProps} 
-          poseProps={{ position: [0.35, 0, 0], headRotationY: -0.3 }} 
+          poseProps={{ 
+            position: [0.4, 0, 0], 
+            headRotationY: -0.4,
+            leftArmRotation: [0.2, 0, -0.1],
+            rightArmRotation: [0.2, 0, 0.1]
+          }} 
         />
         <BlockHumanoid 
           isHelper 
-          scale={0.8} 
+          scale={0.85} 
           materialProps={butterProps} 
-          poseProps={{ position: [-0.35, 0, 0.1], rotation: [0, 0.4, 0], headRotationY: 0.3 }} 
+          poseProps={{ 
+            position: [-0.4, 0, 0.2], 
+            rotation: [0, 0.3, 0], 
+            headRotationY: 0.4,
+            leftArmRotation: [0.2, 0, -0.1],
+            rightArmRotation: [0.2, 0, 0.1]
+          }} 
         />
       </group>
     </Float>
@@ -248,7 +251,7 @@ const BlockHumanoid = forwardRef(({ scale = 1, materialProps, poseProps = {}, is
   );
 });
 
-// --- GRASS ---
+// --- GRASS & ARCHITECTURE ---
 const GrassySassyHills = () => {
   const meshRef = useRef();
   const bladeGeo = useMemo(() => {
@@ -286,7 +289,6 @@ const GrassySassyHills = () => {
   return <group position={[0, -3.5, -40]}><mesh geometry={terrainGeo} receiveShadow><meshStandardMaterial color="#0c020f" roughness={1} /></mesh><instancedMesh ref={meshRef} args={[bladeGeo, grassMaterial, GRASS_COUNT]} castShadow /></group>;
 };
 
-// --- ARCHITECTURE ---
 const Staircase = ({ position, width, rotation, materialProps }) => (
   <group position={position} rotation={rotation}>
     {Array.from({ length: 16 }).map((_, i) => (
@@ -322,7 +324,6 @@ const WheelchairChapter = ({ butterProps, isMobile }) => {
   const groupRef = useRef(); 
   const wheelRef = useRef(); 
   const [isMoving, setIsMoving] = useState(true);
-  
   const startZ = isMobile ? 13 : 22; 
   const finalStopZ = 12.5; 
 
@@ -330,14 +331,9 @@ const WheelchairChapter = ({ butterProps, isMobile }) => {
     const t = Math.min(state.clock.elapsedTime / 14, 1);
     const smoothProgress = THREE.MathUtils.smoothstep(t, 0, 1);
     const currentZ = startZ + (finalStopZ - startZ) * smoothProgress;
-    
     if (groupRef.current) groupRef.current.position.z = currentZ;
-
-    if (t >= 1) {
-      if (isMoving) setIsMoving(false);
-    } else {
-      if (wheelRef.current) wheelRef.current.rotation.x = state.clock.elapsedTime * 2.5;
-    }
+    if (t >= 1) { if (isMoving) setIsMoving(false); } 
+    else { if (wheelRef.current) wheelRef.current.rotation.x = state.clock.elapsedTime * 2.5; }
   });
 
   return (
@@ -365,79 +361,35 @@ const WalkingToConversationChapter = ({ butterProps }) => {
     const et = state.clock.elapsedTime;
     const t = Math.min(et / 16, 1);
     const smoothProgress = THREE.MathUtils.smoothstep(t, 0, 1);
-    
     if (phase === "walking") {
       groupRef.current.position.z = 4.0 + (finalStopZ - 4.0) * smoothProgress;
-
       if (p1Ref.current) {
         const swingA = Math.sin(et * 10.5) * 0.45;
-        p1Ref.current.leftLeg.rotation.x = swingA;
-        p1Ref.current.rightLeg.rotation.x = -swingA;
-        p1Ref.current.leftArm.rotation.x = -swingA * 0.6;
-        p1Ref.current.group.position.y = Math.abs(swingA) * 0.06;
+        p1Ref.current.leftLeg.rotation.x = swingA; p1Ref.current.rightLeg.rotation.x = -swingA;
+        p1Ref.current.leftArm.rotation.x = -swingA * 0.6; p1Ref.current.group.position.y = Math.abs(swingA) * 0.06;
       }
-
       if (p2Ref.current) {
         const swingB = Math.sin((et - 0.5) * 9.2) * 0.35;
-        p2Ref.current.leftLeg.rotation.x = swingB;
-        p2Ref.current.rightLeg.rotation.x = -swingB;
-        p2Ref.current.leftArm.rotation.x = -swingB * 0.6;
-        p2Ref.current.rightArm.rotation.x = swingB * 0.6;
+        p2Ref.current.leftLeg.rotation.x = swingB; p2Ref.current.rightLeg.rotation.x = -swingB;
+        p2Ref.current.leftArm.rotation.x = -swingB * 0.6; p2Ref.current.rightArm.rotation.x = swingB * 0.6;
         p2Ref.current.group.position.y = Math.abs(swingB) * 0.04;
       }
-
       if (t >= 1) {
           setPhase("talking");
-          [p1Ref, p2Ref].forEach(p => {
-              if (p.current) {
-                p.current.leftLeg.rotation.x = 0;
-                p.current.rightLeg.rotation.x = 0;
-                p.current.leftArm.rotation.x = 0.2;
-                p.current.rightArm.rotation.x = 0.2;
-                p.current.group.position.y = 0;
-              }
-          });
+          [p1Ref, p2Ref].forEach(p => { if (p.current) { p.current.leftLeg.rotation.x = 0; p.current.rightLeg.rotation.x = 0; p.current.leftArm.rotation.x = 0.2; p.current.rightArm.rotation.x = 0.2; p.current.group.position.y = 0; } });
       }
     } else {
-      if (p1Ref.current) {
-        p1Ref.current.head.rotation.x = Math.sin(et * 1.5) * 0.1;
-        p1Ref.current.head.rotation.z = Math.cos(et * 0.8) * 0.05;
-      }
-      if (p2Ref.current) {
-        p2Ref.current.head.rotation.x = Math.sin(et * 2.2 + 0.5) * 0.12;
-        p2Ref.current.head.rotation.y = -0.4 + Math.sin(et * 1.2) * 0.1;
-      }
+      if (p1Ref.current) { p1Ref.current.head.rotation.x = Math.sin(et * 1.5) * 0.1; p1Ref.current.head.rotation.z = Math.cos(et * 0.8) * 0.05; }
+      if (p2Ref.current) { p2Ref.current.head.rotation.x = Math.sin(et * 2.2 + 0.5) * 0.12; p2Ref.current.head.rotation.y = -0.4 + Math.sin(et * 1.2) * 0.1; }
     }
   });
 
   const turnFactor = phase === "talking" ? 1 : 0;
-  
   return (
     <group ref={groupRef} position={[7.5, 1.9, 4.0]} rotation={[0, Math.PI, 0]}>
-        <BlockHumanoid 
-          ref={p1Ref}
-          scale={0.95} 
-          materialProps={butterProps} 
-          poseProps={{ 
-            isWalking: false, 
-            cane: true, 
-            rotation: [0, -0.6 * turnFactor, 0], 
-            position: [-0.4, 0, 0], 
-            headRotationY: 1.2 * turnFactor,
-          }} 
-        />
+        <BlockHumanoid ref={p1Ref} scale={0.95} materialProps={butterProps} poseProps={{ cane: true, rotation: [0, -0.6 * turnFactor, 0], position: [-0.4, 0, 0], headRotationY: 1.2 * turnFactor }} />
         <group position={[0.4, 0, 0]}>
-          <BlockHumanoid 
-            ref={p2Ref}
-            isHelper 
-            scale={0.95} 
-            materialProps={butterProps} 
-            poseProps={{ 
-              isWalking: false, 
-              rotation: [0, 0.6 * turnFactor, 0], 
-              headRotationY: phase === "walking" ? 0 : -0.4 
-            }} 
-          />
+          <BlockHumanoid ref={p2Ref} isHelper scale={0.95} materialProps={butterProps} poseProps={{ rotation: [0, 0.6 * turnFactor, 0], headRotationY: phase === "walking" ? 0 : -0.4 }} />
         </group>
     </group>
   );
@@ -457,9 +409,7 @@ export default function Scene({ currentView }) {
     const isHome = currentView === "home";
     const targetPos = isHome ? (isMobile ? new THREE.Vector3(-18, 4.5, 38) : new THREE.Vector3(-13, 3.2, 28)) : new THREE.Vector3(-24.5, 3.5, -450);
     const targetLook = isHome ? new THREE.Vector3(20, 1.2, -2) : new THREE.Vector3(-24.5, 1.5, -1000);
-    
-    camera.position.lerp(targetPos, 0.05); 
-    camera.lookAt(targetLook);
+    camera.position.lerp(targetPos, 0.05); camera.lookAt(targetLook);
     if (waterRef.current) waterRef.current.material.uniforms["time"].value += delta * 0.08;
   });
 
@@ -484,77 +434,36 @@ export default function Scene({ currentView }) {
         </group>
 
         <group position={[17, -1.6, 1]} rotation={[0, -Math.PI / 2, 0]}>
-          <mesh castShadow receiveShadow position={[0.5, 8.5 + extraWallHeight/2, 0]}><boxGeometry args={[1, 17 + extraWallHeight, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
-          <mesh castShadow receiveShadow position={[4.5, 8.5 + extraWallHeight/2, 0]}><boxGeometry args={[7, 17 + extraWallHeight, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
+          <mesh position={[0.5, 8.5 + extraWallHeight/2, 0]} castShadow receiveShadow><boxGeometry args={[1, 17 + extraWallHeight, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
+          <mesh position={[4.5, 8.5 + extraWallHeight/2, 0]} castShadow receiveShadow><boxGeometry args={[7, 17 + extraWallHeight, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
           <WallOpening position={[11, 0, 0]} isWindow={true} colorProps={butterProps} />
           <WallOpening position={[17, 0, 0]} isWindow={true} colorProps={butterProps} />
-          <mesh castShadow receiveShadow position={[24, 8.5 + extraWallHeight/2, 0]}><boxGeometry args={[8, 17 + extraWallHeight, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
+          <mesh position={[24, 8.5 + extraWallHeight/2, 0]} castShadow receiveShadow><boxGeometry args={[8, 17 + extraWallHeight, 2]} /><meshStandardMaterial {...butterProps} /></mesh>
         </group>
 
         <group>
-          <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
-            <Bench materialProps={butterProps} />
-          </group>
-
+          <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}><Bench materialProps={butterProps} /></group>
           <WalkingToConversationChapter butterProps={butterProps} />
-
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <group position={[3.5, 0, -0.2]} rotation={[0, -0.5, 0]}>
-                <BlockHumanoid 
-                 scale={0.84} 
-                 materialProps={butterProps} 
-                 poseProps={{ 
-                   walker: true, 
-                   torsoRotationX: 0.1, 
-                   leftArmRotation: [0.1, 0, -0.1], 
-                   rightArmRotation: [0.1, 0, 0.1], 
-                   animateArmsTo: [-1.1, 0, -0.1], 
-                   leftLegRotation: [0.15, 0, 0],   
-                   rightLegRotation: [-0.1, 0, 0],  
-                   headRotationY: -0.2
-                 }} 
-                />
-                <BlockHumanoid 
-                 isHelper
-                 scale={0.95} 
-                 materialProps={butterProps} 
-                 poseProps={{ 
-                   position: [-0.95, 0, 0.35], 
-                   rotation: [0, 0.65, 0], 
-                   headRotationY: -0.4,
-                   leftArmRotation: [-0.8, 0, -0.25] 
-                 }} 
-                />
+                <BlockHumanoid scale={0.84} materialProps={butterProps} poseProps={{ walker: true, torsoRotationX: 0.1, animateArmsTo: [-1.1, 0, -0.1], leftLegRotation: [0.15, 0, 0], rightLegRotation: [-0.1, 0, 0], headRotationY: -0.2 }} />
+                <BlockHumanoid isHelper scale={0.95} materialProps={butterProps} poseProps={{ position: [-0.95, 0, 0.35], rotation: [0, 0.65, 0], headRotationY: -0.4, leftArmRotation: [-0.8, 0, -0.25] }} />
             </group>
           </group>
-
           <group position={[6.0, 1.6, 10.0]} rotation={[0, Math.PI / 2, 0]}>
             <BlockHumanoid isHelper scale={0.9} materialProps={butterProps} poseProps={{ isLeaning: true, leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [-0.2, 0, 0], rotation: [0, -0.4, 0]}} />
             <BlockHumanoid scale={0.88} materialProps={butterProps} poseProps={{ leftLegRotation: [Math.PI / 2, 0, 0], rightLegRotation: [Math.PI / 2, 0, 0], position: [0.5, 0, 0]}} />
           </group>
-
           <WheelchairChapter butterProps={butterProps} isMobile={isMobile} />
         </group>
       </group>
 
       <water 
         ref={waterRef} 
-        args={[
-          new THREE.PlaneGeometry(2000, 2000), 
-          { 
-            waterNormals, 
-            sunDirection: new THREE.Vector3(-10, 10, -100).normalize(), 
-            sunColor: 0xffffff, 
-            waterColor: TITLE_PURPLE, 
-            distortionScale: 1.0, 
-            alpha: 0.95 
-          }
-        ]} 
-        rotation={[-Math.PI / 2, 0, 0]} 
-        position={[0, -1.45, 0]} 
+        args={[ new THREE.PlaneGeometry(2000, 2000), { waterNormals, sunDirection: new THREE.Vector3(-10, 10, -100).normalize(), sunColor: 0xffffff, waterColor: TITLE_PURPLE, distortionScale: 1.0, alpha: 0.95 } ]} 
+        rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.45, 0]} 
       />
 
-      {/* Floating Platform Upgrade */}
       <FloatingPlatform />
     </>
   );
