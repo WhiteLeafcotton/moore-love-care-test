@@ -100,7 +100,7 @@ const FloatingPlatform = ({ butterProps }) => {
        Y: -2.2 (Lowered deeper into the water)
        Z: 14.8 (Pushed back into the corner nook)
     */
-    <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.4} position={[7.5, -2.2, 14.8]}>
+    <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.4} position={[8.5, -2.2, 14.8]}>
       
       {/* Platform Disk - SHRUNK from 4.2 to 2.8 to fit the nook */}
       <mesh renderOrder={10000}>
