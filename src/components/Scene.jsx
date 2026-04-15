@@ -27,30 +27,45 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
-// --- NEW CHAIR COMPONENT ---
+// --- UPDATED CHAIR COMPONENT ---
 const Chair = ({ position, rotation }) => (
   <group position={position} rotation={rotation} scale={0.6}>
     {/* Seat */}
-    <mesh position={[0, 0.4, 0]} castShadow>
+    <mesh position={[0, 0.4, 0]} renderOrder={10001}>
       <boxGeometry args={[1.2, 0.1, 1.2]} />
-      <meshStandardMaterial color={DARKER_PINK_THEME} />
+      <meshBasicMaterial 
+        color={DARKER_PINK_THEME} 
+        depthTest={false} 
+        transparent={true} 
+        opacity={0.9} 
+      />
     </mesh>
     {/* Backrest */}
-    <mesh position={[0, 1.0, -0.55]} castShadow>
+    <mesh position={[0, 1.0, -0.55]} rotation={[0, 0, 0]} renderOrder={10001}>
       <boxGeometry args={[1.2, 1.2, 0.1]} />
-      <meshStandardMaterial color={DARKER_PINK_THEME} />
+      <meshBasicMaterial 
+        color={DARKER_PINK_THEME} 
+        depthTest={false} 
+        transparent={true} 
+        opacity={0.9} 
+      />
     </mesh>
     {/* Legs */}
     {[[-0.5, 0.2, 0.5], [0.5, 0.2, 0.5], [-0.5, 0.2, -0.5], [0.5, 0.2, -0.5]].map((pos, i) => (
-      <mesh key={i} position={pos} castShadow>
+      <mesh key={i} position={pos} renderOrder={10001}>
         <boxGeometry args={[0.1, 0.4, 0.1]} />
-        <meshStandardMaterial color={DARKER_PINK_THEME} />
+        <meshBasicMaterial 
+          color={DARKER_PINK_THEME} 
+          depthTest={false} 
+          transparent={true} 
+          opacity={0.9} 
+        />
       </mesh>
     ))}
   </group>
 );
 
-// --- THE CIRCULAR FLOATING PLATFORM (UPDATED WITH CHAIR) ---
+// --- THE CIRCULAR FLOATING PLATFORM ---
 const FloatingPlatform = () => {
   return (
     <Float 
@@ -59,7 +74,7 @@ const FloatingPlatform = () => {
       floatIntensity={0.5} 
       position={[10, -1.1, 16]} 
     >
-      {/* The Platform Base */}
+      {/* Platform Base */}
       <mesh 
         renderOrder={10000}        
         frustumCulled={false}      
@@ -73,8 +88,8 @@ const FloatingPlatform = () => {
         />
       </mesh>
 
-      {/* The Chair sitting on top */}
-      <Chair position={[0, 0.1, 0]} rotation={[0, -Math.PI / 4, 0]} />
+      {/* The Chair - Shifted Y to sit clearly on top */}
+      <Chair position={[0, 0.2, 0]} rotation={[0, -Math.PI / 4, 0]} />
     </Float>
   );
 };
@@ -521,7 +536,7 @@ export default function Scene({ currentView }) {
         position={[0, -1.45, 0]} 
       />
 
-      {/* RENDERED LAST - CIRCLE PLATFORM WITH CHAIR */}
+      {/* CIRCLE PLATFORM WITH ATTACHED CHAIR */}
       <FloatingPlatform />
     </>
   );
