@@ -2,7 +2,7 @@ import { useRef, useMemo, useEffect, useState, forwardRef, useImperativeHandle }
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
 import { Environment, Sky, Float } from "@react-three/drei"; 
 import { Water } from "three-stdlib";
-import * as THREE from "this";
+import * as THREE from "three";
 
 extend({ Water });
 
