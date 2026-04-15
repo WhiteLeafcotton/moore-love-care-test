@@ -92,32 +92,30 @@ const HomeLamp = ({ position }) => (
 // --- THE CIRCULAR FLOATING PLATFORM (SANCUTARY) ---
 // --- THE CIRCULAR FLOATING PLATFORM (SANCUTARY) ---
 // --- THE CIRCULAR FLOATING PLATFORM (SANCUTARY) ---
+// --- THE CIRCULAR FLOATING PLATFORM (SANCUTARY) ---
 const FloatingPlatform = ({ butterProps }) => {
   return (
-    /* POSITION UPDATED: 
-       X: 8.5 (Brings it closer to the stairs/building)
-       Y: -1.5 (Lowers it further into the water)
-       Z: 13.5 (Pulls it closer to the foreground)
+    /* POSITION TWEAKED: 
+       X: 8.5 -> 6.5 (Pulls it back toward the left/stairs)
+       Y: -1.5 (Keeps it at the nice submerged depth)
+       Z: 13.5 -> 14.5 (Pushes it slightly further back into the corner)
     */
-    <Float speed={1.8} rotationIntensity={0.2} floatIntensity={0.5} position={[8.5, -1.5, 13.5]}>
-      {/* Platform Disk - KEPT AT ORIGINAL SIZE */}
+    <Float speed={1.8} rotationIntensity={0.2} floatIntensity={0.5} position={[6.5, -1.5, 14.5]}>
+      {/* Platform Disk */}
       <mesh renderOrder={10000}>
         <cylinderGeometry args={[4.2, 4.2, 0.25, 64]} />
         <meshBasicMaterial color="#ffffff" depthTest={false} transparent opacity={0.8} />
       </mesh>
 
-      {/* Circle Rug - WIDENED to fit 2x larger chair */}
+      {/* Circle Rug */}
       <mesh position={[-0.8, 0.13, 0]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={10001}>
         <circleGeometry args={[3.2, 64]} />
         <meshBasicMaterial color="#6e5c8a" depthTest={false} transparent opacity={0.3} />
       </mesh>
 
-      {/* --- 2X LARGER ELEMENTS --- */}
-
-      {/* The Recliner - SCALE 1.8 */}
+      {/* 2X LARGER ELEMENTS */}
       <LazyBoyChair position={[-0.8, 0.45, 0]} rotation={[0, Math.PI / 4, 0]} scale={1.8} />
 
-      {/* Seated Resident (Bob) - SCALE 2.0 */}
       <group position={[-0.8, 1.2, 0]} rotation={[0, Math.PI / 4, 0]}>
         <BlockHumanoid 
           scale={2.0} 
@@ -130,10 +128,8 @@ const FloatingPlatform = ({ butterProps }) => {
         />
       </group>
 
-      {/* Home Lamp - SCALE 2.4 */}
       <HomeLamp position={[-3.0, 0.14, 0]} scale={2.4} />
 
-      {/* Helper - SCALE 2.3 */}
       <group position={[0.8, 0.4, 0.8]} rotation={[0, -Math.PI / 1.5, 0]}>
         <BlockHumanoid 
           isHelper 
