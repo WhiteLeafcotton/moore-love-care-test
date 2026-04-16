@@ -89,7 +89,7 @@ const FloatingPlatform = ({ butterProps }) => {
       </mesh>
 
       {/* 3. THE BRAND NEW LAMP - Locked to this platform only */}
-      <PlatformLamp position={[-1.2, 0.1, -0.8]} />
+      <PlatformLamp position={[-1.2, 0.15, -0.8]} />
 
       {/* 4. Recliner */}
       <LazyBoyChair position={[0, 0.15, 0]} rotation={[0, Math.PI / 4, 0]} scale={1.2} />
