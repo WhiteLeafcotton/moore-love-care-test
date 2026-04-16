@@ -139,7 +139,8 @@ const FloatingPlatform = () => {
 {/* Resident Seated - Settling him into the seat */}
 {/* Resident Seated - Final nudge into the chair cushions */}
 {/* Resident Seated - Final Centering and Deep Seat Adjustment */}
-<group position={[-0.68, 0.42, -0.38]} rotation={[0, Math.PI / 2, 0]}>
+{/* Resident Seated - Grounded and Centered in Angled Chair */}
+<group position={[-0.64, 0.38, -0.42]} rotation={[0, Math.PI / 2, 0]}>
   <BlockHumanoid 
     scale={0.65} 
     materialProps={{
