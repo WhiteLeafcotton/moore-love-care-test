@@ -29,8 +29,6 @@ const getHillHeight = (x, z) => {
 };
 
 const FloatingPlatform = ({ butterProps }) => {
-  // We use depthTest: false so it doesn't vanish/clip, 
-  // but we leave transparent: false so it looks solid.
   const solidOverlayProps = { 
     ...butterProps, 
     depthTest: false, 
@@ -41,14 +39,14 @@ const FloatingPlatform = ({ butterProps }) => {
   return (
     <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.4} position={[8.5, -2.2, 14.8]}>
       
-      {/* Platform Disk - Solid White */}
+      {/* Platform Disk - Rendered First (Lower Order) */}
       <mesh renderOrder={10000}>
         <cylinderGeometry args={[2.8, 2.8, 0.2, 64]} />
         <meshBasicMaterial color="#ffffff" depthTest={false} />
       </mesh>
 
-      {/* Single Standing Chapter - Solid and Opaque */}
-      <group position={[0, 0.1, 0]}>
+      {/* Humanoid - Rendered Second (Higher Order) */}
+      <group position={[0, 0.35, 0]} renderOrder={10001}> 
         <BlockHumanoid 
           scale={1.4} 
           materialProps={solidOverlayProps} 
