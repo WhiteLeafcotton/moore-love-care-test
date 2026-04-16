@@ -82,7 +82,6 @@ const HomeLamp = ({ position, scale = 1, rotation = [0, 0, 0] }) => (
 const FloatingPlatform = ({ butterProps }) => {
   return (
     <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.4} position={[8.5, -2.2, 14.8]}>
-      
       {/* 1. Platform Disk */}
       <mesh renderOrder={10000}>
         <cylinderGeometry args={[2.8, 2.8, 0.2, 64]} />
@@ -95,35 +94,28 @@ const FloatingPlatform = ({ butterProps }) => {
         <meshBasicMaterial color="#6e5c8a" depthTest={false} transparent opacity={0.3} />
       </mesh>
 
-      {/* 3. THE LAMP: Nested inside Float so it moves with the platform */}
+      {/* 3. THE CORRECT LAMP: Nested correctly inside the Float tag */}
       <HomeLamp position={[-1.2, 0.12, -0.8]} scale={1.2} />
 
-      {/* 4. Recliner - Centered */}
+      {/* 4. Recliner */}
       <LazyBoyChair position={[0, 0.15, 0]} rotation={[0, Math.PI / 4, 0]} scale={1.2} />
 
-      {/* 5. Seated Resident (Bob) */}
+      {/* 5. Seated Resident */}
       <group position={[0, 0.6, 0]} rotation={[0, Math.PI / 4, 0]}>
         <BlockHumanoid 
           scale={1.4} 
           materialProps={{...butterProps, depthTest: false}} 
-          poseProps={{ 
-            leftLegRotation: [1.5, 0, 0], 
-            rightLegRotation: [1.5, 0, 0], 
-            torsoRotationX: 0.05 
-          }} 
+          poseProps={{ leftLegRotation: [1.5, 0, 0], rightLegRotation: [1.5, 0, 0], torsoRotationX: 0.05 }} 
         />
       </group>
 
-      {/* 6. Helper - Standing next to Bob */}
+      {/* 6. Helper */}
       <group position={[1.1, 0.12, 0.4]} rotation={[0, -Math.PI / 1.5, 0]}>
         <BlockHumanoid 
           isHelper 
           scale={1.4} 
           materialProps={{...butterProps, depthTest: false}} 
-          poseProps={{ 
-            headRotationY: -0.4, 
-            rightArmRotation: [1.1, 0, -0.3] 
-          }} 
+          poseProps={{ headRotationY: -0.4, rightArmRotation: [1.1, 0, -0.3] }} 
         />
       </group>
     </Float>
@@ -560,7 +552,7 @@ export default function Scene({ currentView }) {
         position={[0, -1.45, 0]} 
       />
 
-      {/* Floating Sanctuary - ONLY lamp here */}
+      {/* Floating Sanctuary - THE ONLY LAMP IN THE SCENE IS HERE */}
       <FloatingPlatform butterProps={butterProps} />
     </>
   );
