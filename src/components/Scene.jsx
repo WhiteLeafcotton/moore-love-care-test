@@ -101,21 +101,7 @@ const FloatingPlatform = () => {
         />
       </group>
 
-      {/* Helper Standing Beside Chair */}
-      <group position={[1.2, 0.2, 1.0]} rotation={[0, -Math.PI / 1.5, 0]}>
-        <BlockHumanoid 
-          isHelper 
-          scale={0.9} 
-          materialProps={{...butterProps, depthTest: false}} 
-          poseProps={{ 
-            headRotationY: -0.4, 
-            rightArmRotation: [1.1, 0, -0.3] 
-          }} 
-        />
-      </group>
-    </Float>
-  );
-};
+    
 
 // --- HUMANOID COMPONENTS ---
 const HeartBadge = () => {
