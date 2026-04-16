@@ -121,9 +121,10 @@ const FloatingPlatform = () => {
 
         {/* Character (forced in front visually) */}
   {/* Resident Seated in Chair */}
+{/* Resident Seated in Chair */}
 <group position={[-0.8, 0.48, 0.05]} rotation={[0, (Math.PI * 3) / 2, 0]}>
   <BlockHumanoid 
-    scale={0.45}  {/* Reduced scale to fit the chair naturally */}
+    scale={0.45}
     materialProps={{...butterProps, depthTest: true}} 
     poseProps={{ 
       leftLegRotation: [1.4, 0, 0], 
