@@ -41,10 +41,14 @@ const PlatformLamp = ({ position }) => (
 </mesh>
     {/* Pole */}
     {/* Pole */}
-<mesh position={[0, 1.5, 0]}>
+{/* Pole */}
+<mesh position={[0, 1.6, 0]}> {/* Lifted slightly more */}
   <cylinderGeometry args={[0.03, 0.03, 3, 16]} />
-  {/* Changed to Standard and removed depthTest */}
-  <meshStandardMaterial color="#222" roughness={0.8} />
+  <meshStandardMaterial 
+    color="#222222" 
+    emissive="#111111" // Gives it a tiny bit of its own light so it won't be pitch black
+    depthTest={true} 
+  />
 </mesh>
     {/* Shade */}
     <mesh position={[0, 3.1, 0]} renderOrder={10001}>
