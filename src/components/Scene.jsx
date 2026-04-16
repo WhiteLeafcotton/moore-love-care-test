@@ -31,10 +31,14 @@ const getHillHeight = (x, z) => {
 const PlatformLamp = ({ position }) => (
   <group position={position}>
     {/* Base */}
-    <mesh position={[0, 0.05, 0]} renderOrder={10001}>
-      <cylinderGeometry args={[0.25, 0.25, 0.1, 32]} />
-      <meshBasicMaterial color="#222" depthTest={false} />
-    </mesh>
+    <mesh renderOrder={10000} receiveShadow castShadow>
+  <cylinderGeometry args={[2.8, 2.8, 0.2, 64]} />
+  <meshStandardMaterial 
+    color="#ffffff"
+    roughness={0.4}
+    metalness={0.05}
+  />
+</mesh>
     {/* Pole */}
     <mesh position={[0, 1.5, 0]} renderOrder={10001}>
       <cylinderGeometry args={[0.03, 0.03, 3, 16]} />
