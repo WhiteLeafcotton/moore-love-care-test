@@ -39,11 +39,11 @@ const LStyleLamp = ({ position }) => (
       <meshBasicMaterial color="#21162e" depthTest={false} transparent opacity={0.9} />
     </mesh>
 
-    {/* Vertical Pole */}
-    <mesh position={[0, 2.0, 0]} renderOrder={10001}>
-      <cylinderGeometry args={[0.04, 0.04, 4.0, 16]} />
-      <meshBasicMaterial color="#21162e" depthTest={false} transparent opacity={0.9} />
-    </mesh>
+   {/* Vertical Pole (shorter) */}
+<mesh position={[0, 1.6, 0]} renderOrder={10001}>
+  <cylinderGeometry args={[0.04, 0.04, 3.2, 16]} />
+  <meshBasicMaterial color="#21162e" depthTest={false} transparent opacity={0.9} />
+</mesh>
 
     {/* L Arm Holder (top of pole) */}
     <group position={[0, 4.0, 0]}>
