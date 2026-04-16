@@ -29,29 +29,29 @@ const getHillHeight = (x, z) => {
 };
 
 const FloatingPlatform = ({ butterProps }) => {
-  // We keep depthTest: true here so his body parts stay solid and don't overlap
-  const solidHumanMaterial = { 
+  // THE KEY: depthTest: false keeps him in front of the stairs.
+  // depthWrite: true (combined with renderOrder) helps keep his body parts solid.
+  const solidVisibleMaterial = { 
     ...butterProps, 
-    transparent: false, 
-    opacity: 1,
-    depthTest: true 
+    depthTest: false, 
+    transparent: false,
+    opacity: 1
   };
 
   return (
     <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.4} position={[8.5, -2.2, 14.8]}>
       
-      {/* 1. THE DISK: Solid White, forced in front of stairs */}
+      {/* 1. THE DISK: Forced in front of stairs */}
       <mesh renderOrder={10000}>
         <cylinderGeometry args={[2.8, 2.8, 0.2, 64]} />
-        <meshBasicMaterial color="#ffffff" depthTest={false} transparent={false} />
+        <meshBasicMaterial color="#ffffff" depthTest={false} />
       </mesh>
 
-      {/* 2. THE HUMAN: Wrapped in a group with an even higher renderOrder */}
-      {/* We lift him slightly more [0, 0.45, 0] to ensure feet clear the disk thickness */}
-      <group position={[0, 0.45, 0]} renderOrder={10001}>
+      {/* 2. THE MAN: Using the same depth logic as the Couch/Lamp base */}
+      <group position={[0, 0.4, 0]} renderOrder={10001}>
         <BlockHumanoid 
           scale={1.4} 
-          materialProps={solidHumanMaterial} 
+          materialProps={solidVisibleMaterial} 
           poseProps={{ 
             leftLegRotation: [0, 0, 0], 
             rightLegRotation: [0, 0, 0], 
