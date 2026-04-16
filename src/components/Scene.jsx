@@ -30,58 +30,84 @@ const getHillHeight = (x, z) => {
 // --- NEW BRAND NEW LAMP COMPONENT ---
 const PlatformLamp = ({ position }) => (
   <group position={position}>
-    {/* Base */}
-    <mesh renderOrder={10000} receiveShadow castShadow>
-  <cylinderGeometry args={[2.8, 2.8, 0.2, 64]} />
-  <meshStandardMaterial 
-    color="#ffffff"
-    roughness={0.4}
-    metalness={0.05}
-  />
-</mesh>
-    {/* Pole */}
-    {/* Pole */}
-{/* Pole */}
-<mesh position={[0, 1.6, 0]}> {/* Lifted slightly more */}
-  <cylinderGeometry args={[0.03, 0.03, 3, 16]} />
-  <meshStandardMaterial 
-    color="#222222" 
-    emissive="#111111" // Gives it a tiny bit of its own light so it won't be pitch black
-    depthTest={true} 
-  />
-</mesh>
-    {/* Shade */}
-    <mesh position={[0, 3.1, 0]} renderOrder={10001}>
-      <cylinderGeometry args={[0.3, 0.5, 0.7, 32]} />
-      <meshBasicMaterial color="#ffffff" transparent opacity={0.9} depthTest={false} />
+    {/* Base (FIXED SIZE) */}
+    <mesh position={[0, 0.05, 0]} receiveShadow castShadow>
+      <cylinderGeometry args={[0.25, 0.25, 0.1, 32]} />
+      <meshStandardMaterial 
+        color="#222222"
+        roughness={0.6}
+        metalness={0.2}
+      />
     </mesh>
-    {/* Light Bulb Glow */}
-    <mesh position={[0, 3.0, 0]} renderOrder={10002}>
+
+    {/* Pole */}
+    <mesh position={[0, 1.6, 0]}>
+      <cylinderGeometry args={[0.03, 0.03, 3, 16]} />
+      <meshStandardMaterial 
+        color="#222222" 
+        emissive="#111111"
+      />
+    </mesh>
+
+    {/* Shade (SOLID but softly glowing) */}
+    <mesh position={[0, 3.1, 0]}>
+      <cylinderGeometry args={[0.3, 0.5, 0.7, 32]} />
+      <meshStandardMaterial 
+        color="#ffffff"
+        emissive="#fff5cc"
+        emissiveIntensity={0.4}
+      />
+    </mesh>
+
+    {/* Light Bulb Glow (only place depthTest stays off) */}
+    <mesh position={[0, 3.0, 0]}>
       <sphereGeometry args={[0.15, 16, 16]} />
-      <meshStandardMaterial color="#fff" emissive="#fff" emissiveIntensity={2} depthTest={false} />
+      <meshStandardMaterial 
+        color="#ffffff"
+        emissive="#ffffff"
+        emissiveIntensity={2}
+        depthTest={false}
+      />
     </mesh>
   </group>
 );
 
+
+// --- CHAIR (FIXED - NO FAKE TRANSPARENCY) ---
 const LazyBoyChair = ({ position, rotation, scale = 0.7 }) => (
   <group position={position} rotation={rotation} scale={scale}>
-    <mesh position={[0, 0.4, 0]} renderOrder={10001}>
+    
+    {/* Seat */}
+    <mesh position={[0, 0.4, 0]}>
       <boxGeometry args={[1.5, 0.8, 1.5]} />
-      <meshBasicMaterial color={DARKER_PINK_THEME} depthTest={false} transparent opacity={0.95} />
+      <meshStandardMaterial 
+        color={DARKER_PINK_THEME}
+        roughness={0.8}
+      />
     </mesh>
-    <mesh position={[0, 1.2, -0.6]} rotation={[-0.3, 0, 0]} renderOrder={10001}>
+
+    {/* Back */}
+    <mesh position={[0, 1.2, -0.6]} rotation={[-0.3, 0, 0]}>
       <boxGeometry args={[1.5, 1.6, 0.4]} />
-      <meshBasicMaterial color={DARKER_PINK_THEME} depthTest={false} transparent opacity={0.95} />
+      <meshStandardMaterial 
+        color={DARKER_PINK_THEME}
+        roughness={0.8}
+      />
     </mesh>
+
+    {/* Arms */}
     {[-0.85, 0.85].map((x, i) => (
-      <mesh key={i} position={[x, 0.7, 0]} renderOrder={10001}>
+      <mesh key={i} position={[x, 0.7, 0]}>
         <boxGeometry args={[0.3, 0.6, 1.5]} />
-        <meshBasicMaterial color={DARKER_PINK_THEME} depthTest={false} transparent opacity={0.95} />
+        <meshStandardMaterial 
+          color={DARKER_PINK_THEME}
+          roughness={0.8}
+        />
       </mesh>
     ))}
+
   </group>
 );
-
 // --- THE CIRCULAR FLOATING PLATFORM (SANCTUARY) ---
 const FloatingPlatform = ({ butterProps }) => {
   return (
