@@ -47,23 +47,6 @@ const LazyBoyChair = ({ position, rotation, scale = 0.7 }) => (
   </group>
 );
 
-const SideTable = ({ position }) => (
-  <group position={position}>
-    <mesh position={[0, 0.35, 0]} renderOrder={10001}>
-      <cylinderGeometry args={[0.4, 0.4, 0.05, 32]} />
-      <meshBasicMaterial color="#ffffff" depthTest={false} transparent opacity={0.8} />
-    </mesh>
-    <mesh position={[0, 0.175, 0]} renderOrder={10001}>
-      <cylinderGeometry args={[0.05, 0.05, 0.35, 16]} />
-      <meshBasicMaterial color="#333" depthTest={false} />
-    </mesh>
-    <mesh position={[0.1, 0.45, 0]} renderOrder={10002}>
-      <cylinderGeometry args={[0.08, 0.06, 0.15, 16]} />
-      <meshStandardMaterial color="#ffcc00" emissive="#ffcc00" emissiveIntensity={0.5} depthTest={false} />
-    </mesh>
-  </group>
-);
-
 const HomeLamp = ({ position, scale = 1, rotation = [0, 0, 0] }) => (
   <group position={position} scale={scale} rotation={rotation}>
     <mesh position={[0, 0.05, 0]} renderOrder={10001}>
@@ -96,13 +79,6 @@ const HomeLamp = ({ position, scale = 1, rotation = [0, 0, 0] }) => (
 );
 
 // --- THE CIRCULAR FLOATING PLATFORM (SANCTUARY) ---
-// --- THE CIRCULAR FLOATING PLATFORM (SANCTUARY) ---
-// --- THE CIRCULAR FLOATING PLATFORM (SANCTUARY) ---
-// --- THE CIRCULAR FLOATING PLATFORM (SANCTUARY) ---
-// --- THE CIRCULAR FLOATING PLATFORM (SANCTUARY) ---
-// --- THE CIRCULAR FLOATING PLATFORM (SANCTUARY) ---
-// --- THE CIRCULAR FLOATING PLATFORM (SANCTUARY) ---
-// --- THE CIRCULAR FLOATING PLATFORM (SANCTUARY) ---
 const FloatingPlatform = ({ butterProps }) => {
   return (
     <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.4} position={[8.5, -2.2, 14.8]}>
@@ -119,8 +95,7 @@ const FloatingPlatform = ({ butterProps }) => {
         <meshBasicMaterial color="#6e5c8a" depthTest={false} transparent opacity={0.3} />
       </mesh>
 
-      {/* 3. THE LAMP: MOVED INSIDE THE FLOAT TAG */}
-      {/* Positioned relative to the platform center */}
+      {/* 3. THE LAMP: Nested inside Float so it moves with the platform */}
       <HomeLamp position={[-1.2, 0.12, -0.8]} scale={1.2} />
 
       {/* 4. Recliner - Centered */}
@@ -154,6 +129,7 @@ const FloatingPlatform = ({ butterProps }) => {
     </Float>
   );
 };
+
 // --- HUMANOID SYSTEM ---
 const HeartBadge = () => {
   const shape = useMemo(() => {
@@ -584,7 +560,7 @@ export default function Scene({ currentView }) {
         position={[0, -1.45, 0]} 
       />
 
-      {/* Floating Sanctuary */}
+      {/* Floating Sanctuary - ONLY lamp here */}
       <FloatingPlatform butterProps={butterProps} />
     </>
   );
