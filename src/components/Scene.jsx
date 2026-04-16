@@ -45,22 +45,22 @@ const LStyleLamp = ({ position }) => (
   <meshBasicMaterial color="#21162e" depthTest={false} transparent opacity={0.9} />
 </mesh>
 
-    {/* L Arm Holder (top of pole) */}
-    <group position={[0, 4.0, 0]}>
+    {/* L Arm Holder (aligned to shortened pole) */}
+<group position={[0, 2.5, 0]}>
 
-      {/* Horizontal Arm */}
-      <mesh position={[0.9, 0, 0]} rotation={[0, 0, Math.PI / 2]} renderOrder={10001}>
-        <cylinderGeometry args={[0.03, 0.03, 1.8, 16]} />
-        <meshBasicMaterial color="#21162e" depthTest={false} transparent opacity={0.9} />
-      </mesh>
+  {/* Horizontal Arm */}
+  <mesh position={[0.85, 0, 0]} rotation={[0, 0, Math.PI / 2]} renderOrder={10001}>
+    <cylinderGeometry args={[0.03, 0.03, 1.8, 16]} />
+    <meshBasicMaterial color="#21162e" depthTest={false} transparent opacity={0.9} />
+  </mesh>
 
-      {/* Bulb (hangs from arm end) */}
-      <mesh position={[1.8, -0.4, 0]} renderOrder={10002}>
-        <sphereGeometry args={[0.25, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2]} />
-        <meshBasicMaterial color="#ffffff" depthTest={false} transparent opacity={1} />
-      </mesh>
+  {/* Bulb (properly hanging at end of arm) */}
+  <mesh position={[1.75, -0.45, 0]} renderOrder={10002}>
+    <sphereGeometry args={[0.25, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2]} />
+    <meshBasicMaterial color="#ffffff" depthTest={false} transparent opacity={1} />
+  </mesh>
 
-    </group>
+</group>
 
   </group>
 );
