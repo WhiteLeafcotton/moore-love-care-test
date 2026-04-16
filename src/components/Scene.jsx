@@ -96,7 +96,7 @@ const FloatingPlatform = () => {
       </mesh>
 
       {/* The Recliner */}
-      <LazyBoyChair position={[-0.8, 0.2, 0]} rotation={[0, Math.PI, 0]} />
+      <LazyBoyChair position={[-0.8, 0.2, 0]} rotation={[0, Math.PI + Math.PI / 4, 0]} />
 
       {/* The L-Lamp */}
       <LStyleLamp position={[-0.8, 0.15, -1.2]} />
