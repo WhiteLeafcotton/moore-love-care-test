@@ -28,122 +28,38 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
-// --- FURNITURE: LAZY BOY & HOME LAMP ---
-const LazyBoyChair = ({ position, rotation }) => (
-  <group position={position} rotation={rotation} scale={0.7}>
-    {/* Main Seat Cushion */}
-    <mesh position={[0, 0.4, 0]} renderOrder={10001}>
-      <boxGeometry args={[1.5, 0.8, 1.5]} />
-      <meshBasicMaterial color={DARKER_PINK_THEME} depthTest={false} transparent opacity={0.95} />
-    </mesh>
-    {/* Plush Backrest */}
-    <mesh position={[0, 1.2, -0.6]} rotation={[-0.3, 0, 0]} renderOrder={10001}>
-      <boxGeometry args={[1.5, 1.6, 0.4]} />
-      <meshBasicMaterial color={DARKER_PINK_THEME} depthTest={false} transparent opacity={0.95} />
-    </mesh>
-    {/* Arms */}
-    {[-0.85, 0.85].map((x, i) => (
-      <mesh key={i} position={[x, 0.7, 0]} renderOrder={10001}>
-        <boxGeometry args={[0.3, 0.6, 1.5]} />
-        <meshBasicMaterial color={DARKER_PINK_THEME} depthTest={false} transparent opacity={0.95} />
-      </mesh>
-    ))}
-  </group>
-);
-
-const HomeLamp = ({ position }) => (
-  <group position={position}>
-    {/* Base on platform */}
-    <mesh position={[0, 0.05, 0]} renderOrder={10001}>
-      <cylinderGeometry args={[0.3, 0.3, 0.1, 32]} />
-      <meshBasicMaterial color="#333" depthTest={false} />
-    </mesh>
-    {/* Vertical Pole */}
-    <mesh position={[0, 1.5, 0]} renderOrder={10001}>
-      <cylinderGeometry args={[0.04, 0.04, 3, 16]} />
-      <meshBasicMaterial color="#333" depthTest={false} />
-    </mesh>
-    {/* L-Bend (Vertical section) */}
-    <mesh position={[0, 3.1, 0]} renderOrder={10001}>
-      <cylinderGeometry args={[0.04, 0.04, 0.2, 16]} />
-      <meshBasicMaterial color="#333" depthTest={false} />
-    </mesh>
-    {/* L-Bend Arm (Horizontal section) */}
-    <mesh position={[0.7, 3.2, 0]} rotation={[0, 0, Math.PI / 2]} renderOrder={10001}>
-      <cylinderGeometry args={[0.04, 0.04, 1.4, 16]} />
-      <meshBasicMaterial color="#333" depthTest={false} />
-    </mesh>
-    {/* Shades & Bulb over Bob's Head */}
-    <group position={[1.4, 3.0, 0]} renderOrder={10002}>
-      <mesh position={[0, 0, 0]} castShadow>
-        <cylinderGeometry args={[0.25, 0.45, 0.6, 32, 1, true]} />
-        <meshBasicMaterial color="#ffffff" transparent opacity={0.9} depthTest={false} side={THREE.DoubleSide} />
-      </mesh>
-      <mesh position={[0, 0.15, 0]}>
-        <sphereGeometry args={[0.12, 16, 16]} />
-        <meshStandardMaterial color="#fff" emissive="#fff" emissiveIntensity={1.5} depthTest={false} />
-      </mesh>
-    </group>
-  </group>
-);
-
-// --- THE CIRCULAR FLOATING PLATFORM (SANCUTARY) ---
-// --- THE CIRCULAR FLOATING PLATFORM (SANCUTARY) ---
-// --- THE CIRCULAR FLOATING PLATFORM (SANCUTARY) ---
-// --- THE CIRCULAR FLOATING PLATFORM (SANCUTARY) ---
-// --- THE CIRCULAR FLOATING PLATFORM (SANCUTARY) ---
-// --- THE CIRCULAR FLOATING PLATFORM (SANCUTARY) ---
-// --- THE CIRCULAR FLOATING PLATFORM (SANCUTARY) ---
-// --- THE CIRCULAR FLOATING PLATFORM (SANCUTARY) ---
-// --- THE CIRCULAR FLOATING PLATFORM (SANCTUARY) ---
 const FloatingPlatform = ({ butterProps }) => {
+  // We'll use a solid version of your butterProps
+  const solidMaterial = { 
+    ...butterProps, 
+    transparent: false, 
+    opacity: 1, 
+    depthTest: true 
+  };
+
   return (
-    // Positioned to float near the stairs/water area
     <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.4} position={[8.5, -2.2, 14.8]}>
       
-      {/* Platform Disk */}
-      <mesh renderOrder={10000}>
+      {/* Solid Platform Disk */}
+      <mesh receiveShadow>
         <cylinderGeometry args={[2.8, 2.8, 0.2, 64]} />
-        <meshBasicMaterial color="#ffffff" depthTest={false} transparent opacity={0.8} />
+        <meshStandardMaterial color="#ffffff" {...solidMaterial} />
       </mesh>
 
-      {/* Aesthetic Circle Rug */}
-      <mesh position={[0, 0.11, 0]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={10001}>
-        <circleGeometry args={[2.4, 64]} />
-        <meshBasicMaterial color="#6e5c8a" depthTest={false} transparent opacity={0.3} />
-      </mesh>
-
-      {/* The Recliner Chair */}
-      <LazyBoyChair position={[0, 0.15, 0]} rotation={[0, Math.PI / 4, 0]} scale={1.2} />
-
-      {/* Resident (Seated) */}
-      <group position={[0, 0.6, 0]} rotation={[0, Math.PI / 4, 0]}>
+      {/* Single Solid Standing Chapter */}
+      <group position={[0, 0.1, 0]}>
         <BlockHumanoid 
           scale={1.4} 
-          materialProps={{...butterProps, depthTest: false}} 
+          materialProps={solidMaterial} 
           poseProps={{ 
-            leftLegRotation: [1.5, 0, 0], 
-            rightLegRotation: [1.5, 0, 0], 
-            torsoRotationX: 0.05 
+            // Reset to a standard standing pose
+            leftLegRotation: [0, 0, 0], 
+            rightLegRotation: [0, 0, 0], 
+            torsoRotationX: 0 
           }} 
         />
       </group>
 
-      {/* Floor Lamp behind the chair */}
-      <HomeLamp position={[-1.0, 0.12, -1.0]} scale={1.2} />
-
-      {/* Helper (Standing next to chair) */}
-      <group position={[1.1, 0.12, 0.4]} rotation={[0, -Math.PI / 1.5, 0]}>
-        <BlockHumanoid 
-          isHelper 
-          scale={1.4} 
-          materialProps={{...butterProps, depthTest: false}} 
-          poseProps={{ 
-            headRotationY: -0.4, 
-            rightArmRotation: [1.1, 0, -0.3] 
-          }} 
-        />
-      </group>
     </Float>
   );
 };
