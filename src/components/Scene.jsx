@@ -29,29 +29,29 @@ const getHillHeight = (x, z) => {
 };
 
 const FloatingPlatform = ({ butterProps }) => {
-  // We apply the 'always on top' logic directly to the humanoid's material properties
-  const forceVisibleMaterial = { 
+  // We take your butterProps and force depthTest: false 
+  // so he "sits" on top of the world just like the couch did.
+  const solidVisibleMaterial = { 
     ...butterProps, 
+    depthTest: false, 
     transparent: false, 
-    opacity: 1, 
-    depthTest: false, // Forces him to stay in front of the stairs
-    renderOrder: 10001 
+    opacity: 1 
   };
 
   return (
     <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.4} position={[8.5, -2.2, 14.8]}>
       
-      {/* 1. THE DISK */}
+      {/* Platform Disk - Made Solid White */}
       <mesh renderOrder={10000}>
         <cylinderGeometry args={[2.8, 2.8, 0.2, 64]} />
-        <meshBasicMaterial color="#ffffff" depthTest={false} />
+        <meshBasicMaterial color="#ffffff" depthTest={false} transparent={false} />
       </mesh>
 
-      {/* 2. THE HUMAN - Solid and Forced to the front */}
-      <group position={[0, 0.35, 0]}>
+      {/* Single Standing Chapter - Using Couch Logic */}
+      <group position={[0, 0.4, 0]} renderOrder={10001}>
         <BlockHumanoid 
           scale={1.4} 
-          materialProps={forceVisibleMaterial} 
+          materialProps={solidVisibleMaterial} 
           poseProps={{ 
             leftLegRotation: [0, 0, 0], 
             rightLegRotation: [0, 0, 0], 
