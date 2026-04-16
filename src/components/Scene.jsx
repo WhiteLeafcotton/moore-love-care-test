@@ -45,16 +45,14 @@ const LStyleLamp = ({ position }) => (
       <meshBasicMaterial color="#21162e" depthTest={false} transparent opacity={0.9} />
     </mesh>
 
-    {/* L Arm Holder (aligned to shortened pole) */}
+    {/* L Arm Holder */}
     <group position={[0, 2.5, 0]}>
 
-      {/* Horizontal Arm */}
       <mesh position={[0.85, 0, 0]} rotation={[0, 0, Math.PI / 2]} renderOrder={10001}>
         <cylinderGeometry args={[0.03, 0.03, 1.8, 16]} />
         <meshBasicMaterial color="#21162e" depthTest={false} transparent opacity={0.9} />
       </mesh>
 
-      {/* Bulb */}
       <mesh position={[1.75, -0.45, 0]} renderOrder={10002}>
         <sphereGeometry args={[0.25, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2]} />
         <meshBasicMaterial color="#ffffff" depthTest={false} transparent opacity={1} />
@@ -66,31 +64,32 @@ const LStyleLamp = ({ position }) => (
 );
 
 
-// FIXED CHAIR (ONLY CHANGE: removed depthTest false causing occlusion bugs)
+// 🔥 FIXED CHAIR (IMPORTANT: restore normal depth behavior)
 const LazyBoyChair = ({ position, rotation }) => (
   <group position={position} rotation={rotation} scale={0.7}>
     
-    <mesh position={[0, 0.4, 0]} renderOrder={10}>
+    <mesh position={[0, 0.4, 0]} renderOrder={1}>
       <boxGeometry args={[1.5, 0.8, 1.5]} />
       <meshBasicMaterial color="#21162e" />
     </mesh>
 
-    <mesh position={[0, 1.2, -0.6]} rotation={[-0.3, 0, 0]} renderOrder={10}>
+    <mesh position={[0, 1.2, -0.6]} rotation={[-0.3, 0, 0]} renderOrder={1}>
       <boxGeometry args={[1.5, 1.6, 0.4]} />
       <meshBasicMaterial color="#21162e" />
     </mesh>
 
     {[-0.85, 0.85].map((x, i) => (
-      <mesh key={i} position={[x, 0.7, 0]} renderOrder={10}>
+      <mesh key={i} position={[x, 0.7, 0]} renderOrder={1}>
         <boxGeometry args={[0.3, 0.6, 1.5]} />
         <meshBasicMaterial color="#21162e" />
       </mesh>
     ))}
+
   </group>
 );
 
 
-// FIXED PLATFORM + CHARACTER LAYERING
+// 🔥 FIXED PLATFORM + CHARACTER LAYERING
 const FloatingPlatform = () => {
   const butterProps = { color: "#fce4e4", roughness: 0.9, metalness: 0.02 };
 
@@ -102,7 +101,7 @@ const FloatingPlatform = () => {
       position={[8.8, -1.4, 14.5]}
     >
       
-      {/* Platform Disk */}
+      {/* Platform */}
       <mesh renderOrder={10000}>
         <cylinderGeometry args={[2.5, 2.5, 0.25, 64]} />
         <meshBasicMaterial
@@ -113,7 +112,7 @@ const FloatingPlatform = () => {
         />
       </mesh>
 
-      {/* CHAIR + CHARACTER GROUP */}
+      {/* CHAIR + CHARACTER */}
       <group position={[-0.8, 0.2, 0]}>
         
         {/* Chair */}
@@ -122,8 +121,8 @@ const FloatingPlatform = () => {
           rotation={[0, (Math.PI * 3) / 2, 0]}
         />
 
-        {/* CHARACTER (FORCED FRONT FIX) */}
-        <group position={[0, 0.3, 0.55]} renderOrder={999}>
+        {/* CHARACTER FIX (ONLY CHANGE THAT MATTERS) */}
+        <group position={[0, 0.3, 0.4]} renderOrder={999}>
           <BlockHumanoid
             scale={0.8}
             materialProps={{
@@ -142,8 +141,9 @@ const FloatingPlatform = () => {
 
       </group>
 
-      {/* L-Lamp */}
+      {/* Lamp */}
       <LStyleLamp position={[-0.8, 0.15, -1.2]} />
+
     </Float>
   );
 };
