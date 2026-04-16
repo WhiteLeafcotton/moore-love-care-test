@@ -128,7 +128,8 @@ const FloatingPlatform = () => {
 {/* Resident Seated in Chair - Pulling him out into the light */}
 {/* Resident Seated - Moved way out to find him */}
 {/* Resident Seated - Centered and Pulled Forward */}
-<group position={[-0.7, 0.5, 0.2]} rotation={[0, (Math.PI * 3) / 2, 0]}>
+{/* Resident Seated - Pulling him forward and into the light */}
+<group position={[-0.6, 0.48, 0.45]} rotation={[0, (Math.PI * 3) / 2, 0]}>
   <BlockHumanoid 
     scale={0.7} 
     materialProps={{...butterProps, depthTest: false}} 
