@@ -39,9 +39,9 @@ const LStyleLamp = ({ position }) => (
       <meshBasicMaterial color="#21162e" depthTest={false} transparent opacity={0.9} />
     </mesh>
 
-   {/* Vertical Pole (shorter) */}
-<mesh position={[0, 1.6, 0]} renderOrder={10001}>
-  <cylinderGeometry args={[0.04, 0.04, 3.2, 16]} />
+   {/* Vertical Pole (extra short) */}
+<mesh position={[0, 1.25, 0]} renderOrder={10001}>
+  <cylinderGeometry args={[0.04, 0.04, 2.5, 16]} />
   <meshBasicMaterial color="#21162e" depthTest={false} transparent opacity={0.9} />
 </mesh>
 
