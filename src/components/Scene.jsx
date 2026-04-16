@@ -29,38 +29,29 @@ const getHillHeight = (x, z) => {
 };
 
 const FloatingPlatform = ({ butterProps }) => {
-  // This is the secret sauce: 
-  // It keeps depthTest ON (so he has legs) 
-  // but forces the GPU to prioritize drawing it.
-  const solidMaterial = { 
+  // 1. Give the humanoid a solid material that STILL uses depthTest
+  // This ensures he doesn't look like a ghost or have overlapping body parts.
+  const humanoidMaterial = { 
     ...butterProps, 
     transparent: false, 
-    opacity: 1,
-    depthTest: true,
-    polygonOffset: true,
-    polygonOffsetFactor: -10, // Pushes the object toward the camera
-    polygonOffsetUnits: -10
+    opacity: 1, 
+    depthTest: true 
   };
 
   return (
     <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.4} position={[8.5, -2.2, 14.8]}>
       
-      {/* Solid Platform Disk */}
-      <mesh receiveShadow>
+      {/* 2. THE DISK: We force this to draw on top of the world but BELOW the man */}
+      <mesh renderOrder={10000}>
         <cylinderGeometry args={[2.8, 2.8, 0.2, 64]} />
-        <meshStandardMaterial 
-          color="#ffffff" 
-          polygonOffset={true}
-          polygonOffsetFactor={-10}
-          polygonOffsetUnits={-10}
-        />
+        <meshBasicMaterial color="#ffffff" depthTest={false} transparent={false} />
       </mesh>
 
-      {/* Single Standing Chapter */}
-      <group position={[0, 0.35, 0]}>
+      {/* 3. THE MAN: We force him to draw on top of the Disk */}
+      <group position={[0, 0.35, 0]} renderOrder={10001}>
         <BlockHumanoid 
           scale={1.4} 
-          materialProps={solidMaterial} 
+          materialProps={humanoidMaterial} 
           poseProps={{ 
             leftLegRotation: [0, 0, 0], 
             rightLegRotation: [0, 0, 0], 
