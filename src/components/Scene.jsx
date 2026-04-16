@@ -135,12 +135,13 @@ const FloatingPlatform = () => {
 {/* Resident Seated - Centered in Chair */}
 {/* Resident Seated - Moved back from camera and left toward chair */}
 {/* Resident Seated - Forced to the Front Layer */}
-<group position={[-0.8, 0.48, -0.15]} rotation={[0, (Math.PI * 3) / 2, 0]}>
+{/* Resident Seated - Turned to face the camera */}
+<group position={[-0.8, 0.48, -0.15]} rotation={[0, Math.PI / 2, 0]}>
   <BlockHumanoid 
     scale={0.7} 
     materialProps={{
       ...butterProps, 
-      depthTest: false,  // This forces him to draw over the chair
+      depthTest: false, 
       transparent: true,
       opacity: 1
     }} 
