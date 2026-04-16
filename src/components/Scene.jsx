@@ -101,6 +101,10 @@ const FloatingPlatform = () => {
         />
       </group>
 
+          </Float>
+  );
+};
+
     
 
 // --- HUMANOID COMPONENTS ---
