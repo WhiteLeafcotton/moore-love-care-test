@@ -106,7 +106,8 @@ const FloatingPlatform = () => {
       </mesh>
 
       {/* --- CHAIR + CHARACTER GROUP (clean layering fix) --- */}
-      <group position={[-0.3, 0.2, 0]}>
+      {/* --- CHAIR + CHARACTER GROUP (clean layering fix) --- */}
+<group position={[-0.3, 0.25, 0]}>
         
         {/* Chair (background object) */}
         <LazyBoyChair
@@ -117,7 +118,7 @@ const FloatingPlatform = () => {
         {/* Character (foreground, slightly forward) */}
         <group position={[0, 0.3, 0.6]}>
           <BlockHumanoid
-            scale={2}
+            scale={4}
             materialProps={{
               ...butterProps,
               depthTest: false,
