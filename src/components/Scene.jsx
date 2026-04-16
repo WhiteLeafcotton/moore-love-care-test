@@ -117,7 +117,7 @@ const FloatingPlatform = () => {
         {/* Character (foreground, slightly forward) */}
         <group position={[0, 0.3, 0.25]}>
           <BlockHumanoid
-            scale={0.8}
+            scale={2}
             materialProps={{
               ...butterProps,
               depthTest: false,
