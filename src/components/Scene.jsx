@@ -29,27 +29,38 @@ const getHillHeight = (x, z) => {
 };
 
 const FloatingPlatform = ({ butterProps }) => {
-  const solidOverlayProps = { 
+  // This is the secret sauce: 
+  // It keeps depthTest ON (so he has legs) 
+  // but forces the GPU to prioritize drawing it.
+  const solidMaterial = { 
     ...butterProps, 
-    depthTest: false, 
     transparent: false, 
-    opacity: 1 
+    opacity: 1,
+    depthTest: true,
+    polygonOffset: true,
+    polygonOffsetFactor: -10, // Pushes the object toward the camera
+    polygonOffsetUnits: -10
   };
 
   return (
     <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.4} position={[8.5, -2.2, 14.8]}>
       
-      {/* Platform Disk - High RenderOrder */}
-      <mesh renderOrder={99998}>
+      {/* Solid Platform Disk */}
+      <mesh receiveShadow>
         <cylinderGeometry args={[2.8, 2.8, 0.2, 64]} />
-        <meshBasicMaterial color="#ffffff" depthTest={false} />
+        <meshStandardMaterial 
+          color="#ffffff" 
+          polygonOffset={true}
+          polygonOffsetFactor={-10}
+          polygonOffsetUnits={-10}
+        />
       </mesh>
 
-      {/* Humanoid - Even Higher RenderOrder */}
-      <group position={[0, 0.35, 0]} renderOrder={99999}> 
+      {/* Single Standing Chapter */}
+      <group position={[0, 0.35, 0]}>
         <BlockHumanoid 
           scale={1.4} 
-          materialProps={solidOverlayProps} 
+          materialProps={solidMaterial} 
           poseProps={{ 
             leftLegRotation: [0, 0, 0], 
             rightLegRotation: [0, 0, 0], 
