@@ -32,29 +32,36 @@ const getHillHeight = (x, z) => {
 
 const LStyleLamp = ({ position }) => (
   <group position={position}>
+    
     {/* Base */}
     <mesh position={[0, 0.05, 0]} renderOrder={10001}>
       <cylinderGeometry args={[0.3, 0.3, 0.1, 32]} />
       <meshBasicMaterial color="#21162e" depthTest={false} transparent opacity={0.9} />
     </mesh>
 
-    {/* Vertical Pole (slightly taller + better proportion) */}
-    <mesh position={[0, 2.3, 0]} renderOrder={10001}>
-      <cylinderGeometry args={[0.04, 0.04, 4.6, 16]} />
+    {/* Vertical Pole */}
+    <mesh position={[0, 2.0, 0]} renderOrder={10001}>
+      <cylinderGeometry args={[0.04, 0.04, 4.0, 16]} />
       <meshBasicMaterial color="#21162e" depthTest={false} transparent opacity={0.9} />
     </mesh>
 
-    {/* Horizontal Arm (extended over chair) */}
-    <mesh position={[-1.1, 4.6, 0]} rotation={[0, 0, Math.PI / 2]} renderOrder={10001}>
-      <cylinderGeometry args={[0.03, 0.03, 2.0, 16]} />
-      <meshBasicMaterial color="#21162e" depthTest={false} transparent opacity={0.9} />
-    </mesh>
+    {/* L Arm Holder (top of pole) */}
+    <group position={[0, 4.0, 0]}>
 
-    {/* Hanging Bulb (aligned with chair center) */}
-    <mesh position={[-1.1, 4.0, 0]} renderOrder={10002}>
-      <sphereGeometry args={[0.25, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2]} />
-      <meshBasicMaterial color="#ffffff" depthTest={false} transparent opacity={1} />
-    </mesh>
+      {/* Horizontal Arm */}
+      <mesh position={[0.9, 0, 0]} rotation={[0, 0, Math.PI / 2]} renderOrder={10001}>
+        <cylinderGeometry args={[0.03, 0.03, 1.8, 16]} />
+        <meshBasicMaterial color="#21162e" depthTest={false} transparent opacity={0.9} />
+      </mesh>
+
+      {/* Bulb (hangs from arm end) */}
+      <mesh position={[1.8, -0.4, 0]} renderOrder={10002}>
+        <sphereGeometry args={[0.25, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2]} />
+        <meshBasicMaterial color="#ffffff" depthTest={false} transparent opacity={1} />
+      </mesh>
+
+    </group>
+
   </group>
 );
 
