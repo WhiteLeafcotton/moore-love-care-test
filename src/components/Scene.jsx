@@ -27,7 +27,7 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
-// --- FURNITURE: LAZY BOY, LAMP, SIDE TABLE ---
+// --- FURNITURE components ---
 const LazyBoyChair = ({ position, rotation, scale = 0.7 }) => (
   <group position={position} rotation={rotation} scale={scale}>
     <mesh position={[0, 0.4, 0]} renderOrder={10001}>
@@ -57,7 +57,6 @@ const SideTable = ({ position }) => (
       <cylinderGeometry args={[0.05, 0.05, 0.35, 16]} />
       <meshBasicMaterial color="#333" depthTest={false} />
     </mesh>
-    {/* The Drink */}
     <mesh position={[0.1, 0.45, 0]} renderOrder={10002}>
       <cylinderGeometry args={[0.08, 0.06, 0.15, 16]} />
       <meshStandardMaterial color="#ffcc00" emissive="#ffcc00" emissiveIntensity={0.5} depthTest={false} />
@@ -84,7 +83,7 @@ const HomeLamp = ({ position, scale = 1, rotation = [0, 0, 0] }) => (
       <meshBasicMaterial color="#333" depthTest={false} />
     </mesh>
     <group position={[1.4, 3.0, 0]} renderOrder={10002}>
-      <mesh position={[0, 0, 0]} castShadow>
+      <mesh position={[0, 0, 0]}>
         <cylinderGeometry args={[0.25, 0.45, 0.6, 32, 1, true]} />
         <meshBasicMaterial color="#ffffff" transparent opacity={0.9} depthTest={false} side={THREE.DoubleSide} />
       </mesh>
@@ -112,38 +111,44 @@ const FloatingPlatform = ({ butterProps }) => {
         <meshBasicMaterial color="#6e5c8a" depthTest={false} transparent opacity={0.3} />
       </mesh>
 
-      {/* Jim in Recliner - Facing Camera */}
-      <LazyBoyChair position={[0, 0.15, 0]} rotation={[0, Math.PI, 0]} scale={1.2} />
-      <group position={[0, 0.6, 0.1]} rotation={[0, Math.PI, 0]}>
-        <BlockHumanoid 
-          scale={1.4} 
-          materialProps={{...butterProps, depthTest: false}} 
-          poseProps={{ 
-            leftLegRotation: [1.5, 0, 0], 
-            rightLegRotation: [1.5, 0, 0], 
-            torsoRotationX: 0.1,
-            leftArmRotation: [0.8, 0, 0.2],
-            rightArmRotation: [0.8, 0, -0.2]
-          }} 
-        />
-      </group>
+      {/* Jim in Recliner - Facing Camera Left-Profile */}
+      <group rotation={[0, Math.PI / -2, 0]}>
+        <LazyBoyChair position={[0, 0.15, 0]} scale={1.2} />
+        
+        {/* Bob/Jim seated */}
+        <group position={[0, 0.6, 0.1]}>
+            <BlockHumanoid 
+            scale={1.4} 
+            materialProps={{...butterProps, depthTest: false}} 
+            poseProps={{ 
+                leftLegRotation: [1.5, 0, 0], 
+                rightLegRotation: [1.5, 0, 0], 
+                torsoRotationX: 0.1,
+                leftArmRotation: [0.8, 0, 0.2],
+                rightArmRotation: [0.8, 0, -0.2]
+            }} 
+            />
+        </group>
 
-      {/* Scene Props */}
-      <SideTable position={[1.4, 0.12, 0.2]} />
-      <HomeLamp position={[-1.2, 0.12, -0.5]} scale={1.1} rotation={[0, -Math.PI / 2.5, 0]} />
+        {/* Home Lamp - Fixed coordinates to stay on rug */}
+        <HomeLamp position={[-0.8, 0.12, -0.6]} scale={1.0} rotation={[0, -Math.PI / 2, 0]} />
+        
+        {/* Side Table */}
+        <SideTable position={[1.2, 0.12, 0.5]} />
 
-      {/* Helper */}
-      <group position={[-1.3, 0.12, 1.2]} rotation={[0, Math.PI / 4, 0]}>
-        <BlockHumanoid 
-          isHelper 
-          scale={1.4} 
-          materialProps={{...butterProps, depthTest: false}} 
-          poseProps={{ 
-            headRotationY: 0.4, 
-            rightArmRotation: [0.2, 0, 0.1],
-            leftArmRotation: [0.2, 0, -0.1]
-          }} 
-        />
+        {/* Helper Standing Nearby */}
+        <group position={[1.1, 0.12, -0.8]} rotation={[0, -Math.PI / 4, 0]}>
+            <BlockHumanoid 
+            isHelper 
+            scale={1.4} 
+            materialProps={{...butterProps, depthTest: false}} 
+            poseProps={{ 
+                headRotationY: -0.4, 
+                rightArmRotation: [0.2, 0, 0.1],
+                leftArmRotation: [0.2, 0, -0.1]
+            }} 
+            />
+        </group>
       </group>
     </Float>
   );
@@ -579,7 +584,7 @@ export default function Scene({ currentView }) {
         position={[0, -1.45, 0]} 
       />
 
-      {/* Floating Solarium Sanctuary Section */}
+      {/* Floating Sanctuary */}
       <FloatingPlatform butterProps={butterProps} />
     </>
   );
