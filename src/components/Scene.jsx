@@ -1,4 +1,3 @@
-A new day: 
 
 import { useRef, useMemo, useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
