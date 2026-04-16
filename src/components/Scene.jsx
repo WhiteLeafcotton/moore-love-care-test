@@ -29,30 +29,30 @@ const getHillHeight = (x, z) => {
 };
 
 const FloatingPlatform = ({ butterProps }) => {
-  // We'll use a solid version of your butterProps
-  const solidMaterial = { 
+  // We use depthTest: false so it doesn't vanish/clip, 
+  // but we leave transparent: false so it looks solid.
+  const solidOverlayProps = { 
     ...butterProps, 
+    depthTest: false, 
     transparent: false, 
-    opacity: 1, 
-    depthTest: true 
+    opacity: 1 
   };
 
   return (
     <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.4} position={[8.5, -2.2, 14.8]}>
       
-      {/* Solid Platform Disk */}
-      <mesh receiveShadow>
+      {/* Platform Disk - Solid White */}
+      <mesh renderOrder={10000}>
         <cylinderGeometry args={[2.8, 2.8, 0.2, 64]} />
-        <meshStandardMaterial color="#ffffff" {...solidMaterial} />
+        <meshBasicMaterial color="#ffffff" depthTest={false} />
       </mesh>
 
-      {/* Single Solid Standing Chapter */}
+      {/* Single Standing Chapter - Solid and Opaque */}
       <group position={[0, 0.1, 0]}>
         <BlockHumanoid 
           scale={1.4} 
-          materialProps={solidMaterial} 
+          materialProps={solidOverlayProps} 
           poseProps={{ 
-            // Reset to a standard standing pose
             leftLegRotation: [0, 0, 0], 
             rightLegRotation: [0, 0, 0], 
             torsoRotationX: 0 
