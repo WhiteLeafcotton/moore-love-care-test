@@ -108,30 +108,34 @@ const FloatingPlatform = () => {
       {/* --- CHAIR + CHARACTER GROUP (clean layering fix) --- */}
       {/* --- CHAIR + CHARACTER GROUP (clean layering fix) --- */}
 {/* --- CHAIR + CHARACTER GROUP (clean layering fix) --- */}
-<group position={[-0.3, 0.25, 0.25]}>
-        
-        {/* Chair (background object) */}
-        <LazyBoyChair
-          position={[0, 0, 0]}
-          rotation={[0, (Math.PI * 3) / 2, 0]}
-        />
+{/* --- CHAIR + CHARACTER GROUP (clean layering fix) --- */}
+<group position={[-0.3, 0.25, 0]}>
 
-        {/* Character (foreground, slightly forward) */}
-        <group position={[0, 0.3, 0.6]}>
-          <BlockHumanoid
-            scale={.9}
-            materialProps={{
-              ...butterProps,
-              depthTest: false,
-              depthWrite: false
-            }}
-            poseProps={{
-              leftLegRotation: [1.4, 0, 0],
-              rightLegRotation: [1.4, 0, 0],
-              torsoRotationX: 0.1
-            }}
-          />
-        </group>
+  {/* Chair (forced behind character visually) */}
+  <group renderOrder={1}>
+    <LazyBoyChair
+      position={[0, 0, 0]}
+      rotation={[0, (Math.PI * 3) / 2, 0]}
+    />
+  </group>
+
+        {/* Character (forced in front visually) */}
+  <group position={[0, 0.3, 0.6]} renderOrder={999}>
+    <BlockHumanoid
+      scale={4}
+      materialProps={{
+        ...butterProps,
+        depthTest: true,
+        depthWrite: true,
+        transparent: false
+      }}
+      poseProps={{
+        leftLegRotation: [1.4, 0, 0],
+        rightLegRotation: [1.4, 0, 0],
+        torsoRotationX: 0.1
+      }}
+    />
+  </group>
       </group>
 
       {/* L-Lamp (unchanged) */}
