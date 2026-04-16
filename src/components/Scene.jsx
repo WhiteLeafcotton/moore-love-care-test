@@ -99,50 +99,46 @@ const HomeLamp = ({ position, scale = 1, rotation = [0, 0, 0] }) => (
 // --- THE CIRCULAR FLOATING PLATFORM (SANCTUARY) ---
 // --- THE CIRCULAR FLOATING PLATFORM (SANCTUARY) ---
 // --- THE CIRCULAR FLOATING PLATFORM (SANCTUARY) ---
-const FloatingPlatform = ({ butterProps }) => {
+const FloatingPlatform = () => {
+  const butterProps = { color: "#fce4e4", roughness: 0.9, metalness: 0.02 };
+
   return (
-    <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.4} position={[8.5, -2.2, 14.8]}>
-      
+    <Float speed={1.8} rotationIntensity={0.2} floatIntensity={0.5} position={[11, -1.0, 17]}>
       {/* 1. Platform Disk */}
       <mesh renderOrder={10000}>
-        <cylinderGeometry args={[2.8, 2.8, 0.2, 64]} />
+        <cylinderGeometry args={[4.2, 4.2, 0.25, 64]} />
         <meshBasicMaterial color="#ffffff" depthTest={false} transparent opacity={0.8} />
       </mesh>
 
-      {/* 2. Circle Rug */}
-      <mesh position={[0, 0.11, 0]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={10001}>
-        <circleGeometry args={[2.4, 64]} />
-        <meshBasicMaterial color="#6e5c8a" depthTest={false} transparent opacity={0.3} />
-      </mesh>
+      {/* 2. The Recliner - Positioned relative to the platform center */}
+      <LazyBoyChair position={[0.8, 0.1, -0.5]} rotation={[0, -Math.PI / 4, 0]} />
 
-      {/* 3. The Lamp - Now positioned relative to the platform center */}
-      <HomeLamp position={[-1.2, 0.12, -0.8]} scale={1.2} />
+      {/* 3. THE LAMP - Placed exactly like your old working version */}
+      {/* This ensures it inherits the floating movement of the platform */}
+      <HomeLamp position={[2.2, 0.1, -1.8]} scale={1.2} />
 
-      {/* 4. Recliner - Centered */}
-      <LazyBoyChair position={[0, 0.15, 0]} rotation={[0, Math.PI / 4, 0]} scale={1.2} />
-
-      {/* 5. Seated Resident (Bob) */}
-      <group position={[0, 0.6, 0]} rotation={[0, Math.PI / 4, 0]}>
+      {/* 4. THE COUPLE */}
+      <group position={[-0.5, 0.1, 1.2]} rotation={[0, Math.PI / 4, 0]}>
         <BlockHumanoid 
-          scale={1.4} 
-          materialProps={{...butterProps, depthTest: false}} 
+          scale={0.85} 
+          materialProps={butterProps} 
           poseProps={{ 
-            leftLegRotation: [1.5, 0, 0], 
-            rightLegRotation: [1.5, 0, 0], 
-            torsoRotationX: 0.05 
+            position: [0.4, 0, 0], 
+            headRotationY: -0.4,
+            leftArmRotation: [0.2, 0, -0.1],
+            rightArmRotation: [0.2, 0, 0.1]
           }} 
         />
-      </group>
-
-      {/* 6. Helper - Standing next to Bob */}
-      <group position={[1.1, 0.12, 0.4]} rotation={[0, -Math.PI / 1.5, 0]}>
         <BlockHumanoid 
           isHelper 
-          scale={1.4} 
-          materialProps={{...butterProps, depthTest: false}} 
+          scale={0.85} 
+          materialProps={butterProps} 
           poseProps={{ 
-            headRotationY: -0.4, 
-            rightArmRotation: [1.1, 0, -0.3] 
+            position: [-0.4, 0, 0.2], 
+            rotation: [0, 0.3, 0], 
+            headRotationY: 0.4,
+            leftArmRotation: [0.2, 0, -0.1],
+            rightArmRotation: [0.2, 0, 0.1]
           }} 
         />
       </group>
