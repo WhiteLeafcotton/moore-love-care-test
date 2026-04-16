@@ -142,7 +142,8 @@ const FloatingPlatform = () => {
 {/* Resident Seated - Grounded and Centered in Angled Chair */}
 {/* Resident Seated - Major shifts to guarantee visual impact */}
 {/* Resident Seated - Bold grounding and centering adjustment */}
-<group position={[-0.55, 0.32, -0.45]} rotation={[0, Math.PI / 2, 0]}>
+{/* Resident Seated - Grounded butt and centered on the cushion */}
+<group position={[-0.45, 0.28, -0.55]} rotation={[0, Math.PI / 2, 0]}>
   <BlockHumanoid 
     scale={0.65} 
     materialProps={{
