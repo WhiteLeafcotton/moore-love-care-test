@@ -27,7 +27,32 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
-// --- FURNITURE components ---
+// --- NEW BRAND NEW LAMP COMPONENT ---
+const PlatformLamp = ({ position }) => (
+  <group position={position}>
+    {/* Base */}
+    <mesh position={[0, 0.05, 0]} renderOrder={10001}>
+      <cylinderGeometry args={[0.25, 0.25, 0.1, 32]} />
+      <meshBasicMaterial color="#222" depthTest={false} />
+    </mesh>
+    {/* Pole */}
+    <mesh position={[0, 1.5, 0]} renderOrder={10001}>
+      <cylinderGeometry args={[0.03, 0.03, 3, 16]} />
+      <meshBasicMaterial color="#222" depthTest={false} />
+    </mesh>
+    {/* Shade */}
+    <mesh position={[0, 3.1, 0]} renderOrder={10001}>
+      <cylinderGeometry args={[0.3, 0.5, 0.7, 32]} />
+      <meshBasicMaterial color="#ffffff" transparent opacity={0.9} depthTest={false} />
+    </mesh>
+    {/* Light Bulb Glow */}
+    <mesh position={[0, 3.0, 0]} renderOrder={10002}>
+      <sphereGeometry args={[0.15, 16, 16]} />
+      <meshStandardMaterial color="#fff" emissive="#fff" emissiveIntensity={2} depthTest={false} />
+    </mesh>
+  </group>
+);
+
 const LazyBoyChair = ({ position, rotation, scale = 0.7 }) => (
   <group position={position} rotation={rotation} scale={scale}>
     <mesh position={[0, 0.4, 0]} renderOrder={10001}>
@@ -47,37 +72,6 @@ const LazyBoyChair = ({ position, rotation, scale = 0.7 }) => (
   </group>
 );
 
-const HomeLamp = ({ position, scale = 1, rotation = [0, 0, 0] }) => (
-  <group position={position} scale={scale} rotation={rotation}>
-    <mesh position={[0, 0.05, 0]} renderOrder={10001}>
-      <cylinderGeometry args={[0.3, 0.3, 0.1, 32]} />
-      <meshBasicMaterial color="#333" depthTest={false} />
-    </mesh>
-    <mesh position={[0, 1.5, 0]} renderOrder={10001}>
-      <cylinderGeometry args={[0.04, 0.04, 3, 16]} />
-      <meshBasicMaterial color="#333" depthTest={false} />
-    </mesh>
-    <mesh position={[0, 3.1, 0]} renderOrder={10001}>
-      <cylinderGeometry args={[0.04, 0.04, 0.2, 16]} />
-      <meshBasicMaterial color="#333" depthTest={false} />
-    </mesh>
-    <mesh position={[0.7, 3.2, 0]} rotation={[0, 0, Math.PI / 2]} renderOrder={10001}>
-      <cylinderGeometry args={[0.04, 0.04, 1.4, 16]} />
-      <meshBasicMaterial color="#333" depthTest={false} />
-    </mesh>
-    <group position={[1.4, 3.0, 0]} renderOrder={10002}>
-      <mesh position={[0, 0, 0]}>
-        <cylinderGeometry args={[0.25, 0.45, 0.6, 32, 1, true]} />
-        <meshBasicMaterial color="#ffffff" transparent opacity={0.9} depthTest={false} side={THREE.DoubleSide} />
-      </mesh>
-      <mesh position={[0, 0.15, 0]}>
-        <sphereGeometry args={[0.12, 16, 16]} />
-        <meshStandardMaterial color="#fff" emissive="#fff" emissiveIntensity={1.5} depthTest={false} />
-      </mesh>
-    </group>
-  </group>
-);
-
 // --- THE CIRCULAR FLOATING PLATFORM (SANCTUARY) ---
 const FloatingPlatform = ({ butterProps }) => {
   return (
@@ -94,8 +88,8 @@ const FloatingPlatform = ({ butterProps }) => {
         <meshBasicMaterial color="#6e5c8a" depthTest={false} transparent opacity={0.3} />
       </mesh>
 
-      {/* 3. THE CORRECT LAMP: Nested correctly inside the Float tag */}
-      <HomeLamp position={[-1.2, 0.12, -0.8]} scale={1.2} />
+      {/* 3. THE BRAND NEW LAMP - Locked to this platform only */}
+      <PlatformLamp position={[-1.2, 0.1, -0.8]} />
 
       {/* 4. Recliner */}
       <LazyBoyChair position={[0, 0.15, 0]} rotation={[0, Math.PI / 4, 0]} scale={1.2} />
@@ -552,7 +546,7 @@ export default function Scene({ currentView }) {
         position={[0, -1.45, 0]} 
       />
 
-      {/* Floating Sanctuary - THE ONLY LAMP IN THE SCENE IS HERE */}
+      {/* Floating Sanctuary - ONLY BRAND NEW LAMP HERE */}
       <FloatingPlatform butterProps={butterProps} />
     </>
   );
