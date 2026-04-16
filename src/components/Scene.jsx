@@ -28,8 +28,8 @@ const getHillHeight = (x, z) => {
 };
 
 // --- FURNITURE: LAZY BOY & HOME LAMP ---
-const LazyBoyChair = ({ position, rotation }) => (
-  <group position={position} rotation={rotation} scale={0.7}>
+const LazyBoyChair = ({ position, rotation, scale = 0.7 }) => (
+  <group position={position} rotation={rotation} scale={scale}>
     {/* Main Seat Cushion */}
     <mesh position={[0, 0.4, 0]} renderOrder={10001}>
       <boxGeometry args={[1.5, 0.8, 1.5]} />
@@ -50,8 +50,8 @@ const LazyBoyChair = ({ position, rotation }) => (
   </group>
 );
 
-const HomeLamp = ({ position }) => (
-  <group position={position}>
+const HomeLamp = ({ position, scale = 1 }) => (
+  <group position={position} scale={scale}>
     {/* Base on platform */}
     <mesh position={[0, 0.05, 0]} renderOrder={10001}>
       <cylinderGeometry args={[0.3, 0.3, 0.1, 32]} />
@@ -86,43 +86,30 @@ const HomeLamp = ({ position }) => (
   </group>
 );
 
-// --- THE CIRCULAR FLOATING PLATFORM (SANCUTARY) ---
-// --- THE CIRCULAR FLOATING PLATFORM (SANCUTARY) ---
-// --- THE CIRCULAR FLOATING PLATFORM (SANCUTARY) ---
-// --- THE CIRCULAR FLOATING PLATFORM (SANCUTARY) ---
-// --- THE CIRCULAR FLOATING PLATFORM (SANCUTARY) ---
-// --- THE CIRCULAR FLOATING PLATFORM (SANCUTARY) ---
-// --- THE CIRCULAR FLOATING PLATFORM (SANCUTARY) ---
-// --- THE CIRCULAR FLOATING PLATFORM (SANCUTARY) ---
+// --- THE CIRCULAR FLOATING PLATFORM (SANCTUARY) ---
 const FloatingPlatform = ({ butterProps }) => {
   return (
-    /* X: 5.5 (Tucked right against the stair edge)
-       Y: -2.2 (Lowered deeper into the water)
-       Z: 14.8 (Pushed back into the corner nook)
-    */
     <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.4} position={[8.5, -2.2, 14.8]}>
       
-      {/* Platform Disk - SHRUNK from 4.2 to 2.8 to fit the nook */}
+      {/* Platform Disk */}
       <mesh renderOrder={10000}>
         <cylinderGeometry args={[2.8, 2.8, 0.2, 64]} />
         <meshBasicMaterial color="#ffffff" depthTest={false} transparent opacity={0.8} />
       </mesh>
 
-      {/* Circle Rug - Resized to fit the smaller platform */}
+      {/* Circle Rug */}
       <mesh position={[0, 0.11, 0]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={10001}>
         <circleGeometry args={[2.4, 64]} />
         <meshBasicMaterial color="#6e5c8a" depthTest={false} transparent opacity={0.3} />
       </mesh>
 
-      {/* --- 2X LARGER ELEMENTS (Maintained for Moore Love & Care aesthetic) --- */}
+      {/* Recliner - Centered */}
+      <LazyBoyChair position={[0, 0.15, 0]} rotation={[0, Math.PI / 4, 0]} scale={1.2} />
 
-      {/* The Recliner - Centered on the smaller platform */}
-      <LazyBoyChair position={[0, 0.4, 0]} rotation={[0, Math.PI / 4, 0]} scale={1.8} />
-
-      {/* Seated Resident (Bob) */}
-      <group position={[0, 1.15, 0]} rotation={[0, Math.PI / 4, 0]}>
+      {/* Seated Resident (Bob) - Placed ON TOP of the platform recliner */}
+      <group position={[0, 0.6, 0]} rotation={[0, Math.PI / 4, 0]}>
         <BlockHumanoid 
-          scale={2.0} 
+          scale={1.4} 
           materialProps={{...butterProps, depthTest: false}} 
           poseProps={{ 
             leftLegRotation: [1.5, 0, 0], 
@@ -132,14 +119,14 @@ const FloatingPlatform = ({ butterProps }) => {
         />
       </group>
 
-      {/* Home Lamp - Placed slightly behind the chair to save space */}
-      <HomeLamp position={[-1.2, 0.12, -1.2]} scale={2.4} />
+      {/* Home Lamp - Placed ON TOP of the platform behind the chair */}
+      <HomeLamp position={[-1.0, 0.12, -1.0]} scale={1.2} />
 
-      {/* Helper - Standing close to Bob on the small platform */}
-      <group position={[1.3, 0.35, 0.5]} rotation={[0, -Math.PI / 1.5, 0]}>
+      {/* Helper - Standing ON TOP of the platform next to Bob */}
+      <group position={[1.1, 0.12, 0.4]} rotation={[0, -Math.PI / 1.5, 0]}>
         <BlockHumanoid 
           isHelper 
-          scale={2.3} 
+          scale={1.4} 
           materialProps={{...butterProps, depthTest: false}} 
           poseProps={{ 
             headRotationY: -0.4, 
@@ -150,6 +137,7 @@ const FloatingPlatform = ({ butterProps }) => {
     </Float>
   );
 };
+
 // --- HUMANOID SYSTEM ---
 const HeartBadge = () => {
   const shape = useMemo(() => {
@@ -180,7 +168,6 @@ const BlockHumanoid = forwardRef(({ scale = 1, materialProps, poseProps = {}, is
     rotation = [0,0,0], 
     cane = false,
     walker = false,
-    isLeaning = false,
     isWalking = false,
     walkSpeed = 8,
     torsoRotationX = 0,
@@ -581,7 +568,7 @@ export default function Scene({ currentView }) {
         position={[0, -1.45, 0]} 
       />
 
-      {/* Circle Platform with fixing Helper and Lamp over Bob */}
+      {/* Circle Platform with Bob, Helper, and Lamp placed ON TOP */}
       <FloatingPlatform butterProps={butterProps} />
     </>
   );
