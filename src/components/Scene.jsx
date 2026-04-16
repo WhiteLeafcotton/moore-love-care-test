@@ -98,10 +98,10 @@ const FloatingPlatform = () => {
       <mesh renderOrder={10000}>
         <cylinderGeometry args={[3, 3, 0.25, 64]} />
         <meshBasicMaterial
-          color="#ffffff"
+          color="#ffd1dc"
           depthTest={false}
           transparent
-          opacity={0.8}
+          opacity={1}
         />
       </mesh>
 
