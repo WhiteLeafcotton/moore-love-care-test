@@ -2,7 +2,7 @@ import { useRef, useMemo, useEffect, useState, forwardRef, useImperativeHandle }
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
 import { Environment, Sky, Float } from "@react-three/drei"; 
 import { Water } from "three-stdlib";
-import * as THREE from "three";
+import * as THREE from "this";
 
 extend({ Water });
 
@@ -32,26 +32,26 @@ const getHillHeight = (x, z) => {
 const LStyleLamp = ({ position }) => (
   <group position={position}>
     <mesh position={[0, 0.05, 0]} renderOrder={10001}>
-      <cylinderGeometry args={[0.3, 0.3, 0.1, 32]} />
+      <cylinderGeometry args={[0.2, 0.2, 0.08, 32]} />
       <meshBasicMaterial color="#21162e" depthTest={false} transparent opacity={0.9} />
     </mesh>
-    <mesh position={[0, 2, 0]} renderOrder={10001}>
-      <cylinderGeometry args={[0.04, 0.04, 4, 16]} />
+    <mesh position={[0, 1.8, 0]} renderOrder={10001}>
+      <cylinderGeometry args={[0.03, 0.03, 3.6, 16]} />
       <meshBasicMaterial color="#21162e" depthTest={false} transparent opacity={0.9} />
     </mesh>
-    <mesh position={[-0.75, 4, 0]} rotation={[0, 0, Math.PI / 2]} renderOrder={10001}>
-      <cylinderGeometry args={[0.03, 0.03, 1.5, 16]} />
+    <mesh position={[-0.6, 3.6, 0]} rotation={[0, 0, Math.PI / 2]} renderOrder={10001}>
+      <cylinderGeometry args={[0.025, 0.025, 1.2, 16]} />
       <meshBasicMaterial color="#21162e" depthTest={false} transparent opacity={0.9} />
     </mesh>
-    <mesh position={[-1.5, 3.7, 0]} renderOrder={10002}>
-      <sphereGeometry args={[0.25, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2]} rotation={[Math.PI, 0, 0]} />
+    <mesh position={[-1.2, 3.35, 0]} renderOrder={10002}>
+      <sphereGeometry args={[0.2, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2]} rotation={[Math.PI, 0, 0]} />
       <meshBasicMaterial color="#ffffff" depthTest={false} transparent opacity={1} />
     </mesh>
   </group>
 );
 
 const LazyBoyChair = ({ position, rotation }) => (
-  <group position={position} rotation={rotation} scale={0.7}>
+  <group position={position} rotation={rotation} scale={0.65}>
     <mesh position={[0, 0.4, 0]} renderOrder={10001}>
       <boxGeometry args={[1.5, 0.8, 1.5]} />
       <meshBasicMaterial color={DARKER_PINK_THEME} depthTest={false} transparent opacity={0.95} />
@@ -69,35 +69,34 @@ const LazyBoyChair = ({ position, rotation }) => (
   </group>
 );
 
-// --- UPDATED FLOATING PLATFORM (THE F ONE SPECS) ---
+// --- UPDATED FLOATING PLATFORM (SMALLER DISK) ---
 const FloatingPlatform = () => {
   const butterProps = { color: "#fce4e4", roughness: 0.9, metalness: 0.02 };
 
   return (
     <Float speed={1.8} rotationIntensity={0.2} floatIntensity={0.5} position={[11, -1.0, 17]}>
-      {/* Platform Disk */}
+      {/* Platform Disk - Scaled down for boutique look */}
       <mesh renderOrder={10000}>
-        <cylinderGeometry args={[4.2, 4.2, 0.25, 64]} />
+        <cylinderGeometry args={[3.2, 3.2, 0.25, 64]} />
         <meshBasicMaterial color="#ffffff" depthTest={false} transparent opacity={0.8} />
       </mesh>
 
-      {/* Circle Rug under Chair - Match "F ONE" Positioning */}
-      <mesh position={[-0.8, 0.13, 0]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={10001}>
-        <circleGeometry args={[2.2, 64]} />
+      {/* Circle Rug - Sized to match platform */}
+      <mesh position={[-0.6, 0.13, 0]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={10001}>
+        <circleGeometry args={[2.0, 64]} />
         <meshBasicMaterial color={TITLE_PURPLE} depthTest={false} transparent opacity={0.3} />
       </mesh>
 
       {/* The Recliner */}
-      <LazyBoyChair position={[-0.8, 0.15, 0]} rotation={[0, Math.PI / 4, 0]} />
+      <LazyBoyChair position={[-0.6, 0.15, 0]} rotation={[0, Math.PI / 4, 0]} />
 
       {/* The L-Lamp */}
-      <LStyleLamp position={[-2.2, 0.15, -1.5]} />
+      <LStyleLamp position={[-1.8, 0.15, -1.2]} />
 
-      {/* --- THE COUPLE (SEATED & STANDING) --- */}
       {/* Resident Seated in Chair */}
-      <group position={[-0.8, 0.62, 0]} rotation={[0, Math.PI / 4, 0]}>
+      <group position={[-0.6, 0.62, 0]} rotation={[0, Math.PI / 4, 0]}>
         <BlockHumanoid 
-          scale={0.8} 
+          scale={0.75} 
           materialProps={{...butterProps, depthTest: false}} 
           poseProps={{ 
             leftLegRotation: [1.5, 0, 0], 
@@ -108,10 +107,10 @@ const FloatingPlatform = () => {
       </group>
 
       {/* Helper Standing Beside Chair */}
-      <group position={[1.2, 0.14, 0.9]} rotation={[0, -Math.PI / 1.5, 0]}>
+      <group position={[1.1, 0.14, 0.8]} rotation={[0, -Math.PI / 1.5, 0]}>
         <BlockHumanoid 
           isHelper 
-          scale={0.92} 
+          scale={0.88} 
           materialProps={{...butterProps, depthTest: false}} 
           poseProps={{ 
             headRotationY: -0.4, 
@@ -158,8 +157,7 @@ const BlockHumanoid = forwardRef(({ scale = 1, materialProps, poseProps = {}, is
     walkSpeed = 8,
     torsoRotationZ = 0,
     torsoRotationX = 0,
-    headRotationY = 0,
-    animateArmsTo = null 
+    headRotationY = 0
   } = poseProps;
   
   const torsoRef = useRef();
@@ -223,13 +221,13 @@ const BlockHumanoid = forwardRef(({ scale = 1, materialProps, poseProps = {}, is
         </mesh>
         {isHelper && <HeartBadge />}
         <group position={[0, 1.2, 0]}>
-          <group ref={leftArmRef} position={[-0.22, 0, 0]}>
+          <group ref={leftArmRef} position={[-0.22, 0, 0]} rotation={leftArmRotation}>
             <mesh castShadow>
               <primitive object={limbGeo} />
               <meshStandardMaterial {...materialProps} />
             </mesh>
           </group>
-          <group ref={rightArmRef} position={[0.22, 0, 0]}>
+          <group ref={rightArmRef} position={[0.22, 0, 0]} rotation={rightArmRotation}>
             <mesh castShadow>
               <primitive object={limbGeo} />
               <meshStandardMaterial {...materialProps} />
@@ -244,13 +242,13 @@ const BlockHumanoid = forwardRef(({ scale = 1, materialProps, poseProps = {}, is
         </group>
       </group>
       <group position={[0, 0.4, 0]}>
-        <group ref={leftLegRef} position={[-0.12, 0, 0]}>
+        <group ref={leftLegRef} position={[-0.12, 0, 0]} rotation={leftLegRotation}>
           <mesh castShadow>
             <primitive object={limbGeo} />
             <meshStandardMaterial {...materialProps} />
           </mesh>
         </group>
-        <group ref={rightLegRef} position={[0.12, 0, 0]}>
+        <group ref={rightLegRef} position={[0.12, 0, 0]} rotation={rightLegRotation}>
           <mesh castShadow>
             <primitive object={limbGeo} />
             <meshStandardMaterial {...materialProps} />
@@ -261,9 +259,7 @@ const BlockHumanoid = forwardRef(({ scale = 1, materialProps, poseProps = {}, is
   );
 });
 
-// --- REST OF SCENE (GRASS, WATER, ETC) AS PER BLUE ---
-// ... (The rest of your original Blue script components here)
-// --- GRASS & ARCHITECTURE ---
+// --- SCENE & WORLD ---
 const GrassySassyHills = () => {
   const meshRef = useRef();
   const bladeGeo = useMemo(() => {
@@ -458,7 +454,7 @@ export default function Scene({ currentView }) {
           <WalkingToConversationChapter butterProps={butterProps} />
           <group position={[14, 1.9, 4]} rotation={[0, -Math.PI / 2, 0]}>
             <group position={[3.5, 0, -0.2]} rotation={[0, -0.5, 0]}>
-                <BlockHumanoid scale={0.84} materialProps={butterProps} poseProps={{ walker: true, torsoRotationX: 0.1, animateArmsTo: [-1.1, 0, -0.1], leftLegRotation: [0.15, 0, 0], rightLegRotation: [-0.1, 0, 0], headRotationY: -0.2 }} />
+                <BlockHumanoid scale={0.84} materialProps={butterProps} poseProps={{ walker: true, torsoRotationX: 0.1, leftLegRotation: [0.15, 0, 0], rightLegRotation: [-0.1, 0, 0], headRotationY: -0.2 }} />
                 <BlockHumanoid isHelper scale={0.95} materialProps={butterProps} poseProps={{ position: [-0.95, 0, 0.35], rotation: [0, 0.65, 0], headRotationY: -0.4, leftArmRotation: [-0.8, 0, -0.25] }} />
             </group>
           </group>
