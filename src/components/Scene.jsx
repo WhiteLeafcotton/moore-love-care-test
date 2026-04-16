@@ -40,10 +40,12 @@ const PlatformLamp = ({ position }) => (
   />
 </mesh>
     {/* Pole */}
-    <mesh position={[0, 1.5, 0]} renderOrder={10001}>
-      <cylinderGeometry args={[0.03, 0.03, 3, 16]} />
-      <meshBasicMaterial color="#222" depthTest={false} />
-    </mesh>
+    {/* Pole */}
+<mesh position={[0, 1.5, 0]}>
+  <cylinderGeometry args={[0.03, 0.03, 3, 16]} />
+  {/* Changed to Standard and removed depthTest */}
+  <meshStandardMaterial color="#222" roughness={0.8} />
+</mesh>
     {/* Shade */}
     <mesh position={[0, 3.1, 0]} renderOrder={10001}>
       <cylinderGeometry args={[0.3, 0.5, 0.7, 32]} />
@@ -106,6 +108,8 @@ const FloatingPlatform = ({ butterProps }) => {
           poseProps={{ leftLegRotation: [1.5, 0, 0], rightLegRotation: [1.5, 0, 0], torsoRotationX: 0.05 }} 
         />
       </group>
+
+     
 
       {/* 6. Helper */}
       <group position={[1.1, 0.12, 0.4]} rotation={[0, -Math.PI / 1.5, 0]}>
