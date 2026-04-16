@@ -36,52 +36,26 @@ const LStyleLamp = ({ position }) => (
     {/* Base */}
     <mesh position={[0, 0.05, 0]} renderOrder={10001}>
       <cylinderGeometry args={[0.3, 0.3, 0.1, 32]} />
-      <meshBasicMaterial
-        color="#21162e"
-        depthTest={false}
-        transparent
-        opacity={0.9}
-      />
+      <meshBasicMaterial color="#21162e" depthTest={false} transparent opacity={0.9} />
     </mesh>
 
-    {/* Vertical Pole (short) */}
+    {/* Vertical Pole */}
     <mesh position={[0, 1.25, 0]} renderOrder={10001}>
       <cylinderGeometry args={[0.04, 0.04, 2.5, 16]} />
-      <meshBasicMaterial
-        color="#21162e"
-        depthTest={false}
-        transparent
-        opacity={0.9}
-      />
+      <meshBasicMaterial color="#21162e" depthTest={false} transparent opacity={0.9} />
     </mesh>
 
     {/* L Arm Holder */}
     <group position={[0, 2.5, 0]}>
 
-      {/* Horizontal Arm */}
-      <mesh
-        position={[0.85, 0, 0]}
-        rotation={[0, 0, Math.PI / 2]}
-        renderOrder={10001}
-      >
+      <mesh position={[0.85, 0, 0]} rotation={[0, 0, Math.PI / 2]} renderOrder={10001}>
         <cylinderGeometry args={[0.03, 0.03, 1.8, 16]} />
-        <meshBasicMaterial
-          color="#21162e"
-          depthTest={false}
-          transparent
-          opacity={0.9}
-        />
+        <meshBasicMaterial color="#21162e" depthTest={false} transparent opacity={0.9} />
       </mesh>
 
-      {/* Bulb */}
       <mesh position={[1.75, -0.45, 0]} renderOrder={10002}>
         <sphereGeometry args={[0.25, 32, 32]} />
-        <meshBasicMaterial
-          color="#ffffff"
-          depthTest={false}
-          transparent
-          opacity={1}
-        />
+        <meshBasicMaterial color="#ffffff" depthTest={false} transparent opacity={1} />
       </mesh>
 
     </group>
@@ -95,18 +69,18 @@ const LazyBoyChair = ({ position, rotation }) => (
 
     <mesh position={[0, 0.4, 0]} renderOrder={10001}>
       <boxGeometry args={[1.5, 0.8, 1.5]} />
-      <meshBasicMaterial color="#21162e" />
+      <meshBasicMaterial color="#21162e" depthTest={false} transparent opacity={0.95} />
     </mesh>
 
     <mesh position={[0, 1.2, -0.6]} rotation={[-0.3, 0, 0]} renderOrder={10001}>
       <boxGeometry args={[1.5, 1.6, 0.4]} />
-      <meshBasicMaterial color="#21162e" />
+      <meshBasicMaterial color="#21162e" depthTest={false} transparent opacity={0.95} />
     </mesh>
 
     {[-0.85, 0.85].map((x, i) => (
       <mesh key={i} position={[x, 0.7, 0]} renderOrder={10001}>
         <boxGeometry args={[0.3, 0.6, 1.5]} />
-        <meshBasicMaterial color="#21162e" />
+        <meshBasicMaterial color="#21162e" depthTest={false} transparent opacity={0.95} />
       </mesh>
     ))}
 
@@ -141,17 +115,17 @@ const FloatingPlatform = () => {
         />
       </mesh>
 
-      {/* --- CLEAN SEAT SYSTEM (NO OVERLAP ZONES) --- */}
+      {/* --- FIXED SEATING SYSTEM --- */}
       <group position={[-0.8, 0.2, 0]}>
 
-        {/* Chair stays centered */}
+        {/* Chair stays exactly where it is */}
         <LazyBoyChair
           position={[0, 0, 0]}
           rotation={[0, (Math.PI * 3) / 2, 0]}
         />
 
-        {/* CHARACTER SAFE SEAT POSITION (forward + up = no clipping) */}
-        <group position={[0, 0.35, 0.55]}>
+        {/* CHARACTER MOVED FORWARD OUT OF CHAIR VOLUME */}
+        <group position={[0, 0.35, 0.6]}>
           <BlockHumanoid
             scale={0.8}
             materialProps={butterProps}
@@ -165,13 +139,12 @@ const FloatingPlatform = () => {
 
       </group>
 
-      {/* Lamp */}
+      {/* Lamp unchanged */}
       <LStyleLamp position={[-0.8, 0.15, -1.2]} />
 
     </Float>
   );
-}; 
-
+};
 // --- HUMANOID COMPONENTS ---
 const HeartBadge = () => {
   const shape = useMemo(() => {
