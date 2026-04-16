@@ -101,19 +101,19 @@ const FloatingPlatform = () => {
       {/* The L-Lamp */}
       <LStyleLamp position={[-0.8, 0.15, -1.2]} />
 
-      {/* --- THE COUPLE (SEATED & STANDING) --- */}
-      {/* Resident Seated in Chair */}
-      <group position={[-0.8, 0.7, 0]} rotation={[0, Math.PI / 4, 0]}>
-        <BlockHumanoid 
-          scale={0.8} 
-          materialProps={{...butterProps, depthTest: false}} 
-          poseProps={{ 
-            leftLegRotation: [1.4, 0, 0], 
-            rightLegRotation: [1.4, 0, 0], 
-            torsoRotationX: 0.1 
-          }} 
-        />
-      </group>
+      {/* --- THE one (SEATED ) --- */}
+     {/* Resident Seated in Chair */}
+<group position={[-0.8, 0.45, 0]} rotation={[0, (Math.PI * 3) / 2, 0]}>
+  <BlockHumanoid 
+    scale={0.8} 
+    materialProps={{...butterProps, depthTest: false}} 
+    poseProps={{ 
+      leftLegRotation: [1.4, 0, 0], 
+      rightLegRotation: [1.4, 0, 0], 
+      torsoRotationX: 0.1 
+    }} 
+  />
+</group>
 
           </Float>
   );
