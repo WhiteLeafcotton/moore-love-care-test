@@ -30,79 +30,61 @@ const getHillHeight = (x, z) => {
 // --- NEW BRAND NEW LAMP COMPONENT ---
 const PlatformLamp = ({ position }) => (
   <group position={position}>
-    {/* Base (FIXED SIZE) */}
-    <mesh position={[0, 0.05, 0]} receiveShadow castShadow>
+    
+    {/* Base (correct size, visible) */}
+    <mesh position={[0, 0.05, 0]} renderOrder={10001}>
       <cylinderGeometry args={[0.25, 0.25, 0.1, 32]} />
-      <meshStandardMaterial 
-        color="#222222"
-        roughness={0.6}
-        metalness={0.2}
-      />
+      <meshBasicMaterial color="#222222" />
     </mesh>
 
     {/* Pole */}
-    <mesh position={[0, 1.6, 0]}>
+    <mesh position={[0, 1.6, 0]} renderOrder={10001}>
       <cylinderGeometry args={[0.03, 0.03, 3, 16]} />
-      <meshStandardMaterial 
-        color="#222222" 
-        emissive="#111111"
-      />
+      <meshBasicMaterial color="#222222" />
     </mesh>
 
-    {/* Shade (SOLID but softly glowing) */}
-    <mesh position={[0, 3.1, 0]}>
+    {/* Shade (visible, NOT fake transparent) */}
+    <mesh position={[0, 3.1, 0]} renderOrder={10001}>
       <cylinderGeometry args={[0.3, 0.5, 0.7, 32]} />
-      <meshStandardMaterial 
-        color="#ffffff"
-        emissive="#fff5cc"
-        emissiveIntensity={0.4}
-      />
+      <meshBasicMaterial color="#ffffff" />
     </mesh>
 
-    {/* Light Bulb Glow (only place depthTest stays off) */}
-    <mesh position={[0, 3.0, 0]}>
+    {/* Light Bulb Glow (ONLY place using depth override) */}
+    <mesh position={[0, 3.0, 0]} renderOrder={10002}>
       <sphereGeometry args={[0.15, 16, 16]} />
-      <meshStandardMaterial 
+      <meshBasicMaterial 
         color="#ffffff"
-        emissive="#ffffff"
-        emissiveIntensity={2}
+        transparent
+        opacity={0.9}
         depthTest={false}
       />
     </mesh>
+
   </group>
 );
 
 
-// --- CHAIR (FIXED - NO FAKE TRANSPARENCY) ---
+// --- CHAIR (VISIBLE + SOLID, same style) ---
 const LazyBoyChair = ({ position, rotation, scale = 0.7 }) => (
   <group position={position} rotation={rotation} scale={scale}>
     
     {/* Seat */}
-    <mesh position={[0, 0.4, 0]}>
+    <mesh position={[0, 0.4, 0]} renderOrder={10001}>
       <boxGeometry args={[1.5, 0.8, 1.5]} />
-      <meshStandardMaterial 
-        color={DARKER_PINK_THEME}
-        roughness={0.8}
-      />
+      <meshBasicMaterial color={DARKER_PINK_THEME} />
     </mesh>
 
     {/* Back */}
-    <mesh position={[0, 1.2, -0.6]} rotation={[-0.3, 0, 0]}>
+    <mesh position={[0, 1.2, -0.6]} rotation={[-0.3, 0, 0]} renderOrder={10001}>
       <boxGeometry args={[1.5, 1.6, 0.4]} />
-      <meshStandardMaterial 
-        color={DARKER_PINK_THEME}
-        roughness={0.8}
-      />
+      <meshBasicMaterial color={DARKER_PINK_THEME} />
     </mesh>
 
     {/* Arms */}
     {[-0.85, 0.85].map((x, i) => (
-      <mesh key={i} position={[x, 0.7, 0]}>
+      <mesh key={i} position={[x, 0.7, 0]} renderOrder={10001}>
         <boxGeometry args={[0.3, 0.6, 1.5]} />
-        <meshStandardMaterial 
-          color={DARKER_PINK_THEME}
-          roughness={0.8}
-        />
+        <meshBasicMaterial color={DARKER_PINK_THEME} />
       </mesh>
     ))}
 
