@@ -101,26 +101,31 @@ const HomeLamp = ({ position, scale = 1, rotation = [0, 0, 0] }) => (
 // --- THE CIRCULAR FLOATING PLATFORM (SANCTUARY) ---
 // --- THE CIRCULAR FLOATING PLATFORM (SANCTUARY) ---
 // --- THE CIRCULAR FLOATING PLATFORM (SANCTUARY) ---
+// --- THE CIRCULAR FLOATING PLATFORM (SANCTUARY) ---
 const FloatingPlatform = ({ butterProps }) => {
   return (
     <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.4} position={[8.5, -2.2, 14.8]}>
       
-      {/* Platform Disk */}
+      {/* 1. Platform Disk */}
       <mesh renderOrder={10000}>
         <cylinderGeometry args={[2.8, 2.8, 0.2, 64]} />
         <meshBasicMaterial color="#ffffff" depthTest={false} transparent opacity={0.8} />
       </mesh>
 
-      {/* Circle Rug */}
+      {/* 2. Circle Rug */}
       <mesh position={[0, 0.11, 0]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={10001}>
         <circleGeometry args={[2.4, 64]} />
         <meshBasicMaterial color="#6e5c8a" depthTest={false} transparent opacity={0.3} />
       </mesh>
 
-      {/* Recliner - Centered */}
+      {/* 3. THE LAMP: MOVED INSIDE THE FLOAT TAG */}
+      {/* Position [0, 0.12, 0] puts it exactly in the center of the platform disk */}
+      <HomeLamp position={[-1.2, 0.12, -0.8]} scale={1.2} />
+
+      {/* 4. Recliner - Centered */}
       <LazyBoyChair position={[0, 0.15, 0]} rotation={[0, Math.PI / 4, 0]} scale={1.2} />
 
-      {/* Seated Resident (Bob) */}
+      {/* 5. Seated Resident (Bob) */}
       <group position={[0, 0.6, 0]} rotation={[0, Math.PI / 4, 0]}>
         <BlockHumanoid 
           scale={1.4} 
@@ -133,12 +138,7 @@ const FloatingPlatform = ({ butterProps }) => {
         />
       </group>
 
-      {/* --- THE LAMP: Fixed position and render order to stay on top --- */}
-      <group renderOrder={10005}>
-        <HomeLamp position={[-1.2, 0.12, -0.8]} scale={1.2} />
-      </group>
-
-      {/* Helper - Standing next to Bob */}
+      {/* 6. Helper - Standing next to Bob */}
       <group position={[1.1, 0.12, 0.4]} rotation={[0, -Math.PI / 1.5, 0]}>
         <BlockHumanoid 
           isHelper 
