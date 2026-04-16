@@ -36,7 +36,7 @@ const LStyleLamp = ({ position }) => (
     {/* Base */}
     <mesh position={[0, 0.05, 0]} renderOrder={10001}>
       <cylinderGeometry args={[0.3, 0.3, 0.1, 32]} />
-      <meshBasicMaterial color="#ffffff" depthTest={false} transparent opacity={0.9} />
+      <meshBasicMaterial color="#9c7f91" depthTest={false} transparent opacity={0.9} />
     </mesh>
 
    {/* Vertical Pole (extra short) */}
@@ -101,6 +101,10 @@ const LazyBoyChair = ({ position, rotation }) => (
 
 const FloatingPlatform = () => {
   const butterProps = { color: "#fce4e4", roughness: 0.9, metalness: 0.02 };
+  
+  // Custom Color Palette for the Platform
+  const PLATFORM_TOP = "#ffffff";    // Clean White Top
+  const PLATFORM_RIM = "#9c7f91";    // Dark Purple Rim for depth
 
   return (
     <Float
@@ -109,14 +113,32 @@ const FloatingPlatform = () => {
       floatIntensity={0.5}
       position={[8.8, -1.4, 14.5]}
     >
-      {/* Platform Disk */}
+      {/* Platform Disk - Using Material Array for the White/Purple combo */}
       <mesh renderOrder={10000}>
         <cylinderGeometry args={[3, 3, 0.25, 64]} />
-        <meshBasicMaterial
-          color="#ffd1dc"
-          depthTest={false}
-          transparent
-          opacity={1}
+        
+        {/* Material 0: The Side/Rim */}
+        <meshBasicMaterial 
+          attach="material-0" 
+          color={PLATFORM_RIM} 
+          depthTest={false} 
+          transparent 
+        />
+        
+        {/* Material 1: The Top Surface */}
+        <meshBasicMaterial 
+          attach="material-1" 
+          color={PLATFORM_TOP} 
+          depthTest={false} 
+          transparent 
+        />
+        
+        {/* Material 2: The Bottom (optional, kept same as rim) */}
+        <meshBasicMaterial 
+          attach="material-2" 
+          color={PLATFORM_RIM} 
+          depthTest={false} 
+          transparent 
         />
       </mesh>
 
