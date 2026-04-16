@@ -96,7 +96,7 @@ const FloatingPlatform = () => {
     >
       {/* Platform Disk */}
       <mesh renderOrder={10000}>
-        <cylinderGeometry args={[2.5, 2.5, 0.25, 64]} />
+        <cylinderGeometry args={[3.5, 3.5, 0.25, 64]} />
         <meshBasicMaterial
           color="#ffffff"
           depthTest={false}
@@ -106,7 +106,7 @@ const FloatingPlatform = () => {
       </mesh>
 
       {/* --- CHAIR + CHARACTER GROUP (clean layering fix) --- */}
-      <group position={[-0.8, 0.2, 0]}>
+      <group position={[-0.3, 0.2, 0]}>
         
         {/* Chair (background object) */}
         <LazyBoyChair
