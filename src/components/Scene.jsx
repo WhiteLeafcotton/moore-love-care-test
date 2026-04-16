@@ -36,13 +36,13 @@ const LStyleLamp = ({ position }) => (
     {/* Base */}
     <mesh position={[0, 0.05, 0]} renderOrder={10001}>
       <cylinderGeometry args={[0.3, 0.3, 0.1, 32]} />
-      <meshBasicMaterial color="#B5A8C2" depthTest={false} transparent opacity={0.9} />
+      <meshBasicMaterial color="#ffffff" depthTest={false} transparent opacity={0.9} />
     </mesh>
 
    {/* Vertical Pole (extra short) */}
 <mesh position={[0, 1.25, 0]} renderOrder={10001}>
   <cylinderGeometry args={[0.04, 0.04, 2.5, 16]} />
-  <meshBasicMaterial color="#B5A8C2" depthTest={false} transparent opacity={0.9} />
+  <meshBasicMaterial color="#bf9fb3" depthTest={false} transparent opacity={0.9} />
 </mesh>
 
     {/* L Arm Holder (aligned to shortened pole) */}
@@ -51,7 +51,7 @@ const LStyleLamp = ({ position }) => (
   {/* Horizontal Arm */}
   <mesh position={[0.85, 0, 0]} rotation={[0, 0, Math.PI / 2]} renderOrder={10001}>
     <cylinderGeometry args={[0.03, 0.03, 1.8, 16]} />
-    <meshBasicMaterial color="#B5A8C2" depthTest={false} transparent opacity={0.9} />
+    <meshBasicMaterial color="#bf9fb3" depthTest={false} transparent opacity={0.9} />
   </mesh>
 
   {/* Bulb (properly hanging at end of arm) */}
@@ -69,16 +69,16 @@ const LazyBoyChair = ({ position, rotation }) => (
   <group position={position} rotation={rotation} scale={0.7}>
     <mesh position={[0, 0.4, 0]} renderOrder={10001}>
       <boxGeometry args={[1.5, 0.8, 1.5]} />
-      <meshBasicMaterial color="#B5A8C2" depthTest={false} transparent opacity={0.95} />
+      <meshBasicMaterial color="#bf9fb3" depthTest={false} transparent opacity={0.95} />
     </mesh>
     <mesh position={[0, 1.2, -0.6]} rotation={[-0.3, 0, 0]} renderOrder={10001}>
       <boxGeometry args={[1.5, 1.6, 0.4]} />
-      <meshBasicMaterial color="#B5A8C2" depthTest={false} transparent opacity={0.95} />
+      <meshBasicMaterial color="#bf9fb3" depthTest={false} transparent opacity={0.95} />
     </mesh>
     {[-0.85, 0.85].map((x, i) => (
       <mesh key={i} position={[x, 0.7, 0]} renderOrder={10001}>
         <boxGeometry args={[0.3, 0.6, 1.5]} />
-        <meshBasicMaterial color="#B5A8C2" depthTest={false} transparent opacity={0.95} />
+        <meshBasicMaterial color="#bf9fb3" depthTest={false} transparent opacity={0.95} />
       </mesh>
     ))}
   </group>
