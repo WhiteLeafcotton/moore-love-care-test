@@ -102,6 +102,7 @@ const HomeLamp = ({ position, scale = 1, rotation = [0, 0, 0] }) => (
 // --- THE CIRCULAR FLOATING PLATFORM (SANCTUARY) ---
 // --- THE CIRCULAR FLOATING PLATFORM (SANCTUARY) ---
 // --- THE CIRCULAR FLOATING PLATFORM (SANCTUARY) ---
+// --- THE CIRCULAR FLOATING PLATFORM (SANCTUARY) ---
 const FloatingPlatform = ({ butterProps }) => {
   return (
     <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.4} position={[8.5, -2.2, 14.8]}>
@@ -119,7 +120,7 @@ const FloatingPlatform = ({ butterProps }) => {
       </mesh>
 
       {/* 3. THE LAMP: MOVED INSIDE THE FLOAT TAG */}
-      {/* Position [0, 0.12, 0] puts it exactly in the center of the platform disk */}
+      {/* Positioned relative to the platform center */}
       <HomeLamp position={[-1.2, 0.12, -0.8]} scale={1.2} />
 
       {/* 4. Recliner - Centered */}
