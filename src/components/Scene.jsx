@@ -88,38 +88,55 @@ const FloatingPlatform = () => {
   const butterProps = { color: "#fce4e4", roughness: 0.9, metalness: 0.02 };
 
   return (
-    <Float speed={1.8} rotationIntensity={0.2} floatIntensity={0.5} position={[8.8, -1.4, 14.5]}>
+    <Float
+      speed={1.8}
+      rotationIntensity={0.2}
+      floatIntensity={0.5}
+      position={[8.8, -1.4, 14.5]}
+    >
       {/* Platform Disk */}
       <mesh renderOrder={10000}>
         <cylinderGeometry args={[2.5, 2.5, 0.25, 64]} />
-        <meshBasicMaterial color="#ffffff" depthTest={false} transparent opacity={0.8} />
+        <meshBasicMaterial
+          color="#ffffff"
+          depthTest={false}
+          transparent
+          opacity={0.8}
+        />
       </mesh>
 
-      {/* The Recliner */}
-      <LazyBoyChair position={[-0.8, 0.2, 0]} rotation={[0, (Math.PI * 3) / 2, 0]} />
+      {/* --- CHAIR + CHARACTER GROUP (clean layering fix) --- */}
+      <group position={[-0.8, 0.2, 0]}>
+        
+        {/* Chair (background object) */}
+        <LazyBoyChair
+          position={[0, 0, 0]}
+          rotation={[0, (Math.PI * 3) / 2, 0]}
+        />
 
-      {/* The L-Lamp */}
+        {/* Character (foreground, slightly forward) */}
+        <group position={[0, 0.3, 0.25]}>
+          <BlockHumanoid
+            scale={0.8}
+            materialProps={{
+              ...butterProps,
+              depthTest: false,
+              depthWrite: false
+            }}
+            poseProps={{
+              leftLegRotation: [1.4, 0, 0],
+              rightLegRotation: [1.4, 0, 0],
+              torsoRotationX: 0.1
+            }}
+          />
+        </group>
+      </group>
+
+      {/* L-Lamp (unchanged) */}
       <LStyleLamp position={[-0.8, 0.15, -1.2]} />
-
-      {/* --- THE one (SEATED ) --- */}
-     {/* Resident Seated in Chair */}
-{/* Resident Seated in Chair - Pulled Forward */}
-<group position={[-0.8, 0.5, -0.05]} rotation={[0, (Math.PI * 3) / 2, 0]}>
-  <BlockHumanoid 
-    scale={0.8} 
-    materialProps={{...butterProps, depthTest: false}} 
-    poseProps={{ 
-      leftLegRotation: [1.4, 0, 0], 
-      rightLegRotation: [1.4, 0, 0], 
-      torsoRotationX: 0.1 
-    }} 
-  />
-</group>
-
-          </Float>
+    </Float>
   );
 };
-
     
 
 // --- HUMANOID COMPONENTS ---
