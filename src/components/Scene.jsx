@@ -29,29 +29,29 @@ const getHillHeight = (x, z) => {
 };
 
 const FloatingPlatform = ({ butterProps }) => {
-  // We take your butterProps and force depthTest: false 
-  // so he "sits" on top of the world just like the couch did.
-  const solidVisibleMaterial = { 
+  // We keep depthTest: true here so his body parts stay solid and don't overlap
+  const solidHumanMaterial = { 
     ...butterProps, 
-    depthTest: false, 
     transparent: false, 
-    opacity: 1 
+    opacity: 1,
+    depthTest: true 
   };
 
   return (
     <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.4} position={[8.5, -2.2, 14.8]}>
       
-      {/* Platform Disk - Made Solid White */}
+      {/* 1. THE DISK: Solid White, forced in front of stairs */}
       <mesh renderOrder={10000}>
         <cylinderGeometry args={[2.8, 2.8, 0.2, 64]} />
         <meshBasicMaterial color="#ffffff" depthTest={false} transparent={false} />
       </mesh>
 
-      {/* Single Standing Chapter - Using Couch Logic */}
-      <group position={[0, 0.4, 0]} renderOrder={10001}>
+      {/* 2. THE HUMAN: Wrapped in a group with an even higher renderOrder */}
+      {/* We lift him slightly more [0, 0.45, 0] to ensure feet clear the disk thickness */}
+      <group position={[0, 0.45, 0]} renderOrder={10001}>
         <BlockHumanoid 
           scale={1.4} 
-          materialProps={solidVisibleMaterial} 
+          materialProps={solidHumanMaterial} 
           poseProps={{ 
             leftLegRotation: [0, 0, 0], 
             rightLegRotation: [0, 0, 0], 
