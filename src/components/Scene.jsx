@@ -74,7 +74,7 @@ const FloatingPlatform = () => {
   const butterProps = { color: "#fce4e4", roughness: 0.9, metalness: 0.02 };
 
   return (
-    <Float speed={1.8} rotationIntensity={0.2} floatIntensity={0.5} position={[5.8, -1.4, 14.5]}>
+    <Float speed={1.8} rotationIntensity={0.2} floatIntensity={0.5} position={[8.8, -1.4, 14.5]}>
       {/* Platform Disk */}
       <mesh renderOrder={10000}>
         <cylinderGeometry args={[2.5, 2.5, 0.25, 64]} />
