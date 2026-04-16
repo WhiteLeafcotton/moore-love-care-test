@@ -65,27 +65,38 @@ const LStyleLamp = ({ position }) => (
   </group>
 );
 
+const DARK_PURPLE = "#9c7f91"; // Darker shade for "shadows"
+const BASE_PURPLE = "#bf9fb3"; // Your exact wheelchair purple
+
 const LazyBoyChair = ({ position, rotation }) => (
   <group position={position} rotation={rotation} scale={0.7}>
-    {/* Main Seat - Now uses StandardMaterial for shadows/depth */}
-    <mesh position={[0, 0.4, 0]} renderOrder={10001} castShadow receiveShadow>
+    
+    {/* Main Seat with fake depth */}
+    <mesh position={[0, 0.4, 0]} renderOrder={10001}>
       <boxGeometry args={[1.5, 0.8, 1.5]} />
-      <meshStandardMaterial color="#bf9fb3" roughness={0.7} />
+      {/* Array of colors: [Right, Left, Top, Bottom, Front, Back] */}
+      {[DARK_PURPLE, DARK_PURPLE, BASE_PURPLE, DARK_PURPLE, BASE_PURPLE, DARK_PURPLE].map((col, i) => (
+        <meshBasicMaterial key={i} attach={`material-${i}`} color={col} depthTest={false} transparent opacity={0.95} />
+      ))}
     </mesh>
-    {/* Backrest */}
-    <mesh position={[0, 1.2, -0.6]} rotation={[-0.3, 0, 0]} renderOrder={10001} castShadow receiveShadow>
+
+    {/* Backrest with fake depth */}
+    <mesh position={[0, 1.2, -0.6]} rotation={[-0.3, 0, 0]} renderOrder={10001}>
       <boxGeometry args={[1.5, 1.6, 0.4]} />
-      <meshStandardMaterial color="#bf9fb3" roughness={0.7} />
+      {[BASE_PURPLE, BASE_PURPLE, BASE_PURPLE, DARK_PURPLE, BASE_PURPLE, DARK_PURPLE].map((col, i) => (
+        <meshBasicMaterial key={i} attach={`material-${i}`} color={col} depthTest={false} transparent opacity={0.95} />
+      ))}
     </mesh>
+
     {/* Armrests */}
     {[-0.85, 0.85].map((x, i) => (
-      <mesh key={i} position={[x, 0.7, 0]} renderOrder={10001} castShadow receiveShadow>
+      <mesh key={i} position={[x, 0.7, 0]} renderOrder={10001}>
         <boxGeometry args={[0.3, 0.6, 1.5]} />
-        <meshStandardMaterial color="#bf9fb3" roughness={0.7} />
+        <meshBasicMaterial color={DARK_PURPLE} depthTest={false} transparent opacity={0.95} />
       </mesh>
     ))}
   </group>
-  );
+);
   
 
 const FloatingPlatform = () => {
