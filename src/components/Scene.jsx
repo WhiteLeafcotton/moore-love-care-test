@@ -1,4 +1,5 @@
-import { useRef, useMemo, useEffect, forwardRef, useImperativeHandle } from "react";
+// Fixed imports: added useState back in
+import { useRef, useMemo, useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
 import { Environment, Sky, Float } from "@react-three/drei"; 
 import { Water } from "three-stdlib";
@@ -30,17 +31,17 @@ const getHillHeight = (x, z) => {
 // --- SOLID LAMP COMPONENT ---
 const PlatformLamp = ({ position }) => (
   <group position={position}>
-    {/* Base - Opaque */}
+    {/* Base - Solid Opaque */}
     <mesh position={[0, 0.05, 0]}>
       <cylinderGeometry args={[0.25, 0.25, 0.1, 32]} />
       <meshStandardMaterial color="#111" roughness={0.5} />
     </mesh>
-    {/* Pole - Opaque */}
+    {/* Pole - Solid Opaque */}
     <mesh position={[0, 1.5, 0]}>
       <cylinderGeometry args={[0.03, 0.03, 3, 16]} />
       <meshStandardMaterial color="#111" roughness={0.5} />
     </mesh>
-    {/* Shade - Opaque white to stand out */}
+    {/* Shade - Solid Opaque */}
     <mesh position={[0, 3.1, 0]}>
       <cylinderGeometry args={[0.3, 0.5, 0.7, 32]} />
       <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.2} />
@@ -76,19 +77,19 @@ const LazyBoyChair = ({ position, rotation, scale = 0.7 }) => (
 const FloatingPlatform = ({ butterProps }) => {
   return (
     <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.4} position={[8.5, -2.2, 14.8]}>
-      {/* 1. Platform Disk - NOW SOLID OPAQUE WHITE */}
+      {/* 1. Platform Disk - SOLID OPAQUE */}
       <mesh castShadow receiveShadow>
         <cylinderGeometry args={[2.8, 2.8, 0.2, 64]} />
         <meshStandardMaterial color="#ffffff" roughness={0.3} metalness={0.1} />
       </mesh>
 
-      {/* 2. Circle Rug - Solid purple */}
+      {/* 2. Circle Rug - SOLID OPAQUE */}
       <mesh position={[0, 0.11, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <circleGeometry args={[2.4, 64]} />
         <meshStandardMaterial color="#6e5c8a" roughness={0.8} />
       </mesh>
 
-      {/* 3. SOLID LAMP - Positioned further back on the platform center */}
+      {/* 3. THE LAMP - Positioned specifically to avoid depth-clipping with the rug */}
       <PlatformLamp position={[-0.8, 0.1, -0.5]} />
 
       {/* 4. Recliner */}
@@ -546,7 +547,7 @@ export default function Scene({ currentView }) {
         position={[0, -1.45, 0]} 
       />
 
-      {/* Floating Sanctuary - NOW SOLID AND CENTERED */}
+      {/* Floating Sanctuary - SOLID AND CENTERED */}
       <FloatingPlatform butterProps={butterProps} />
     </>
   );
