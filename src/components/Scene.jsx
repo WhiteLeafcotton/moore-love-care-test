@@ -111,12 +111,13 @@ const FloatingPlatform = ({ butterProps }) => {
         <meshBasicMaterial color="#6e5c8a" depthTest={false} transparent opacity={0.3} />
       </mesh>
 
-      {/* Jim in Recliner - Facing Camera Left-Profile */}
-      <group rotation={[0, Math.PI / -2, 0]}>
+      {/* Main Container Group - Rotated to face Camera */}
+      <group rotation={[0, Math.PI / 1.6, 0]}>
+        {/* Chair - Locked */}
         <LazyBoyChair position={[0, 0.15, 0]} scale={1.2} />
         
-        {/* Bob/Jim seated */}
-        <group position={[0, 0.6, 0.1]}>
+        {/* Jim - Locked into seat */}
+        <group position={[0, 0.65, 0.1]}>
             <BlockHumanoid 
             scale={1.4} 
             materialProps={{...butterProps, depthTest: false}} 
@@ -130,14 +131,14 @@ const FloatingPlatform = ({ butterProps }) => {
             />
         </group>
 
-        {/* Home Lamp - Fixed coordinates to stay on rug */}
-        <HomeLamp position={[-0.8, 0.12, -0.6]} scale={1.0} rotation={[0, -Math.PI / 2, 0]} />
+        {/* Lamp - Moved onto rug next to chair */}
+        <HomeLamp position={[-1.2, 0.12, 0]} scale={0.9} rotation={[0, -Math.PI / 2, 0]} />
         
-        {/* Side Table */}
+        {/* Side Table - Locked */}
         <SideTable position={[1.2, 0.12, 0.5]} />
 
-        {/* Helper Standing Nearby */}
-        <group position={[1.1, 0.12, -0.8]} rotation={[0, -Math.PI / 4, 0]}>
+        {/* Helper Standing Nearby - Facing Jim */}
+        <group position={[1.1, 0.12, -0.9]} rotation={[0, -Math.PI / 4, 0]}>
             <BlockHumanoid 
             isHelper 
             scale={1.4} 
