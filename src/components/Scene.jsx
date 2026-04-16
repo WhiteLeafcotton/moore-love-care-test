@@ -124,9 +124,10 @@ const FloatingPlatform = () => {
 {/* Resident Seated in Chair */}
 {/* Resident Seated in Chair - Visible and Scaled Up */}
 {/* Resident Seated in Chair - Visible and Scaled Up */}
-<group position={[-0.75, 0.48, 0.1]} rotation={[0, (Math.PI * 3) / 2, 0]}>
+{/* Resident Seated in Chair - Pulling him out into the light */}
+<group position={[-0.55, 0.52, 0.3]} rotation={[0, (Math.PI * 3) / 2, 0]}>
   <BlockHumanoid 
-    scale={0.65} 
+    scale={0.7} 
     materialProps={{...butterProps, depthTest: true}} 
     poseProps={{ 
       leftLegRotation: [1.4, 0, 0], 
@@ -135,6 +136,8 @@ const FloatingPlatform = () => {
     }} 
   />
 </group>
+
+
 </group>
 
       {/* L-Lamp (unchanged) */}
