@@ -15,9 +15,9 @@ const getHillHeight = (x, z) => {
   const flatZone = 45; 
   const influence = dist < flatZone ? 0 : Math.min((dist - flatZone) / 25, 1.0);
   const hills = [
-    { x: 20, z: -100, h: 18, w: 16 },      
-    { x: -70, z: -50, h: 12, w: 12 },      
-    { x: 55, z: -40, h: 14, w: 14 }       
+    { x: 20, z: -100, h: 18, w: 16 },       
+    { x: -70, z: -50, h: 12, w: 12 },       
+    { x: 55, z: -40, h: 14, w: 14 }         
   ];
   let hillHeight = 0;
   hills.forEach(h => {
@@ -27,20 +27,17 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
-// --- FURNITURE: LAZY BOY & HOME LAMP ---
+// --- FURNITURE: LAZY BOY, LAMP, SIDE TABLE ---
 const LazyBoyChair = ({ position, rotation, scale = 0.7 }) => (
   <group position={position} rotation={rotation} scale={scale}>
-    {/* Main Seat Cushion */}
     <mesh position={[0, 0.4, 0]} renderOrder={10001}>
       <boxGeometry args={[1.5, 0.8, 1.5]} />
       <meshBasicMaterial color={DARKER_PINK_THEME} depthTest={false} transparent opacity={0.95} />
     </mesh>
-    {/* Plush Backrest */}
     <mesh position={[0, 1.2, -0.6]} rotation={[-0.3, 0, 0]} renderOrder={10001}>
       <boxGeometry args={[1.5, 1.6, 0.4]} />
       <meshBasicMaterial color={DARKER_PINK_THEME} depthTest={false} transparent opacity={0.95} />
     </mesh>
-    {/* Arms */}
     {[-0.85, 0.85].map((x, i) => (
       <mesh key={i} position={[x, 0.7, 0]} renderOrder={10001}>
         <boxGeometry args={[0.3, 0.6, 1.5]} />
@@ -50,29 +47,42 @@ const LazyBoyChair = ({ position, rotation, scale = 0.7 }) => (
   </group>
 );
 
-const HomeLamp = ({ position, scale = 1 }) => (
-  <group position={position} scale={scale}>
-    {/* Base on platform */}
+const SideTable = ({ position }) => (
+  <group position={position}>
+    <mesh position={[0, 0.35, 0]} renderOrder={10001}>
+      <cylinderGeometry args={[0.4, 0.4, 0.05, 32]} />
+      <meshBasicMaterial color="#ffffff" depthTest={false} transparent opacity={0.8} />
+    </mesh>
+    <mesh position={[0, 0.175, 0]} renderOrder={10001}>
+      <cylinderGeometry args={[0.05, 0.05, 0.35, 16]} />
+      <meshBasicMaterial color="#333" depthTest={false} />
+    </mesh>
+    {/* The Drink */}
+    <mesh position={[0.1, 0.45, 0]} renderOrder={10002}>
+      <cylinderGeometry args={[0.08, 0.06, 0.15, 16]} />
+      <meshStandardMaterial color="#ffcc00" emissive="#ffcc00" emissiveIntensity={0.5} depthTest={false} />
+    </mesh>
+  </group>
+);
+
+const HomeLamp = ({ position, scale = 1, rotation = [0, 0, 0] }) => (
+  <group position={position} scale={scale} rotation={rotation}>
     <mesh position={[0, 0.05, 0]} renderOrder={10001}>
       <cylinderGeometry args={[0.3, 0.3, 0.1, 32]} />
       <meshBasicMaterial color="#333" depthTest={false} />
     </mesh>
-    {/* Vertical Pole */}
     <mesh position={[0, 1.5, 0]} renderOrder={10001}>
       <cylinderGeometry args={[0.04, 0.04, 3, 16]} />
       <meshBasicMaterial color="#333" depthTest={false} />
     </mesh>
-    {/* L-Bend (Vertical section) */}
     <mesh position={[0, 3.1, 0]} renderOrder={10001}>
       <cylinderGeometry args={[0.04, 0.04, 0.2, 16]} />
       <meshBasicMaterial color="#333" depthTest={false} />
     </mesh>
-    {/* L-Bend Arm (Horizontal section) */}
     <mesh position={[0.7, 3.2, 0]} rotation={[0, 0, Math.PI / 2]} renderOrder={10001}>
       <cylinderGeometry args={[0.04, 0.04, 1.4, 16]} />
       <meshBasicMaterial color="#333" depthTest={false} />
     </mesh>
-    {/* Shades & Bulb over Bob's Head */}
     <group position={[1.4, 3.0, 0]} renderOrder={10002}>
       <mesh position={[0, 0, 0]} castShadow>
         <cylinderGeometry args={[0.25, 0.45, 0.6, 32, 1, true]} />
@@ -90,7 +100,6 @@ const HomeLamp = ({ position, scale = 1 }) => (
 const FloatingPlatform = ({ butterProps }) => {
   return (
     <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.4} position={[8.5, -2.2, 14.8]}>
-      
       {/* Platform Disk */}
       <mesh renderOrder={10000}>
         <cylinderGeometry args={[2.8, 2.8, 0.2, 64]} />
@@ -103,34 +112,36 @@ const FloatingPlatform = ({ butterProps }) => {
         <meshBasicMaterial color="#6e5c8a" depthTest={false} transparent opacity={0.3} />
       </mesh>
 
-      {/* Recliner - Centered */}
-      <LazyBoyChair position={[0, 0.15, 0]} rotation={[0, Math.PI / 4, 0]} scale={1.2} />
-
-      {/* Seated Resident (Bob) - Placed ON TOP of the platform recliner */}
-      <group position={[0, 0.6, 0]} rotation={[0, Math.PI / 4, 0]}>
+      {/* Jim in Recliner - Facing Camera */}
+      <LazyBoyChair position={[0, 0.15, 0]} rotation={[0, Math.PI, 0]} scale={1.2} />
+      <group position={[0, 0.6, 0.1]} rotation={[0, Math.PI, 0]}>
         <BlockHumanoid 
           scale={1.4} 
           materialProps={{...butterProps, depthTest: false}} 
           poseProps={{ 
             leftLegRotation: [1.5, 0, 0], 
             rightLegRotation: [1.5, 0, 0], 
-            torsoRotationX: 0.05 
+            torsoRotationX: 0.1,
+            leftArmRotation: [0.8, 0, 0.2],
+            rightArmRotation: [0.8, 0, -0.2]
           }} 
         />
       </group>
 
-      {/* Home Lamp - Placed ON TOP of the platform behind the chair */}
-      <HomeLamp position={[-1.0, 0.12, -1.0]} scale={1.2} />
+      {/* Scene Props */}
+      <SideTable position={[1.4, 0.12, 0.2]} />
+      <HomeLamp position={[-1.2, 0.12, -0.5]} scale={1.1} rotation={[0, -Math.PI / 2.5, 0]} />
 
-      {/* Helper - Standing ON TOP of the platform next to Bob */}
-      <group position={[1.1, 0.12, 0.4]} rotation={[0, -Math.PI / 1.5, 0]}>
+      {/* Helper */}
+      <group position={[-1.3, 0.12, 1.2]} rotation={[0, Math.PI / 4, 0]}>
         <BlockHumanoid 
           isHelper 
           scale={1.4} 
           materialProps={{...butterProps, depthTest: false}} 
           poseProps={{ 
-            headRotationY: -0.4, 
-            rightArmRotation: [1.1, 0, -0.3] 
+            headRotationY: 0.4, 
+            rightArmRotation: [0.2, 0, 0.1],
+            leftArmRotation: [0.2, 0, -0.1]
           }} 
         />
       </group>
@@ -568,7 +579,7 @@ export default function Scene({ currentView }) {
         position={[0, -1.45, 0]} 
       />
 
-      {/* Circle Platform with Bob, Helper, and Lamp placed ON TOP */}
+      {/* Floating Solarium Sanctuary Section */}
       <FloatingPlatform butterProps={butterProps} />
     </>
   );
