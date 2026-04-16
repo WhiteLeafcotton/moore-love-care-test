@@ -29,29 +29,29 @@ const getHillHeight = (x, z) => {
 };
 
 const FloatingPlatform = ({ butterProps }) => {
-  // 1. Give the humanoid a solid material that STILL uses depthTest
-  // This ensures he doesn't look like a ghost or have overlapping body parts.
-  const humanoidMaterial = { 
+  // We apply the 'always on top' logic directly to the humanoid's material properties
+  const forceVisibleMaterial = { 
     ...butterProps, 
     transparent: false, 
     opacity: 1, 
-    depthTest: true 
+    depthTest: false, // Forces him to stay in front of the stairs
+    renderOrder: 10001 
   };
 
   return (
     <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.4} position={[8.5, -2.2, 14.8]}>
       
-      {/* 2. THE DISK: We force this to draw on top of the world but BELOW the man */}
+      {/* 1. THE DISK */}
       <mesh renderOrder={10000}>
         <cylinderGeometry args={[2.8, 2.8, 0.2, 64]} />
-        <meshBasicMaterial color="#ffffff" depthTest={false} transparent={false} />
+        <meshBasicMaterial color="#ffffff" depthTest={false} />
       </mesh>
 
-      {/* 3. THE MAN: We force him to draw on top of the Disk */}
-      <group position={[0, 0.35, 0]} renderOrder={10001}>
+      {/* 2. THE HUMAN - Solid and Forced to the front */}
+      <group position={[0, 0.35, 0]}>
         <BlockHumanoid 
           scale={1.4} 
-          materialProps={humanoidMaterial} 
+          materialProps={forceVisibleMaterial} 
           poseProps={{ 
             leftLegRotation: [0, 0, 0], 
             rightLegRotation: [0, 0, 0], 
