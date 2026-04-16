@@ -31,41 +31,37 @@ const getHillHeight = (x, z) => {
 
 const LStyleLamp = ({ position }) => (
   <group position={position}>
-    <mesh position={[0, 0.05, 0]} renderOrder={10001}>
-      <cylinderGeometry args={[0.3, 0.3, 0.1, 32]} />
+    {/* Refined Base - Thinner and flatter for home use */}
+    <mesh position={[0, 0.02, 0]} renderOrder={10001}>
+      <cylinderGeometry args={[0.4, 0.4, 0.05, 32]} />
       <meshBasicMaterial color="#21162e" depthTest={false} transparent opacity={0.9} />
     </mesh>
+    
+    {/* Vertical Stand - Slightly thinner */}
     <mesh position={[0, 2, 0]} renderOrder={10001}>
-      <cylinderGeometry args={[0.04, 0.04, 4, 16]} />
+      <cylinderGeometry args={[0.02, 0.02, 4, 16]} />
       <meshBasicMaterial color="#21162e" depthTest={false} transparent opacity={0.9} />
     </mesh>
-    <mesh position={[-0.75, 4, 0]} rotation={[0, 0, Math.PI / 2]} renderOrder={10001}>
-      <cylinderGeometry args={[0.03, 0.03, 1.5, 16]} />
+    
+    {/* Horizontal Arm - Extended to reach exactly 1.4 units (distance to person) */}
+    <mesh position={[0.7, 4, 0]} rotation={[0, 0, Math.PI / 2]} renderOrder={10001}>
+      <cylinderGeometry args={[0.015, 0.015, 1.4, 16]} />
       <meshBasicMaterial color="#21162e" depthTest={false} transparent opacity={0.9} />
     </mesh>
-    <mesh position={[-1.5, 3.7, 0]} renderOrder={10002}>
-      <sphereGeometry args={[0.25, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2]} rotation={[Math.PI, 0, 0]} />
-      <meshBasicMaterial color="#ffffff" depthTest={false} transparent opacity={1} />
-    </mesh>
-  </group>
-);
-
-const LazyBoyChair = ({ position, rotation }) => (
-  <group position={position} rotation={rotation} scale={0.7}>
-    <mesh position={[0, 0.4, 0]} renderOrder={10001}>
-      <boxGeometry args={[1.5, 0.8, 1.5]} />
-      <meshBasicMaterial color={DARKER_PINK_THEME} depthTest={false} transparent opacity={0.95} />
-    </mesh>
-    <mesh position={[0, 1.2, -0.6]} rotation={[-0.3, 0, 0]} renderOrder={10001}>
-      <boxGeometry args={[1.5, 1.6, 0.4]} />
-      <meshBasicMaterial color={DARKER_PINK_THEME} depthTest={false} transparent opacity={0.95} />
-    </mesh>
-    {[-0.85, 0.85].map((x, i) => (
-      <mesh key={i} position={[x, 0.7, 0]} renderOrder={10001}>
-        <boxGeometry args={[0.3, 0.6, 1.5]} />
-        <meshBasicMaterial color={DARKER_PINK_THEME} depthTest={false} transparent opacity={0.95} />
+    
+    {/* Hanging Light Bulb/Shade - Now centered over the person's head */}
+    <group position={[1.4, 3.8, 0]}>
+       {/* Small wire */}
+       <mesh position={[0, 0.1, 0]}>
+         <cylinderGeometry args={[0.005, 0.005, 0.2]} />
+         <meshBasicMaterial color="#21162e" depthTest={false} />
+       </mesh>
+       {/* Domestic Lamp Shade */}
+       <mesh renderOrder={10002}>
+        <sphereGeometry args={[0.2, 32, 32, 0, Math.PI * 2, 0, Math.PI / 1.5]} rotation={[Math.PI, 0, 0]} />
+        <meshBasicMaterial color="#fff4d1" depthTest={false} transparent opacity={1} />
       </mesh>
-    ))}
+    </group>
   </group>
 );
 
@@ -74,21 +70,18 @@ const FloatingPlatform = () => {
 
   return (
     <Float speed={1.8} rotationIntensity={0.2} floatIntensity={0.5} position={[11, -1.0, 17]}>
-      {/* Platform Disk */}
       <mesh renderOrder={10000}>
         <cylinderGeometry args={[4.2, 4.2, 0.25, 64]} />
         <meshBasicMaterial color="#ffffff" depthTest={false} transparent opacity={0.8} />
       </mesh>
 
-      {/* The Recliner */}
-      <LazyBoyChair position={[-0.8, 0.2, 0]} rotation={[0, Math.PI / 4, 0]} />
+      <LazyBoyChair position={[-0.8, 0.2, 0]} rotation={[0, 0, 0]} />
 
-      {/* The L-Lamp */}
-      <LStyleLamp position={[-2.2, 0.2, -1.5]} />
+      {/* The L-Lamp - Positioned so the arm reaches the person at -0.8 */}
+      <LStyleLamp position={[-2.2, 0.2, 0]} />
 
-      {/* --- THE COUPLE (SEATED & STANDING) --- */}
       {/* Resident Seated in Chair */}
-      <group position={[-0.8, 0.7, 0]} rotation={[0, Math.PI / 4, 0]}>
+      <group position={[-0.8, 0.7, 0]} rotation={[0, 0, 0]}>
         <BlockHumanoid 
           scale={0.8} 
           materialProps={{...butterProps, depthTest: false}} 
@@ -99,23 +92,9 @@ const FloatingPlatform = () => {
           }} 
         />
       </group>
-
-      {/* Helper Standing Beside Chair */}
-      <group position={[1.2, 0.2, 1.0]} rotation={[0, -Math.PI / 1.5, 0]}>
-        <BlockHumanoid 
-          isHelper 
-          scale={0.9} 
-          materialProps={{...butterProps, depthTest: false}} 
-          poseProps={{ 
-            headRotationY: -0.4, 
-            rightArmRotation: [1.1, 0, -0.3] 
-          }} 
-        />
-      </group>
     </Float>
   );
 };
-
 // --- HUMANOID COMPONENTS ---
 const HeartBadge = () => {
   const shape = useMemo(() => {
