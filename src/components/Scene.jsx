@@ -100,29 +100,27 @@ const HomeLamp = ({ position, scale = 1, rotation = [0, 0, 0] }) => (
 // --- THE CIRCULAR FLOATING PLATFORM (SANCTUARY) ---
 // --- THE CIRCULAR FLOATING PLATFORM (SANCTUARY) ---
 // --- THE CIRCULAR FLOATING PLATFORM (SANCTUARY) ---
+// --- THE CIRCULAR FLOATING PLATFORM (SANCTUARY) ---
 const FloatingPlatform = ({ butterProps }) => {
   return (
     <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.4} position={[8.5, -2.2, 14.8]}>
       
-      {/* 1. Platform Disk - Expanded to 3.5 for better spacing */}
+      {/* Platform Disk */}
       <mesh renderOrder={10000}>
-        <cylinderGeometry args={[3.5, 3.5, 0.2, 64]} />
+        <cylinderGeometry args={[2.8, 2.8, 0.2, 64]} />
         <meshBasicMaterial color="#ffffff" depthTest={false} transparent opacity={0.8} />
       </mesh>
 
-      {/* 2. Circle Rug */}
+      {/* Circle Rug */}
       <mesh position={[0, 0.11, 0]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={10001}>
-        <circleGeometry args={[3.0, 64]} />
+        <circleGeometry args={[2.4, 64]} />
         <meshBasicMaterial color="#6e5c8a" depthTest={false} transparent opacity={0.3} />
       </mesh>
 
-      {/* 3. The Lamp - Shifted to the back-left edge to avoid clipping the chair */}
-      <HomeLamp position={[-1.8, 0.12, -1.2]} scale={1.2} />
-
-      {/* 4. Recliner - Centered */}
+      {/* Recliner - Centered */}
       <LazyBoyChair position={[0, 0.15, 0]} rotation={[0, Math.PI / 4, 0]} scale={1.2} />
 
-      {/* 5. Seated Resident (Bob) - Sitting in the chair */}
+      {/* Seated Resident (Bob) */}
       <group position={[0, 0.6, 0]} rotation={[0, Math.PI / 4, 0]}>
         <BlockHumanoid 
           scale={1.4} 
@@ -135,8 +133,13 @@ const FloatingPlatform = ({ butterProps }) => {
         />
       </group>
 
-      {/* 6. Helper - Standing slightly to the side and forward */}
-      <group position={[1.4, 0.12, 0.8]} rotation={[0, -Math.PI / 1.5, 0]}>
+      {/* --- THE LAMP: Fixed position and render order to stay on top --- */}
+      <group renderOrder={10005}>
+        <HomeLamp position={[-1.2, 0.12, -0.8]} scale={1.2} />
+      </group>
+
+      {/* Helper - Standing next to Bob */}
+      <group position={[1.1, 0.12, 0.4]} rotation={[0, -Math.PI / 1.5, 0]}>
         <BlockHumanoid 
           isHelper 
           scale={1.4} 
