@@ -39,14 +39,14 @@ const FloatingPlatform = ({ butterProps }) => {
   return (
     <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.4} position={[8.5, -2.2, 14.8]}>
       
-      {/* Platform Disk - Rendered First (Lower Order) */}
-      <mesh renderOrder={10000}>
+      {/* Platform Disk - High RenderOrder */}
+      <mesh renderOrder={99998}>
         <cylinderGeometry args={[2.8, 2.8, 0.2, 64]} />
         <meshBasicMaterial color="#ffffff" depthTest={false} />
       </mesh>
 
-      {/* Humanoid - Rendered Second (Higher Order) */}
-      <group position={[0, 0.35, 0]} renderOrder={10001}> 
+      {/* Humanoid - Even Higher RenderOrder */}
+      <group position={[0, 0.35, 0]} renderOrder={99999}> 
         <BlockHumanoid 
           scale={1.4} 
           materialProps={solidOverlayProps} 
