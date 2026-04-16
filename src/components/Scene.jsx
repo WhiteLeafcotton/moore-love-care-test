@@ -123,6 +123,7 @@ const FloatingPlatform = () => {
   {/* Resident Seated in Chair */}
 {/* Resident Seated in Chair */}
 {/* Resident Seated in Chair - Visible and Scaled Up */}
+{/* Resident Seated in Chair - Visible and Scaled Up */}
 <group position={[-0.75, 0.48, 0.1]} rotation={[0, (Math.PI * 3) / 2, 0]}>
   <BlockHumanoid 
     scale={0.65} 
