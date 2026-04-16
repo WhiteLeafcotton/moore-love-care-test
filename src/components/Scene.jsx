@@ -15,9 +15,9 @@ const getHillHeight = (x, z) => {
   const flatZone = 45; 
   const influence = dist < flatZone ? 0 : Math.min((dist - flatZone) / 25, 1.0);
   const hills = [
-    { x: 20, z: -100, h: 18, w: 16 },      
-    { x: -70, z: -50, h: 12, w: 12 },      
-    { x: 55, z: -40, h: 14, w: 14 }       
+    { x: 20, z: -100, h: 18, w: 16 },       
+    { x: -70, z: -50, h: 12, w: 12 },       
+    { x: 55, z: -40, h: 14, w: 14 }        
   ];
   let hillHeight = 0;
   hills.forEach(h => {
@@ -31,70 +31,98 @@ const getHillHeight = (x, z) => {
 
 const LStyleLamp = ({ position }) => (
   <group position={position}>
-    {/* Refined Base - Thinner and flatter for home use */}
-    <mesh position={[0, 0.02, 0]} renderOrder={10001}>
-      <cylinderGeometry args={[0.4, 0.4, 0.05, 32]} />
+    <mesh position={[0, 0.05, 0]} renderOrder={10001}>
+      <cylinderGeometry args={[0.3, 0.3, 0.1, 32]} />
       <meshBasicMaterial color="#21162e" depthTest={false} transparent opacity={0.9} />
     </mesh>
-    
-    {/* Vertical Stand - Slightly thinner */}
     <mesh position={[0, 2, 0]} renderOrder={10001}>
-      <cylinderGeometry args={[0.02, 0.02, 4, 16]} />
+      <cylinderGeometry args={[0.04, 0.04, 4, 16]} />
       <meshBasicMaterial color="#21162e" depthTest={false} transparent opacity={0.9} />
     </mesh>
-    
-    {/* Horizontal Arm - Extended to reach exactly 1.4 units (distance to person) */}
-    <mesh position={[0.7, 4, 0]} rotation={[0, 0, Math.PI / 2]} renderOrder={10001}>
-      <cylinderGeometry args={[0.015, 0.015, 1.4, 16]} />
+    <mesh position={[-0.75, 4, 0]} rotation={[0, 0, Math.PI / 2]} renderOrder={10001}>
+      <cylinderGeometry args={[0.03, 0.03, 1.5, 16]} />
       <meshBasicMaterial color="#21162e" depthTest={false} transparent opacity={0.9} />
     </mesh>
-    
-    {/* Hanging Light Bulb/Shade - Now centered over the person's head */}
-    <group position={[1.4, 3.8, 0]}>
-       {/* Small wire */}
-       <mesh position={[0, 0.1, 0]}>
-         <cylinderGeometry args={[0.005, 0.005, 0.2]} />
-         <meshBasicMaterial color="#21162e" depthTest={false} />
-       </mesh>
-       {/* Domestic Lamp Shade */}
-       <mesh renderOrder={10002}>
-        <sphereGeometry args={[0.2, 32, 32, 0, Math.PI * 2, 0, Math.PI / 1.5]} rotation={[Math.PI, 0, 0]} />
-        <meshBasicMaterial color="#fff4d1" depthTest={false} transparent opacity={1} />
-      </mesh>
-    </group>
+    <mesh position={[-1.5, 3.7, 0]} renderOrder={10002}>
+      <sphereGeometry args={[0.25, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2]} rotation={[Math.PI, 0, 0]} />
+      <meshBasicMaterial color="#ffffff" depthTest={false} transparent opacity={1} />
+    </mesh>
   </group>
 );
 
+const LazyBoyChair = ({ position, rotation }) => (
+  <group position={position} rotation={rotation} scale={0.7}>
+    <mesh position={[0, 0.4, 0]} renderOrder={10001}>
+      <boxGeometry args={[1.5, 0.8, 1.5]} />
+      <meshBasicMaterial color={DARKER_PINK_THEME} depthTest={false} transparent opacity={0.95} />
+    </mesh>
+    <mesh position={[0, 1.2, -0.6]} rotation={[-0.3, 0, 0]} renderOrder={10001}>
+      <boxGeometry args={[1.5, 1.6, 0.4]} />
+      <meshBasicMaterial color={DARKER_PINK_THEME} depthTest={false} transparent opacity={0.95} />
+    </mesh>
+    {[-0.85, 0.85].map((x, i) => (
+      <mesh key={i} position={[x, 0.7, 0]} renderOrder={10001}>
+        <boxGeometry args={[0.3, 0.6, 1.5]} />
+        <meshBasicMaterial color={DARKER_PINK_THEME} depthTest={false} transparent opacity={0.95} />
+      </mesh>
+    ))}
+  </group>
+);
+
+// --- UPDATED FLOATING PLATFORM (THE F ONE SPECS) ---
 const FloatingPlatform = () => {
   const butterProps = { color: "#fce4e4", roughness: 0.9, metalness: 0.02 };
 
   return (
     <Float speed={1.8} rotationIntensity={0.2} floatIntensity={0.5} position={[11, -1.0, 17]}>
+      {/* Platform Disk */}
       <mesh renderOrder={10000}>
         <cylinderGeometry args={[4.2, 4.2, 0.25, 64]} />
         <meshBasicMaterial color="#ffffff" depthTest={false} transparent opacity={0.8} />
       </mesh>
 
-      <LazyBoyChair position={[-0.8, 0.2, 0]} rotation={[0, 0, 0]} />
+      {/* Circle Rug under Chair - Match "F ONE" Positioning */}
+      <mesh position={[-0.8, 0.13, 0]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={10001}>
+        <circleGeometry args={[2.2, 64]} />
+        <meshBasicMaterial color={TITLE_PURPLE} depthTest={false} transparent opacity={0.3} />
+      </mesh>
 
-      {/* The L-Lamp - Positioned so the arm reaches the person at -0.8 */}
-      <LStyleLamp position={[-2.2, 0.2, 0]} />
+      {/* The Recliner */}
+      <LazyBoyChair position={[-0.8, 0.15, 0]} rotation={[0, Math.PI / 4, 0]} />
 
+      {/* The L-Lamp */}
+      <LStyleLamp position={[-2.2, 0.15, -1.5]} />
+
+      {/* --- THE COUPLE (SEATED & STANDING) --- */}
       {/* Resident Seated in Chair */}
-      <group position={[-0.8, 0.7, 0]} rotation={[0, 0, 0]}>
+      <group position={[-0.8, 0.62, 0]} rotation={[0, Math.PI / 4, 0]}>
         <BlockHumanoid 
           scale={0.8} 
           materialProps={{...butterProps, depthTest: false}} 
           poseProps={{ 
-            leftLegRotation: [1.4, 0, 0], 
-            rightLegRotation: [1.4, 0, 0], 
-            torsoRotationX: 0.1 
+            leftLegRotation: [1.5, 0, 0], 
+            rightLegRotation: [1.5, 0, 0], 
+            torsoRotationX: 0.05 
+          }} 
+        />
+      </group>
+
+      {/* Helper Standing Beside Chair */}
+      <group position={[1.2, 0.14, 0.9]} rotation={[0, -Math.PI / 1.5, 0]}>
+        <BlockHumanoid 
+          isHelper 
+          scale={0.92} 
+          materialProps={{...butterProps, depthTest: false}} 
+          poseProps={{ 
+            headRotationY: -0.4, 
+            rightArmRotation: [1.1, 0, -0.3] 
           }} 
         />
       </group>
     </Float>
   );
 };
+
 // --- HUMANOID COMPONENTS ---
 const HeartBadge = () => {
   const shape = useMemo(() => {
@@ -179,58 +207,62 @@ const BlockHumanoid = forwardRef(({ scale = 1, materialProps, poseProps = {}, is
       if (rightLegRef.current) rightLegRef.current.rotation.x = -swing;
       if (leftArmRef.current) leftArmRef.current.rotation.x = -swing * 0.5;
       if (rightArmRef.current) rightArmRef.current.rotation.x = swing * 0.5;
-    } else if (animateArmsTo) {
-      const reachProgress = THREE.MathUtils.smoothstep(t, 0.5, 3.5); 
-      if (leftArmRef.current) {
-        leftArmRef.current.rotation.x = THREE.MathUtils.lerp(leftArmRotation[0], animateArmsTo[0], reachProgress);
-        leftArmRef.current.rotation.z = THREE.MathUtils.lerp(leftArmRotation[2], animateArmsTo[2], reachProgress);
-      }
-      if (rightArmRef.current) {
-        rightArmRef.current.rotation.x = THREE.MathUtils.lerp(rightArmRotation[0], animateArmsTo[0], reachProgress);
-        rightArmRef.current.rotation.z = THREE.MathUtils.lerp(rightArmRotation[2], -animateArmsTo[2], reachProgress);
-      }
-    } else {
-        if (leftArmRef.current) leftArmRef.current.rotation.set(...leftArmRotation);
-        if (rightArmRef.current) rightArmRef.current.rotation.set(...rightArmRotation);
     }
-    
-    if (!isWalking && leftLegRef.current) leftLegRef.current.rotation.set(...leftLegRotation);
-    if (!isWalking && rightLegRef.current) rightLegRef.current.rotation.set(...rightLegRotation);
   });
 
   return (
     <group scale={scale} position={position} rotation={rotation} ref={innerGroupRef}>
       <group ref={torsoRef}>
-        <mesh ref={headRef} position={[0, 1.4, 0]} renderOrder={10002}><sphereGeometry args={[0.22, 32, 32]} /><meshStandardMaterial {...materialProps} /></mesh>
-        <mesh position={[0, 0.3, 0]} renderOrder={10002}><primitive object={torsoGeo} /><meshStandardMaterial {...materialProps} /></mesh>
+        <mesh ref={headRef} position={[0, 1.4, 0]} castShadow>
+          <sphereGeometry args={[0.22, 32, 32]} />
+          <meshStandardMaterial {...materialProps} />
+        </mesh>
+        <mesh position={[0, 0.3, 0]} castShadow>
+          <primitive object={torsoGeo} />
+          <meshStandardMaterial {...materialProps} />
+        </mesh>
         {isHelper && <HeartBadge />}
         <group position={[0, 1.2, 0]}>
-          <group ref={leftArmRef} position={[-0.22, 0, 0]}><mesh renderOrder={10002}><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh></group>
+          <group ref={leftArmRef} position={[-0.22, 0, 0]}>
+            <mesh castShadow>
+              <primitive object={limbGeo} />
+              <meshStandardMaterial {...materialProps} />
+            </mesh>
+          </group>
           <group ref={rightArmRef} position={[0.22, 0, 0]}>
-            <mesh renderOrder={10002}><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} />
-              {cane && <mesh position={[0, -0.7, 0.1]}><cylinderGeometry args={[0.015, 0.015, 1.1]} /><meshStandardMaterial color={DARKER_PINK_THEME} depthTest={false} /></mesh>}
+            <mesh castShadow>
+              <primitive object={limbGeo} />
+              <meshStandardMaterial {...materialProps} />
+              {cane && (
+                <mesh position={[0, -0.7, 0.1]}>
+                  <cylinderGeometry args={[0.015, 0.015, 1.1]} />
+                  <meshStandardMaterial color={DARKER_PINK_THEME} />
+                </mesh>
+              )}
             </mesh>
           </group>
         </group>
       </group>
-      {walker && (
-        <group position={[0, -0.2, 0.35]}>
-          <mesh position={[0.3, 0.45, 0]} renderOrder={10002}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color={DARKER_PINK_THEME} depthTest={false} /></mesh>
-          <mesh position={[-0.3, 0.45, 0]} renderOrder={10002}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color={DARKER_PINK_THEME} depthTest={false} /></mesh>
-          <mesh position={[0, 0.85, 0]} renderOrder={10002}><boxGeometry args={[0.65, 0.03, 0.03]} /><meshStandardMaterial color={DARKER_PINK_THEME} depthTest={false} /></mesh>
-          <mesh position={[0.3, 0.45, 0.3]} renderOrder={10002}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color={DARKER_PINK_THEME} depthTest={false} /></mesh>
-          <mesh position={[-0.3, 0.45, 0.3]} renderOrder={10002}><boxGeometry args={[0.03, 0.9, 0.03]} /><meshStandardMaterial color={DARKER_PINK_THEME} depthTest={false} /></mesh>
-          <mesh position={[0, 0.85, 0.3]} renderOrder={10002}><boxGeometry args={[0.6, 0.03, 0.03]} /><meshStandardMaterial color={DARKER_PINK_THEME} depthTest={false} /></mesh>
-        </group>
-      )}
       <group position={[0, 0.4, 0]}>
-        <group ref={leftLegRef} position={[-0.12, 0, 0]}><mesh renderOrder={10002}><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh></group>
-        <group ref={rightLegRef} position={[0.12, 0, 0]}><mesh renderOrder={10002}><primitive object={limbGeo} /><meshStandardMaterial {...materialProps} /></mesh></group>
+        <group ref={leftLegRef} position={[-0.12, 0, 0]}>
+          <mesh castShadow>
+            <primitive object={limbGeo} />
+            <meshStandardMaterial {...materialProps} />
+          </mesh>
+        </group>
+        <group ref={rightLegRef} position={[0.12, 0, 0]}>
+          <mesh castShadow>
+            <primitive object={limbGeo} />
+            <meshStandardMaterial {...materialProps} />
+          </mesh>
+        </group>
       </group>
     </group>
   );
 });
 
+// --- REST OF SCENE (GRASS, WATER, ETC) AS PER BLUE ---
+// ... (The rest of your original Blue script components here)
 // --- GRASS & ARCHITECTURE ---
 const GrassySassyHills = () => {
   const meshRef = useRef();
