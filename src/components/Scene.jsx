@@ -97,9 +97,9 @@ const HomeLamp = ({ position, scale = 1, rotation = [0, 0, 0] }) => (
 
 // --- THE CIRCULAR FLOATING PLATFORM (SANCTUARY) ---
 // --- THE CIRCULAR FLOATING PLATFORM (SANCTUARY) ---
+// --- THE CIRCULAR FLOATING PLATFORM (SANCTUARY) ---
 const FloatingPlatform = ({ butterProps }) => {
   return (
-    // Positioned to float near the stairs/water area
     <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.4} position={[8.5, -2.2, 14.8]}>
       
       {/* Platform Disk */}
@@ -108,16 +108,16 @@ const FloatingPlatform = ({ butterProps }) => {
         <meshBasicMaterial color="#ffffff" depthTest={false} transparent opacity={0.8} />
       </mesh>
 
-      {/* Aesthetic Circle Rug */}
+      {/* Circle Rug */}
       <mesh position={[0, 0.11, 0]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={10001}>
         <circleGeometry args={[2.4, 64]} />
         <meshBasicMaterial color="#6e5c8a" depthTest={false} transparent opacity={0.3} />
       </mesh>
 
-      {/* The Recliner Chair */}
+      {/* Recliner - Centered */}
       <LazyBoyChair position={[0, 0.15, 0]} rotation={[0, Math.PI / 4, 0]} scale={1.2} />
 
-      {/* Resident (Seated) */}
+      {/* Seated Resident (Bob) */}
       <group position={[0, 0.6, 0]} rotation={[0, Math.PI / 4, 0]}>
         <BlockHumanoid 
           scale={1.4} 
@@ -130,10 +130,10 @@ const FloatingPlatform = ({ butterProps }) => {
         />
       </group>
 
-      {/* Floor Lamp behind the chair */}
-      <HomeLamp position={[-1.0, 0.12, -1.0]} scale={1.2} />
+      {/* --- THE LAMP: Placed behind the chair on the platform --- */}
+      <HomeLamp position={[-1.2, 0.12, -0.8]} scale={1.2} />
 
-      {/* Helper (Standing next to chair) */}
+      {/* Helper - Standing next to Bob */}
       <group position={[1.1, 0.12, 0.4]} rotation={[0, -Math.PI / 1.5, 0]}>
         <BlockHumanoid 
           isHelper 
@@ -148,7 +148,6 @@ const FloatingPlatform = ({ butterProps }) => {
     </Float>
   );
 };
-
 // --- HUMANOID SYSTEM ---
 const HeartBadge = () => {
   const shape = useMemo(() => {
