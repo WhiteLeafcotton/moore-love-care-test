@@ -96,7 +96,7 @@ const FloatingPlatform = () => {
     >
       {/* Platform Disk */}
       <mesh renderOrder={10000}>
-        <cylinderGeometry args={[3.5, 3.5, 0.25, 64]} />
+        <cylinderGeometry args={[3, 3, 0.25, 64]} />
         <meshBasicMaterial
           color="#ffffff"
           depthTest={false}
