@@ -107,7 +107,8 @@ const FloatingPlatform = () => {
 
       {/* --- CHAIR + CHARACTER GROUP (clean layering fix) --- */}
       {/* --- CHAIR + CHARACTER GROUP (clean layering fix) --- */}
-<group position={[-0.3, 0.25, 0]}>
+{/* --- CHAIR + CHARACTER GROUP (clean layering fix) --- */}
+<group position={[-0.3, 0.25, 0.25]}>
         
         {/* Chair (background object) */}
         <LazyBoyChair
