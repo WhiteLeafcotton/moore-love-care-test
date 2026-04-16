@@ -1,4 +1,3 @@
-// Fixed imports: added useState back in
 import { useRef, useMemo, useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import { useThree, useFrame, extend, useLoader } from "@react-three/fiber";
 import { Environment, Sky, Float } from "@react-three/drei"; 
@@ -28,25 +27,25 @@ const getHillHeight = (x, z) => {
   return hillHeight * influence;
 };
 
-// --- SOLID LAMP COMPONENT ---
+// --- SOLID BRAND NEW LAMP ---
 const PlatformLamp = ({ position }) => (
   <group position={position}>
-    {/* Base - Solid Opaque */}
-    <mesh position={[0, 0.05, 0]}>
+    {/* Base - Solid Material */}
+    <mesh position={[0, 0.05, 0]} castShadow>
       <cylinderGeometry args={[0.25, 0.25, 0.1, 32]} />
-      <meshStandardMaterial color="#111" roughness={0.5} />
+      <meshStandardMaterial color="#1a1a1a" roughness={0.4} metalness={0.2} />
     </mesh>
-    {/* Pole - Solid Opaque */}
-    <mesh position={[0, 1.5, 0]}>
+    {/* Pole - Solid Material */}
+    <mesh position={[0, 1.5, 0]} castShadow>
       <cylinderGeometry args={[0.03, 0.03, 3, 16]} />
-      <meshStandardMaterial color="#111" roughness={0.5} />
+      <meshStandardMaterial color="#1a1a1a" roughness={0.4} metalness={0.2} />
     </mesh>
-    {/* Shade - Solid Opaque */}
-    <mesh position={[0, 3.1, 0]}>
+    {/* Shade - Solid Material */}
+    <mesh position={[0, 3.1, 0]} castShadow>
       <cylinderGeometry args={[0.3, 0.5, 0.7, 32]} />
-      <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.2} />
+      <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.1} roughness={1} />
     </mesh>
-    {/* Bulb - Solid Glow */}
+    {/* Light Bulb Glow */}
     <mesh position={[0, 3.0, 0]}>
       <sphereGeometry args={[0.15, 16, 16]} />
       <meshStandardMaterial color="#fff" emissive="#fff" emissiveIntensity={2} />
@@ -54,20 +53,21 @@ const PlatformLamp = ({ position }) => (
   </group>
 );
 
+// --- SOLID RECLINER ---
 const LazyBoyChair = ({ position, rotation, scale = 0.7 }) => (
   <group position={position} rotation={rotation} scale={scale}>
-    <mesh position={[0, 0.4, 0]}>
+    <mesh position={[0, 0.4, 0]} castShadow>
       <boxGeometry args={[1.5, 0.8, 1.5]} />
-      <meshStandardMaterial color={DARKER_PINK_THEME} />
+      <meshStandardMaterial color={DARKER_PINK_THEME} roughness={0.8} />
     </mesh>
-    <mesh position={[0, 1.2, -0.6]} rotation={[-0.3, 0, 0]}>
+    <mesh position={[0, 1.2, -0.6]} rotation={[-0.3, 0, 0]} castShadow>
       <boxGeometry args={[1.5, 1.6, 0.4]} />
-      <meshStandardMaterial color={DARKER_PINK_THEME} />
+      <meshStandardMaterial color={DARKER_PINK_THEME} roughness={0.8} />
     </mesh>
     {[-0.85, 0.85].map((x, i) => (
-      <mesh key={i} position={[x, 0.7, 0]}>
+      <mesh key={i} position={[x, 0.7, 0]} castShadow>
         <boxGeometry args={[0.3, 0.6, 1.5]} />
-        <meshStandardMaterial color={DARKER_PINK_THEME} />
+        <meshStandardMaterial color={DARKER_PINK_THEME} roughness={0.8} />
       </mesh>
     ))}
   </group>
@@ -77,20 +77,20 @@ const LazyBoyChair = ({ position, rotation, scale = 0.7 }) => (
 const FloatingPlatform = ({ butterProps }) => {
   return (
     <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.4} position={[8.5, -2.2, 14.8]}>
-      {/* 1. Platform Disk - SOLID OPAQUE */}
+      {/* 1. Platform Disk - Opaque White */}
       <mesh castShadow receiveShadow>
         <cylinderGeometry args={[2.8, 2.8, 0.2, 64]} />
         <meshStandardMaterial color="#ffffff" roughness={0.3} metalness={0.1} />
       </mesh>
 
-      {/* 2. Circle Rug - SOLID OPAQUE */}
-      <mesh position={[0, 0.11, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+      {/* 2. Circle Rug - Solid Deep Purple */}
+      <mesh position={[0, 0.11, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <circleGeometry args={[2.4, 64]} />
-        <meshStandardMaterial color="#6e5c8a" roughness={0.8} />
+        <meshStandardMaterial color="#4a3b63" roughness={1} />
       </mesh>
 
-      {/* 3. THE LAMP - Positioned specifically to avoid depth-clipping with the rug */}
-      <PlatformLamp position={[-0.8, 0.1, -0.5]} />
+      {/* 3. THE BRAND NEW LAMP - Locked and centered better on the rug */}
+      <PlatformLamp position={[-1.2, 0.1, -0.6]} />
 
       {/* 4. Recliner */}
       <LazyBoyChair position={[0, 0.15, 0]} rotation={[0, Math.PI / 4, 0]} scale={1.2} />
@@ -547,7 +547,7 @@ export default function Scene({ currentView }) {
         position={[0, -1.45, 0]} 
       />
 
-      {/* Floating Sanctuary - SOLID AND CENTERED */}
+      {/* Floating Sanctuary - Fully Opaque & Locked together */}
       <FloatingPlatform butterProps={butterProps} />
     </>
   );
