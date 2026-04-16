@@ -96,60 +96,54 @@ const HomeLamp = ({ position, scale = 1, rotation = [0, 0, 0] }) => (
 );
 
 // --- THE CIRCULAR FLOATING PLATFORM (SANCTUARY) ---
+// --- THE CIRCULAR FLOATING PLATFORM (SANCTUARY) ---
 const FloatingPlatform = ({ butterProps }) => {
   return (
+    // Positioned to float near the stairs/water area
     <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.4} position={[8.5, -2.2, 14.8]}>
+      
       {/* Platform Disk */}
       <mesh renderOrder={10000}>
         <cylinderGeometry args={[2.8, 2.8, 0.2, 64]} />
         <meshBasicMaterial color="#ffffff" depthTest={false} transparent opacity={0.8} />
       </mesh>
 
-      {/* Circle Rug */}
+      {/* Aesthetic Circle Rug */}
       <mesh position={[0, 0.11, 0]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={10001}>
         <circleGeometry args={[2.4, 64]} />
         <meshBasicMaterial color="#6e5c8a" depthTest={false} transparent opacity={0.3} />
       </mesh>
 
-      {/* Main Container Group - Rotated to face Camera */}
-      <group rotation={[0, Math.PI / 1.6, 0]}>
-        {/* Chair - Locked */}
-        <LazyBoyChair position={[0, 0.15, 0]} scale={1.2} />
-        
-        {/* Jim - Locked into seat */}
-        <group position={[0, 0.65, 0.1]}>
-            <BlockHumanoid 
-            scale={1.4} 
-            materialProps={{...butterProps, depthTest: false}} 
-            poseProps={{ 
-                leftLegRotation: [1.5, 0, 0], 
-                rightLegRotation: [1.5, 0, 0], 
-                torsoRotationX: 0.1,
-                leftArmRotation: [0.8, 0, 0.2],
-                rightArmRotation: [0.8, 0, -0.2]
-            }} 
-            />
-        </group>
+      {/* The Recliner Chair */}
+      <LazyBoyChair position={[0, 0.15, 0]} rotation={[0, Math.PI / 4, 0]} scale={1.2} />
 
-        {/* Lamp - Moved onto rug next to chair */}
-        <HomeLamp position={[-1.2, 0.12, 0]} scale={0.9} rotation={[0, -Math.PI / 2, 0]} />
-        
-        {/* Side Table - Locked */}
-        <SideTable position={[1.2, 0.12, 0.5]} />
+      {/* Resident (Seated) */}
+      <group position={[0, 0.6, 0]} rotation={[0, Math.PI / 4, 0]}>
+        <BlockHumanoid 
+          scale={1.4} 
+          materialProps={{...butterProps, depthTest: false}} 
+          poseProps={{ 
+            leftLegRotation: [1.5, 0, 0], 
+            rightLegRotation: [1.5, 0, 0], 
+            torsoRotationX: 0.05 
+          }} 
+        />
+      </group>
 
-        {/* Helper Standing Nearby - Facing Jim */}
-        <group position={[1.1, 0.12, -0.9]} rotation={[0, -Math.PI / 4, 0]}>
-            <BlockHumanoid 
-            isHelper 
-            scale={1.4} 
-            materialProps={{...butterProps, depthTest: false}} 
-            poseProps={{ 
-                headRotationY: -0.4, 
-                rightArmRotation: [0.2, 0, 0.1],
-                leftArmRotation: [0.2, 0, -0.1]
-            }} 
-            />
-        </group>
+      {/* Floor Lamp behind the chair */}
+      <HomeLamp position={[-1.0, 0.12, -1.0]} scale={1.2} />
+
+      {/* Helper (Standing next to chair) */}
+      <group position={[1.1, 0.12, 0.4]} rotation={[0, -Math.PI / 1.5, 0]}>
+        <BlockHumanoid 
+          isHelper 
+          scale={1.4} 
+          materialProps={{...butterProps, depthTest: false}} 
+          poseProps={{ 
+            headRotationY: -0.4, 
+            rightArmRotation: [1.1, 0, -0.3] 
+          }} 
+        />
       </group>
     </Float>
   );
