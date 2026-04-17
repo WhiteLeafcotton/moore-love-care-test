@@ -182,7 +182,7 @@ const FloatingPlatform = () => {
 {/* Resident Seated - Grounded butt and centered on the cushion */}
 <group position={[-0.45, 0.28, -0.55]} rotation={[0, Math.PI / 2, 0]}>
   <BlockHumanoid 
-    scale={0.65} 
+    scale={1} 
     materialProps={{
       ...butterProps, 
       depthTest: false, 
