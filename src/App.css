@@ -62,7 +62,7 @@ canvas {
   z-index: -1;
   
   /* NEARLY TRANSPARENT BASE */
-  background-color: rgba(247, 236, 232, 0.03); 
+  background-color: rgba(247, 236, 232, 0.01); 
   
   /* REDUCED BLUR FOR MAXIMUM CLARITY */
   backdrop-filter: blur(8px) saturate(102%);
