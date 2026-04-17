@@ -65,8 +65,8 @@ canvas {
   background-color: rgba(247, 236, 232, 0.01); 
   
   /* REDUCED BLUR FOR MAXIMUM CLARITY */
-  backdrop-filter: blur(8px) saturate(102%);
-  -webkit-backdrop-filter: blur(8px) saturate(102%);
+  backdrop-filter: blur(3px) saturate(101%);
+  -webkit-backdrop-filter: blur(3px) saturate(101%);
 
   /* WHISPER-THIN RADIAL GLOW */
   background: radial-gradient(
