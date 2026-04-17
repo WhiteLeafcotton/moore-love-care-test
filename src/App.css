@@ -13,7 +13,7 @@
   --text-main: #1f1726;
   --text-soft: rgba(31, 23, 38, 0.4);
 
-  /* ✅ DYNAMGGIC SAFE AREAS */
+  /* ✅ DYNAMIC SAFE AREAS */
   --safe-top: env(safe-area-inset-top);
   --safe-bottom: env(safe-area-inset-bottom);
 }
@@ -70,18 +70,17 @@ canvas {
 
   pointer-events: none;
   
-  /* ✅ ULTRA THICK FROST */
-  /* Added a slight background-color so the 30px blur doesn't look thin at the edges */
+  /* ✅ FIX: ADDED SEMI-TRANSPARENT BASE FOR BLUR TO WORK */
   background-color: rgba(247, 236, 232, 0.1); 
-  
+
+  /* ✅ FROST SETTINGS */
   backdrop-filter: blur(30px); 
   -webkit-backdrop-filter: blur(30px);
 
   /* ✅ HEAVY RADIAL GLOW */
-  /* This ensures the center (where your characters are) is the "milkiest" part */
   background: radial-gradient(
     circle at 50% 50%,
-    rgba(247, 236, 232, 0.9) 0%,   /* Increased to 0.9 for maximum center whiteness */
+    rgba(247, 236, 232, 0.9) 0%,   
     rgba(247, 236, 232, 0.6) 35%, 
     rgba(247, 236, 232, 0.2) 75%,
     transparent 100%
@@ -101,7 +100,6 @@ canvas {
   pointer-events: auto;
 }
 
-/* ✅ LOGO DELETED */
 .logo {
   display: none !important;
 }
@@ -111,28 +109,27 @@ canvas {
 .hero-container {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start; /* ✅ PUSHED TO THE TOP */
-  padding-top: 0; /* Removed padding to maximize the "Push Up" effect */
+  justify-content: flex-start; 
+  padding-top: 0; 
   flex-grow: 1;
 }
 
 .brand-title {
-  /* ✅ OMEGLE FONT */
   font-family: 'Omegle', sans-serif;
   font-size: clamp(4rem, 10vw, 8.5rem);
   line-height: 1; 
   letter-spacing: -0.04em;
   pointer-events: auto;
   text-transform: uppercase;
-  white-space: nowrap; /* ✅ FORCE SAME LINE ON WEB */
-  margin-top: -1vh; /* Nudges title even higher into the safe area */
+  white-space: nowrap; 
+  margin-top: -1vh; 
 }
 
 .brand-subtitle {
   font-size: 11px;
   letter-spacing: 0.8em;
   text-transform: uppercase;
-  color: var(--text-main); /* Slightly darker for better readability against heavy frost */
+  color: var(--text-main); 
   margin-bottom: 1.5rem;
 }
 
@@ -217,17 +214,15 @@ canvas {
     background: radial-gradient(
       circle at 50% 50%,
       rgba(247, 236, 232, 0.8) 0%, 
-      rgba(247, 236, 232, 0.3) 100%
+      rgba(247, 236, 232, 0.4) 100%
     );
   }
 
-  /* ✅ MOVE TITLE TO TOP LEFT ON MOBILE */
   .hero-container {
     justify-content: flex-start;
     padding-top: 5px;
   }
 
-  /* ✅ BROW TEXT (SUBTITLE) SHOWING ON MOBILE */
   .brand-subtitle { 
     display: block !important; 
     font-size: 8px;
@@ -237,10 +232,10 @@ canvas {
 
   .brand-title {
     font-family: 'Omegle', sans-serif;
-    font-size: 5.5rem; /* KEEPING LARGE MOBILE SIZE */
+    font-size: 5.5rem; 
     line-height: 0.85;
     text-align: left;
-    white-space: normal; /* ALLOW WRAP ON MOBILE */
+    white-space: normal; 
   }
 
   .main-footer {
