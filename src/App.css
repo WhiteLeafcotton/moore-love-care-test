@@ -179,6 +179,7 @@ canvas {
 }
 
 /* ================= MOBILE OVERRIDES ================= */
+/* ================= MOBILE OVERRIDES ================= */
 
 @media (max-width: 768px) {
   /* 1. Adjusted Inquiry Button */
@@ -186,7 +187,7 @@ canvas {
     top: calc(var(--safe-top) + 20px);
     right: 5vw;
     padding: 8px 16px;
-    font-size: 8px; /* Slightly smaller text for mobile */
+    font-size: 8px;
   }
 
   /* 2. Lightened Frost for Mobile */
@@ -198,13 +199,13 @@ canvas {
     );
   }
 
-  /* 3. SHRUNK TITLE (Now significantly smaller than 5.8rem) */
+  /* 3. SHRUNK TITLE */
   .brand-title {
-    font-size: 3.8rem; /* Scaled down for better fit */
+    font-size: 3.8rem; 
     line-height: 0.95;
-    text-align: left;
+    text-align: left; /* Keep title left-aligned or change to center if preferred */
     white-space: normal; 
-    margin-top: 0; /* Resetting negative margin for smaller text */
+    margin-top: 0;
   }
 
   .brand-subtitle { 
@@ -214,28 +215,34 @@ canvas {
     margin-bottom: 2rem;
   }
 
-  /* 4. OPTIMIZED FOOTER (Stacks for readability) */
+  /* 4. OPTIMIZED & CENTERED FOOTER */
   .main-footer {
-    flex-direction: column; /* Stack vertically */
-    align-items: flex-start; /* Align everything to the left */
-    gap: 20px;
-    padding-bottom: 2vh;
+    flex-direction: column; /* Stack elements */
+    align-items: center;    /* Center everything horizontally */
+    justify-content: center;
+    gap: 15px;              /* Space between sections */
+    padding-bottom: 3vh;
+    width: 100%;
   }
 
   .social-links {
     width: 100%;
-    justify-content: flex-start;
-    gap: 20px;
+    justify-content: center; /* Center social icons */
+    gap: 24px;
+    margin-bottom: 5px;
   }
 
   .footer-tag {
-    text-align: left; /* Align center tag to the left */
-    order: 3; /* Push copyright/tag to the bottom */
+    text-align: center;      /* Center the copyright/middle tag */
+    width: 100%;
+    order: 2;
   }
 
   .footer-right {
-    text-align: left; /* Align right text to the left */
+    text-align: center;      /* Center the address/right info */
+    width: 100%;
     font-size: 8px;
+    order: 3;
   }
 
   /* 5. MOBILE FEATURE SECTION FROST */
