@@ -37,10 +37,9 @@ canvas {
   inset: 0;
   width: 100vw !important;
   height: 100dvh !important;
-  z-index: 1; /* ✅ Canvas stays at the bottom */
 }
 
-/* ================= THE FROST FIX ================= */
+/* ================= UI OVERLAY (LIGHTER MILKY FROST) ================= */
 
 .ui-overlay {
   position: fixed;
@@ -51,36 +50,30 @@ canvas {
   justify-content: space-between;
   padding: calc(var(--safe-top) + 6vh) 7vw calc(var(--safe-bottom) + 6vh);
   pointer-events: none;
+  
+  /* ✅ LIGHTENED BASE: Reduced from 0.45 to 0.25 for more clarity */
+  background-color: rgba(247, 236, 232, 0.25); 
+
+  /* ✅ SMOOTH HEAVY BLUR */
+  backdrop-filter: blur(35px) saturate(130%); 
+  -webkit-backdrop-filter: blur(35px) saturate(130%);
+
+  /* ✅ LIGHTENED RADIAL GLOW: Softened the center concentrations */
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(247, 236, 232, 0.75) 0%,   /* Lightened from 0.95 */
+    rgba(247, 236, 232, 0.4) 45%,    /* Lightened from 0.7 */
+    rgba(247, 236, 232, 0.1) 85%,
+    transparent 100%
+  );
+  
   transition: opacity 1.2s ease-in-out;
 }
 
-/* ✅ THIS IS THE ACTUAL FROST LAYER */
-.ui-overlay::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1; /* Sits behind the text but inside the overlay */
-  
-  /* ✅ ULTRA MILKY BASE */
-  background-color: rgba(247, 236, 232, 0.3); 
-  
-  /* ✅ THE HEAVY BLUR */
-  backdrop-filter: blur(40px) saturate(150%);
-  -webkit-backdrop-filter: blur(40px) saturate(150%);
-
-  /* ✅ CENTER GLOW */
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgba(247, 236, 232, 0.95) 0%,   
-    rgba(247, 236, 232, 0.7) 40%, 
-    rgba(247, 236, 232, 0.3) 80%,
-    transparent 100%
-  );
-}
-
+/* ✅ REMOVED LOGO */
 .logo { display: none !important; }
 
-/* ================= HERO (PUSHED UP) ================= */
+/* ================= HERO (PUSHED UP & CENTER-LINE WEB) ================= */
 
 .hero-container {
   display: flex;
@@ -97,8 +90,9 @@ canvas {
   letter-spacing: -0.04em;
   pointer-events: auto;
   text-transform: uppercase;
+  /* ✅ WEB ONLY SAME LINE */
   white-space: nowrap; 
-  margin-top: -3vh; /* Pushed way up */
+  margin-top: -2.5vh; 
 }
 
 .brand-subtitle {
@@ -155,30 +149,38 @@ canvas {
   transition: opacity 0.3s;
 }
 
-/* ================= MOBILE ================= */
+/* ================= MOBILE OVERRIDES ================= */
 
 @media (max-width: 768px) {
-  .ui-overlay::before {
+  .ui-overlay {
+    /* Lighter radial for mobile */
     background: radial-gradient(
       circle at 50% 50%,
-      rgba(247, 236, 232, 0.9) 0%, 
-      rgba(247, 236, 232, 0.5) 100%
+      rgba(247, 236, 232, 0.75) 0%, 
+      rgba(247, 236, 232, 0.3) 100%
     );
+  }
+
+  /* ✅ MOBILE TOP LEFT ALIGNMENT */
+  .hero-container {
+    justify-content: flex-start;
+    padding-top: 10px;
   }
 
   .brand-title {
     font-size: 5.8rem; 
     line-height: 0.85;
     text-align: left;
-    white-space: normal; 
+    white-space: normal; /* Wraps on mobile */
   }
 
+  /* ✅ MOBILE VISIBLE BROW TEXT */
   .brand-subtitle { display: block !important; font-size: 8px; }
 
-  /* ✅ MOBILE FEATURE SECTION FROST */
+  /* ✅ FEATURE SECTION FROST */
   .feature-large {
     position: relative;
-    background-color: rgba(247, 236, 232, 0.3) !important;
+    background-color: rgba(247, 236, 232, 0.2) !important;
     backdrop-filter: blur(30px) !important;
     -webkit-backdrop-filter: blur(30px) !important;
   }
