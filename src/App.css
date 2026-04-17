@@ -1,8 +1,7 @@
 /* ✅ CUSTOM FONT DEFINITION */
 @font-face {
-  font-family: 'Macker';
-  /* Since it's in the public folder, we just use /Filename */
-  src: url('/Macker.ttf') format('truetype'); 
+  font-family: 'Macker'; /* Change the name here */
+  src: url('/fonts/Macker.ttf') format('truetype'); /* Update filename and format */
   font-weight: normal;
   font-style: normal;
 }
@@ -115,7 +114,7 @@ canvas {
 }
 
 .brand-title {
-  font-family: 'Omegle', sans-serif;
+  font-family: 'Macker', sans-serif; /
   font-size: clamp(4rem, 10vw, 8.5rem);
   line-height: 1; 
   letter-spacing: -0.04em;
