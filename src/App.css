@@ -1,7 +1,8 @@
 /* ✅ CUSTOM FONT DEFINITION */
 @font-face {
-  font-family: 'Omegle';
-  src: url('/fonts/OMEGLE.otf') format('opentype');
+  font-family: 'Macker';
+  /* Since it's in the public folder, we just use /Filename */
+  src: url('/Macker.ttf') format('truetype'); 
   font-weight: normal;
   font-style: normal;
 }
