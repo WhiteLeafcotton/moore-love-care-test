@@ -61,12 +61,12 @@ canvas {
   inset: 0;
   z-index: -1;
   
- /* ✅ THE SWEET SPOT: Just enough to feel premium, not enough to hide art */
-  background-color: rgba(247, 236, 232, 0.004); 
+ /* ✅ THE PERFECT RATIO */
+  background-color: rgba(247, 236, 232, 0.0045); 
   
-  /* ✅ BALANCED BLUR */
-  backdrop-filter: blur(2px) saturate(101%);
-  -webkit-backdrop-filter: blur(2px) saturate(101%);
+  /* ✅ SPLITTING THE DIFFERENCE */
+  backdrop-filter: blur(2.5px) saturate(101%);
+  -webkit-backdrop-filter: blur(2.5px) saturate(101%);
 
   /* WHISPER-THIN RADIAL GLOW */
   background: radial-gradient(
