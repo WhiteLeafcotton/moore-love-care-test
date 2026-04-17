@@ -1,3 +1,11 @@
+/* ✅ CUSTOM FONT DEFINITION (Linked from public/fonts/OMEGLE.otf) */
+@font-face {
+  font-family: 'Omegle';
+  src: url('/fonts/OMEGLE.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400&family=Inter:wght@300;400;600&display=swap');
 
 :root {
@@ -104,11 +112,13 @@ canvas {
 }
 
 .brand-title {
-  font-family: 'Cormorant Garamond', serif;
+  /* ✅ UPDATED FONT */
+  font-family: 'Omegle', sans-serif;
   font-size: clamp(4rem, 10vw, 8.5rem);
   line-height: 0.82;
   letter-spacing: -0.04em;
   pointer-events: auto;
+  text-transform: uppercase;
 }
 
 .brand-subtitle {
@@ -208,6 +218,8 @@ canvas {
   .brand-subtitle { display: none !important; }
 
   .brand-title {
+    /* ✅ APPLIED OMEGLE TO MOBILE */
+    font-family: 'Omegle', sans-serif;
     font-size: 4.5rem;
     line-height: 0.9;
   }
