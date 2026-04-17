@@ -54,10 +54,12 @@ canvas {
 
 /* ================= UI OVERLAY ================= */
 
+/* ================= UI OVERLAY (MILKY FROST FIX) ================= */
+
 .ui-overlay {
   position: fixed;
   inset: 0;
-  z-index: 100;
+  z-index: 999; /* ✅ Higher Z-index to ensure it sits above everything */
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -70,25 +72,26 @@ canvas {
 
   pointer-events: none;
   
-  /* ✅ ULTRA-HEAVY FROST BASE */
-  background-color: rgba(247, 236, 232, 0.2); 
-  backdrop-filter: blur(30px); 
-  -webkit-backdrop-filter: blur(30px);
+  /* ✅ THE MILKY SECRET: 
+     We use a semi-opaque background color so the blur has 'mass' to work with. 
+  */
+  background-color: rgba(247, 236, 232, 0.45); 
 
-  /* ✅ HEAVY RADIAL GLOW: Concentrated central frost */
+  /* ✅ HEAVY BLUR */
+  backdrop-filter: blur(40px) saturate(120%); 
+  -webkit-backdrop-filter: blur(40px) saturate(120%);
+
+  /* ✅ RADIAL DEPTH: Stronger center concentration for your characters */
   background: radial-gradient(
     circle at 50% 50%,
-    rgba(247, 236, 232, 0.9) 0%,   
-    rgba(247, 236, 232, 0.6) 35%, 
-    rgba(247, 236, 232, 0.2) 75%,
+    rgba(247, 236, 232, 0.95) 0%,   /* Very milky center */
+    rgba(247, 236, 232, 0.7) 40%, 
+    rgba(247, 236, 232, 0.3) 80%,
     transparent 100%
   );
   
   transition: opacity 1.2s ease-in-out;
 }
-
-.fade-out { opacity: 0; }
-
 /* ================= HEADER ================= */
 
 .main-header {
