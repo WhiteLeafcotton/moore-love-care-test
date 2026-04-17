@@ -192,7 +192,9 @@ const FloatingPlatform = () => {
     poseProps={{ 
       leftLegRotation: [1.4, 0, 0], 
       rightLegRotation: [1.4, 0, 0], 
-      torsoRotationX: 0.1 
+      // Adjusted body lean and head tilt
+      torsoRotationX: -0.05, // Pulls the torso slightly forward
+      headRotationX: 0.2,    // Tilts the head down so he isn't staring at the sky
     }} 
   />
 </group>
