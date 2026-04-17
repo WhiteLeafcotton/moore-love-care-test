@@ -70,16 +70,17 @@ canvas {
 
   pointer-events: none;
   
-  /* ✅ THICKER FROST SETTINGS */
-  backdrop-filter: blur(4px); /* Increased blur */
-  -webkit-backdrop-filter: blur(4px);
+  /* ✅ MAXIMUM FROST SETTINGS */
+  backdrop-filter: blur(12px); /* Heavily increased blur for that deep frosted glass look */
+  -webkit-backdrop-filter: blur(12px);
 
-  /* ✅ THICKER RADIAL FROST: Stronger center glow */
+  /* ✅ HEAVY RADIAL FROST: Strong central concentration */
   background: radial-gradient(
     circle at 50% 50%,
-    rgba(247, 236, 232, 0.5) 0%, /* Increased opacity */
-    rgba(247, 236, 232, 0.15) 50%,
-    transparent 90%
+    rgba(247, 236, 232, 0.8) 0%, /* Deeply opaque center */
+    rgba(247, 236, 232, 0.4) 40%,
+    rgba(247, 236, 232, 0.1) 70%,
+    transparent 100%
   );
   
   transition: opacity 1.2s ease-in-out;
@@ -106,8 +107,8 @@ canvas {
 .hero-container {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start; /* ✅ Moves title UP on web */
-  padding-top: 2vh; /* Slight nudge for high-end positioning */
+  justify-content: flex-start; /* ✅ PUSHED TO THE TOP */
+  padding-top: 0; /* Removed padding to maximize the "Push Up" effect */
   flex-grow: 1;
 }
 
@@ -115,18 +116,19 @@ canvas {
   /* ✅ OMEGLE FONT */
   font-family: 'Omegle', sans-serif;
   font-size: clamp(4rem, 10vw, 8.5rem);
-  line-height: 0.95; /* Increased to accommodate same-line height */
+  line-height: 1; 
   letter-spacing: -0.04em;
   pointer-events: auto;
   text-transform: uppercase;
   white-space: nowrap; /* ✅ FORCE SAME LINE ON WEB */
+  margin-top: -1vh; /* Nudges title even higher into the safe area */
 }
 
 .brand-subtitle {
   font-size: 11px;
   letter-spacing: 0.8em;
   text-transform: uppercase;
-  color: var(--text-soft);
+  color: var(--text-main); /* Slightly darker for better readability against heavy frost */
   margin-bottom: 1.5rem;
 }
 
@@ -207,18 +209,18 @@ canvas {
       25px
       calc(var(--safe-bottom) + 25px);
 
-    /* Thicker Frost Mobile */
+    /* Heavy Frost Mobile */
     background: radial-gradient(
       circle at 50% 50%,
-      rgba(247, 236, 232, 0.6) 0%, /* Thicker for mobile */
-      transparent 85%
+      rgba(247, 236, 232, 0.8) 0%, 
+      rgba(247, 236, 232, 0.3) 100%
     );
   }
 
   /* ✅ MOVE TITLE TO TOP LEFT ON MOBILE */
   .hero-container {
     justify-content: flex-start;
-    padding-top: 10px;
+    padding-top: 5px;
   }
 
   /* ✅ BROW TEXT (SUBTITLE) SHOWING ON MOBILE */
@@ -231,10 +233,10 @@ canvas {
 
   .brand-title {
     font-family: 'Omegle', sans-serif;
-    font-size: 5.5rem; /* ✅ INCREASED MOBILE SIZE */
+    font-size: 5.5rem; /* KEEPING LARGE MOBILE SIZE */
     line-height: 0.85;
     text-align: left;
-    white-space: normal; /* ✅ ALLOW WRAP ON MOBILE SO IT FITS */
+    white-space: normal; /* ALLOW WRAP ON MOBILE */
   }
 
   .main-footer {
