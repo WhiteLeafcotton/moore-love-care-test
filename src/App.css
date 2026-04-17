@@ -71,8 +71,8 @@ canvas {
   pointer-events: none;
   
   /* ✅ MAXIMUM FROST SETTINGS */
-  backdrop-filter: blur(12px); /* Heavily increased blur for that deep frosted glass look */
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(30px); /* Heavily increased blur for that deep frosted glass look */
+  -webkit-backdrop-filter: blur(30px);
 
   /* ✅ HEAVY RADIAL FROST: Strong central concentration */
   background: radial-gradient(
