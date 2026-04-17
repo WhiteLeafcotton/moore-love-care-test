@@ -218,7 +218,7 @@ canvas {
 
   /* 3. SHRUNK TITLE */
   .brand-title {
-    font-size: 3.8rem; 
+    font-size: 9 rem; 
     line-height: 0.95;
     text-align: left; /* Keep title left-aligned or change to center if preferred */
     white-space: normal; 
