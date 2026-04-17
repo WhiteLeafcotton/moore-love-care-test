@@ -12,8 +12,6 @@
   --bg: #f7ece8;
   --text-main: #1f1726;
   --text-soft: rgba(31, 23, 38, 0.4);
-
-  /* ✅ DYNAMIC SAFE AREAS */
   --safe-top: env(safe-area-inset-top);
   --safe-bottom: env(safe-area-inset-bottom);
 }
@@ -26,7 +24,6 @@
   -webkit-font-smoothing: antialiased;
 }
 
-/* ✅ PREVENT ZOOM & WHITE BARS */
 html, body, #root {
   width: 100%;
   height: 100%;
@@ -35,82 +32,60 @@ html, body, #root {
   position: fixed;
 }
 
-/* ✅ FULL VIEWPORT LOCK */
-.app-viewport {
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100dvh;
-  background: transparent;
-}
-
-/* ✅ CANVAS FULL BLEED */
 canvas {
   position: fixed !important;
   inset: 0;
   width: 100vw !important;
   height: 100dvh !important;
+  z-index: 1; /* ✅ Canvas stays at the bottom */
 }
 
-/* ================= UI OVERLAY ================= */
-
-/* ================= UI OVERLAY (MILKY FROST FIX) ================= */
+/* ================= THE FROST FIX ================= */
 
 .ui-overlay {
   position: fixed;
   inset: 0;
-  z-index: 999; /* ✅ Higher Z-index to ensure it sits above everything */
+  z-index: 100;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-
-  /* Responsive Padding */
-  padding: 
-    calc(var(--safe-top) + 6vh) 
-    7vw 
-    calc(var(--safe-bottom) + 6vh);
-
+  padding: calc(var(--safe-top) + 6vh) 7vw calc(var(--safe-bottom) + 6vh);
   pointer-events: none;
+  transition: opacity 1.2s ease-in-out;
+}
+
+/* ✅ THIS IS THE ACTUAL FROST LAYER */
+.ui-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1; /* Sits behind the text but inside the overlay */
   
-  /* ✅ THE MILKY SECRET: 
-     We use a semi-opaque background color so the blur has 'mass' to work with. 
-  */
-  background-color: rgba(247, 236, 232, 0.45); 
+  /* ✅ ULTRA MILKY BASE */
+  background-color: rgba(247, 236, 232, 0.3); 
+  
+  /* ✅ THE HEAVY BLUR */
+  backdrop-filter: blur(40px) saturate(150%);
+  -webkit-backdrop-filter: blur(40px) saturate(150%);
 
-  /* ✅ HEAVY BLUR */
-  backdrop-filter: blur(40px) saturate(120%); 
-  -webkit-backdrop-filter: blur(40px) saturate(120%);
-
-  /* ✅ RADIAL DEPTH: Stronger center concentration for your characters */
+  /* ✅ CENTER GLOW */
   background: radial-gradient(
     circle at 50% 50%,
-    rgba(247, 236, 232, 0.95) 0%,   /* Very milky center */
+    rgba(247, 236, 232, 0.95) 0%,   
     rgba(247, 236, 232, 0.7) 40%, 
     rgba(247, 236, 232, 0.3) 80%,
     transparent 100%
   );
-  
-  transition: opacity 1.2s ease-in-out;
-}
-/* ================= HEADER ================= */
-
-.main-header {
-  display: flex;
-  justify-content: flex-end; 
-  align-items: center;
-  pointer-events: auto;
 }
 
-.logo {
-  display: none !important;
-}
+.logo { display: none !important; }
 
-/* ================= HERO ================= */
+/* ================= HERO (PUSHED UP) ================= */
 
 .hero-container {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start; /* ✅ PUSHED TITLE UP ON WEB */
+  justify-content: flex-start; 
   padding-top: 0; 
   flex-grow: 1;
 }
@@ -122,8 +97,8 @@ canvas {
   letter-spacing: -0.04em;
   pointer-events: auto;
   text-transform: uppercase;
-  white-space: nowrap; /* ✅ FORCE SAME LINE ON WEB */
-  margin-top: -2vh; /* Extra nudge up */
+  white-space: nowrap; 
+  margin-top: -3vh; /* Pushed way up */
 }
 
 .brand-subtitle {
@@ -136,8 +111,7 @@ canvas {
 
 /* ================= BUTTONS ================= */
 
-.inquiry-button,
-.explore-button {
+.inquiry-button, .explore-button {
   background: transparent;
   border: 1px solid rgba(31, 23, 38, 0.2);
   border-radius: 999px;
@@ -151,13 +125,9 @@ canvas {
   transition: 0.3s ease;
 }
 
-.explore-button {
-  margin-top: 50px;
-  width: fit-content;
-}
+.explore-button { margin-top: 50px; width: fit-content; }
 
-.inquiry-button:hover,
-.explore-button:hover {
+.inquiry-button:hover, .explore-button:hover {
   background: var(--text-main);
   color: white;
 }
@@ -174,24 +144,9 @@ canvas {
   color: var(--text-soft);
 }
 
-.social-links {
-  display: flex;
-  gap: 24px;
-  flex: 1;
-  pointer-events: auto;
-}
-
-.footer-tag {
-  flex: 1;
-  text-align: center;
-  white-space: nowrap;
-}
-
-.footer-right {
-  flex: 1;
-  text-align: right;
-  line-height: 1.6;
-}
+.social-links { display: flex; gap: 24px; flex: 1; pointer-events: auto; }
+.footer-tag { flex: 1; text-align: center; white-space: nowrap; }
+.footer-right { flex: 1; text-align: right; line-height: 1.6; }
 
 .social-icon {
   color: var(--text-main);
@@ -200,133 +155,31 @@ canvas {
   transition: opacity 0.3s;
 }
 
-.social-icon:hover { opacity: 1; }
-
-/* ================= UNIFIED MOBILE BLOCK ================= */
+/* ================= MOBILE ================= */
 
 @media (max-width: 768px) {
-  .ui-overlay {
-    padding:
-      calc(var(--safe-top) + 25px)
-      25px
-      calc(var(--safe-bottom) + 25px);
-
-    /* Heavy Frost Mobile */
+  .ui-overlay::before {
     background: radial-gradient(
       circle at 50% 50%,
-      rgba(247, 236, 232, 0.85) 0%, 
-      rgba(247, 236, 232, 0.4) 100%
+      rgba(247, 236, 232, 0.9) 0%, 
+      rgba(247, 236, 232, 0.5) 100%
     );
   }
 
-  /* ✅ FEATURE SECTION FROST */
-  .feature-large {
-    position: relative;
-    overflow: hidden;
-    background-color: rgba(247, 236, 232, 0.25) !important;
-    backdrop-filter: blur(30px) !important;
-    -webkit-backdrop-filter: blur(30px) !important;
-  }
-
-  /* REMOVE DESKTOP PADDING */
-  .feature-large h2,
-  .feature-large p {
-    padding: 0 !important;
-  }
-
-  .feature-large h2 {
-    margin: 0 0 8px 0;
-    font-size: 26px;
-  }
-
-  .feature-large p {
-    margin: 0;
-    font-size: 14px;
-  }
-
-  /* MAIN FEATURE TEXT POSITION */
-  .feature-text {
-    position: absolute;
-    bottom: 20px; 
-    left: 20px;   
-    z-index: 5;
-    max-width: 80%;
-  }
-
-  /* FLOATING FEATURE CARDS */
-  .feature-cards {
-    position: absolute;
-    right: 20px;
-    top: 40%; 
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 18px;
-    z-index: 10;
-  }
-
-  .feature-card {
-    background: none !important; 
-    box-shadow: none !important;
-    border-radius: 0 !important;
-    color: inherit !important;
-    text-decoration: none !important;
-  }
-
-  /* ICON */
-  .feature-card i {
-    font-size: 36px !important;
-    width: 64px !important;
-    height: 64px !important;
-    color: white !important;
-    background: #0b1f3f !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    border-radius: 50% !important;
-    margin-bottom: 12px !important;
-  }
-
-  /* TEXT UNDER ICON */
-  .feature-card h3 {
-    font-size: 16px !important;
-    font-weight: 600 !important;
-    color: white !important;
-    text-align: center !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  }
-
-  .hero-container {
-    justify-content: flex-start;
-    padding-top: 5px;
-  }
-
-  .brand-subtitle { 
-    display: block !important; 
-    font-size: 8px;
-    letter-spacing: 0.4em;
-    margin-bottom: 0.5rem;
-  }
-
   .brand-title {
-    font-family: 'Omegle', sans-serif;
-    font-size: 5.8rem; /* ✅ INCREASED SIZE FURTHER */
+    font-size: 5.8rem; 
     line-height: 0.85;
-    text-align: left; /* ✅ TOP LEFT POSITION */
+    text-align: left;
     white-space: normal; 
   }
 
-  .main-footer {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 20px;
-  }
+  .brand-subtitle { display: block !important; font-size: 8px; }
 
-  .footer-tag { order: 1; font-size: 8px; }
-  .social-links { order: 2; justify-content: center; }
-  .footer-right { order: 3; text-align: center; font-size: 8px; }
+  /* ✅ MOBILE FEATURE SECTION FROST */
+  .feature-large {
+    position: relative;
+    background-color: rgba(247, 236, 232, 0.3) !important;
+    backdrop-filter: blur(30px) !important;
+    -webkit-backdrop-filter: blur(30px) !important;
+  }
 }
