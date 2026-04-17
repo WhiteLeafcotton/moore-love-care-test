@@ -49,36 +49,45 @@ canvas {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: calc(var(--safe-top) + 6vh) 7vw calc(var(--safe-bottom) + 6vh);
+  padding: calc(var(--safe-top) + 4vh) 5vw calc(var(--safe-bottom) + 5vh);
   pointer-events: none;
   transition: opacity 1.2s ease-in-out;
 }
 
-/* ✅ THE FROST LAYER - LIGHTENED FOR CLARITY */
+/* ✅ FROST LAYER - 50% LIGHTER THAN PREVIOUS */
 .ui-overlay::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   
-  /* ✅ LIGHTER MILKY BASE */
-  background-color: rgba(247, 236, 232, 0.2); 
+  /* LIGHTER MILKY BASE */
+  background-color: rgba(247, 236, 232, 0.12); 
   
-  /* ✅ THE HEAVY BLUR */
-  backdrop-filter: blur(35px) saturate(130%);
-  -webkit-backdrop-filter: blur(35px) saturate(130%);
+  /* SOFTENED BLUR */
+  backdrop-filter: blur(25px) saturate(110%);
+  -webkit-backdrop-filter: blur(25px) saturate(110%);
 
-  /* ✅ LIGHTENED RADIAL GLOW */
+  /* LIGHTENED RADIAL GLOW */
   background: radial-gradient(
     circle at 50% 50%,
-    rgba(247, 236, 232, 0.8) 0%,   
-    rgba(247, 236, 232, 0.5) 45%,  
-    rgba(247, 236, 232, 0.15) 85%,
+    rgba(247, 236, 232, 0.4) 0%,   
+    rgba(247, 236, 232, 0.2) 50%,  
     transparent 100%
   );
 }
 
 .logo { display: none !important; }
+
+/* ================= TOP NAV (INQUIRY RIGHT) ================= */
+
+.top-nav {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end; /* Pushes Inquiry to the right */
+  pointer-events: none;
+  z-index: 101;
+}
 
 /* ================= HERO (PUSHED UP) ================= */
 
@@ -86,7 +95,7 @@ canvas {
   display: flex;
   flex-direction: column;
   justify-content: flex-start; 
-  padding-top: 0; 
+  padding-top: 2vh; 
   flex-grow: 1;
 }
 
@@ -98,7 +107,7 @@ canvas {
   pointer-events: auto;
   text-transform: uppercase;
   white-space: nowrap; 
-  margin-top: -3vh; 
+  margin-top: -1vh; 
 }
 
 .brand-subtitle {
@@ -113,7 +122,7 @@ canvas {
 
 .inquiry-button, .explore-button {
   background: transparent;
-  border: 1px solid rgba(31, 23, 38, 0.2);
+  border: 1px solid rgba(31, 23, 38, 0.15);
   border-radius: 999px;
   padding: 10px 24px;
   font-size: 9px;
@@ -122,14 +131,15 @@ canvas {
   cursor: pointer;
   pointer-events: auto;
   color: var(--text-main);
-  transition: 0.3s ease;
+  transition: all 0.3s ease;
 }
 
-.explore-button { margin-top: 50px; width: fit-content; }
+.explore-button { margin-top: 40px; width: fit-content; }
 
 .inquiry-button:hover, .explore-button:hover {
   background: var(--text-main);
   color: white;
+  border-color: var(--text-main);
 }
 
 /* ================= FOOTER ================= */
@@ -161,8 +171,8 @@ canvas {
   .ui-overlay::before {
     background: radial-gradient(
       circle at 50% 50%,
-      rgba(247, 236, 232, 0.8) 0%, 
-      rgba(247, 236, 232, 0.3) 100%
+      rgba(247, 236, 232, 0.4) 0%, 
+      rgba(247, 236, 232, 0.1) 100%
     );
   }
 
@@ -175,11 +185,10 @@ canvas {
 
   .brand-subtitle { display: block !important; font-size: 8px; }
 
-  /* ✅ MOBILE FEATURE SECTION FROST */
   .feature-large {
     position: relative;
-    background-color: rgba(247, 236, 232, 0.2) !important;
-    backdrop-filter: blur(30px) !important;
-    -webkit-backdrop-filter: blur(30px) !important;
+    background-color: rgba(247, 236, 232, 0.1) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
   }
 }
