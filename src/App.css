@@ -61,12 +61,12 @@ canvas {
   inset: 0;
   z-index: -1;
   
-  /* ✅ THE LIGHTEST POSSIBLE VEIL */
-  background-color: rgba(247, 236, 232, 0.002); 
+ /* ✅ THE SWEET SPOT: Just enough to feel premium, not enough to hide art */
+  background-color: rgba(247, 236, 232, 0.004); 
   
-  /* ✅ MINIMAL BLUR FOR SHARP CLARITY */
-  backdrop-filter: blur(1px) saturate(100%);
-  -webkit-backdrop-filter: blur(1px) saturate(100%);
+  /* ✅ BALANCED BLUR */
+  backdrop-filter: blur(2px) saturate(101%);
+  -webkit-backdrop-filter: blur(2px) saturate(101%);
 
   /* WHISPER-THIN RADIAL GLOW */
   background: radial-gradient(
