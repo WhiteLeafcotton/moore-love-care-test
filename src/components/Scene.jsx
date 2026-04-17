@@ -199,7 +199,26 @@ const FloatingPlatform = () => {
   />
 </group>
 
-
+{/* --- HELPER (STANDING) --- */}
+        <group position={[0.8, 0.1, 1.2]} rotation={[0, -Math.PI / 4, 0]}>
+          <BlockHumanoid 
+            scale={1} 
+            materialProps={{ 
+              ...butterProps, 
+              color: "#ffffff", // Pure white for a professional look
+              depthTest: false, 
+              transparent: true, 
+              opacity: 1 
+            }} 
+            poseProps={{ 
+              leftLegRotation: [0, 0, 0],  // Straight legs for standing
+              rightLegRotation: [0, 0, 0], 
+              torsoRotationX: 0,
+              headRotationX: 0.1, // Slight tilt to look toward the chair
+            }} 
+          />
+        </group>
+     
 </group>
 
       {/* L-Lamp (unchanged) */}
