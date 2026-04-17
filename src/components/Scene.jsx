@@ -42,7 +42,7 @@ const LStyleLamp = ({ position }) => (
    {/* Vertical Pole (extra short) */}
 <mesh position={[0, 1.25, 0]} renderOrder={10001}>
   <cylinderGeometry args={[0.04, 0.04, 2.5, 16]} />
-  <meshBasicMaterial color="#bf9fb3" depthTest={false} transparent opacity={0.9} />
+  <meshBasicMaterial color="#9c7f91" depthTest={false} transparent opacity={0.9} />
 </mesh>
 
     {/* L Arm Holder (aligned to shortened pole) */}
@@ -51,7 +51,7 @@ const LStyleLamp = ({ position }) => (
   {/* Horizontal Arm */}
   <mesh position={[0.85, 0, 0]} rotation={[0, 0, Math.PI / 2]} renderOrder={10001}>
     <cylinderGeometry args={[0.03, 0.03, 1.8, 16]} />
-    <meshBasicMaterial color="#bf9fb3" depthTest={false} transparent opacity={0.9} />
+    <meshBasicMaterial color="#9c7f91" depthTest={false} transparent opacity={0.9} />
   </mesh>
 
   {/* Bulb (properly hanging at end of arm) */}
