@@ -1,4 +1,4 @@
-/* ✅ CUSTOM FONT DEFINITION (Linked from public/fonts/OMEGLE.otf) */
+/* ✅ CUSTOM FONT DEFINITION */
 @font-face {
   font-family: 'Omegle';
   src: url('/fonts/OMEGLE.otf') format('opentype');
@@ -70,17 +70,18 @@ canvas {
 
   pointer-events: none;
   
-  /* Frost reduced to almost nothing */
+  /* ✅ FROST SETTINGS */
   backdrop-filter: blur(1px);
   -webkit-backdrop-filter: blur(1px);
 
-  /* Left Frost reduced to extreme transparency */
-  background: linear-gradient(
-    90deg,
-    rgba(247, 236, 232, 0.05) 0%,
-    rgba(247, 236, 232, 0.01) 35%,
-    transparent 65%
+  /* ✅ CENTER FROST GLOW: Lightened middle area for character visibility */
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(247, 236, 232, 0.25) 0%,
+    rgba(247, 236, 232, 0.05) 45%,
+    transparent 85%
   );
+  
   transition: opacity 1.2s ease-in-out;
 }
 
@@ -90,16 +91,14 @@ canvas {
 
 .main-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end; 
   align-items: center;
   pointer-events: auto;
 }
 
+/* ✅ LOGO DELETED */
 .logo {
-  font-size: 11px;
-  letter-spacing: 0.5em;
-  text-transform: uppercase;
-  font-weight: 600;
+  display: none !important;
 }
 
 /* ================= HERO ================= */
@@ -112,7 +111,7 @@ canvas {
 }
 
 .brand-title {
-  /* ✅ UPDATED FONT */
+  /* ✅ OMEGLE FONT */
   font-family: 'Omegle', sans-serif;
   font-size: clamp(4rem, 10vw, 8.5rem);
   line-height: 0.82;
@@ -157,7 +156,7 @@ canvas {
   color: white;
 }
 
-/* ================= FOOTER UPGRADE ================= */
+/* ================= FOOTER ================= */
 
 .main-footer {
   width: 100%;
@@ -206,22 +205,33 @@ canvas {
       25px
       calc(var(--safe-bottom) + 25px);
 
-    /* Mobile gradient reduced to almost nothing */
-    background: linear-gradient(
-      to bottom,
-      rgba(247,236,232,0.05) 0%,
-      transparent 45%
+    /* Light Frost Mobile */
+    background: radial-gradient(
+      circle at 50% 50%,
+      rgba(247, 236, 232, 0.3) 0%,
+      transparent 75%
     );
   }
 
-  /* ✅ HIDE SUBTITLE ON MOBILE */
-  .brand-subtitle { display: none !important; }
+  /* ✅ MOVE TITLE TO TOP LEFT ON MOBILE */
+  .hero-container {
+    justify-content: flex-start;
+    padding-top: 10px;
+  }
+
+  /* ✅ BROW TEXT (SUBTITLE) SHOWING ON MOBILE */
+  .brand-subtitle { 
+    display: block !important; 
+    font-size: 8px;
+    letter-spacing: 0.4em;
+    margin-bottom: 0.5rem;
+  }
 
   .brand-title {
-    /* ✅ APPLIED OMEGLE TO MOBILE */
     font-family: 'Omegle', sans-serif;
-    font-size: 4.5rem;
-    line-height: 0.9;
+    font-size: 3.8rem;
+    line-height: 0.85;
+    text-align: left;
   }
 
   .main-footer {
