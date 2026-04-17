@@ -70,14 +70,12 @@ canvas {
 
   pointer-events: none;
   
-  /* ✅ FIX: ADDED SEMI-TRANSPARENT BASE FOR BLUR TO WORK */
-  background-color: rgba(247, 236, 232, 0.1); 
-
-  /* ✅ FROST SETTINGS */
+  /* ✅ ULTRA-HEAVY FROST BASE */
+  background-color: rgba(247, 236, 232, 0.2); 
   backdrop-filter: blur(30px); 
   -webkit-backdrop-filter: blur(30px);
 
-  /* ✅ HEAVY RADIAL GLOW */
+  /* ✅ HEAVY RADIAL GLOW: Concentrated central frost */
   background: radial-gradient(
     circle at 50% 50%,
     rgba(247, 236, 232, 0.9) 0%,   
@@ -109,7 +107,7 @@ canvas {
 .hero-container {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start; 
+  justify-content: flex-start; /* ✅ PUSHED TITLE UP ON WEB */
   padding-top: 0; 
   flex-grow: 1;
 }
@@ -121,8 +119,8 @@ canvas {
   letter-spacing: -0.04em;
   pointer-events: auto;
   text-transform: uppercase;
-  white-space: nowrap; 
-  margin-top: -1vh; 
+  white-space: nowrap; /* ✅ FORCE SAME LINE ON WEB */
+  margin-top: -2vh; /* Extra nudge up */
 }
 
 .brand-subtitle {
@@ -201,7 +199,7 @@ canvas {
 
 .social-icon:hover { opacity: 1; }
 
-/* ================= UNIFIED KMOBILE BLOCK ================= */
+/* ================= UNIFIED MOBILE BLOCK ================= */
 
 @media (max-width: 768px) {
   .ui-overlay {
@@ -213,9 +211,89 @@ canvas {
     /* Heavy Frost Mobile */
     background: radial-gradient(
       circle at 50% 50%,
-      rgba(247, 236, 232, 0.8) 0%, 
+      rgba(247, 236, 232, 0.85) 0%, 
       rgba(247, 236, 232, 0.4) 100%
     );
+  }
+
+  /* ✅ FEATURE SECTION FROST */
+  .feature-large {
+    position: relative;
+    overflow: hidden;
+    background-color: rgba(247, 236, 232, 0.25) !important;
+    backdrop-filter: blur(30px) !important;
+    -webkit-backdrop-filter: blur(30px) !important;
+  }
+
+  /* REMOVE DESKTOP PADDING */
+  .feature-large h2,
+  .feature-large p {
+    padding: 0 !important;
+  }
+
+  .feature-large h2 {
+    margin: 0 0 8px 0;
+    font-size: 26px;
+  }
+
+  .feature-large p {
+    margin: 0;
+    font-size: 14px;
+  }
+
+  /* MAIN FEATURE TEXT POSITION */
+  .feature-text {
+    position: absolute;
+    bottom: 20px; 
+    left: 20px;   
+    z-index: 5;
+    max-width: 80%;
+  }
+
+  /* FLOATING FEATURE CARDS */
+  .feature-cards {
+    position: absolute;
+    right: 20px;
+    top: 40%; 
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 18px;
+    z-index: 10;
+  }
+
+  .feature-card {
+    background: none !important; 
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+
+  /* ICON */
+  .feature-card i {
+    font-size: 36px !important;
+    width: 64px !important;
+    height: 64px !important;
+    color: white !important;
+    background: #0b1f3f !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 50% !important;
+    margin-bottom: 12px !important;
+  }
+
+  /* TEXT UNDER ICON */
+  .feature-card h3 {
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    color: white !important;
+    text-align: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
   }
 
   .hero-container {
@@ -232,9 +310,9 @@ canvas {
 
   .brand-title {
     font-family: 'Omegle', sans-serif;
-    font-size: 5.5rem; 
+    font-size: 5.8rem; /* ✅ INCREASED SIZE FURTHER */
     line-height: 0.85;
-    text-align: left;
+    text-align: left; /* ✅ TOP LEFT POSITION */
     white-space: normal; 
   }
 
