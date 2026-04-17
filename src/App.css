@@ -114,7 +114,7 @@ canvas {
 }
 
 .brand-title {
-  font-family: 'Macker', sans-serif; /
+  font-family: 'Macker', sans-serif; 
   font-size: clamp(4rem, 10vw, 8.5rem);
   line-height: 1; 
   letter-spacing: -0.04em;
