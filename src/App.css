@@ -135,26 +135,36 @@ canvas {
 /* ================= EXPLORE BUTTON ================= */
 
 .explore-button {
-  background: transparent;
-  border: 1px solid rgba(31, 23, 38, 0.1);
+  /* ✅ NOW DARK PURPLE & LARGER */
+  background: var(--text-main);
+  color: white; 
+  
+  border: 1px solid var(--text-main);
   border-radius: 999px;
-  padding: 10px 24px;
-  font-size: 9px;
-  letter-spacing: 2px;
+  
+  /* Increased from 10px 24px to 16px 36px */
+  padding: 16px 36px; 
+  
+  /* Increased from 9px to 11px */
+  font-size: 11px; 
+  
+  letter-spacing: 3px; /* Slightly more space for the larger size */
   text-transform: uppercase;
+  font-weight: 600; /* Added a bit of weight to balance the size */
+  
   cursor: pointer;
   pointer-events: auto;
-  color: var(--text-main);
-  transition: 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
   margin-top: 50px; 
   width: fit-content;
 }
 
 .explore-button:hover {
-  background: var(--text-main);
-  color: white;
+  background: transparent;
+  color: var(--text-main);
+  border: 1px solid rgba(31, 23, 38, 0.3);
+  transform: translateY(-2px); /* Gives it a slight "lift" when hovered */
 }
-
 /* ================= FOOTER ================= */
 
 .main-footer {
