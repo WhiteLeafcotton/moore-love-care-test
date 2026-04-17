@@ -199,6 +199,13 @@ canvas {
     padding: 8px 16px;
     font-size: 8px;
   }
+  .explore-button {
+    /* Keeping it large, but scaling slightly so it fits mobile widths */
+    padding: 14px 30px; 
+    font-size: 10px; 
+    margin-top: 30px; /* Reduced gap so footer stays visible */
+  }
+
 
   /* 2. Lightened Frost for Mobile */
   .ui-overlay::before {
