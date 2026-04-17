@@ -61,12 +61,12 @@ canvas {
   inset: 0;
   z-index: -1;
   
-  /* NEARLY TRANSPARENT BASE */
-  background-color: rgba(247, 236, 232, 0.01); 
+  /* ✅ THE LIGHTEST POSSIBLE VEIL */
+  background-color: rgba(247, 236, 232, 0.002); 
   
-  /* REDUCED BLUR FOR MAXIMUM CLARITY */
-  backdrop-filter: blur(3px) saturate(101%);
-  -webkit-backdrop-filter: blur(3px) saturate(101%);
+  /* ✅ MINIMAL BLUR FOR SHARP CLARITY */
+  backdrop-filter: blur(1px) saturate(100%);
+  -webkit-backdrop-filter: blur(1px) saturate(100%);
 
   /* WHISPER-THIN RADIAL GLOW */
   background: radial-gradient(
