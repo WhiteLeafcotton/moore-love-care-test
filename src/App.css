@@ -1,7 +1,7 @@
 /* ✅ CUSTOM FONT DEFINITION */
 @font-face {
-  font-family: 'Macker'; /* Change the name here */
-  src: url('/fonts/Macker.ttf') format('truetype'); /* Update filename and format */
+  font-family: 'Macker';
+  src: url('/Macker.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
