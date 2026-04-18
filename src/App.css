@@ -54,7 +54,7 @@ canvas {
   transition: opacity 1.2s ease-in-out;
 }
 
-/* ✅ BALANCED FROST */
+/* ✅ REFINED BALANCED FROST */
 .ui-overlay::before {
   content: "";
   position: absolute;
@@ -80,8 +80,32 @@ canvas {
   );
 }
 
-/* REMOVED INQUIRY BUTTON FOR BOTH WEB & MOBILE */
-.inquiry-button { display: none !important; }
+/* ✅ REMOVED TOP LEFT TEXT */
+.logo, .top-left-text { display: none !important; }
+
+/* ✅ RESTORED INQUIRY BUTTON (TOP RIGHT) */
+.inquiry-button {
+  position: absolute;
+  top: calc(var(--safe-top) + 40px);
+  right: 8vw;
+  background: transparent;
+  border: 1px solid rgba(31, 23, 38, 0.15);
+  border-radius: 999px;
+  padding: 12px 28px;
+  font-size: 8px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  cursor: pointer;
+  pointer-events: auto;
+  color: var(--text-main);
+  transition: all 0.4s ease;
+}
+
+.inquiry-button:hover {
+  background: var(--text-main);
+  color: white;
+  transform: translateY(-1px);
+}
 
 /* ================= HERO LAYOUT ================= */
 
@@ -90,8 +114,8 @@ canvas {
   flex-direction: column;
   justify-content: center;
   flex-grow: 1;
-  /* Max width ensures the title breaks into exactly 2 lines on desktop */
-  max-width: 850px; 
+  /* Max-width forces the title to wrap into exactly 2 lines on desktop */
+  max-width: 900px; 
 }
 
 .brand-subtitle {
@@ -102,20 +126,19 @@ canvas {
   text-transform: uppercase;
   color: var(--text-soft);
   margin-bottom: 1.5rem;
-  margin-left: 0.5rem;
+  margin-left: 0.4rem;
 }
 
 .brand-title {
   font-family: 'Macker', serif; 
-  font-size: clamp(5rem, 11vw, 9.5rem);
-  line-height: 0.88; 
+  font-size: clamp(4.5rem, 10vw, 9rem);
+  line-height: 0.9; 
   letter-spacing: -0.04em;
   color: var(--text-main);
   pointer-events: auto;
   text-transform: uppercase;
-  /* Forces 2 lines on large screens if the text is long enough */
-  word-wrap: break-word;
-  overflow-wrap: break-word;
+  /* Visual balance */
+  margin-left: -0.2rem;
 }
 
 /* ================= EXPLORE BUTTON ================= */
@@ -133,14 +156,13 @@ canvas {
   cursor: pointer;
   pointer-events: auto;
   transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1);
-  margin-top: 4.5rem; 
+  margin-top: 4rem; 
   width: fit-content;
 }
 
 .explore-button:hover {
   transform: translateX(12px);
   background: #2a2033;
-  box-shadow: 20px 0 40px rgba(0,0,0,0.05);
 }
 
 /* ================= FOOTER ================= */
@@ -165,8 +187,6 @@ canvas {
   transition: opacity 0.3s;
 }
 
-.social-icon:hover { opacity: 0.5; }
-
 /* ================= MOBILE OVERRIDES ================= */
 
 @media (max-width: 768px) {
@@ -174,35 +194,26 @@ canvas {
     padding: calc(var(--safe-top) + 4vh) 7vw;
   }
 
-  .hero-container {
-    max-width: 100%; /* Allow natural flow on mobile */
+  .inquiry-button {
+    top: calc(var(--safe-top) + 20px);
+    right: 7vw;
+    padding: 10px 20px;
+    font-size: 7px;
   }
 
   .brand-title {
-    font-size: 4.2rem;
-    line-height: 0.95;
-    /* On mobile, text can flow to 3 lines naturally to avoid horizontal scrolling */
+    font-size: 4rem;
+    line-height: 1;
+    /* Allow mobile to flow naturally (3 lines often looks better on narrow screens) */
     white-space: normal; 
-  }
-
-  .brand-subtitle {
-    font-size: 8px;
-    letter-spacing: 0.4em;
-    margin-bottom: 1.2rem;
-  }
-
-  .explore-button {
-    padding: 18px 36px;
-    margin-top: 3rem;
   }
 
   .main-footer {
     flex-direction: column;
     align-items: center;
-    text-align: center;
     gap: 20px;
   }
 
-  .social-links { justify-content: center; width: 100%; }
-  .footer-right { text-align: center; width: 100%; }
+  .social-links { justify-content: center; }
+  .footer-right { text-align: center; }
 }
