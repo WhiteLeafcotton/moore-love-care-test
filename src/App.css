@@ -11,7 +11,7 @@
 :root {
   --bg: #f7ece8;
   --text-main: #1f1726;
-  --text-soft: rgba(31, 23, 38, 0.4);
+  --text-soft: rgba(31, 23, 38, 0.5);
   --safe-top: env(safe-area-inset-top);
   --safe-bottom: env(safe-area-inset-bottom);
 }
@@ -49,155 +49,175 @@ canvas {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: calc(var(--safe-top) + 6vh) 7vw calc(var(--safe-bottom) + 6vh);
+  padding: calc(var(--safe-top) + 8vh) 8vw calc(var(--safe-bottom) + 8vh);
   pointer-events: none;
   transition: opacity 1.2s ease-in-out;
 }
 
-/* ✅ BALANCED FADE: THICK LEFT, VANISHING RIGHT */
+/* ✅ REFINED BALANCED FROST */
 .ui-overlay::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
-  
-  /* Slightly lowered opacity base to keep the right side from feeling "milky" */
-  background-color: rgba(247, 236, 232, 0.5); 
-  
-  /* High-quality deep blur */
-  backdrop-filter: blur(45px) saturate(110%);
-  -webkit-backdrop-filter: blur(45px) saturate(110%);
+  background-color: rgba(247, 236, 232, 0.4); 
+  backdrop-filter: blur(40px) saturate(110%);
+  -webkit-backdrop-filter: blur(40px) saturate(110%);
 
-  /* MASK LOGIC:
-     - Stays 100% thick until 30% (Brand Title area)
-     - Smoothly drops to 20% visibility by the 70% mark
-     - Almost fully disappears (2%) at the right edge
-  */
   -webkit-mask-image: linear-gradient(
     to right, 
     black 0%, 
     black 30%, 
-    rgba(0, 0, 0, 0.2) 75%, 
-    rgba(0, 0, 0, 0.02) 100%
+    rgba(0, 0, 0, 0.15) 75%, 
+    transparent 100%
   );
   mask-image: linear-gradient(
     to right, 
     black 0%, 
     black 30%, 
-    rgba(0, 0, 0, 0.2) 75%, 
-    rgba(0, 0, 0, 0.02) 100%
+    rgba(0, 0, 0, 0.15) 75%, 
+    transparent 100%
   );
 }
 
-.logo { display: none !important; }
-
-/* ================= INQUIRY BUTTON ================= */
+/* ================= INQUIRY BUTTON (CLEANER) ================= */
 
 .inquiry-button {
   position: absolute;
   top: calc(var(--safe-top) + 40px);
-  right: 7vw;
+  right: 8vw;
   background: transparent;
-  border: 1px solid rgba(31, 23, 38, 0.15);
+  border: 1px solid rgba(31, 23, 38, 0.1);
   border-radius: 999px;
-  padding: 10px 24px;
-  font-size: 9px;
-  letter-spacing: 2px;
+  padding: 12px 28px;
+  font-size: 8px;
+  letter-spacing: 0.25em;
   text-transform: uppercase;
   cursor: pointer;
   pointer-events: auto;
   color: var(--text-main);
-  transition: 0.3s ease;
+  transition: all 0.4s ease;
 }
 
 .inquiry-button:hover {
   background: var(--text-main);
   color: white;
+  border-color: var(--text-main);
 }
 
-/* ================= HERO ================= */
+/* ================= HERO LAYOUT (ESTHETIC FOCUS) ================= */
 
 .hero-container {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start; 
+  justify-content: center;
   flex-grow: 1;
-}
-
-.brand-title {
-  font-family: 'Macker', sans-serif; 
-  font-size: clamp(4rem, 10vw, 8.5rem);
-  line-height: 1; 
-  letter-spacing: -0.04em;
-  pointer-events: auto;
-  text-transform: uppercase;
-  white-space: nowrap; 
-  margin-top: -3vh;
+  max-width: 1200px;
 }
 
 .brand-subtitle {
-  font-size: 11px;
-  letter-spacing: 0.8em;
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.6em;
   text-transform: uppercase;
-  color: var(--text-main); 
-  margin-bottom: 1.5rem;
+  color: var(--text-soft);
+  margin-bottom: 1.2rem;
+  margin-left: 0.5rem; /* Slight offset for style */
 }
 
-/* ================= EXPLORE BUTTON ================= */
+.brand-title {
+  font-family: 'Macker', serif; 
+  font-size: clamp(5rem, 12vw, 10rem);
+  line-height: 0.85; 
+  letter-spacing: -0.05em;
+  color: var(--text-main);
+  pointer-events: auto;
+  text-transform: uppercase;
+  margin-left: -0.3rem; /* Optical alignment */
+}
+
+/* ================= EXPLORE BUTTON (ESTHETIC) ================= */
 
 .explore-button {
   background: var(--text-main);
   color: white; 
-  border: 1px solid var(--text-main);
+  border: none;
   border-radius: 999px;
-  padding: 16px 36px; 
-  font-size: 11px; 
-  letter-spacing: 3px; 
+  padding: 20px 48px; 
+  font-size: 10px; 
+  letter-spacing: 0.4em; 
   text-transform: uppercase;
-  font-weight: 600; 
+  font-weight: 400; 
   cursor: pointer;
   pointer-events: auto;
-  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-  margin-top: 50px; 
+  transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+  margin-top: 4rem; 
   width: fit-content;
 }
 
-/* ================= FOOTER ================= */
+.explore-button:hover {
+  transform: translateX(10px); /* Elegant slide instead of lift */
+  letter-spacing: 0.5em;
+  background: rgba(31, 23, 38, 0.9);
+}
+
+/* ================= FOOTER (CLEANER SPACING) ================= */
 
 .main-footer {
   width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  font-size: 9px;
-  letter-spacing: 0.15em;
+  font-size: 8px;
+  letter-spacing: 0.2em;
   color: var(--text-soft);
+  padding-bottom: 10px;
 }
 
-.social-links { display: flex; gap: 24px; flex: 1; pointer-events: auto; }
-.footer-tag { flex: 1; text-align: center; white-space: nowrap; }
-.footer-right { flex: 1; text-align: right; line-height: 1.6; }
+.social-links { display: flex; gap: 32px; flex: 1; pointer-events: auto; }
+.footer-tag { flex: 1; text-align: center; font-style: italic; }
+.footer-right { flex: 1; text-align: right; line-height: 1.8; }
+
+.social-icon {
+  color: var(--text-main);
+  text-decoration: none;
+  transition: opacity 0.3s;
+}
+
+.social-icon:hover { opacity: 0.5; }
 
 /* ================= MOBILE OVERRIDES ================= */
 
 @media (max-width: 768px) {
-  .ui-overlay::before {
-    backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
-    /* Mobile needs a faster fade to stay "clean" on small screens */
-    -webkit-mask-image: linear-gradient(to right, black 20%, transparent 90%);
-    mask-image: linear-gradient(to right, black 20%, transparent 90%);
+  .ui-overlay {
+    padding: calc(var(--safe-top) + 4vh) 6vw;
   }
 
   .brand-title {
-    font-size: 4.5rem; 
-    white-space: normal; 
+    font-size: 4.8rem;
+    white-space: normal;
+    line-height: 0.9;
+  }
+
+  .brand-subtitle {
+    font-size: 8px;
+    letter-spacing: 0.4em;
+    margin-bottom: 1rem;
+  }
+
+  .explore-button {
+    padding: 16px 32px;
+    margin-top: 2.5rem;
   }
 
   .main-footer {
     flex-direction: column;
-    align-items: center;
-    gap: 15px;
-    padding-bottom: 3vh;
+    align-items: flex-start;
+    gap: 20px;
   }
+
+  .social-links { width: 100%; justify-content: flex-start; }
+  .footer-tag { text-align: left; order: 3; }
+  .footer-right { text-align: left; order: 2; width: 100%; }
 }
