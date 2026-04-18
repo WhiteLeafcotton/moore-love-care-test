@@ -54,65 +54,44 @@ canvas {
   transition: opacity 1.2s ease-in-out;
 }
 
-/* ✅ REFINED BALANCED FROST */
+/* ✅ BALANCED FROST */
 .ui-overlay::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
-  background-color: rgba(247, 236, 232, 0.4); 
-  backdrop-filter: blur(40px) saturate(110%);
-  -webkit-backdrop-filter: blur(40px) saturate(110%);
+  background-color: rgba(247, 236, 232, 0.45); 
+  backdrop-filter: blur(45px) saturate(110%);
+  -webkit-backdrop-filter: blur(45px) saturate(110%);
 
   -webkit-mask-image: linear-gradient(
     to right, 
     black 0%, 
     black 30%, 
-    rgba(0, 0, 0, 0.15) 75%, 
+    rgba(0, 0, 0, 0.1) 75%, 
     transparent 100%
   );
   mask-image: linear-gradient(
     to right, 
     black 0%, 
     black 30%, 
-    rgba(0, 0, 0, 0.15) 75%, 
+    rgba(0, 0, 0, 0.1) 75%, 
     transparent 100%
   );
 }
 
-/* ================= INQUIRY BUTTON (CLEANER) ================= */
+/* REMOVED INQUIRY BUTTON FOR BOTH WEB & MOBILE */
+.inquiry-button { display: none !important; }
 
-.inquiry-button {
-  position: absolute;
-  top: calc(var(--safe-top) + 40px);
-  right: 8vw;
-  background: transparent;
-  border: 1px solid rgba(31, 23, 38, 0.1);
-  border-radius: 999px;
-  padding: 12px 28px;
-  font-size: 8px;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  cursor: pointer;
-  pointer-events: auto;
-  color: var(--text-main);
-  transition: all 0.4s ease;
-}
-
-.inquiry-button:hover {
-  background: var(--text-main);
-  color: white;
-  border-color: var(--text-main);
-}
-
-/* ================= HERO LAYOUT (ESTHETIC FOCUS) ================= */
+/* ================= HERO LAYOUT ================= */
 
 .hero-container {
   display: flex;
   flex-direction: column;
   justify-content: center;
   flex-grow: 1;
-  max-width: 1200px;
+  /* Max width ensures the title breaks into exactly 2 lines on desktop */
+  max-width: 850px; 
 }
 
 .brand-subtitle {
@@ -122,47 +101,49 @@ canvas {
   letter-spacing: 0.6em;
   text-transform: uppercase;
   color: var(--text-soft);
-  margin-bottom: 1.2rem;
-  margin-left: 0.5rem; /* Slight offset for style */
+  margin-bottom: 1.5rem;
+  margin-left: 0.5rem;
 }
 
 .brand-title {
   font-family: 'Macker', serif; 
-  font-size: clamp(5rem, 12vw, 10rem);
-  line-height: 0.85; 
-  letter-spacing: -0.05em;
+  font-size: clamp(5rem, 11vw, 9.5rem);
+  line-height: 0.88; 
+  letter-spacing: -0.04em;
   color: var(--text-main);
   pointer-events: auto;
   text-transform: uppercase;
-  margin-left: -0.3rem; /* Optical alignment */
+  /* Forces 2 lines on large screens if the text is long enough */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
-/* ================= EXPLORE BUTTON (ESTHETIC) ================= */
+/* ================= EXPLORE BUTTON ================= */
 
 .explore-button {
   background: var(--text-main);
   color: white; 
   border: none;
   border-radius: 999px;
-  padding: 20px 48px; 
+  padding: 22px 54px; 
   font-size: 10px; 
   letter-spacing: 0.4em; 
   text-transform: uppercase;
   font-weight: 400; 
   cursor: pointer;
   pointer-events: auto;
-  transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-  margin-top: 4rem; 
+  transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+  margin-top: 4.5rem; 
   width: fit-content;
 }
 
 .explore-button:hover {
-  transform: translateX(10px); /* Elegant slide instead of lift */
-  letter-spacing: 0.5em;
-  background: rgba(31, 23, 38, 0.9);
+  transform: translateX(12px);
+  background: #2a2033;
+  box-shadow: 20px 0 40px rgba(0,0,0,0.05);
 }
 
-/* ================= FOOTER (CLEANER SPACING) ================= */
+/* ================= FOOTER ================= */
 
 .main-footer {
   width: 100%;
@@ -172,7 +153,6 @@ canvas {
   font-size: 8px;
   letter-spacing: 0.2em;
   color: var(--text-soft);
-  padding-bottom: 10px;
 }
 
 .social-links { display: flex; gap: 32px; flex: 1; pointer-events: auto; }
@@ -191,33 +171,38 @@ canvas {
 
 @media (max-width: 768px) {
   .ui-overlay {
-    padding: calc(var(--safe-top) + 4vh) 6vw;
+    padding: calc(var(--safe-top) + 4vh) 7vw;
+  }
+
+  .hero-container {
+    max-width: 100%; /* Allow natural flow on mobile */
   }
 
   .brand-title {
-    font-size: 4.8rem;
-    white-space: normal;
-    line-height: 0.9;
+    font-size: 4.2rem;
+    line-height: 0.95;
+    /* On mobile, text can flow to 3 lines naturally to avoid horizontal scrolling */
+    white-space: normal; 
   }
 
   .brand-subtitle {
     font-size: 8px;
     letter-spacing: 0.4em;
-    margin-bottom: 1rem;
+    margin-bottom: 1.2rem;
   }
 
   .explore-button {
-    padding: 16px 32px;
-    margin-top: 2.5rem;
+    padding: 18px 36px;
+    margin-top: 3rem;
   }
 
   .main-footer {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
+    text-align: center;
     gap: 20px;
   }
 
-  .social-links { width: 100%; justify-content: flex-start; }
-  .footer-tag { text-align: left; order: 3; }
-  .footer-right { text-align: left; order: 2; width: 100%; }
+  .social-links { justify-content: center; width: 100%; }
+  .footer-right { text-align: center; width: 100%; }
 }
