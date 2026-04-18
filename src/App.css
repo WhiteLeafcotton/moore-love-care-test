@@ -54,32 +54,30 @@ canvas {
   transition: opacity 1.2s ease-in-out;
 }
 
-/* ✅ INCREASED FROST WITH LEFT-TO-RIGHT FADE */
+/* ✅ SUPER FROST TO CLEAR FADE */
 .ui-overlay::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   
-  /* Increased blur for a stronger "frost" feel */
-  backdrop-filter: blur(8px) saturate(110%);
-  -webkit-backdrop-filter: blur(8px) saturate(110%);
+  /* Heavy frost color */
+  background-color: rgba(247, 236, 232, 0.4); 
+  
+  /* Strong blur for "Super Frosted" effect */
+  backdrop-filter: blur(15px) saturate(110%);
+  -webkit-backdrop-filter: blur(15px) saturate(110%);
 
-  /* Linear Gradient Fade: 
-     Starts at 25% opacity on the left and fades to fully transparent on the right.
-     Adjust the 0.25 to 0.4 if you want the left side even "thicker".
+  /* THE KEY: This mask fades the ENTIRE effect (blur + color) 
+     from opaque (left) to 0% (right).
   */
-  background: linear-gradient(
-    to right,
-    rgba(247, 236, 232, 0.25) 0%,
-    rgba(247, 236, 232, 0.1) 50%,
-    transparent 100%
-  );
+  -webkit-mask-image: linear-gradient(to right, black 0%, rgba(0,0,0,0.5) 40%, transparent 80%);
+  mask-image: linear-gradient(to right, black 0%, rgba(0,0,0,0.5) 40%, transparent 80%);
 }
 
 .logo { display: none !important; }
 
-/* ================= INQUIRY BUTTON (LOCKED TO TOP RIGHT) ================= */
+/* ================= INQUIRY BUTTON ================= */
 
 .inquiry-button {
   position: absolute;
@@ -103,7 +101,7 @@ canvas {
   color: white;
 }
 
-/* ================= HERO (PUSHED UP) ================= */
+/* ================= HERO ================= */
 
 .hero-container {
   display: flex;
@@ -174,13 +172,6 @@ canvas {
 .footer-tag { flex: 1; text-align: center; white-space: nowrap; }
 .footer-right { flex: 1; text-align: right; line-height: 1.6; }
 
-.social-icon {
-  color: var(--text-main);
-  opacity: 0.5;
-  display: flex;
-  transition: opacity 0.3s;
-}
-
 /* ================= MOBILE OVERRIDES ================= */
 
 @media (max-width: 768px) {
@@ -188,67 +179,29 @@ canvas {
     top: calc(var(--safe-top) + 20px);
     right: 5vw;
     padding: 8px 16px;
-    font-size: 8px;
   }
   
-  .explore-button {
-    padding: 14px 30px; 
-    font-size: 10px; 
-    margin-top: 30px;
-  }
-
-  /* Keep the left-to-right fade consistent on mobile but slightly subtler */
   .ui-overlay::before {
-    background: linear-gradient(
-      to right,
-      rgba(247, 236, 232, 0.2) 0%,
-      rgba(247, 236, 232, 0.05) 100%
-    );
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    /* Slightly less intense for mobile performance */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    -webkit-mask-image: linear-gradient(to right, black 0%, transparent 90%);
+    mask-image: linear-gradient(to right, black 0%, transparent 90%);
   }
 
   .brand-title {
-    font-size: 4rem; 
-    line-height: 0.95;
-    text-align: left;
+    font-size: 4.5rem; 
     white-space: normal; 
-    margin-top: 0;
-  }
-
-  .brand-subtitle { 
-    display: block !important; 
-    font-size: 7px; 
-    letter-spacing: 0.5em; 
-    margin-bottom: 2rem;
   }
 
   .main-footer {
     flex-direction: column;
     align-items: center;
-    justify-content: center;
     gap: 15px;
     padding-bottom: 3vh;
-    width: 100%;
   }
 
-  .social-links {
-    width: 100%;
-    justify-content: center;
-    gap: 24px;
-    margin-bottom: 5px;
-  }
-
-  .footer-tag {
-    text-align: center;
-    width: 100%;
-    order: 2;
-  }
-
-  .footer-right {
-    text-align: center;
-    width: 100%;
-    font-size: 8px;
-    order: 3;
-  }
+  .social-links { justify-content: center; }
+  .footer-tag { order: 2; }
+  .footer-right { text-align: center; order: 3; }
 }
