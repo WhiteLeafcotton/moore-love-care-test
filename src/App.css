@@ -80,10 +80,10 @@ canvas {
   );
 }
 
-/* ✅ REMOVED TOP LEFT TEXT */
+/* ✅ LOGO REMOVED */
 .logo, .top-left-text { display: none !important; }
 
-/* ✅ RESTORED INQUIRY BUTTON (TOP RIGHT) */
+/* ✅ INQUIRY BUTTON (TOP RIGHT) */
 .inquiry-button {
   position: absolute;
   top: calc(var(--safe-top) + 40px);
@@ -104,7 +104,6 @@ canvas {
 .inquiry-button:hover {
   background: var(--text-main);
   color: white;
-  transform: translateY(-1px);
 }
 
 /* ================= HERO LAYOUT ================= */
@@ -114,8 +113,7 @@ canvas {
   flex-direction: column;
   justify-content: center;
   flex-grow: 1;
-  /* Max-width forces the title to wrap into exactly 2 lines on desktop */
-  max-width: 900px; 
+  max-width: 1000px; /* Adjusted to fit 2 lines comfortably */
 }
 
 .brand-subtitle {
@@ -137,8 +135,13 @@ canvas {
   color: var(--text-main);
   pointer-events: auto;
   text-transform: uppercase;
-  /* Visual balance */
   margin-left: -0.2rem;
+
+  /* ✅ STRICT 2 LINE LIMIT ON WEB */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;  
+  overflow: hidden;
 }
 
 /* ================= EXPLORE BUTTON ================= */
@@ -201,11 +204,17 @@ canvas {
     font-size: 7px;
   }
 
+  /* ✅ LARGER MOBILE TITLE */
   .brand-title {
-    font-size: 4rem;
-    line-height: 1;
-    /* Allow mobile to flow naturally (3 lines often looks better on narrow screens) */
-    white-space: normal; 
+    font-size: 5.5rem; /* Increased size */
+    line-height: 0.9;
+    -webkit-line-clamp: unset; /* Allow natural wrap on mobile */
+    max-width: 100%;
+  }
+
+  .brand-subtitle {
+    font-size: 9px;
+    letter-spacing: 0.4em;
   }
 
   .main-footer {
