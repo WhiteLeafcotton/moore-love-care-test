@@ -54,38 +54,38 @@ canvas {
   transition: opacity 1.2s ease-in-out;
 }
 
-/* ✅ 35% SUPER THICK FROST -> FADING REST */
+/* ✅ EXTENDED MIDDLE THICKNESS & LIGHTENED FAR-RIGHT */
 .ui-overlay::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   
-  /* Increased opacity for the frost "tint" */
-  background-color: rgba(247, 236, 232, 0.6); 
+  /* Solid frost base */
+  background-color: rgba(247, 236, 232, 0.65); 
   
-  /* Extreme Blur for the "Super Thick" look */
+  /* Deep blur */
   backdrop-filter: blur(50px) saturate(120%);
   -webkit-backdrop-filter: blur(50px) saturate(120%);
 
   /* MASK LOGIC:
-     0% to 35%   -> Solid black (Thickest frost)
-     35% to 80%  -> Fading out
-     80% to 100% -> Transparent (Clear)
+     0% to 45%   -> 100% Solid (Extended thickness)
+     45% to 85%  -> Gradual fade out
+     85% to 100% -> Just a hint of light (5% opacity) so the right isn't "dead"
   */
   -webkit-mask-image: linear-gradient(
     to right, 
     black 0%, 
-    black 35%, 
-    rgba(0, 0, 0, 0.1) 80%, 
-    transparent 100%
+    black 45%, 
+    rgba(0, 0, 0, 0.4) 75%, 
+    rgba(0, 0, 0, 0.05) 100% 
   );
   mask-image: linear-gradient(
     to right, 
     black 0%, 
-    black 35%, 
-    rgba(0, 0, 0, 0.1) 80%, 
-    transparent 100%
+    black 45%, 
+    rgba(0, 0, 0, 0.4) 75%, 
+    rgba(0, 0, 0, 0.05) 100%
   );
 }
 
@@ -182,11 +182,10 @@ canvas {
 
 @media (max-width: 768px) {
   .ui-overlay::before {
-    /* Slightly lower blur for performance, but keeping the 35% cut-off */
-    backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
-    -webkit-mask-image: linear-gradient(to right, black 35%, transparent 90%);
-    mask-image: linear-gradient(to right, black 35%, transparent 90%);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    -webkit-mask-image: linear-gradient(to right, black 40%, transparent 100%);
+    mask-image: linear-gradient(to right, black 40%, transparent 100%);
   }
 
   .brand-title {
