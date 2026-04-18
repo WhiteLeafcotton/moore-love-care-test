@@ -54,36 +54,38 @@ canvas {
   transition: opacity 1.2s ease-in-out;
 }
 
-/* ✅ MAXIMUM FROST - EXTENDED TO THE RIGHT */
+/* ✅ 35% SUPER THICK FROST -> FADING REST */
 .ui-overlay::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   
-  /* Solid white-ish base to catch the light */
-  background-color: rgba(247, 236, 232, 0.45); 
+  /* Increased opacity for the frost "tint" */
+  background-color: rgba(247, 236, 232, 0.6); 
   
-  /* Extreme Blur for deep frost */
-  backdrop-filter: blur(30px) saturate(115%);
-  -webkit-backdrop-filter: blur(30px) saturate(115%);
+  /* Extreme Blur for the "Super Thick" look */
+  backdrop-filter: blur(50px) saturate(120%);
+  -webkit-backdrop-filter: blur(50px) saturate(120%);
 
-  /* The mask stays solid (black) until 70%, 
-     then starts fading out, becoming fully clear only at 90-100%.
+  /* MASK LOGIC:
+     0% to 35%   -> Solid black (Thickest frost)
+     35% to 80%  -> Fading out
+     80% to 100% -> Transparent (Clear)
   */
   -webkit-mask-image: linear-gradient(
     to right, 
     black 0%, 
-    black 70%, 
-    rgba(0, 0, 0, 0.3) 85%, 
-    transparent 95%
+    black 35%, 
+    rgba(0, 0, 0, 0.1) 80%, 
+    transparent 100%
   );
   mask-image: linear-gradient(
     to right, 
     black 0%, 
-    black 70%, 
-    rgba(0, 0, 0, 0.3) 85%, 
-    transparent 95%
+    black 35%, 
+    rgba(0, 0, 0, 0.1) 80%, 
+    transparent 100%
   );
 }
 
@@ -96,7 +98,7 @@ canvas {
   top: calc(var(--safe-top) + 40px);
   right: 7vw;
   background: transparent;
-  border: 1px solid rgba(31, 23, 38, 0.1);
+  border: 1px solid rgba(31, 23, 38, 0.2);
   border-radius: 999px;
   padding: 10px 24px;
   font-size: 9px;
@@ -119,7 +121,6 @@ canvas {
   display: flex;
   flex-direction: column;
   justify-content: flex-start; 
-  padding-top: 0; 
   flex-grow: 1;
 }
 
@@ -181,11 +182,11 @@ canvas {
 
 @media (max-width: 768px) {
   .ui-overlay::before {
-    /* Slightly less blur on mobile for performance, but same mask logic */
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    -webkit-mask-image: linear-gradient(to right, black 60%, transparent 95%);
-    mask-image: linear-gradient(to right, black 60%, transparent 95%);
+    /* Slightly lower blur for performance, but keeping the 35% cut-off */
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    -webkit-mask-image: linear-gradient(to right, black 35%, transparent 90%);
+    mask-image: linear-gradient(to right, black 35%, transparent 90%);
   }
 
   .brand-title {
