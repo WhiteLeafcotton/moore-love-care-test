@@ -54,25 +54,37 @@ canvas {
   transition: opacity 1.2s ease-in-out;
 }
 
-/* ✅ SUPER FROST TO CLEAR FADE */
+/* ✅ MAXIMUM FROST - EXTENDED TO THE RIGHT */
 .ui-overlay::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   
-  /* Heavy frost color */
-  background-color: rgba(247, 236, 232, 0.4); 
+  /* Solid white-ish base to catch the light */
+  background-color: rgba(247, 236, 232, 0.45); 
   
-  /* Strong blur for "Super Frosted" effect */
-  backdrop-filter: blur(15px) saturate(110%);
-  -webkit-backdrop-filter: blur(15px) saturate(110%);
+  /* Extreme Blur for deep frost */
+  backdrop-filter: blur(30px) saturate(115%);
+  -webkit-backdrop-filter: blur(30px) saturate(115%);
 
-  /* THE KEY: This mask fades the ENTIRE effect (blur + color) 
-     from opaque (left) to 0% (right).
+  /* The mask stays solid (black) until 70%, 
+     then starts fading out, becoming fully clear only at 90-100%.
   */
-  -webkit-mask-image: linear-gradient(to right, black 0%, rgba(0,0,0,0.5) 40%, transparent 80%);
-  mask-image: linear-gradient(to right, black 0%, rgba(0,0,0,0.5) 40%, transparent 80%);
+  -webkit-mask-image: linear-gradient(
+    to right, 
+    black 0%, 
+    black 70%, 
+    rgba(0, 0, 0, 0.3) 85%, 
+    transparent 95%
+  );
+  mask-image: linear-gradient(
+    to right, 
+    black 0%, 
+    black 70%, 
+    rgba(0, 0, 0, 0.3) 85%, 
+    transparent 95%
+  );
 }
 
 .logo { display: none !important; }
@@ -149,13 +161,6 @@ canvas {
   width: fit-content;
 }
 
-.explore-button:hover {
-  background: transparent;
-  color: var(--text-main);
-  border: 1px solid rgba(31, 23, 38, 0.3);
-  transform: translateY(-2px);
-}
-
 /* ================= FOOTER ================= */
 
 .main-footer {
@@ -175,18 +180,12 @@ canvas {
 /* ================= MOBILE OVERRIDES ================= */
 
 @media (max-width: 768px) {
-  .inquiry-button {
-    top: calc(var(--safe-top) + 20px);
-    right: 5vw;
-    padding: 8px 16px;
-  }
-  
   .ui-overlay::before {
-    /* Slightly less intense for mobile performance */
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    -webkit-mask-image: linear-gradient(to right, black 0%, transparent 90%);
-    mask-image: linear-gradient(to right, black 0%, transparent 90%);
+    /* Slightly less blur on mobile for performance, but same mask logic */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    -webkit-mask-image: linear-gradient(to right, black 60%, transparent 95%);
+    mask-image: linear-gradient(to right, black 60%, transparent 95%);
   }
 
   .brand-title {
@@ -200,8 +199,4 @@ canvas {
     gap: 15px;
     padding-bottom: 3vh;
   }
-
-  .social-links { justify-content: center; }
-  .footer-tag { order: 2; }
-  .footer-right { text-align: center; order: 3; }
 }
