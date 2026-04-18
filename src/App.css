@@ -54,38 +54,38 @@ canvas {
   transition: opacity 1.2s ease-in-out;
 }
 
-/* ✅ EXTENDED MIDDLE THICKNESS & LIGHTENED FAR-RIGHT */
+/* ✅ BALANCED FADE: THICK LEFT, VANISHING RIGHT */
 .ui-overlay::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   
-  /* Solid frost base */
-  background-color: rgba(247, 236, 232, 0.65); 
+  /* Slightly lowered opacity base to keep the right side from feeling "milky" */
+  background-color: rgba(247, 236, 232, 0.5); 
   
-  /* Deep blur */
-  backdrop-filter: blur(50px) saturate(120%);
-  -webkit-backdrop-filter: blur(50px) saturate(120%);
+  /* High-quality deep blur */
+  backdrop-filter: blur(45px) saturate(110%);
+  -webkit-backdrop-filter: blur(45px) saturate(110%);
 
   /* MASK LOGIC:
-     0% to 45%   -> 100% Solid (Extended thickness)
-     45% to 85%  -> Gradual fade out
-     85% to 100% -> Just a hint of light (5% opacity) so the right isn't "dead"
+     - Stays 100% thick until 30% (Brand Title area)
+     - Smoothly drops to 20% visibility by the 70% mark
+     - Almost fully disappears (2%) at the right edge
   */
   -webkit-mask-image: linear-gradient(
     to right, 
     black 0%, 
-    black 45%, 
-    rgba(0, 0, 0, 0.4) 75%, 
-    rgba(0, 0, 0, 0.05) 100% 
+    black 30%, 
+    rgba(0, 0, 0, 0.2) 75%, 
+    rgba(0, 0, 0, 0.02) 100%
   );
   mask-image: linear-gradient(
     to right, 
     black 0%, 
-    black 45%, 
-    rgba(0, 0, 0, 0.4) 75%, 
-    rgba(0, 0, 0, 0.05) 100%
+    black 30%, 
+    rgba(0, 0, 0, 0.2) 75%, 
+    rgba(0, 0, 0, 0.02) 100%
   );
 }
 
@@ -98,7 +98,7 @@ canvas {
   top: calc(var(--safe-top) + 40px);
   right: 7vw;
   background: transparent;
-  border: 1px solid rgba(31, 23, 38, 0.2);
+  border: 1px solid rgba(31, 23, 38, 0.15);
   border-radius: 999px;
   padding: 10px 24px;
   font-size: 9px;
@@ -182,10 +182,11 @@ canvas {
 
 @media (max-width: 768px) {
   .ui-overlay::before {
-    backdrop-filter: blur(30px);
-    -webkit-backdrop-filter: blur(30px);
-    -webkit-mask-image: linear-gradient(to right, black 40%, transparent 100%);
-    mask-image: linear-gradient(to right, black 40%, transparent 100%);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    /* Mobile needs a faster fade to stay "clean" on small screens */
+    -webkit-mask-image: linear-gradient(to right, black 20%, transparent 90%);
+    mask-image: linear-gradient(to right, black 20%, transparent 90%);
   }
 
   .brand-title {
